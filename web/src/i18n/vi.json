@@ -1,0 +1,144 @@
+{
+  "common": {
+    "home": "Trang chủ",
+    "switchToDark": "Chuyển sang giao diện tối",
+    "switchToLight": "Chuyển sang giao diện sáng",
+    "switchLanguage": "Đổi ngôn ngữ",
+    "toggleMenu": "Mở/đóng menu nhanh"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "shop": "Cửa hàng",
+    "custom": "Thiết kế Custom",
+    "suppliers": "Xưởng & Nhà cung cấp",
+    "b2b": "Doanh nghiệp B2B",
+    "intro": "Giới thiệu",
+    "about": "Về WoodHub",
+    "pricing": "Bảng giá",
+    "contact": "Liên hệ",
+    "cart": "Giỏ hàng",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "greeting": "Chào, {{name}}",
+    "exploreNow": "Khám phá ngay"
+  },
+  "hero": {
+    "badge": "Thiết kế 3D · Xem AR tại nhà",
+    "title": "Gỗ thật, thiết kế của bạn",
+    "subtitle": "Mua nội thất có sẵn, đặt số lượng lớn cho doanh nghiệp, hoặc tự thiết kế sản phẩm 3D và ghép với xưởng mộc phù hợp — tất cả trên WoodHub.",
+    "partnersCount": "120+",
+    "partnersLabel": "Xưởng mộc đối tác",
+    "designNow": "Thiết kế ngay",
+    "exploreCollection": "Khám phá bộ sưu tập",
+    "viewShop": "Xem cửa hàng"
+  },
+  "landing": {
+    "flowsTitle": "Ba cách dùng WoodHub",
+    "flows": [
+      { "title": "Mua sẵn (B2C)", "desc": "Duyệt hàng nghìn sản phẩm từ các xưởng đã xác minh, xem AR ngay trong phòng bạn.", "cta": "Vào cửa hàng" },
+      { "title": "Doanh nghiệp (B2B)", "desc": "Đặt số lượng lớn, nhận báo giá từ nhiều nhà cung cấp, xuất hóa đơn VAT.", "cta": "Tìm hiểu B2B" },
+      { "title": "Thiết kế Custom", "desc": "Tự chỉnh kích thước, chất liệu, màu trên mô hình 3D — hệ thống ghép xưởng phù hợp.", "cta": "Bắt đầu thiết kế" }
+    ],
+    "featuredTitle": "Sản phẩm nổi bật",
+    "viewAll": "Xem tất cả →"
+  },
+  "footer": {
+    "tagline": "Sàn nội thất gỗ B2C · B2B · Custom — Đồ án EXE101, FPT University HCMC",
+    "explore": "Khám phá",
+    "company": "Công ty",
+    "copyright": "© 2026 WoodHub Team"
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Mật khẩu",
+      "submit": "Đăng nhập",
+      "error": "Email hoặc mật khẩu không đúng.",
+      "noAccount": "Chưa có tài khoản?",
+      "registerLink": "Đăng ký",
+      "demoNote": "Chế độ demo: nhập email/mật khẩu bất kỳ."
+    },
+    "register": {
+      "title": "Tạo tài khoản",
+      "roleCustomer": "Khách hàng",
+      "roleSupplier": "Xưởng / Nhà cung cấp",
+      "namePlaceholder": "Họ tên",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Mật khẩu (≥ 6 ký tự)",
+      "workshopNamePlaceholder": "Tên xưởng / doanh nghiệp",
+      "workshopAddressPlaceholder": "Địa chỉ xưởng",
+      "submit": "Đăng ký",
+      "haveAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập"
+    }
+  },
+  "suppliers": {
+    "title": "Xưởng & Nhà cung cấp",
+    "subtitle": "Các xưởng mộc đã được WoodHub xác minh năng lực — chọn xưởng phù hợp rồi đặt thiết kế custom.",
+    "completedJobs": "{{count}} đơn hoàn thành",
+    "leadTime": "{{days}} ngày/đơn",
+    "materialBadge": "Gỗ {{material}}",
+    "cta": "Đặt thiết kế custom",
+    "types": { "table": "Bàn", "chair": "Ghế", "cabinet": "Tủ", "shelf": "Kệ", "bed": "Giường" },
+    "materials": { "oak": "Sồi", "walnut": "Óc chó", "ash": "Tần bì", "pine": "Thông", "rubber": "Cao su" }
+  },
+  "b2b": {
+    "heroTitle": "Giải pháp nội thất cho doanh nghiệp",
+    "heroDesc": "Mua số lượng lớn cho văn phòng, chuỗi nhà hàng, khách sạn — nhận báo giá từ nhiều nhà cung cấp đã xác minh, xuất hóa đơn VAT đầy đủ, theo dõi đơn hàng tập trung.",
+    "ctaRegister": "Đăng ký tài khoản doanh nghiệp",
+    "stepsTitle": "Quy trình hoạt động",
+    "steps": [
+      { "step": "1", "title": "Đăng ký tài khoản doanh nghiệp", "desc": "Cung cấp thông tin công ty, mã số thuế để nhận báo giá và xuất hóa đơn VAT." },
+      { "step": "2", "title": "Gửi yêu cầu số lượng lớn", "desc": "Chọn sản phẩm hoặc mô tả nhu cầu — hệ thống gửi yêu cầu báo giá tới nhiều nhà cung cấp phù hợp." },
+      { "step": "3", "title": "So sánh & đặt hàng", "desc": "Nhận báo giá, so sánh giá/thời gian giao hàng, chốt đơn và xuất hóa đơn VAT đầy đủ." }
+    ],
+    "ctaTitle": "Sẵn sàng hợp tác cùng WoodHub?",
+    "ctaDesc": "Tạo tài khoản doanh nghiệp ngay hôm nay — đội ngũ WoodHub sẽ liên hệ tư vấn gói phù hợp."
+  },
+  "about": {
+    "title": "Câu chuyện của WoodHub",
+    "paragraphs": [
+      "WoodHub bắt đầu từ một xưởng mộc nhỏ ở Tân Bình, nơi gia đình của một thành viên sáng lập đã gắn bó với nghề gỗ qua hai thế hệ. Chúng tôi từng chứng kiến những sản phẩm chất lượng tốt, làm thủ công tỉ mỉ, nhưng lại khó tiếp cận khách hàng ngoài phạm vi vài con phố quen thuộc.",
+      "Trong khi đó, người mua nội thất gỗ thường gặp khó khi không hình dung được sản phẩm sẽ trông ra sao trong nhà mình, hoặc muốn một món đồ \"đo ni đóng giày\" nhưng không biết bắt đầu từ đâu.",
+      "WoodHub ra đời để kết nối hai phía: một nền tảng nơi các xưởng mộc Việt có thể trưng bày sản phẩm, nhận đơn số lượng lớn từ doanh nghiệp, và nhận các đơn thiết kế custom — còn khách hàng có thể mua sắm, đặt thiết kế riêng và xem trước sản phẩm bằng AI cùng công nghệ AR/3D ngay tại nhà."
+    ],
+    "illustrationQuote": "Từ xưởng gỗ Tân Bình",
+    "illustrationDesc": "đến nền tảng kết nối hàng trăm xưởng mộc với khách hàng trên cả nước.",
+    "valuesTitle": "Giá trị cốt lõi",
+    "values": [
+      { "title": "Gỗ thật, nguồn gốc rõ ràng", "desc": "Mỗi sản phẩm trên WoodHub đều đến từ xưởng đã được xác minh năng lực và vật liệu — không hàng giả gỗ, không mập mờ xuất xứ." },
+      { "title": "Đồng hành cùng người thợ Việt", "desc": "Chúng tôi xây công cụ để xưởng mộc nhỏ tiếp cận khách hàng số đông, thay vì chỉ làm gia công cho thương hiệu lớn." },
+      { "title": "Công nghệ phục vụ trải nghiệm thật", "desc": "AI tư vấn và xem trước AR/3D giúp khách hình dung sản phẩm trong chính không gian của mình trước khi đặt hàng." }
+    ]
+  },
+  "pricing": {
+    "title": "Bảng giá",
+    "subtitle": "Chọn gói phù hợp với nhu cầu của bạn trên WoodHub.",
+    "perMonth": "/ tháng",
+    "subscribe": "Đăng ký gói",
+    "toastMessage": "Luồng thanh toán subscription sẽ có ở V1",
+    "groups": {
+      "b2c": { "title": "Khách mua lẻ (B2C)", "desc": "Trải nghiệm AR/3D nâng cao khi mua sắm nội thất." },
+      "supplier": { "title": "Xưởng & Nhà cung cấp", "desc": "Công cụ quản lý bán hàng cho xưởng mộc." },
+      "custom": { "title": "Khách đặt thiết kế Custom", "desc": "Ưu tiên ghép xưởng verified cho đơn custom." }
+    }
+  },
+  "contact": {
+    "title": "Liên hệ",
+    "subtitle": "Có câu hỏi về sản phẩm, hợp tác xưởng mộc hay phản hồi? Gửi cho chúng tôi.",
+    "namePlaceholder": "Họ tên",
+    "emailPlaceholder": "Email",
+    "subjectPlaceholder": "Chủ đề",
+    "messagePlaceholder": "Nội dung",
+    "submit": "Gửi liên hệ",
+    "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi sớm.",
+    "errors": {
+      "name": "Vui lòng nhập họ tên.",
+      "email": "Email không hợp lệ.",
+      "subject": "Vui lòng nhập chủ đề.",
+      "message": "Vui lòng nhập nội dung."
+    }
+  }
+}

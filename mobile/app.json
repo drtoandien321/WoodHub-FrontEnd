@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "WoodHub",
+    "slug": "woodhub-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#5B4232" },
+    "ios": { "supportsTablet": false },
+    "android": { "package": "vn.woodhub.app" }
+  }
+}

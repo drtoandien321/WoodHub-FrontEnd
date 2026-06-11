@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/*
+ * daisyUI v5 khai báo trực tiếp trong CSS (khác v4 trở về trước dùng tailwind.config.js).
+ * Theme "woodhub": walnut / oak / gold / ivory — design token đặt 1 chỗ duy nhất ở đây,
+ * mọi component dùng class daisyUI (btn-primary, bg-base-100...) sẽ tự ăn theo.
+ */
+@plugin "daisyui" {
+  themes: false;
+}
+
+@plugin "daisyui/theme" {
+  name: "woodhub";
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #f4efe6; /* ivory: nền chính */
+  --color-base-200: #ece4d6;
+  --color-base-300: #ddd1bd;
+  --color-base-content: #3a2c1f; /* chữ trên nền sáng */
+
+  --color-primary: #5b4232; /* walnut đậm */
+  --color-primary-content: #f8f4ec;
+
+  --color-secondary: #b08968; /* oak */
+  --color-secondary-content: #2e2218;
+
+  --color-accent: #c9a227; /* gold/brass */
+  --color-accent-content: #2e2218;
+
+  --color-neutral: #2e2218;
+  --color-neutral-content: #f4efe6;
+
+  --color-info: #4a6fa5;
+  --color-info-content: #f4efe6;
+  --color-success: #3f5e4e; /* forest */
+  --color-success-content: #f4efe6;
+  --color-warning: #d9912e;
+  --color-warning-content: #2e2218;
+  --color-error: #a4453a;
+  --color-error-content: #f4efe6;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.5rem;
+}
+
+/* Theme tối — vẫn nâu gỗ ấm, không dùng đen thuần để giữ tinh thần "wood" */
+@plugin "daisyui/theme" {
+  name: "woodhub-dark";
+  default: false;
+  color-scheme: dark;
+
+  --color-base-100: #221a12; /* nâu gỗ tối */
+  --color-base-200: #2b2018;
+  --color-base-300: #3a2c1f;
+  --color-base-content: #ede4d4; /* chữ ngà trên nền tối */
+
+  --color-primary: #c89b6e; /* oak sáng — nổi bật trên nền tối */
+  --color-primary-content: #2e2218;
+
+  --color-secondary: #8a6a4d; /* oak trầm */
+  --color-secondary-content: #f4efe6;
+
+  --color-accent: #c9a227; /* gold/brass — giữ nguyên 2 theme */
+  --color-accent-content: #2e2218;
+
+  --color-neutral: #ede4d4;
+  --color-neutral-content: #2e2218;
+
+  --color-info: #7c9cc4;
+  --color-info-content: #1c2533;
+  --color-success: #6f9c83;
+  --color-success-content: #16231c;
+  --color-warning: #e0a85a;
+  --color-warning-content: #2e2218;
+  --color-error: #d9776a;
+  --color-error-content: #2e1410;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1.5rem;
+}
+
+/* Token tùy biến dùng chung (ngoài daisyUI) */
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lora", Georgia, serif;
+  --color-walnut: #5b4232;
+  --color-walnut-soft: #7a5c44;
+  --color-oak: #b08968;
+  --color-gold: #c9a227;
+  --color-ivory: #f4efe6;
+
+  /* Màu chữ/icon đặt trên gradient gỗ của hero — gradient này không đổi theo theme,
+     nên "mực" walnut cũng giữ cố định ở cả 2 theme (dùng kèm modifier /opacity, vd text-hero-ink/80) */
+  --color-hero-ink: #4a3522;
+}
+
+:root {
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background-color: var(--color-base-100);
+}
+
+/* Display headline dùng Lora */
+.font-display {
+  font-family: var(--font-display);
+}
