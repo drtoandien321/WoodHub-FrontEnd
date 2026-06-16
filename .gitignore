@@ -1,0 +1,3 @@
+# Backend là repo Git riêng (xuanmai000/woodhub-be) — KHÔNG track trong repo FE này.
+# Nó được clone lồng vào đây chỉ để tiện chạy chung 1 chỗ; BE vẫn push/pull về repo của nó.
+backend/
