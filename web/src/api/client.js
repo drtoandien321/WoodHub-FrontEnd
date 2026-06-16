@@ -11,7 +11,25 @@ import { mockAdapter } from './mock/mockAdapter.js';
  * Contract đầy đủ (method, path, request/response shape) xem docs/API_CONTRACT.md.
  */
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'; // mặc định mock để FE chạy độc lập
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api';
+
+/*
+ * BE hiện mới làm xong nhóm Auth + User (xem Swagger). Các endpoint khác (products,
+ * orders, custom, supplier...) CHƯA có BE → vẫn dùng mock kể cả khi VITE_USE_MOCK=false.
+ * Chỉ những key nằm trong REAL_ENDPOINTS mới gọi BE thật. Khi BE làm xong endpoint mới,
+ * chỉ cần thêm key vào đây — không phải sửa page/component.
+ */
+const REAL_ENDPOINTS = new Set(['login', 'register']);
+
+/*
+ * Lớp chuyển đổi shape: BE trả phẳng { token, userId, email, fullName, role },
+ * còn toàn bộ FE (authStore, các page) dùng { token, user: { id, name, email, role } }.
+ * Gom về đúng 1 chỗ này để không phải sửa UI khi shape BE khác mock.
+ */
+const toAuthResult = (data) => ({
+  token: data.token,
+  user: { id: data.userId, name: data.fullName, email: data.email, role: data.role },
+});
 
 export const http = axios.create({ baseURL: BASE_URL, timeout: 10_000 });
 
@@ -40,17 +58,41 @@ http.interceptors.response.use(
  * USE_MOCK=true → trả dữ liệu giả (có delay giả lập mạng); false → gọi BE thật.
  */
 async function call(realCall, mockKey, ...args) {
-  if (USE_MOCK) return mockAdapter[mockKey](...args);
+  // Dùng mock nếu bật cờ mock, HOẶC endpoint này chưa có BE thật (xem REAL_ENDPOINTS)
+  if (USE_MOCK || !REAL_ENDPOINTS.has(mockKey)) return mockAdapter[mockKey](...args);
   const res = await realCall(...args);
   return res.data;
 }
 
 export const api = {
-  // ===== AUTH =====
-  // POST /auth/register  body: { email, password, name, role, supplierInfo? }
-  register: (body) => call(() => http.post('/auth/register', body), 'register', body),
-  // POST /auth/login  body: { email, password } → { token, refreshToken, user }
-  login: (body) => call(() => http.post('/auth/login', body), 'login', body),
+  // ===== AUTH (đã gắn BE thật — Spring Boot /api/auth) =====
+  /*
+   * POST /auth/register
+   * BE chỉ nhận { email, password, fullName, phone } và LUÔN tạo role = customer
+   * (chưa hỗ trợ đăng ký supplier/business). Nên chỉ lấy đúng các field BE cần;
+   * name/role/supplierInfo... từ form FE được map/bỏ qua tại đây.
+   * BE trả 201 + { token, userId, email, fullName, role } → đổi về { token, user }.
+   */
+  register: async (body) => {
+    if (USE_MOCK) return mockAdapter.register(body);
+    const res = await http.post('/auth/register', {
+      email: body.email,
+      password: body.password,
+      fullName: body.name,
+      phone: body.phone,
+    });
+    return toAuthResult(res.data);
+  },
+  /*
+   * POST /auth/login
+   * BE chỉ nhận { email, password } (role do BE tự xác định từ tài khoản, bỏ qua role FE gửi).
+   * Trả { token, userId, email, fullName, role } → đổi về { token, user }.
+   */
+  login: async (body) => {
+    if (USE_MOCK) return mockAdapter.login(body);
+    const res = await http.post('/auth/login', { email: body.email, password: body.password });
+    return toAuthResult(res.data);
+  },
 
   // ===== PRODUCTS (B2C catalog) =====
   // GET /products?category=&material=&minPrice=&maxPrice=&sort=&page=
