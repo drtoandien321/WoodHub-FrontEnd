@@ -14,18 +14,23 @@
   default: true;
   color-scheme: light;
 
-  --color-base-100: #f4efe6; /* ivory: nền chính */
+  --color-base-100: #f4efe6;
+  /* ivory: nền chính */
   --color-base-200: #ece4d6;
   --color-base-300: #ddd1bd;
-  --color-base-content: #3a2c1f; /* chữ trên nền sáng */
+  --color-base-content: #3a2c1f;
+  /* chữ trên nền sáng */
 
-  --color-primary: #5b4232; /* walnut đậm */
+  --color-primary: #5b4232;
+  /* walnut đậm */
   --color-primary-content: #f8f4ec;
 
-  --color-secondary: #b08968; /* oak */
+  --color-secondary: #b08968;
+  /* oak */
   --color-secondary-content: #2e2218;
 
-  --color-accent: #c9a227; /* gold/brass */
+  --color-accent: #c9a227;
+  /* gold/brass */
   --color-accent-content: #2e2218;
 
   --color-neutral: #2e2218;
@@ -33,7 +38,8 @@
 
   --color-info: #4a6fa5;
   --color-info-content: #f4efe6;
-  --color-success: #3f5e4e; /* forest */
+  --color-success: #3f5e4e;
+  /* forest */
   --color-success-content: #f4efe6;
   --color-warning: #d9912e;
   --color-warning-content: #2e2218;
@@ -51,18 +57,23 @@
   default: false;
   color-scheme: dark;
 
-  --color-base-100: #221a12; /* nâu gỗ tối */
+  --color-base-100: #221a12;
+  /* nâu gỗ tối */
   --color-base-200: #2b2018;
   --color-base-300: #3a2c1f;
-  --color-base-content: #ede4d4; /* chữ ngà trên nền tối */
+  --color-base-content: #ede4d4;
+  /* chữ ngà trên nền tối */
 
-  --color-primary: #c89b6e; /* oak sáng — nổi bật trên nền tối */
+  --color-primary: #c89b6e;
+  /* oak sáng — nổi bật trên nền tối */
   --color-primary-content: #2e2218;
 
-  --color-secondary: #8a6a4d; /* oak trầm */
+  --color-secondary: #8a6a4d;
+  /* oak trầm */
   --color-secondary-content: #f4efe6;
 
-  --color-accent: #c9a227; /* gold/brass — giữ nguyên 2 theme */
+  --color-accent: #c9a227;
+  /* gold/brass — giữ nguyên 2 theme */
   --color-accent-content: #2e2218;
 
   --color-neutral: #ede4d4;
@@ -101,9 +112,16 @@
   font-family: var(--font-sans);
 }
 
+/* Ngăn tràn ngang (horizontal overflow) trên mọi thiết bị, đặc biệt mobile */
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   margin: 0;
   overflow-x: hidden;
+  max-width: 100vw;
   background-color: var(--color-base-100);
 }
 

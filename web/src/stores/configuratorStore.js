@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { WOOD_MATERIALS, FINISH_COLORS, PRODUCT_TYPE_DEFAULTS } from '../api/mock/customData.js';
+import { WOOD_MATERIALS, FINISH_COLORS, PRODUCT_TYPE_DEFAULTS, PRODUCT_TYPE_BASE_DAYS } from '../api/mock/customData.js';
 
 /*
  * Store riêng cho Configurator 3D (tách khỏi cart/auth) vì:
@@ -39,5 +39,17 @@ export const useConfiguratorStore = create((set, get) => ({
     const finish = FINISH_COLORS.find((f) => f.id === finishId);
     const base = volumeM3 * (material?.pricePerM3 ?? 8_000_000);
     return Math.round((base * (finish?.priceFactor ?? 1) + 500_000) / 10_000) * 10_000;
+  },
+
+  /*
+   * Thời gian gia công ước tính (ngày) — hiển thị real-time cạnh giá.
+   * Công thức demo: số ngày cơ bản theo loại sản phẩm + thêm ~2 ngày cho mỗi 0.5m³ thể tích
+   * (sản phẩm lớn hơn cần nhiều thời gian gia công/lắp ráp hơn).
+   */
+  estimateDays: () => {
+    const { productType, dimensions } = get();
+    const volumeM3 = (dimensions.width * dimensions.height * dimensions.depth) / 1_000_000;
+    const baseDays = PRODUCT_TYPE_BASE_DAYS[productType] ?? PRODUCT_TYPE_BASE_DAYS.table;
+    return baseDays + Math.round(volumeM3 / 0.5) * 2;
   },
 }));

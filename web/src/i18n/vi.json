@@ -21,7 +21,10 @@
     "register": "Đăng ký",
     "logout": "Đăng xuất",
     "greeting": "Chào, {{name}}",
-    "exploreNow": "Khám phá ngay"
+    "exploreNow": "Khám phá ngay",
+    "orders": "Đơn hàng",
+    "portal": "Portal Nhà cung cấp",
+    "admin": "Quản trị"
   },
   "hero": {
     "badge": "Thiết kế 3D · Xem AR tại nhà",
@@ -58,7 +61,13 @@
       "error": "Email hoặc mật khẩu không đúng.",
       "noAccount": "Chưa có tài khoản?",
       "registerLink": "Đăng ký",
-      "demoNote": "Chế độ demo: nhập email/mật khẩu bất kỳ."
+      "demoNote": "Chế độ demo: nhập email/mật khẩu bất kỳ.",
+      "selectRole": "Đăng nhập với vai trò"
+    },
+    "roles": {
+      "customer": "Khách hàng",
+      "supplier": "Xưởng / Nhà cung cấp",
+      "admin": "Quản trị viên"
     },
     "register": {
       "title": "Tạo tài khoản",
@@ -71,7 +80,12 @@
       "workshopAddressPlaceholder": "Địa chỉ xưởng",
       "submit": "Đăng ký",
       "haveAccount": "Đã có tài khoản?",
-      "loginLink": "Đăng nhập"
+      "loginLink": "Đăng nhập",
+      "businessTitle": "Tạo tài khoản doanh nghiệp",
+      "businessSubtitle": "Dành cho doanh nghiệp mua số lượng lớn — nhận báo giá & xuất hóa đơn VAT.",
+      "companyNamePlaceholder": "Tên doanh nghiệp",
+      "contactNamePlaceholder": "Họ tên người liên hệ",
+      "taxCodePlaceholder": "Mã số thuế"
     }
   },
   "suppliers": {
@@ -139,6 +153,196 @@
       "email": "Email không hợp lệ.",
       "subject": "Vui lòng nhập chủ đề.",
       "message": "Vui lòng nhập nội dung."
+    }
+  },
+  "shop": {
+    "all": "Tất cả",
+    "filterMaterial": "Vật liệu",
+    "filterColor": "Màu sắc",
+    "filterMaxPrice": "Giá tối đa",
+    "clearFilter": "Xóa lọc",
+    "emptyTitle": "Chưa có sản phẩm phù hợp",
+    "emptyHint": "Thử bỏ bớt bộ lọc hoặc xem danh mục khác.",
+    "priceMin": "1tr",
+    "priceMax": "20tr+",
+    "sort": {
+      "default": "Mặc định",
+      "price_asc": "Giá tăng dần",
+      "price_desc": "Giá giảm dần"
+    }
+  },
+  "cart": {
+    "title": "Giỏ hàng",
+    "empty": "Giỏ hàng đang trống",
+    "emptyHint": "Khám phá cửa hàng hoặc tự thiết kế một món đồ riêng cho bạn.",
+    "browseShop": "Vào cửa hàng",
+    "remove": "Xóa",
+    "summary": "Tạm tính",
+    "productsLabel": "Sản phẩm",
+    "shippingTbd": "Tính ở bước sau",
+    "total": "Tổng",
+    "checkout": "Tiến hành thanh toán"
+  },
+  "checkout": {
+    "title": "Thanh toán",
+    "shippingAddress": "Địa chỉ giao hàng",
+    "fullName": "Họ và tên",
+    "phone": "Số điện thoại",
+    "address": "Địa chỉ",
+    "city": "Thành phố",
+    "paymentMethod": "Phương thức thanh toán",
+    "vnpay": "Thẻ ATM / VNPay",
+    "momo": "Ví MoMo",
+    "bank": "Chuyển khoản ngân hàng",
+    "orderSummary": "Tóm tắt đơn hàng",
+    "subtotal": "Tạm tính",
+    "shippingFee": "Phí vận chuyển",
+    "total": "Tổng cộng",
+    "placeOrder": "Đặt hàng",
+    "processing": "Đang xử lý thanh toán...",
+    "success": "Thanh toán thành công ✓",
+    "emptyCart": "Giỏ hàng rỗng",
+    "backToShop": "Về cửa hàng",
+    "freeShipping": "Miễn phí"
+  },
+  "orders": {
+    "title": "Đơn hàng của bạn",
+    "empty": "Chưa có đơn hàng nào",
+    "backToShop": "Khám phá cửa hàng",
+    "id": "Mã đơn: {{id}}",
+    "date": "Ngày đặt: {{date}}",
+    "itemsCount": "{{count}} sản phẩm",
+    "total": "Tổng: {{total}}",
+    "detailTitle": "Chi tiết đơn hàng",
+    "notFound": "Không tìm thấy đơn hàng",
+    "shippingInfo": "Thông tin giao hàng",
+    "paymentMethod": "Phương thức thanh toán",
+    "timeline": "Trạng thái đơn hàng",
+    "status": {
+      "processing": "Đang xử lý",
+      "packing": "Đang đóng gói",
+      "shipping": "Đang giao hàng",
+      "completed": "Hoàn tất"
+    }
+  },
+  "custom": {
+    "selectTitle": "Bạn muốn thiết kế gì?",
+    "selectDesc": "Chọn loại sản phẩm để mở bộ cấu hình 3D — chỉnh kích thước, chất liệu, màu theo ý bạn.",
+    "dimensions": "Kích thước (cm)",
+    "dimensionWidth": "Chiều rộng",
+    "dimensionHeight": "Chiều cao",
+    "dimensionDepth": "Chiều sâu",
+    "material": "Chất liệu gỗ",
+    "finish": "Màu hoàn thiện",
+    "estimatedPrice": "Giá ước tính",
+    "estimatedPriceNote": "Giá cuối cùng do xưởng xác nhận khi báo giá.",
+    "estimatedTime": "Thời gian ước tính",
+    "estimatedTimeUnit": "{{days}} ngày",
+    "saveDesign": "Lưu thiết kế & tìm xưởng",
+    "types": {
+      "table": { "name": "Bàn", "desc": "Bàn ăn, bàn làm việc, bàn trà" },
+      "cabinet": { "name": "Tủ", "desc": "Tủ quần áo, tủ bếp, tủ trưng bày" },
+      "shelf": { "name": "Kệ", "desc": "Kệ sách, kệ trang trí, kệ treo tường" },
+      "chair": { "name": "Ghế", "desc": "Ghế ăn, ghế làm việc, băng ghế" }
+    },
+    "materials": {
+      "oak": "Sồi (Oak)",
+      "walnut": "Óc chó (Walnut)",
+      "ash": "Tần bì (Ash)",
+      "pine": "Thông (Pine)"
+    },
+    "finishes": {
+      "natural": "Tự nhiên (dầu lau)",
+      "dark": "Nâu đậm",
+      "white": "Trắng sữa",
+      "black": "Đen mờ"
+    }
+  },
+  "workshopMatch": {
+    "title": "Xưởng phù hợp với thiết kế của bạn",
+    "subtitle": "Lọc theo năng lực sản xuất (loại sản phẩm, kích thước tối đa, vật liệu) và xếp hạng theo đánh giá, tốc độ, kinh nghiệm.",
+    "bestMatch": "Phù hợp nhất",
+    "workshopInfo": "{{district}} · ★ {{rating}} · {{jobs}} đơn hoàn thành · giao ~{{days}} ngày",
+    "requestQuote": "Yêu cầu báo giá",
+    "emptyTitle": "Chưa tìm thấy xưởng phù hợp",
+    "emptyHint": "Thử giảm kích thước hoặc đổi chất liệu trong thiết kế.",
+    "editDesign": "Sửa thiết kế",
+    "designOther": "← Thiết kế sản phẩm khác"
+  },
+  "forbidden": {
+    "title": "403 — Không có quyền truy cập",
+    "message": "Bạn không có quyền truy cập trang này.",
+    "backHome": "Về trang chủ"
+  },
+  "admin": {
+    "title": "Trang quản trị",
+    "comingSoon": "Đang được phát triển — sẽ có trong bản cập nhật tiếp theo."
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Tổng quan",
+      "store": "Gian hàng",
+      "products": "Sản phẩm",
+      "orders": "Đơn hàng"
+    },
+    "dashboard": {
+      "title": "Tổng quan",
+      "newOrders": "Đơn mới",
+      "monthlyRevenue": "Doanh thu (tổng đơn)",
+      "pendingQuotes": "Thiết kế chờ báo giá",
+      "topProducts": "Sản phẩm bán chạy",
+      "recentOrders": "Đơn hàng gần đây",
+      "soldCount": "Đã bán {{count}}",
+      "noOrders": "Chưa có đơn hàng nào"
+    },
+    "store": {
+      "title": "Gian hàng",
+      "name": "Tên gian hàng",
+      "description": "Giới thiệu",
+      "logoUrl": "Ảnh logo (URL)",
+      "coverUrl": "Ảnh bìa (URL)",
+      "logoPreview": "Xem trước logo",
+      "coverPreview": "Xem trước ảnh bìa",
+      "save": "Lưu thay đổi",
+      "saved": "Đã lưu thông tin gian hàng ✓"
+    },
+    "products": {
+      "title": "Sản phẩm",
+      "add": "Thêm sản phẩm",
+      "edit": "Sửa sản phẩm",
+      "newProduct": "Sản phẩm mới",
+      "delete": "Xóa",
+      "confirmDelete": "Xóa sản phẩm \"{{name}}\"? Hành động này không thể hoàn tác.",
+      "empty": "Chưa có sản phẩm nào",
+      "table": {
+        "image": "Ảnh",
+        "name": "Tên",
+        "price": "Giá",
+        "material": "Chất liệu",
+        "stock": "Tồn kho",
+        "actions": "Thao tác"
+      },
+      "form": {
+        "nameVi": "Tên (Tiếng Việt)",
+        "nameEn": "Tên (English)",
+        "price": "Giá (VND)",
+        "material": "Chất liệu",
+        "stock": "Tồn kho",
+        "image": "Ảnh sản phẩm (URL)",
+        "imagePreview": "Xem trước ảnh",
+        "imageNote": "V1: tải ảnh thật qua BE — demo dùng URL ảnh.",
+        "descriptionVi": "Mô tả (Tiếng Việt)",
+        "descriptionEn": "Mô tả (English)",
+        "save": "Lưu",
+        "cancel": "Hủy"
+      }
+    },
+    "orders": {
+      "title": "Đơn hàng",
+      "empty": "Chưa có đơn hàng nào",
+      "customer": "Khách hàng",
+      "updateStatus": "Chuyển sang \"{{status}}\"",
+      "completed": "Đơn đã hoàn tất"
     }
   }
 }

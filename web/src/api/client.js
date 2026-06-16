@@ -63,6 +63,8 @@ export const api = {
   // ===== ORDERS (checkout giả lập theo roadmap C.2) =====
   // POST /orders  body: { items: [{productId, qty}], address, paymentMethod }
   createOrder: (body) => call(() => http.post('/orders', body), 'createOrder', body),
+  // GET /orders
+  getOrders: () => call(() => http.get('/orders'), 'getOrders'),
   // GET /orders/:id
   getOrder: (id) => call(() => http.get(`/orders/${id}`), 'getOrder', id),
 
@@ -87,4 +89,24 @@ export const api = {
   // ===== CONTACT =====
   // POST /contact  body: { name, email, subject, message }
   submitContact: (body) => call(() => http.post('/contact', body), 'submitContact', body),
+
+  // ===== SUPPLIER PORTAL (B.6) =====
+  // GET /supplier/dashboard — KPI tổng quan
+  getDashboardStats: () => call(() => http.get('/supplier/dashboard'), 'getDashboardStats'),
+  // GET /supplier/store
+  getSupplierStore: () => call(() => http.get('/supplier/store'), 'getSupplierStore'),
+  // PATCH /supplier/store  body: { name, description, logoUrl, coverUrl }
+  updateSupplierStore: (body) => call(() => http.patch('/supplier/store', body), 'updateSupplierStore', body),
+  // GET /supplier/products
+  getSupplierProducts: () => call(() => http.get('/supplier/products'), 'getSupplierProducts'),
+  // POST /supplier/products
+  createSupplierProduct: (body) => call(() => http.post('/supplier/products', body), 'createSupplierProduct', body),
+  // PATCH /supplier/products/:id
+  updateSupplierProduct: ({ id, ...body }) => call(() => http.patch(`/supplier/products/${id}`, body), 'updateSupplierProduct', { id, ...body }),
+  // DELETE /supplier/products/:id
+  deleteSupplierProduct: (id) => call(() => http.delete(`/supplier/products/${id}`), 'deleteSupplierProduct', id),
+  // GET /supplier/orders
+  getSupplierOrders: () => call(() => http.get('/supplier/orders'), 'getSupplierOrders'),
+  // PATCH /supplier/orders/:id/status  body: { status }
+  updateSupplierOrderStatus: ({ id, status }) => call(() => http.patch(`/supplier/orders/${id}/status`, { status }), 'updateSupplierOrderStatus', { id, status }),
 };

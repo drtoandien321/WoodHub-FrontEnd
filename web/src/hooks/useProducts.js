@@ -15,6 +15,9 @@ export const useFeaturedProducts = () =>
 export const useProduct = (id) =>
   useQuery({ queryKey: ['product', id], queryFn: () => api.getProduct(id), enabled: !!id });
 
+export const useOrders = () =>
+  useQuery({ queryKey: ['orders'], queryFn: () => api.getOrders() });
+
 export const useOrder = (id) =>
   useQuery({ queryKey: ['order', id], queryFn: () => api.getOrder(id), enabled: !!id });
 

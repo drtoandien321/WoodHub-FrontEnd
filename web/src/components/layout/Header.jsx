@@ -6,12 +6,26 @@ import { useUiStore } from '../../stores/uiStore.js';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
 import { SunIcon, MoonIcon } from '../ui/icons.jsx';
 
+// DEV ONLY: đổi nhanh role đang đăng nhập để test ProtectedRoute/Portal/Admin mà không cần login lại
+const DEV_ROLES = ['customer', 'supplier', 'admin'];
+const DEV_ROLE_NAMES = { customer: 'demo', supplier: 'Xưởng Mộc Tân Bình', admin: 'Quản trị viên' };
+
 export default function Header() {
   const itemCount = useCartStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
-  const { user, logout } = useAuthStore();
+  const { user, token, logout, setAuth } = useAuthStore();
   const { theme, toggleTheme } = useUiStore();
   const { t } = useTranslation();
   const isDark = theme === 'woodhub-dark';
+
+  // Người mua = chưa đăng nhập (guest) hoặc role customer → mới có Giỏ hàng/Đơn hàng
+  const isBuyer = !user || user.role === 'customer';
+
+  const handleDevRoleChange = (newRole) => {
+    setAuth({
+      token: token ?? 'mock-jwt-token',
+      user: { id: 'u1', name: DEV_ROLE_NAMES[newRole], email: user?.email ?? 'dev@woodhub.local', role: newRole },
+    });
+  };
 
   const navClass = ({ isActive }) =>
     `px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`;
@@ -51,15 +65,36 @@ export default function Header() {
           </button>
           <LanguageSwitcher />
 
-          <Link to="/cart" className="btn btn-ghost btn-sm relative">
-            {t('nav.cart')}
-            {itemCount > 0 && (
-              <span className="badge badge-accent badge-sm absolute -top-1 -right-1">{itemCount}</span>
-            )}
-          </Link>
+          {/* DEV ONLY: đổi nhanh role để test các trang/portal theo phân quyền, không build vào production. Ẩn trên mobile để tránh tràn ngang. */}
+          {import.meta.env.DEV && (
+            <select
+              value={user?.role ?? 'customer'}
+              onChange={(e) => handleDevRoleChange(e.target.value)}
+              className="select select-bordered select-sm w-28 hidden sm:inline-flex"
+              title="DEV: switch role"
+            >
+              {DEV_ROLES.map((r) => (
+                <option key={r} value={r}>{t(`auth.roles.${r}`)}</option>
+              ))}
+            </select>
+          )}
+
+          {/* Giỏ hàng + Đơn hàng là chức năng của người MUA (guest/customer).
+              Supplier & Admin không mua hàng → ẩn đi cho đúng vai trò. */}
+          {isBuyer && (
+            <Link to="/cart" className="btn btn-ghost btn-sm relative">
+              {t('nav.cart')}
+              {itemCount > 0 && (
+                <span className="badge badge-accent badge-sm absolute -top-1 -right-1">{itemCount}</span>
+              )}
+            </Link>
+          )}
           {user ? (
             <div className="flex items-center gap-2">
               <span className="text-sm hidden sm:inline">{t('nav.greeting', { name: user.name })}</span>
+              {user.role === 'supplier' && <Link to="/portal" className="btn btn-ghost btn-sm">{t('nav.portal')}</Link>}
+              {user.role === 'admin' && <Link to="/admin" className="btn btn-ghost btn-sm">{t('nav.admin')}</Link>}
+              {user.role === 'customer' && <Link to="/orders" className="btn btn-ghost btn-sm">{t('nav.orders')}</Link>}
               <button onClick={logout} className="btn btn-outline btn-sm">{t('nav.logout')}</button>
             </div>
           ) : (

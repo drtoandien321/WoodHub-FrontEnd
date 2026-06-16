@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import SiteLayout from './components/layout/SiteLayout.jsx';
+import PortalLayout from './components/layout/PortalLayout.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
@@ -15,6 +16,7 @@ const Shop = lazy(() => import('./pages/Shop.jsx'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.jsx'));
 const Cart = lazy(() => import('./pages/Cart.jsx'));
 const Checkout = lazy(() => import('./pages/Checkout.jsx'));
+const Orders = lazy(() => import('./pages/Orders.jsx'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
@@ -27,6 +29,12 @@ const About = lazy(() => import('./pages/About.jsx'));
 const Pricing = lazy(() => import('./pages/Pricing.jsx'));
 const Contact = lazy(() => import('./pages/Contact.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
+const Forbidden = lazy(() => import('./pages/Forbidden.jsx'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'));
+const PortalDashboard = lazy(() => import('./pages/portal/PortalDashboard.jsx'));
+const PortalStore = lazy(() => import('./pages/portal/PortalStore.jsx'));
+const PortalProducts = lazy(() => import('./pages/portal/PortalProducts.jsx'));
+const PortalOrders = lazy(() => import('./pages/portal/PortalOrders.jsx'));
 
 export default function App() {
   const theme = useUiStore((s) => s.theme);
@@ -61,11 +69,28 @@ export default function App() {
           {/* ProtectedRoute: chưa login thì đẩy về /login (xem routes/ProtectedRoute.jsx) */}
           <Route element={<ProtectedRoute />}>
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/custom/match/:designId" element={<WorkshopMatch />} />
           </Route>
 
+          {/* allow=['admin']: chỉ role admin vào được, role khác bị đẩy sang /403 */}
+          <Route element={<ProtectedRoute allow={['admin']} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+
+          <Route path="/403" element={<Forbidden />} />
           <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* Supplier Portal: layout riêng (sidebar + topbar), chỉ role supplier */}
+        <Route element={<ProtectedRoute allow={['supplier']} />}>
+          <Route path="/portal" element={<PortalLayout />}>
+            <Route index element={<PortalDashboard />} />
+            <Route path="store" element={<PortalStore />} />
+            <Route path="products" element={<PortalProducts />} />
+            <Route path="orders" element={<PortalOrders />} />
+          </Route>
         </Route>
       </Routes>
     </Suspense>

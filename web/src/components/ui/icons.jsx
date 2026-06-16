@@ -11,3 +11,10 @@ export const MoonIcon = ({ className }) => (
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
   </svg>
 );
+
+// Dùng cho nút mở sidebar (drawer toggle) trong PortalLayout trên mobile
+export const MenuIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 6h18M3 12h18M3 18h18" />
+  </svg>
+);

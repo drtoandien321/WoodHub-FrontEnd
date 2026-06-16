@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useWorkshopMatch } from '../hooks/useProducts.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 
@@ -8,15 +9,14 @@ import EmptyState from '../components/ui/EmptyState.jsx';
  */
 export default function WorkshopMatch() {
   const { designId } = useParams();
+  const { t } = useTranslation();
   const { data, isLoading } = useWorkshopMatch(designId);
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div>
-        <h1 className="font-display text-3xl">Xưởng phù hợp với thiết kế của bạn</h1>
-        <p className="text-sm text-base-content/60 mt-1">
-          Lọc theo năng lực sản xuất (loại sản phẩm, kích thước tối đa, vật liệu) và xếp hạng theo đánh giá, tốc độ, kinh nghiệm.
-        </p>
+        <h1 className="font-display text-3xl">{t('workshopMatch.title')}</h1>
+        <p className="text-sm text-base-content/60 mt-1">{t('workshopMatch.subtitle')}</p>
       </div>
 
       {isLoading ? (
@@ -31,19 +31,21 @@ export default function WorkshopMatch() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">{w.name}</h3>
-                  {idx === 0 && <span className="badge badge-accent badge-sm">Phù hợp nhất</span>}
+                  {idx === 0 && <span className="badge badge-accent badge-sm">{t('workshopMatch.bestMatch')}</span>}
                 </div>
-                <p className="text-sm text-base-content/60">{w.district} · ★ {w.rating} · {w.completedJobs} đơn hoàn thành · giao ~{w.leadTimeDays} ngày</p>
+                <p className="text-sm text-base-content/60">
+                  {t('workshopMatch.workshopInfo', { district: w.district, rating: w.rating, jobs: w.completedJobs, days: w.leadTimeDays })}
+                </p>
               </div>
-              <button className="btn btn-primary btn-sm">Yêu cầu báo giá</button>
+              <button className="btn btn-primary btn-sm">{t('workshopMatch.requestQuote')}</button>
             </div>
           ))}
         </div>
       ) : (
-        <EmptyState title="Chưa tìm thấy xưởng phù hợp" hint="Thử giảm kích thước hoặc đổi chất liệu trong thiết kế." ctaLabel="Sửa thiết kế" ctaTo="/custom" />
+        <EmptyState title={t('workshopMatch.emptyTitle')} hint={t('workshopMatch.emptyHint')} ctaLabel={t('workshopMatch.editDesign')} ctaTo="/custom" />
       )}
 
-      <Link to="/custom" className="link link-primary text-sm">← Thiết kế sản phẩm khác</Link>
+      <Link to="/custom" className="link link-primary text-sm">{t('workshopMatch.designOther')}</Link>
     </div>
   );
 }

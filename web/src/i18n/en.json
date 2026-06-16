@@ -21,7 +21,10 @@
     "register": "Sign up",
     "logout": "Log out",
     "greeting": "Hi, {{name}}",
-    "exploreNow": "Explore now"
+    "exploreNow": "Explore now",
+    "orders": "Orders",
+    "portal": "Supplier Portal",
+    "admin": "Admin"
   },
   "hero": {
     "badge": "3D Design · View AR at home",
@@ -58,7 +61,13 @@
       "error": "Incorrect email or password.",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up",
-      "demoNote": "Demo mode: enter any email/password."
+      "demoNote": "Demo mode: enter any email/password.",
+      "selectRole": "Log in as"
+    },
+    "roles": {
+      "customer": "Customer",
+      "supplier": "Workshop / Supplier",
+      "admin": "Administrator"
     },
     "register": {
       "title": "Create account",
@@ -71,7 +80,12 @@
       "workshopAddressPlaceholder": "Workshop address",
       "submit": "Sign up",
       "haveAccount": "Already have an account?",
-      "loginLink": "Log in"
+      "loginLink": "Log in",
+      "businessTitle": "Create a business account",
+      "businessSubtitle": "For businesses buying in bulk — get quotes & VAT invoices.",
+      "companyNamePlaceholder": "Company name",
+      "contactNamePlaceholder": "Contact person",
+      "taxCodePlaceholder": "Tax code"
     }
   },
   "suppliers": {
@@ -139,6 +153,196 @@
       "email": "Invalid email address.",
       "subject": "Please enter a subject.",
       "message": "Please enter a message."
+    }
+  },
+  "shop": {
+    "all": "All",
+    "filterMaterial": "Material",
+    "filterColor": "Color",
+    "filterMaxPrice": "Max Price",
+    "clearFilter": "Clear filters",
+    "emptyTitle": "No matching products",
+    "emptyHint": "Try removing some filters or browse another category.",
+    "priceMin": "1M",
+    "priceMax": "20M+",
+    "sort": {
+      "default": "Default",
+      "price_asc": "Price: Low to High",
+      "price_desc": "Price: High to Low"
+    }
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "emptyHint": "Browse the shop or design your own custom piece.",
+    "browseShop": "Go to shop",
+    "remove": "Remove",
+    "summary": "Summary",
+    "productsLabel": "Products",
+    "shippingTbd": "Calculated at next step",
+    "total": "Total",
+    "checkout": "Proceed to checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping Address",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "address": "Address",
+    "city": "City",
+    "paymentMethod": "Payment Method",
+    "vnpay": "ATM Card / VNPay",
+    "momo": "MoMo Wallet",
+    "bank": "Bank Transfer",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shippingFee": "Shipping Fee",
+    "total": "Total",
+    "placeOrder": "Place Order",
+    "processing": "Processing payment...",
+    "success": "Payment successful ✓",
+    "emptyCart": "Your cart is empty",
+    "backToShop": "Back to Shop",
+    "freeShipping": "Free"
+  },
+  "orders": {
+    "title": "Your Orders",
+    "empty": "You have no orders yet",
+    "backToShop": "Explore shop",
+    "id": "Order ID: {{id}}",
+    "date": "Date: {{date}}",
+    "itemsCount": "{{count}} items",
+    "total": "Total: {{total}}",
+    "detailTitle": "Order Details",
+    "notFound": "Order not found",
+    "shippingInfo": "Shipping Information",
+    "paymentMethod": "Payment Method",
+    "timeline": "Order Status",
+    "status": {
+      "processing": "Processing",
+      "packing": "Packing",
+      "shipping": "Shipping",
+      "completed": "Completed"
+    }
+  },
+  "custom": {
+    "selectTitle": "What would you like to design?",
+    "selectDesc": "Pick a product type to open the 3D configurator — adjust dimensions, material and color to your liking.",
+    "dimensions": "Dimensions (cm)",
+    "dimensionWidth": "Width",
+    "dimensionHeight": "Height",
+    "dimensionDepth": "Depth",
+    "material": "Wood Material",
+    "finish": "Finish Color",
+    "estimatedPrice": "Estimated Price",
+    "estimatedPriceNote": "Final price will be confirmed by the workshop when quoting.",
+    "estimatedTime": "Estimated Time",
+    "estimatedTimeUnit": "{{days}} days",
+    "saveDesign": "Save design & find workshop",
+    "types": {
+      "table": { "name": "Table", "desc": "Dining tables, desks, coffee tables" },
+      "cabinet": { "name": "Cabinet", "desc": "Wardrobes, kitchen cabinets, display cabinets" },
+      "shelf": { "name": "Shelf", "desc": "Bookshelves, decorative shelves, wall shelves" },
+      "chair": { "name": "Chair", "desc": "Dining chairs, office chairs, benches" }
+    },
+    "materials": {
+      "oak": "Oak",
+      "walnut": "Walnut",
+      "ash": "Ash",
+      "pine": "Pine"
+    },
+    "finishes": {
+      "natural": "Natural (oiled)",
+      "dark": "Dark brown",
+      "white": "Milky white",
+      "black": "Matte black"
+    }
+  },
+  "workshopMatch": {
+    "title": "Workshops matching your design",
+    "subtitle": "Filtered by production capability (product type, max size, material) and ranked by rating, speed and experience.",
+    "bestMatch": "Best match",
+    "workshopInfo": "{{district}} · ★ {{rating}} · {{jobs}} completed jobs · ships in ~{{days}} days",
+    "requestQuote": "Request quote",
+    "emptyTitle": "No matching workshops found",
+    "emptyHint": "Try reducing the size or changing the material in your design.",
+    "editDesign": "Edit design",
+    "designOther": "← Design another product"
+  },
+  "forbidden": {
+    "title": "403 — Access denied",
+    "message": "You don't have permission to access this page.",
+    "backHome": "Back to home"
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "comingSoon": "Coming soon — will be available in a future update."
+  },
+  "portal": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "store": "Store",
+      "products": "Products",
+      "orders": "Orders"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "newOrders": "New orders",
+      "monthlyRevenue": "Revenue (total orders)",
+      "pendingQuotes": "Designs awaiting quote",
+      "topProducts": "Best-selling products",
+      "recentOrders": "Recent orders",
+      "soldCount": "{{count}} sold",
+      "noOrders": "No orders yet"
+    },
+    "store": {
+      "title": "Store",
+      "name": "Store name",
+      "description": "Description",
+      "logoUrl": "Logo image (URL)",
+      "coverUrl": "Cover image (URL)",
+      "logoPreview": "Logo preview",
+      "coverPreview": "Cover preview",
+      "save": "Save changes",
+      "saved": "Store info saved ✓"
+    },
+    "products": {
+      "title": "Products",
+      "add": "Add product",
+      "edit": "Edit product",
+      "newProduct": "New product",
+      "delete": "Delete",
+      "confirmDelete": "Delete \"{{name}}\"? This cannot be undone.",
+      "empty": "No products yet",
+      "table": {
+        "image": "Image",
+        "name": "Name",
+        "price": "Price",
+        "material": "Material",
+        "stock": "Stock",
+        "actions": "Actions"
+      },
+      "form": {
+        "nameVi": "Name (Vietnamese)",
+        "nameEn": "Name (English)",
+        "price": "Price (VND)",
+        "material": "Material",
+        "stock": "Stock",
+        "image": "Product image (URL)",
+        "imagePreview": "Image preview",
+        "imageNote": "V1: real file upload via BE — demo uses an image URL.",
+        "descriptionVi": "Description (Vietnamese)",
+        "descriptionEn": "Description (English)",
+        "save": "Save",
+        "cancel": "Cancel"
+      }
+    },
+    "orders": {
+      "title": "Orders",
+      "empty": "No orders yet",
+      "customer": "Customer",
+      "updateStatus": "Move to \"{{status}}\"",
+      "completed": "Order completed"
     }
   }
 }
