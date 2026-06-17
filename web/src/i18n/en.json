@@ -201,6 +201,13 @@
   },
   "shop": {
     "all": "All",
+    "categories": {
+      "table": "Tables",
+      "chair": "Chairs",
+      "cabinet": "Cabinets",
+      "shelf": "Shelves",
+      "bed": "Beds"
+    },
     "filterMaterial": "Material",
     "filterColor": "Color",
     "filterMaxPrice": "Max Price",

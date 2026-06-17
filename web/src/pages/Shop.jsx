@@ -1,12 +1,18 @@
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProducts } from '../hooks/useProducts.js';
 import ProductCard from '../components/ui/ProductCard.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
+import { formatVnd } from '../utils/format.js';
+
+const PRICE_MIN = 1000000;
+const PRICE_MAX = 20000000;
 
 export default function Shop() {
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const sort = searchParams.get('sort') ?? '';
@@ -28,21 +34,26 @@ export default function Shop() {
     setSearchParams(next);
   };
 
-  // Debounce helper cho slider giá
-  let timeoutId;
+  // Giá hiển thị (cập nhật tức thì khi kéo) tách khỏi giá lọc thật (debounce 300ms)
+  // để vừa thấy số ngay, vừa không gọi API liên tục lúc đang kéo.
+  const [priceDisplay, setPriceDisplay] = useState(Number(maxPrice) || PRICE_MAX);
+  const priceTimeout = useRef();
   const handlePriceChange = (e) => {
-    const value = e.target.value;
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      setParam('maxPrice', value);
-    }, 300);
+    const value = Number(e.target.value);
+    setPriceDisplay(value);
+    clearTimeout(priceTimeout.current);
+    priceTimeout.current = setTimeout(() => setParam('maxPrice', value), 300);
   };
 
+  // Xóa hết filter: phải navigate('/shop') để bỏ cả DANH MỤC (nằm ở path /shop/:category)
+  // — setSearchParams({}) chỉ xóa query nên danh mục vẫn còn. Reset luôn thanh giá về tối đa.
   const clearFilters = () => {
-    setSearchParams({});
+    setPriceDisplay(PRICE_MAX);
+    navigate('/shop');
   };
 
-  const hasFilters = material || maxPrice || sort;
+  // Tính cả danh mục (params.category) để nút "Xóa lọc" hiện khi chỉ chọn 1 danh mục
+  const hasFilters = material || maxPrice || sort || params.category;
 
   const materialsList = ['oak', 'walnut', 'ash', 'pine', 'rubber'];
 
@@ -73,7 +84,7 @@ export default function Shop() {
               <Link to="/shop" className={`hover:text-primary transition-colors ${!params.category ? 'font-semibold text-primary' : ''}`}>{t('shop.all')}</Link>
               {data?.categories?.map((c) => (
                 <Link key={c.id} to={`/shop/${c.id}`} className={`hover:text-primary transition-colors ${params.category === c.id ? 'font-semibold text-primary' : ''}`}>
-                  {c.name}
+                  {t(`shop.categories.${c.id}`, { defaultValue: c.name })}
                 </Link>
               ))}
             </div>
@@ -102,15 +113,21 @@ export default function Shop() {
 
           {/* Filter giá tối đa */}
           <div>
-            <h3 className="font-medium mb-3">{t('shop.filterMaxPrice')}</h3>
-            <input 
-              type="range" 
-              min="1000000" 
-              max="20000000" 
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-medium">{t('shop.filterMaxPrice')}</h3>
+              {/* Hiển thị mức giá hiện tại; khi kéo hết cỡ thì hiện nhãn "20tr+" thay vì số */}
+              <span className="text-sm font-semibold text-primary">
+                {priceDisplay >= PRICE_MAX ? t('shop.priceMax') : formatVnd(priceDisplay)}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={PRICE_MIN}
+              max={PRICE_MAX}
               step="500000"
-              defaultValue={maxPrice || 20000000}
+              value={priceDisplay}
               onChange={handlePriceChange}
-              className="range range-primary range-sm" 
+              className="range range-primary range-sm"
             />
             <div className="flex justify-between text-xs mt-2 text-base-content/60">
               <span>{t('shop.priceMin')}</span>

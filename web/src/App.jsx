@@ -5,6 +5,7 @@ import PortalLayout from './components/layout/PortalLayout.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
 import { useUiStore } from './stores/uiStore.js';
 
 /*
@@ -47,6 +48,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<PageLoader />}>
+      <ScrollToTop />
       <Routes>
         {/* Landing đứng riêng: hero full-screen, không dùng layout chung */}
         <Route path="/" element={<Landing />} />

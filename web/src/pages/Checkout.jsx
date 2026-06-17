@@ -82,10 +82,12 @@ export default function Checkout() {
     );
   }
 
+  // flex-col: nhãn nằm TRÊN ô input (class form-control/label-text của daisyUI v4 đã bỏ ở v5
+  // nên label bị đè lên input — thay bằng flex thủ công)
   const field = (key, label, placeholder) => (
-    <label className="form-control">
-      <span className="label-text mb-1">{label}</span>
-      <input className="input input-bordered" placeholder={placeholder} value={address[key]} onChange={(e) => setAddress({ ...address, [key]: e.target.value })} />
+    <label className="flex flex-col gap-1">
+      <span className="text-sm text-base-content/70">{label}</span>
+      <input className="input input-bordered w-full" placeholder={placeholder} value={address[key]} onChange={(e) => setAddress({ ...address, [key]: e.target.value })} />
     </label>
   );
 

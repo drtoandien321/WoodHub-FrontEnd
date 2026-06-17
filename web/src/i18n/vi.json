@@ -201,6 +201,13 @@
   },
   "shop": {
     "all": "Tất cả",
+    "categories": {
+      "table": "Bàn",
+      "chair": "Ghế",
+      "cabinet": "Tủ",
+      "shelf": "Kệ",
+      "bed": "Giường"
+    },
     "filterMaterial": "Vật liệu",
     "filterColor": "Màu sắc",
     "filterMaxPrice": "Giá tối đa",
