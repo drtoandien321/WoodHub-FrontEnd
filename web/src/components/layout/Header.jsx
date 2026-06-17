@@ -4,57 +4,55 @@ import { useCartStore } from '../../stores/cartStore.js';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
-import { SunIcon, MoonIcon } from '../ui/icons.jsx';
+import { SunIcon, MoonIcon, CartIcon, UserIcon, ChevronDownIcon } from '../ui/icons.jsx';
 
-// DEV ONLY: đổi nhanh role đang đăng nhập để test ProtectedRoute/Portal/Admin mà không cần login lại
-const DEV_ROLES = ['customer', 'supplier', 'admin'];
-const DEV_ROLE_NAMES = { customer: 'demo', supplier: 'Xưởng Mộc Tân Bình', admin: 'Quản trị viên' };
+// "Giới thiệu" giờ là 1 trang gộp (Câu chuyện + Bảng giá + Liên hệ) → link thẳng /about, bỏ dropdown
+const MENU = [
+  { key: 'shop', to: '/shop' },
+  { key: 'custom', to: '/custom' },
+  { key: 'suppliers', to: '/suppliers' },
+  { key: 'b2b', to: '/b2b' },
+  { key: 'intro', to: '/about' },
+];
 
 export default function Header() {
   const itemCount = useCartStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
-  const { user, token, logout, setAuth } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { theme, toggleTheme } = useUiStore();
   const { t } = useTranslation();
   const isDark = theme === 'woodhub-dark';
 
-  // Người mua = chưa đăng nhập (guest) hoặc role customer → mới có Giỏ hàng/Đơn hàng
+  // Người mua = chưa đăng nhập (guest) hoặc role customer → mới có Giỏ hàng
   const isBuyer = !user || user.role === 'customer';
 
-  const handleDevRoleChange = (newRole) => {
-    setAuth({
-      token: token ?? 'mock-jwt-token',
-      user: { id: 'u1', name: DEV_ROLE_NAMES[newRole], email: user?.email ?? 'dev@woodhub.local', role: newRole },
-    });
-  };
+  // "Khu vực riêng" theo role — hiện trong dropdown tài khoản
+  const roleArea =
+    user?.role === 'supplier' ? { to: '/portal', label: t('nav.portal') }
+    : user?.role === 'admin' ? { to: '/admin', label: t('nav.admin') }
+    : { to: '/orders', label: t('nav.orders') };
 
+  // whitespace-nowrap: chặn nhãn dài (vd "Thiết kế Custom") bị xuống 2 hàng
   const navClass = ({ isActive }) =>
-    `px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`;
+    `px-3 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${isActive ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`;
 
   return (
     <header className="sticky top-0 z-40 bg-base-100/80 backdrop-blur border-b border-base-300">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between gap-4">
-        <Link to="/" className="font-display text-2xl text-primary tracking-tight">WoodHub</Link>
+      <div className="max-w-7xl mx-auto px-4 md:px-8 h-20 flex items-center gap-4">
+        {/* THƯƠNG HIỆU — tách riêng bên trái, cỡ lớn hơn + tagline */}
+        <Link to="/" className="flex flex-col leading-none shrink-0">
+          <span className="font-display text-2xl md:text-3xl text-primary tracking-tight">WOODHUB</span>
+          <span className="text-[10px] md:text-[11px] tracking-[0.32em] text-base-content/45 mt-1">FURNITURE &amp; CRAFT</span>
+        </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
-          <NavLink to="/shop" className={navClass}>{t('nav.shop')}</NavLink>
-          <NavLink to="/custom" className={navClass}>{t('nav.custom')}</NavLink>
-          <NavLink to="/suppliers" className={navClass}>{t('nav.suppliers')}</NavLink>
-          <NavLink to="/b2b" className={navClass}>{t('nav.b2b')}</NavLink>
-
-          {/* Dropdown gom các trang giới thiệu — tránh navbar quá dài */}
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="px-3 py-2 rounded-lg text-sm hover:bg-base-200 cursor-pointer">
-              {t('nav.intro')}
-            </div>
-            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-20 w-44 p-2 shadow border border-base-300">
-              <li><Link to="/about">{t('nav.about')}</Link></li>
-              <li><Link to="/pricing">{t('nav.pricing')}</Link></li>
-              <li><Link to="/contact">{t('nav.contact')}</Link></li>
-            </ul>
-          </div>
+        {/* MENU — chiếm khoảng giữa (flex-1) và căn giữa; KHÔNG absolute nữa để không đè lên cụm phải */}
+        <nav className="hidden lg:flex flex-1 items-center justify-center gap-1">
+          {MENU.map((item) => (
+            <NavLink key={item.key} to={item.to} className={navClass}>{t(`nav.${item.key}`)}</NavLink>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        {/* BÊN PHẢI: theme, ngôn ngữ, giỏ hàng (icon), tài khoản — dồn sát lề phải */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
           <button
             type="button"
             onClick={toggleTheme}
@@ -65,40 +63,38 @@ export default function Header() {
           </button>
           <LanguageSwitcher />
 
-          {/* DEV ONLY: đổi nhanh role để test các trang/portal theo phân quyền, không build vào production. Ẩn trên mobile để tránh tràn ngang. */}
-          {import.meta.env.DEV && (
-            <select
-              value={user?.role ?? 'customer'}
-              onChange={(e) => handleDevRoleChange(e.target.value)}
-              className="select select-bordered select-sm w-28 hidden sm:inline-flex"
-              title="DEV: switch role"
-            >
-              {DEV_ROLES.map((r) => (
-                <option key={r} value={r}>{t(`auth.roles.${r}`)}</option>
-              ))}
-            </select>
-          )}
-
-          {/* Giỏ hàng + Đơn hàng là chức năng của người MUA (guest/customer).
-              Supplier & Admin không mua hàng → ẩn đi cho đúng vai trò. */}
+          {/* Giỏ hàng — chỉ còn ICON + badge số lượng (bỏ chữ "Giỏ hàng") */}
           {isBuyer && (
-            <Link to="/cart" className="btn btn-ghost btn-sm relative">
-              {t('nav.cart')}
+            <Link to="/cart" aria-label={t('nav.cart')} className="btn btn-ghost btn-sm btn-circle relative">
+              <CartIcon className="w-5 h-5" />
               {itemCount > 0 && (
-                <span className="badge badge-accent badge-sm absolute -top-1 -right-1">{itemCount}</span>
+                <span className="badge badge-accent badge-xs absolute -top-0.5 -right-0.5">{itemCount}</span>
               )}
             </Link>
           )}
+
           {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm hidden sm:inline">{t('nav.greeting', { name: user.name })}</span>
-              {user.role === 'supplier' && <Link to="/portal" className="btn btn-ghost btn-sm">{t('nav.portal')}</Link>}
-              {user.role === 'admin' && <Link to="/admin" className="btn btn-ghost btn-sm">{t('nav.admin')}</Link>}
-              {user.role === 'customer' && <Link to="/orders" className="btn btn-ghost btn-sm">{t('nav.orders')}</Link>}
-              <button onClick={logout} className="btn btn-outline btn-sm">{t('nav.logout')}</button>
+            // Pill tài khoản: icon người + "Chào, {tên}" → bấm xổ menu Đơn hàng / Thông tin cá nhân / Đăng xuất
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="flex items-center gap-2 rounded-full border border-base-300 pl-2 pr-3 py-1.5 text-sm hover:bg-base-200 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-base-200 text-base-content/70">
+                  <UserIcon className="w-4 h-4" />
+                </span>
+                <span className="hidden sm:inline">{t('nav.greeting', { name: user.name })}</span>
+                <ChevronDownIcon className="w-4 h-4 text-base-content/50" />
+              </div>
+              <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-20 w-48 p-2 shadow border border-base-300 mt-2">
+                <li><Link to={roleArea.to}>{roleArea.label}</Link></li>
+                <li><Link to="/profile">{t('nav.profile')}</Link></li>
+                <li><button onClick={logout}>{t('nav.logout')}</button></li>
+              </ul>
             </div>
           ) : (
-            <Link to="/login" className="btn btn-primary btn-sm">{t('nav.login')}</Link>
+            <Link to="/login" className="btn btn-primary btn-sm whitespace-nowrap">{t('nav.login')}</Link>
           )}
         </div>
       </div>

@@ -18,6 +18,7 @@ const Cart = lazy(() => import('./pages/Cart.jsx'));
 const Checkout = lazy(() => import('./pages/Checkout.jsx'));
 const Orders = lazy(() => import('./pages/Orders.jsx'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail.jsx'));
+const Profile = lazy(() => import('./pages/Profile.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
 const CustomSelect = lazy(() => import('./pages/CustomSelect.jsx'));
@@ -69,6 +70,7 @@ export default function App() {
           {/* ProtectedRoute: chưa login thì đẩy về /login (xem routes/ProtectedRoute.jsx) */}
           <Route element={<ProtectedRoute />}>
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/custom/match/:designId" element={<WorkshopMatch />} />

@@ -4,7 +4,9 @@
     "switchToDark": "Switch to dark mode",
     "switchToLight": "Switch to light mode",
     "switchLanguage": "Switch language",
-    "toggleMenu": "Toggle quick menu"
+    "toggleMenu": "Toggle quick menu",
+    "notifications": "Notifications",
+    "noNotifications": "No notifications yet"
   },
   "nav": {
     "home": "Home",
@@ -24,7 +26,8 @@
     "exploreNow": "Explore now",
     "orders": "Orders",
     "portal": "Supplier Portal",
-    "admin": "Admin"
+    "admin": "Admin",
+    "profile": "My profile"
   },
   "hero": {
     "badge": "3D Design · View AR at home",
@@ -51,6 +54,12 @@
     "explore": "Explore",
     "company": "Company",
     "copyright": "© 2026 WoodHub Team"
+  },
+  "profile": {
+    "title": "My profile",
+    "name": "Full name",
+    "email": "Email",
+    "role": "Role"
   },
   "auth": {
     "login": {
@@ -125,18 +134,50 @@
       { "title": "Real wood, clear origin", "desc": "Every product on WoodHub comes from a workshop verified for capability and materials — no fake wood, no unclear sourcing." },
       { "title": "Standing with Vietnamese craftsmen", "desc": "We build tools that help small workshops reach a wide customer base, instead of only doing contract work for big brands." },
       { "title": "Technology for a real experience", "desc": "AI advice and AR/3D previews help customers picture a product in their own space before ordering." }
+    ],
+    "timeline": [
+      { "year": "2018", "label": "From a Tân Bình wood workshop" },
+      { "year": "2024+", "label": "A platform connecting hundreds of workshops" }
     ]
   },
   "pricing": {
     "title": "Pricing",
-    "subtitle": "Pick the plan that fits your needs on WoodHub.",
+    "subtitle": "Flexible to your needs, optimized for every type of customer.",
     "perMonth": "/ month",
     "subscribe": "Subscribe",
+    "popular": "Popular",
     "toastMessage": "Subscription payment flow is coming in V1",
     "groups": {
-      "b2c": { "title": "Retail customers (B2C)", "desc": "Enhanced AR/3D experience for furniture shopping." },
-      "supplier": { "title": "Workshops & Suppliers", "desc": "Sales management tools for workshops." },
-      "custom": { "title": "Custom Design customers", "desc": "Priority matching with verified workshops for custom orders." }
+      "b2c": {
+        "title": "Retail customers (B2C)",
+        "desc": "Enhanced AR/3D experience for furniture shopping.",
+        "features": [
+          "Unlimited AR/3D viewing for every product",
+          "Priority AI advisor — faster responses",
+          "Save unlimited tried-on AR room setups",
+          "Free shipping on orders from 2,000,000đ"
+        ]
+      },
+      "supplier": {
+        "title": "Workshops & Suppliers",
+        "desc": "Sales management tools for workshops.",
+        "features": [
+          "Unlimited product listings on the B2C marketplace",
+          "Order & inventory management dashboard",
+          "Priority placement in workshop matching results",
+          "Monthly revenue & performance reports"
+        ]
+      },
+      "custom": {
+        "title": "Custom Design customers",
+        "desc": "Priority matching with verified workshops for custom orders.",
+        "features": [
+          "Priority matching with verified workshops",
+          "Unlimited 3D design revisions",
+          "1-on-1 technical support before confirming",
+          "Extended warranty for custom products"
+        ]
+      }
     }
   },
   "contact": {
@@ -147,6 +188,9 @@
     "subjectPlaceholder": "Subject",
     "messagePlaceholder": "Message",
     "submit": "Send message",
+    "support": { "label": "Customer support", "value": "1900 9889 (8:00 – 17:30, Mon – Sat)" },
+    "emailInfo": { "label": "Email", "value": "support@woodhub.vn" },
+    "address": { "label": "Address", "value": "65/12 Bàu Cát, Ward 14, Tân Bình District, HCMC" },
     "success": "Thank you! WoodHub has received your message and will get back to you soon.",
     "errors": {
       "name": "Please enter your name.",

@@ -1,8 +1,8 @@
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import HeroNavbar from './HeroNavbar.jsx';
+import HeroNavbar, { ArrowUpRight } from './HeroNavbar.jsx';
 import HeroBadge from './HeroBadge.jsx';
-import BottomLeftCard from './BottomLeftCard.jsx';
 import BottomRightCorner from './BottomRightCorner.jsx';
 
 /*
@@ -23,6 +23,7 @@ const HERO_IMAGE_URL = '/hero/living-room-3d.png';
 
 export default function Hero() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <div className="w-full flex items-center justify-center p-3 md:p-5 bg-base-100">
@@ -37,8 +38,10 @@ export default function Hero() {
           alt=""
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
         />
-        {/* Lớp phủ mờ phía trên — giữ chữ dễ đọc */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-ivory/85 via-ivory/35 to-transparent" />
+        {/* Lớp phủ NHẸ chỉ ở mép trái: đậm ~nửa trái rồi trong suốt hẳn từ ~50% trở đi
+            → nội thất bên phải thấy rõ nét, chữ canh trái vẫn đủ tương phản.
+            Dùng stop tường minh thay vì from/via/to để kiểm soát điểm tan biến (ivory = #f4efe6). */}
+        <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,rgba(244,239,230,0.85)_0%,rgba(244,239,230,0.35)_26%,rgba(244,239,230,0)_50%)]" />
         {HERO_VIDEO_URL && (
           <video
             autoPlay muted loop playsInline
@@ -47,34 +50,53 @@ export default function Hero() {
           />
         )}
 
-        {/* Content layer */}
-        <div className="relative z-10 w-full h-full flex flex-col items-center">
+        {/* Content layer — bố cục canh TRÁI, nội dung căn giữa theo chiều dọc */}
+        <div className="relative z-10 w-full h-full flex flex-col">
           <HeroNavbar />
 
-          <div className="w-full flex flex-col items-center pt-6 sm:pt-8 px-4 sm:px-6 text-center max-w-5xl">
-            <HeroBadge />
+          <div className="flex-1 flex items-center">
+            <div className="w-full max-w-lg px-5 sm:px-8 md:px-12 lg:px-16 text-left">
+              <HeroBadge />
 
-            <motion.h1
-              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[80px] font-normal text-hero-ink mb-2 tracking-tight leading-[1.05] w-full"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              {t('hero.title')}
-            </motion.h1>
+              <motion.h1
+                className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-normal text-hero-ink mb-4 tracking-tight leading-[1.08] max-w-[13ch]"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                {t('hero.title')}
+              </motion.h1>
 
-            <motion.p
-              className="text-sm sm:text-base md:text-lg text-hero-ink opacity-80 leading-relaxed max-w-xl font-normal"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              {t('hero.subtitle')}
-            </motion.p>
+              {/* Frosted patch: chỉ làm mờ vùng NGAY SAU đoạn mô tả (localized blur bên trái,
+                  giống hình mẫu) thay vì phủ mờ cả ảnh. */}
+              <motion.p
+                className="text-sm md:text-[15px] text-hero-ink/80 leading-relaxed max-w-sm font-normal rounded-2xl bg-ivory/25 backdrop-blur-[3px] px-4 py-3 -ml-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                {t('hero.subtitle')}
+              </motion.p>
+
+              {/* Nút CTA chính — chuyển từ card góc trái cũ lên đây (theo ảnh mẫu) */}
+              <motion.button
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.55 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/custom')}
+                className="group mt-6 inline-flex items-center gap-3 rounded-full bg-hero-ink pl-6 pr-2 py-2 text-ivory cursor-pointer"
+              >
+                <span className="text-sm md:text-base font-normal">{t('hero.designNow')}</span>
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-ivory/20 transition-transform group-hover:rotate-12">
+                  <ArrowUpRight className="w-4 h-4" />
+                </span>
+              </motion.button>
+            </div>
           </div>
 
-          {/* 2 card góc */}
-          <BottomLeftCard />
+          {/* Góc khoét "Khám phá bộ sưu tập" — giữ nguyên theo yêu cầu */}
           <BottomRightCorner />
         </div>
 

@@ -4,7 +4,9 @@
     "switchToDark": "Chuyển sang giao diện tối",
     "switchToLight": "Chuyển sang giao diện sáng",
     "switchLanguage": "Đổi ngôn ngữ",
-    "toggleMenu": "Mở/đóng menu nhanh"
+    "toggleMenu": "Mở/đóng menu nhanh",
+    "notifications": "Thông báo",
+    "noNotifications": "Chưa có thông báo"
   },
   "nav": {
     "home": "Trang chủ",
@@ -24,7 +26,8 @@
     "exploreNow": "Khám phá ngay",
     "orders": "Đơn hàng",
     "portal": "Portal Nhà cung cấp",
-    "admin": "Quản trị"
+    "admin": "Quản trị",
+    "profile": "Thông tin cá nhân"
   },
   "hero": {
     "badge": "Thiết kế 3D · Xem AR tại nhà",
@@ -51,6 +54,12 @@
     "explore": "Khám phá",
     "company": "Công ty",
     "copyright": "© 2026 WoodHub Team"
+  },
+  "profile": {
+    "title": "Thông tin cá nhân",
+    "name": "Họ tên",
+    "email": "Email",
+    "role": "Vai trò"
   },
   "auth": {
     "login": {
@@ -125,18 +134,50 @@
       { "title": "Gỗ thật, nguồn gốc rõ ràng", "desc": "Mỗi sản phẩm trên WoodHub đều đến từ xưởng đã được xác minh năng lực và vật liệu — không hàng giả gỗ, không mập mờ xuất xứ." },
       { "title": "Đồng hành cùng người thợ Việt", "desc": "Chúng tôi xây công cụ để xưởng mộc nhỏ tiếp cận khách hàng số đông, thay vì chỉ làm gia công cho thương hiệu lớn." },
       { "title": "Công nghệ phục vụ trải nghiệm thật", "desc": "AI tư vấn và xem trước AR/3D giúp khách hình dung sản phẩm trong chính không gian của mình trước khi đặt hàng." }
+    ],
+    "timeline": [
+      { "year": "2018", "label": "Từ xưởng gỗ Tân Bình" },
+      { "year": "2024+", "label": "Nền tảng kết nối hàng trăm xưởng mộc" }
     ]
   },
   "pricing": {
     "title": "Bảng giá",
-    "subtitle": "Chọn gói phù hợp với nhu cầu của bạn trên WoodHub.",
+    "subtitle": "Linh hoạt theo nhu cầu, tối ưu trải nghiệm cho từng đối tượng khách hàng.",
     "perMonth": "/ tháng",
     "subscribe": "Đăng ký gói",
+    "popular": "Phổ biến",
     "toastMessage": "Luồng thanh toán subscription sẽ có ở V1",
     "groups": {
-      "b2c": { "title": "Khách mua lẻ (B2C)", "desc": "Trải nghiệm AR/3D nâng cao khi mua sắm nội thất." },
-      "supplier": { "title": "Xưởng & Nhà cung cấp", "desc": "Công cụ quản lý bán hàng cho xưởng mộc." },
-      "custom": { "title": "Khách đặt thiết kế Custom", "desc": "Ưu tiên ghép xưởng verified cho đơn custom." }
+      "b2c": {
+        "title": "Khách mua lẻ (B2C)",
+        "desc": "Trải nghiệm AR/3D nâng cao khi mua sắm nội thất.",
+        "features": [
+          "Xem AR/3D không giới hạn cho mọi sản phẩm",
+          "Tư vấn AI ưu tiên — phản hồi nhanh hơn",
+          "Lưu không giới hạn cấu hình phòng đã thử AR",
+          "Miễn phí vận chuyển cho đơn từ 2 triệu"
+        ]
+      },
+      "supplier": {
+        "title": "Xưởng & Nhà cung cấp",
+        "desc": "Công cụ quản lý bán hàng cho xưởng mộc.",
+        "features": [
+          "Đăng sản phẩm không giới hạn lên sàn B2C",
+          "Dashboard quản lý đơn hàng & tồn kho",
+          "Ưu tiên xuất hiện trong kết quả ghép xưởng (matching)",
+          "Báo cáo doanh thu & hiệu suất hàng tháng"
+        ]
+      },
+      "custom": {
+        "title": "Khách đặt thiết kế Custom",
+        "desc": "Ưu tiên ghép xưởng verified cho đơn custom.",
+        "features": [
+          "Ưu tiên ghép với xưởng đã xác minh (verified)",
+          "Không giới hạn số lượt chỉnh thiết kế 3D",
+          "Hỗ trợ kỹ thuật 1-1 trước khi chốt đơn",
+          "Bảo hành mở rộng cho sản phẩm custom"
+        ]
+      }
     }
   },
   "contact": {
@@ -147,6 +188,9 @@
     "subjectPlaceholder": "Chủ đề",
     "messagePlaceholder": "Nội dung",
     "submit": "Gửi liên hệ",
+    "support": { "label": "Hỗ trợ khách hàng", "value": "1900 9889 (8:00 – 17:30, T2 – T7)" },
+    "emailInfo": { "label": "Email", "value": "support@woodhub.vn" },
+    "address": { "label": "Địa chỉ", "value": "65/12 Bàu Cát, P.14, Q. Tân Bình, TP. HCM" },
     "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi sớm.",
     "errors": {
       "name": "Vui lòng nhập họ tên.",

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Hero from '../components/hero/Hero.jsx';
 import ProductCard from '../components/ui/ProductCard.jsx';
 import Footer from '../components/layout/Footer.jsx';
-import FluidMenu from '../components/ui/FluidMenu.jsx';
+import SideRail from '../components/ui/SideRail.jsx';
 import { useFeaturedProducts } from '../hooks/useProducts.js';
 
 const FLOW_LINKS = ['/shop', '/b2b', '/custom'];
@@ -15,7 +15,7 @@ export default function Landing() {
 
   return (
     <div className="bg-base-100">
-      <FluidMenu />
+      <SideRail />
       <Hero />
 
       {/* 3 luồng chính */}
