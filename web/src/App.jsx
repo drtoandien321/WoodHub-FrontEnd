@@ -22,6 +22,7 @@ const OrderDetail = lazy(() => import('./pages/OrderDetail.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
+const VerifyOtp = lazy(() => import('./pages/VerifyOtp.jsx'));
 const CustomSelect = lazy(() => import('./pages/CustomSelect.jsx'));
 const CustomConfigure = lazy(() => import('./pages/CustomConfigure.jsx'));
 const WorkshopMatch = lazy(() => import('./pages/WorkshopMatch.jsx'));
@@ -53,10 +54,13 @@ export default function App() {
         {/* Landing đứng riêng: hero full-screen, không dùng layout chung */}
         <Route path="/" element={<Landing />} />
 
+        {/* Trang xác thực: layout RIÊNG (AuthLayout full màn hình), KHÔNG header/footer */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+
         {/* Các trang còn lại dùng SiteLayout (header + footer) qua nested route */}
         <Route element={<SiteLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/:category" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />

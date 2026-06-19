@@ -6,7 +6,9 @@
     "switchLanguage": "Switch language",
     "toggleMenu": "Toggle quick menu",
     "notifications": "Notifications",
-    "noNotifications": "No notifications yet"
+    "noNotifications": "No notifications yet",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "home": "Home",
@@ -64,13 +66,14 @@
   "auth": {
     "login": {
       "title": "Log in",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Password",
+      "subtitle": "Welcome back to WoodHub",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password",
       "submit": "Log in",
       "error": "Incorrect email or password.",
+      "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up",
-      "demoNote": "Demo mode: enter any email/password.",
       "selectRole": "Log in as"
     },
     "roles": {
@@ -80,21 +83,34 @@
     },
     "register": {
       "title": "Create account",
-      "roleCustomer": "Customer",
-      "roleSupplier": "Workshop / Supplier",
+      "subtitle": "Join WoodHub to explore the world of wooden interiors",
       "namePlaceholder": "Full name",
       "emailPlaceholder": "Email",
+      "phonePlaceholder": "Phone number",
       "passwordPlaceholder": "Password (6+ characters)",
-      "workshopNamePlaceholder": "Workshop / business name",
-      "workshopAddressPlaceholder": "Workshop address",
       "submit": "Sign up",
       "haveAccount": "Already have an account?",
       "loginLink": "Log in",
       "businessTitle": "Create a business account",
       "businessSubtitle": "For businesses buying in bulk — get quotes & VAT invoices.",
-      "companyNamePlaceholder": "Company name",
-      "contactNamePlaceholder": "Contact person",
-      "taxCodePlaceholder": "Tax code"
+      "companyNamePlaceholder": "Company name"
+    },
+    "divider": "Or",
+    "google": {
+      "login": "Sign in with Google",
+      "register": "Sign up with Google",
+      "error": "Google sign-in failed. Please try again."
+    },
+    "otp": {
+      "title": "Verify your email",
+      "subtitle": "Enter the 6-digit code sent to {{email}}",
+      "codePlaceholder": "Enter 6-digit code",
+      "submit": "Verify",
+      "resend": "Resend code",
+      "resendIn": "Resend in {{seconds}}s",
+      "error": "Invalid or expired code.",
+      "resent": "A new code has been sent to your email.",
+      "missingEmail": "Missing email — please register again."
     }
   },
   "suppliers": {
@@ -209,7 +225,6 @@
       "bed": "Beds"
     },
     "filterMaterial": "Material",
-    "filterColor": "Color",
     "filterMaxPrice": "Max Price",
     "clearFilter": "Clear filters",
     "emptyTitle": "No matching products",
@@ -253,8 +268,14 @@
     "processing": "Processing payment...",
     "success": "Payment successful ✓",
     "emptyCart": "Your cart is empty",
+    "emptyCartHint": "Add some products to your cart before checking out.",
     "backToShop": "Back to Shop",
-    "freeShipping": "Free"
+    "freeShipping": "Free",
+    "namePlaceholder": "John Doe",
+    "phonePlaceholder": "09xx xxx xxx",
+    "cityPlaceholder": "Tan Binh",
+    "addressPlaceholder": "Street address",
+    "fillAllHint": "Please fill in your name, phone, address and city to place the order."
   },
   "orders": {
     "title": "Your Orders",

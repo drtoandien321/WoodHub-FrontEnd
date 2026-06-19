@@ -14,12 +14,13 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'; // mặc định moc
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api';
 
 /*
- * BE hiện mới làm xong nhóm Auth + User (xem Swagger). Các endpoint khác (products,
- * orders, custom, supplier...) CHƯA có BE → vẫn dùng mock kể cả khi VITE_USE_MOCK=false.
- * Chỉ những key nằm trong REAL_ENDPOINTS mới gọi BE thật. Khi BE làm xong endpoint mới,
- * chỉ cần thêm key vào đây — không phải sửa page/component.
+ * REAL_ENDPOINTS: các endpoint ĐI QUA hàm call() (products, orders, custom, supplier...) đã có BE thật.
+ * HIỆN CHƯA có cái nào → tất cả các endpoint đó vẫn dùng mock kể cả khi VITE_USE_MOCK=false.
+ * Khi BE làm xong endpoint nào, thêm đúng mockKey của nó vào set này — không phải sửa page/component.
+ * LƯU Ý: nhóm Auth (login/register/verify-otp/resend-otp/google) được xử lý TƯỜNG MINH ở dưới
+ * (mỗi hàm tự kiểm tra USE_MOCK), KHÔNG đi qua call() nên không liệt kê ở đây.
  */
-const REAL_ENDPOINTS = new Set(['login', 'register']);
+const REAL_ENDPOINTS = new Set();
 
 /*
  * Lớp chuyển đổi shape: BE trả phẳng { token, userId, email, fullName, role },
@@ -68,10 +69,8 @@ export const api = {
   // ===== AUTH (đã gắn BE thật — Spring Boot /api/auth) =====
   /*
    * POST /auth/register
-   * BE chỉ nhận { email, password, fullName, phone } và LUÔN tạo role = customer
-   * (chưa hỗ trợ đăng ký supplier/business). Nên chỉ lấy đúng các field BE cần;
-   * name/role/supplierInfo... từ form FE được map/bỏ qua tại đây.
-   * BE trả 201 + { token, userId, email, fullName, role } → đổi về { token, user }.
+   * BE nhận { email, password, fullName, phone }, LUÔN tạo role = customer, gửi OTP về email.
+   * KHÁC trước: register KHÔNG còn trả token — chỉ trả { message }. Phải qua verifyOtp mới có token.
    */
   register: async (body) => {
     if (USE_MOCK) return mockAdapter.register(body);
@@ -81,16 +80,40 @@ export const api = {
       fullName: body.name,
       phone: body.phone,
     });
-    return toAuthResult(res.data);
+    return res.data; // { message }
   },
   /*
-   * POST /auth/login
-   * BE chỉ nhận { email, password } (role do BE tự xác định từ tài khoản, bỏ qua role FE gửi).
+   * POST /auth/verify-otp  body: { email, code(6 số) }
+   * Xác thực email thành công → BE trả { token, userId, email, fullName, role } → đổi về { token, user }.
+   */
+  verifyOtp: async (body) => {
+    if (USE_MOCK) return mockAdapter.verifyOtp(body);
+    const res = await http.post('/auth/verify-otp', { email: body.email, code: body.code });
+    return toAuthResult(res.data);
+  },
+  // POST /auth/resend-otp  body: { email } → { message } (BE giới hạn gửi lại mỗi 60s)
+  resendOtp: async (body) => {
+    if (USE_MOCK) return mockAdapter.resendOtp(body);
+    const res = await http.post('/auth/resend-otp', { email: body.email });
+    return res.data;
+  },
+  /*
+   * POST /auth/login  body: { email, password }
    * Trả { token, userId, email, fullName, role } → đổi về { token, user }.
+   * BE chặn nếu email chưa xác thực (403) — FE bắt lỗi này để chuyển sang màn nhập OTP.
    */
   login: async (body) => {
     if (USE_MOCK) return mockAdapter.login(body);
     const res = await http.post('/auth/login', { email: body.email, password: body.password });
+    return toAuthResult(res.data);
+  },
+  /*
+   * POST /auth/google  body: { idToken } (ID token lấy từ Google Identity Services)
+   * BE verify token, tạo/liên kết tài khoản → trả { token, userId, email, fullName, role }.
+   */
+  loginWithGoogle: async (body) => {
+    if (USE_MOCK) return mockAdapter.loginWithGoogle(body);
+    const res = await http.post('/auth/google', { idToken: body.idToken });
     return toAuthResult(res.data);
   },
 

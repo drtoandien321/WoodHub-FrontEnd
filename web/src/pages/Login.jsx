@@ -3,14 +3,15 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client.js';
 import { useAuthStore } from '../stores/authStore.js';
+import AuthLayout from '../components/auth/AuthLayout.jsx';
+import AuthField from '../components/auth/AuthField.jsx';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
+import { MailIcon, LockIcon } from '../components/ui/icons.jsx';
+import { redirectPathForRole } from '../utils/auth.js';
 
-// Trang đích sau khi đăng nhập, theo role — supplier/admin vào portal riêng,
-// customer quay lại trang đã định vào trước khi bị ProtectedRoute chặn (state.from)
-const redirectPathForRole = (role, fromPath) => {
-  if (role === 'supplier') return '/portal';
-  if (role === 'admin') return '/admin';
-  return fromPath ?? '/';
-};
+// Chỉ chế độ mock mới cần nút chọn vai trò (để demo nhanh customer/supplier/admin).
+// BE thật xác định role từ tài khoản → không cho FE chọn, nên ẩn nút này đi.
+const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -30,7 +31,12 @@ export default function Login() {
       const { token, user } = await api.login({ ...form, role });
       setAuth({ token, user });
       navigate(redirectPathForRole(user.role, location.state?.from?.pathname), { replace: true });
-    } catch {
+    } catch (err) {
+      // BE trả 403 khi email chưa xác thực → đưa sang màn nhập OTP
+      if (err?.response?.status === 403) {
+        navigate('/verify-otp', { state: { email: form.email } });
+        return;
+      }
       setError(t('auth.login.error'));
     } finally {
       setLoading(false);
@@ -45,32 +51,64 @@ export default function Login() {
   ];
 
   return (
-    <div className="max-w-sm mx-auto py-10">
-      <h1 className="font-display text-3xl mb-6 text-center">{t('auth.login.title')}</h1>
+    <AuthLayout>
+      <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.login.title')}</h1>
+      <p className="text-base-content/60 mb-7">{t('auth.login.subtitle')}</p>
 
-      <div className="mb-4">
-        <p className="text-xs text-base-content/60 mb-2">{t('auth.login.selectRole')}</p>
-        <div className="grid grid-cols-3 gap-2">
-          {ROLES.map(([value, label]) => (
-            <button key={value} type="button" onClick={() => setRole(value)} className={`btn btn-sm ${role === value ? 'btn-primary' : 'btn-outline'}`}>
-              {label}
-            </button>
-          ))}
+      {/* Chọn vai trò — CHỈ hiện ở chế độ mock (BE thật tự lấy role từ tài khoản) */}
+      {USE_MOCK && (
+        <div className="mb-5">
+          <p className="text-sm font-medium text-base-content/70 mb-2">{t('auth.login.selectRole')}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {ROLES.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setRole(value)}
+                className={`min-h-12 rounded-xl px-2 py-2 text-xs leading-tight font-medium transition-colors cursor-pointer ${
+                  role === value ? 'bg-primary text-primary-content' : 'border border-primary/40 text-primary hover:bg-primary/5'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input type="email" required placeholder={t('auth.login.emailPlaceholder')} className="input input-bordered" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-        <input type="password" required minLength={6} placeholder={t('auth.login.passwordPlaceholder')} className="input input-bordered" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <AuthField icon={MailIcon} type="email" required placeholder={t('auth.login.emailPlaceholder')}
+          value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <div>
+          <AuthField icon={LockIcon} password required minLength={6} placeholder={t('auth.login.passwordPlaceholder')}
+            value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <div className="text-right mt-2">
+            {/* Chưa có luồng quên mật khẩu — link để sẵn cho V1 */}
+            <button type="button" className="text-sm font-medium text-primary hover:underline cursor-pointer">
+              {t('auth.login.forgotPassword')}
+            </button>
+          </div>
+        </div>
         {error && <p className="text-error text-sm">{error}</p>}
-        <button className="btn btn-primary" disabled={loading}>
+        <button
+          className="h-14 rounded-2xl bg-primary text-primary-content font-medium transition hover:brightness-95 hover:-translate-y-px disabled:opacity-60"
+          disabled={loading}
+        >
           {loading ? <span className="loading loading-spinner loading-sm" /> : t('auth.login.submit')}
         </button>
       </form>
-      <p className="text-sm text-center mt-4 text-base-content/60">
-        {t('auth.login.noAccount')} <Link to="/register" className="link link-primary">{t('auth.login.registerLink')}</Link>
+
+      {/* Phân cách + Google */}
+      <div className="flex items-center gap-3 my-5">
+        <div className="flex-1 h-px bg-base-content/15" />
+        <span className="text-xs text-base-content/50">{t('auth.divider')}</span>
+        <div className="flex-1 h-px bg-base-content/15" />
+      </div>
+      <GoogleAuthButton mode="login" />
+
+      <p className="text-sm text-center mt-5 text-base-content/60">
+        {t('auth.login.noAccount')} <Link to="/register" className="link link-primary font-medium">{t('auth.login.registerLink')}</Link>
       </p>
-      <p className="text-xs text-center mt-2 text-base-content/40">{t('auth.login.demoNote')}</p>
-    </div>
+    </AuthLayout>
   );
 }

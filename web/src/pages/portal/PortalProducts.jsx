@@ -121,36 +121,36 @@ export default function PortalProducts() {
         <div className="modal-box max-w-lg">
           <h3 className="font-display text-xl mb-4">{editingId ? t('portal.products.edit') : t('portal.products.newProduct')}</h3>
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <label className="form-control">
-              <span className="label-text mb-1">{t('portal.products.form.nameVi')}</span>
-              <input required className="input input-bordered" value={form.name} onChange={handleChange('name')} />
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-base-content/70">{t('portal.products.form.nameVi')}</span>
+              <input required className="input input-bordered w-full" value={form.name} onChange={handleChange('name')} />
             </label>
-            <label className="form-control">
-              <span className="label-text mb-1">{t('portal.products.form.nameEn')}</span>
-              <input className="input input-bordered" value={form.nameEn} onChange={handleChange('nameEn')} />
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-base-content/70">{t('portal.products.form.nameEn')}</span>
+              <input className="input input-bordered w-full" value={form.nameEn} onChange={handleChange('nameEn')} />
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="form-control">
-                <span className="label-text mb-1">{t('portal.products.form.price')}</span>
-                <input required type="number" min="0" className="input input-bordered" value={form.price} onChange={handleChange('price')} />
+              <label className="flex flex-col gap-1">
+                <span className="text-sm text-base-content/70">{t('portal.products.form.price')}</span>
+                <input required type="number" min="0" className="input input-bordered w-full" value={form.price} onChange={handleChange('price')} />
               </label>
-              <label className="form-control">
-                <span className="label-text mb-1">{t('portal.products.form.stock')}</span>
-                <input required type="number" min="0" className="input input-bordered" value={form.stock} onChange={handleChange('stock')} />
+              <label className="flex flex-col gap-1">
+                <span className="text-sm text-base-content/70">{t('portal.products.form.stock')}</span>
+                <input required type="number" min="0" className="input input-bordered w-full" value={form.stock} onChange={handleChange('stock')} />
               </label>
             </div>
-            <label className="form-control">
-              <span className="label-text mb-1">{t('portal.products.form.material')}</span>
-              <select className="select select-bordered" value={form.material} onChange={handleChange('material')}>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-base-content/70">{t('portal.products.form.material')}</span>
+              <select className="select select-bordered w-full" value={form.material} onChange={handleChange('material')}>
                 {MATERIALS.map((m) => (
                   <option key={m} value={m}>{t(`suppliers.materials.${m}`)}</option>
                 ))}
               </select>
             </label>
-            <label className="form-control">
-              <span className="label-text mb-1">{t('portal.products.form.image')}</span>
-              <input className="input input-bordered" value={form.image} onChange={handleChange('image')} />
-              <span className="label-text-alt mt-1 text-base-content/50">{t('portal.products.form.imageNote')}</span>
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-base-content/70">{t('portal.products.form.image')}</span>
+              <input className="input input-bordered w-full" value={form.image} onChange={handleChange('image')} />
+              <span className="text-xs mt-1 text-base-content/50">{t('portal.products.form.imageNote')}</span>
             </label>
             {form.image && (
               <div>
@@ -158,13 +158,13 @@ export default function PortalProducts() {
                 <img src={form.image} alt="" className="w-16 h-16 object-cover rounded-md border border-base-300" />
               </div>
             )}
-            <label className="form-control">
-              <span className="label-text mb-1">{t('portal.products.form.descriptionVi')}</span>
-              <textarea className="textarea textarea-bordered" rows={2} value={form.description} onChange={handleChange('description')} />
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-base-content/70">{t('portal.products.form.descriptionVi')}</span>
+              <textarea className="textarea textarea-bordered w-full" rows={2} value={form.description} onChange={handleChange('description')} />
             </label>
-            <label className="form-control">
-              <span className="label-text mb-1">{t('portal.products.form.descriptionEn')}</span>
-              <textarea className="textarea textarea-bordered" rows={2} value={form.descriptionEn} onChange={handleChange('descriptionEn')} />
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-base-content/70">{t('portal.products.form.descriptionEn')}</span>
+              <textarea className="textarea textarea-bordered w-full" rows={2} value={form.descriptionEn} onChange={handleChange('descriptionEn')} />
             </label>
 
             <div className="modal-action">

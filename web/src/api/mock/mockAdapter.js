@@ -44,12 +44,39 @@ const persistSupplierOrders = () => storage.setItem(SUPPLIER_ORDERS_KEY, supplie
 let seq = 1;
 const nextId = (prefix) => `${prefix}_${Date.now()}_${seq++}`;
 
+// "Đăng ký đang chờ xác thực" — mock lưu tạm theo email để verifyOtp lấy lại tên/role.
+// Mô phỏng luồng OTP mới của BE: register chỉ trả message, phải verifyOtp mới có token.
+const pendingRegistrations = new Map();
+
 export const mockAdapter = {
   async register(body) {
     await delay(500);
+    pendingRegistrations.set(body.email, { name: body.name, role: 'customer' });
+    return { message: 'Đăng ký thành công (demo). Nhập 6 số bất kỳ để xác thực email.' };
+  },
+
+  // Demo: chấp nhận mọi mã 6 số → trả token + user (lấy tên đã lưu lúc register, mặc định từ email)
+  async verifyOtp(body) {
+    await delay(400);
+    const pending = pendingRegistrations.get(body.email);
+    pendingRegistrations.delete(body.email);
     return {
       token: 'mock-jwt-token',
-      user: { id: 'u1', name: body.name, email: body.email, role: body.role ?? 'customer' },
+      user: { id: 'u1', name: pending?.name ?? body.email.split('@')[0], email: body.email, role: pending?.role ?? 'customer' },
+    };
+  },
+
+  async resendOtp() {
+    await delay(300);
+    return { message: 'Đã gửi lại mã (demo).' };
+  },
+
+  // Demo đăng nhập Google — không gọi Google thật, trả 1 user mẫu
+  async loginWithGoogle() {
+    await delay(500);
+    return {
+      token: 'mock-jwt-token',
+      user: { id: 'u_google', name: 'Google User', email: 'googleuser@gmail.com', role: 'customer' },
     };
   },
 

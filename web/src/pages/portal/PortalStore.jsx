@@ -30,19 +30,19 @@ export default function PortalStore() {
       <h1 className="font-display text-2xl md:text-3xl">{t('portal.store.title')}</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="form-control">
-          <span className="label-text mb-1">{t('portal.store.name')}</span>
-          <input className="input input-bordered" value={form.name} onChange={handleChange('name')} />
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-base-content/70">{t('portal.store.name')}</span>
+          <input className="input input-bordered w-full" value={form.name} onChange={handleChange('name')} />
         </label>
 
-        <label className="form-control">
-          <span className="label-text mb-1">{t('portal.store.description')}</span>
-          <textarea className="textarea textarea-bordered" rows={3} value={form.description} onChange={handleChange('description')} />
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-base-content/70">{t('portal.store.description')}</span>
+          <textarea className="textarea textarea-bordered w-full" rows={3} value={form.description} onChange={handleChange('description')} />
         </label>
 
-        <label className="form-control">
-          <span className="label-text mb-1">{t('portal.store.logoUrl')}</span>
-          <input className="input input-bordered" value={form.logoUrl} onChange={handleChange('logoUrl')} />
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-base-content/70">{t('portal.store.logoUrl')}</span>
+          <input className="input input-bordered w-full" value={form.logoUrl} onChange={handleChange('logoUrl')} />
         </label>
         {form.logoUrl && (
           <div>
@@ -51,9 +51,9 @@ export default function PortalStore() {
           </div>
         )}
 
-        <label className="form-control">
-          <span className="label-text mb-1">{t('portal.store.coverUrl')}</span>
-          <input className="input input-bordered" value={form.coverUrl} onChange={handleChange('coverUrl')} />
+        <label className="flex flex-col gap-1">
+          <span className="text-sm text-base-content/70">{t('portal.store.coverUrl')}</span>
+          <input className="input input-bordered w-full" value={form.coverUrl} onChange={handleChange('coverUrl')} />
         </label>
         {form.coverUrl && (
           <div>

@@ -6,7 +6,9 @@
     "switchLanguage": "Đổi ngôn ngữ",
     "toggleMenu": "Mở/đóng menu nhanh",
     "notifications": "Thông báo",
-    "noNotifications": "Chưa có thông báo"
+    "noNotifications": "Chưa có thông báo",
+    "showPassword": "Hiện mật khẩu",
+    "hidePassword": "Ẩn mật khẩu"
   },
   "nav": {
     "home": "Trang chủ",
@@ -64,13 +66,14 @@
   "auth": {
     "login": {
       "title": "Đăng nhập",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Mật khẩu",
+      "subtitle": "Chào mừng bạn quay trở lại WoodHub",
+      "emailPlaceholder": "Nhập email của bạn",
+      "passwordPlaceholder": "Nhập mật khẩu",
       "submit": "Đăng nhập",
       "error": "Email hoặc mật khẩu không đúng.",
+      "forgotPassword": "Quên mật khẩu?",
       "noAccount": "Chưa có tài khoản?",
       "registerLink": "Đăng ký",
-      "demoNote": "Chế độ demo: nhập email/mật khẩu bất kỳ.",
       "selectRole": "Đăng nhập với vai trò"
     },
     "roles": {
@@ -80,21 +83,34 @@
     },
     "register": {
       "title": "Tạo tài khoản",
-      "roleCustomer": "Khách hàng",
-      "roleSupplier": "Xưởng / Nhà cung cấp",
+      "subtitle": "Tham gia WoodHub để khám phá thế giới nội thất gỗ",
       "namePlaceholder": "Họ tên",
       "emailPlaceholder": "Email",
+      "phonePlaceholder": "Số điện thoại",
       "passwordPlaceholder": "Mật khẩu (≥ 6 ký tự)",
-      "workshopNamePlaceholder": "Tên xưởng / doanh nghiệp",
-      "workshopAddressPlaceholder": "Địa chỉ xưởng",
       "submit": "Đăng ký",
       "haveAccount": "Đã có tài khoản?",
       "loginLink": "Đăng nhập",
       "businessTitle": "Tạo tài khoản doanh nghiệp",
       "businessSubtitle": "Dành cho doanh nghiệp mua số lượng lớn — nhận báo giá & xuất hóa đơn VAT.",
-      "companyNamePlaceholder": "Tên doanh nghiệp",
-      "contactNamePlaceholder": "Họ tên người liên hệ",
-      "taxCodePlaceholder": "Mã số thuế"
+      "companyNamePlaceholder": "Tên doanh nghiệp"
+    },
+    "divider": "Hoặc",
+    "google": {
+      "login": "Đăng nhập bằng Google",
+      "register": "Đăng ký bằng Google",
+      "error": "Đăng nhập Google thất bại. Vui lòng thử lại."
+    },
+    "otp": {
+      "title": "Xác thực email",
+      "subtitle": "Nhập mã 6 số đã gửi tới {{email}}",
+      "codePlaceholder": "Nhập mã 6 số",
+      "submit": "Xác thực",
+      "resend": "Gửi lại mã",
+      "resendIn": "Gửi lại sau {{seconds}}s",
+      "error": "Mã không đúng hoặc đã hết hạn.",
+      "resent": "Đã gửi lại mã mới tới email của bạn.",
+      "missingEmail": "Thiếu thông tin email — vui lòng đăng ký lại."
     }
   },
   "suppliers": {
@@ -209,7 +225,6 @@
       "bed": "Giường"
     },
     "filterMaterial": "Vật liệu",
-    "filterColor": "Màu sắc",
     "filterMaxPrice": "Giá tối đa",
     "clearFilter": "Xóa lọc",
     "emptyTitle": "Chưa có sản phẩm phù hợp",
@@ -253,8 +268,14 @@
     "processing": "Đang xử lý thanh toán...",
     "success": "Thanh toán thành công ✓",
     "emptyCart": "Giỏ hàng rỗng",
+    "emptyCartHint": "Hãy thêm sản phẩm vào giỏ trước khi thanh toán.",
     "backToShop": "Về cửa hàng",
-    "freeShipping": "Miễn phí"
+    "freeShipping": "Miễn phí",
+    "namePlaceholder": "Nguyễn Văn A",
+    "phonePlaceholder": "09xx xxx xxx",
+    "cityPlaceholder": "Tân Bình",
+    "addressPlaceholder": "Số nhà, tên đường",
+    "fillAllHint": "Vui lòng điền đủ họ tên, SĐT, địa chỉ và quận/huyện để đặt hàng."
   },
   "orders": {
     "title": "Đơn hàng của bạn",

@@ -29,7 +29,7 @@ export default function Checkout() {
     return (
       <EmptyState
         title={t('checkout.emptyCart')}
-        hint={t('checkout.emptyCart')}
+        hint={t('checkout.emptyCartHint')}
         ctaLabel={t('checkout.backToShop')}
         ctaTo="/shop"
       />
@@ -96,12 +96,12 @@ export default function Checkout() {
       <div className="flex flex-col gap-4">
         <h1 className="font-display text-3xl">{t('checkout.title')}</h1>
         <h2 className="font-medium mt-2">{t('checkout.shippingAddress')}</h2>
-        {field('fullName', t('checkout.fullName'), 'Nguyễn Văn A')}
+        {field('fullName', t('checkout.fullName'), t('checkout.namePlaceholder'))}
         <div className="grid grid-cols-2 gap-3">
-          {field('phone', t('checkout.phone'), '09xx xxx xxx')}
-          {field('city', t('checkout.city'), 'Tân Bình')}
+          {field('phone', t('checkout.phone'), t('checkout.phonePlaceholder'))}
+          {field('city', t('checkout.city'), t('checkout.cityPlaceholder'))}
         </div>
-        {field('address', t('checkout.address'), 'Số nhà, tên đường')}
+        {field('address', t('checkout.address'), t('checkout.addressPlaceholder'))}
 
         <h2 className="font-medium mt-2">{t('checkout.paymentMethod')}</h2>
         <div className="flex flex-col gap-2">
@@ -142,7 +142,7 @@ export default function Checkout() {
         <button onClick={handleSubmit} disabled={!isValid || createOrder.isPending} className="btn btn-primary w-full mt-2">
           {createOrder.isPending ? <span className="loading loading-spinner loading-sm" /> : t('checkout.placeOrder')}
         </button>
-        {!isValid && items.length > 0 && <p className="text-xs text-base-content/50">Vui lòng điền đủ họ tên, SĐT, địa chỉ và quận/huyện để đặt hàng.</p>}
+        {!isValid && items.length > 0 && <p className="text-xs text-base-content/50">{t('checkout.fillAllHint')}</p>}
       </aside>
     </div>
   );
