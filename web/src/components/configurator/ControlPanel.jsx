@@ -10,7 +10,7 @@ const DIMENSION_LABEL_KEYS = { width: 'custom.dimensionWidth', height: 'custom.d
  * Panel điều khiển — đọc/ghi trực tiếp configuratorStore.
  * Mỗi control là 1 selector riêng → chỉ phần liên quan re-render khi giá trị đổi.
  */
-export default function ControlPanel({ onSave, saving }) {
+export default function ControlPanel({ onSave, onFindWorkshop, saving }) {
   const { t } = useTranslation();
   const { productType, dimensions, materialId, finishId, setDimension, setMaterial, setFinish, estimatePrice, estimateDays } =
     useConfiguratorStore();
@@ -93,8 +93,13 @@ export default function ControlPanel({ onSave, saving }) {
         <p className="text-xs text-base-content/50 mt-1">{t('custom.estimatedPriceNote')}</p>
       </section>
 
+      {/* Hành động chính: lưu thiết kế + thêm vào giỏ (không bắt đăng nhập) */}
       <button onClick={onSave} disabled={saving} className="btn btn-primary">
         {saving ? <span className="loading loading-spinner loading-sm" /> : t('custom.saveDesign')}
+      </button>
+      {/* Hành động phụ: gửi thiết kế đi tìm/ghép xưởng (luồng cũ) */}
+      <button onClick={onFindWorkshop} disabled={saving} className="btn btn-outline btn-sm">
+        {t('custom.findWorkshop')}
       </button>
     </div>
   );

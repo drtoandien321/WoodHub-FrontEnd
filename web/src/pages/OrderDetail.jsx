@@ -44,7 +44,7 @@ export default function OrderDetail() {
             <h2 className="font-medium text-base mb-1">{t('orders.shippingInfo')}</h2>
             <p><span className="text-base-content/60">{t('checkout.fullName')}:</span> {order.shippingAddress?.fullName}</p>
             <p><span className="text-base-content/60">{t('checkout.phone')}:</span> {order.shippingAddress?.phone}</p>
-            <p><span className="text-base-content/60">{t('checkout.address')}:</span> {order.shippingAddress?.address}, {order.shippingAddress?.city}</p>
+            <p><span className="text-base-content/60">{t('checkout.address')}:</span> {order.shippingAddress?.address}{(order.shippingAddress?.district || order.shippingAddress?.city) ? `, ${order.shippingAddress?.district ?? order.shippingAddress?.city}` : ''}</p>
           </div>
 
           <div className="flex flex-col gap-2 text-sm">

@@ -1,4 +1,5 @@
-import { PRODUCTS, CATEGORIES, WORKSHOPS } from './data.js';
+import i18n from '../../i18n/index.js';
+import { PRODUCTS, WORKSHOPS } from './data.js';
 import { PRODUCT_TYPES } from './customData.js';
 import { PLANS } from './plansData.js';
 import { DEFAULT_SUPPLIER_STORE, DEFAULT_SUPPLIER_PRODUCTS, DEFAULT_SUPPLIER_ORDERS, ORDER_STATUS_SEQUENCE } from './supplierData.js';
@@ -10,6 +11,43 @@ import { storage } from '../../services/storage.js';
  * nên khi BE bật lên, chuyển VITE_USE_MOCK=false là chạy, không sửa UI.
  */
 const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms)); // giả lập độ trễ mạng
+
+/*
+ * ===== I18N CHO DỮ LIỆU SẢN PHẨM =====
+ * BE thật sẽ trả chuỗi đã localize theo Accept-Language. Mock thì tự "dẹt" field song ngữ
+ * { vi, en } về string theo ngôn ngữ đang chọn — UI chỉ nhận string, không phải xử lý gì.
+ * (Để UI đổi theo ngôn ngữ, queryKey trong useProducts.js có kèm i18n.language → đổi ngữ là refetch.)
+ */
+const currentLang = () => (i18n.language?.startsWith('en') ? 'en' : 'vi');
+const loc = (val) =>
+  val && typeof val === 'object' && !Array.isArray(val) ? val[currentLang()] ?? val.vi : val;
+
+// Chuyển 1 product (field song ngữ) → shape phẳng mà UI dùng: name/description/categoryName/materialName là string
+const localizeProduct = (p) => ({
+  ...p,
+  name: loc(p.name),
+  description: loc(p.description),
+  categoryName: loc(p.category),
+  materialName: loc(p.material),
+});
+
+// Cửa hàng demo hiển thị TẤT CẢ sản phẩm trong data (kể cả draft/archived) theo yêu cầu.
+// (Muốn ẩn bớt sau này thì lọc theo p.status ở getProducts.)
+
+// Dựng danh sách facet (danh mục/vật liệu) từ tập sản phẩm — distinct theo id, name đã localize
+const buildFacet = (list, idKey, nameKey) => {
+  const map = new Map();
+  list.forEach((p) => {
+    if (p[idKey] && !map.has(p[idKey])) map.set(p[idKey], loc(p[nameKey]));
+  });
+  return Array.from(map, ([id, name]) => ({ id, name }));
+};
+
+// Demo: 2 tài khoản test để đăng nhập supplier/admin khi KHÔNG chạy BE (BE thật xác định role từ DB)
+const TEST_ACCOUNTS = {
+  'supplier@woodhub.vn': 'supplier',
+  'admin@woodhub.vn': 'admin',
+};
 
 const ORDERS_KEY = 'woodhub:orders';
 const DESIGNS_KEY = 'woodhub:designs';
@@ -82,8 +120,9 @@ export const mockAdapter = {
 
   async login(body) {
     await delay(500);
-    // Demo: mọi email/password đều pass, role lấy theo lựa chọn ở Login.jsx (BE thật sẽ tự xác định role từ tài khoản).
-    const role = body.role ?? 'customer';
+    // Demo: mọi email/password đều pass. Role ưu tiên theo email test (supplier@/admin@),
+    // còn lại mặc định 'customer'. BE thật sẽ tự xác định role từ tài khoản trong DB.
+    const role = TEST_ACCOUNTS[body.email?.toLowerCase()] ?? body.role ?? 'customer';
     // Demo: gắn tên hiển thị riêng cho supplier/admin để portal/admin có ngữ cảnh ngay sau khi login
     const name = role === 'supplier' ? supplierStore.name : role === 'admin' ? 'Quản trị viên' : body.email.split('@')[0];
     return {
@@ -94,36 +133,43 @@ export const mockAdapter = {
 
   async getProducts(params = {}) {
     await delay();
-    let items = [...PRODUCTS];
-    if (params.category) items = items.filter((p) => p.category === params.category);
-    if (params.material) items = items.filter((p) => p.material === params.material);
+    // Hiển thị toàn bộ sản phẩm; facet danh mục+vật liệu dựng từ TẤT CẢ (không phụ thuộc filter)
+    const all = [...PRODUCTS];
+    const categories = buildFacet(all, 'categoryId', 'category');
+    const materials = buildFacet(all, 'materialId', 'material');
+
+    let items = all;
+    if (params.category) items = items.filter((p) => p.categoryId === params.category);
+    if (params.material) items = items.filter((p) => p.materialId === params.material);
     if (params.minPrice) items = items.filter((p) => p.price >= Number(params.minPrice));
     if (params.maxPrice) items = items.filter((p) => p.price <= Number(params.maxPrice));
-    if (params.sort === 'price_asc') items.sort((a, b) => a.price - b.price);
-    if (params.sort === 'price_desc') items.sort((a, b) => b.price - a.price);
+    if (params.sort === 'price_asc') items = [...items].sort((a, b) => a.price - b.price);
+    if (params.sort === 'price_desc') items = [...items].sort((a, b) => b.price - a.price);
 
     // Pagination shape chuẩn — BE trả y hệt để FE không sửa
     const page = Number(params.page ?? 1);
     const pageSize = Number(params.pageSize ?? 12);
     return {
-      items: items.slice((page - 1) * pageSize, page * pageSize),
+      items: items.slice((page - 1) * pageSize, page * pageSize).map(localizeProduct),
       page,
       pageSize,
       total: items.length,
-      categories: CATEGORIES,
+      categories,
+      materials,
     };
   },
 
   async getFeaturedProducts() {
     await delay(250);
-    return { items: PRODUCTS.slice(0, 4) };
+    return { items: PRODUCTS.filter((p) => p.status === 'active').slice(0, 4).map(localizeProduct) };
   },
 
   async getProduct(id) {
     await delay(250);
     const product = PRODUCTS.find((p) => p.id === id);
     if (!product) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
-    return { ...product, related: PRODUCTS.filter((p) => p.id !== id && p.category === product.category) };
+    const related = PRODUCTS.filter((p) => p.id !== id && p.categoryId === product.categoryId);
+    return { ...localizeProduct(product), related: related.map(localizeProduct) };
   },
 
   async createOrder(body) {

@@ -55,7 +55,9 @@ export default function Shop() {
   // Tính cả danh mục (params.category) để nút "Xóa lọc" hiện khi chỉ chọn 1 danh mục
   const hasFilters = material || maxPrice || sort || params.category;
 
-  const materialsList = ['oak', 'walnut', 'ash', 'pine', 'rubber'];
+  // Danh mục & vật liệu lấy thẳng từ data (BE/mock dựng động từ sản phẩm, đã localize VI/EN)
+  const categoriesList = data?.categories ?? [];
+  const materialsList = data?.materials ?? [];
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
@@ -82,9 +84,9 @@ export default function Shop() {
             <h3 className="font-medium mb-3">{t('nav.shop')}</h3>
             <div className="flex flex-col gap-2">
               <Link to="/shop" className={`hover:text-primary transition-colors ${!params.category ? 'font-semibold text-primary' : ''}`}>{t('shop.all')}</Link>
-              {data?.categories?.map((c) => (
+              {categoriesList.map((c) => (
                 <Link key={c.id} to={`/shop/${c.id}`} className={`hover:text-primary transition-colors ${params.category === c.id ? 'font-semibold text-primary' : ''}`}>
-                  {t(`shop.categories.${c.id}`, { defaultValue: c.name })}
+                  {c.name}
                 </Link>
               ))}
             </div>
@@ -100,10 +102,10 @@ export default function Shop() {
                 <input type="radio" name="material" className="radio radio-xs radio-primary" checked={!material} onChange={() => setParam('material', '')} />
                 <span className={!material ? 'font-medium' : ''}>{t('shop.all')}</span>
               </label>
-              {materialsList.map(mat => (
-                <label key={mat} className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-                  <input type="radio" name="material" className="radio radio-xs radio-primary" checked={material === mat} onChange={() => setParam('material', mat)} />
-                  <span className={material === mat ? 'font-medium' : ''}>{t(`suppliers.materials.${mat}`)}</span>
+              {materialsList.map((mat) => (
+                <label key={mat.id} className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
+                  <input type="radio" name="material" className="radio radio-xs radio-primary" checked={material === mat.id} onChange={() => setParam('material', mat.id)} />
+                  <span className={material === mat.id ? 'font-medium' : ''}>{mat.name}</span>
                 </label>
               ))}
             </div>

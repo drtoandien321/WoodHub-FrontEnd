@@ -74,7 +74,9 @@
       "forgotPassword": "Quên mật khẩu?",
       "noAccount": "Chưa có tài khoản?",
       "registerLink": "Đăng ký",
-      "selectRole": "Đăng nhập với vai trò"
+      "selectRole": "Đăng nhập với vai trò",
+      "testAccountsTitle": "Tài khoản test (chế độ demo)",
+      "testAccountsHint": "Mật khẩu nhập bất kỳ (≥ 6 ký tự). Email khác sẽ đăng nhập với vai trò Khách hàng."
     },
     "roles": {
       "customer": "Khách hàng",
@@ -237,6 +239,21 @@
       "price_desc": "Giá giảm dần"
     }
   },
+  "product": {
+    "suppliedBy": "Cung cấp bởi",
+    "material": "Chất liệu",
+    "stock": "Tồn kho",
+    "unit": "sản phẩm",
+    "addToCart": "Thêm vào giỏ",
+    "added": "Đã thêm ✓",
+    "buyNow": "Mua ngay",
+    "customize": "🪄 Tùy biến mẫu này trong Configurator 3D",
+    "related": "Sản phẩm cùng loại",
+    "notFound": "Không tìm thấy sản phẩm.",
+    "backToShop": "Quay lại cửa hàng",
+    "viewAr": "Xem AR/3D",
+    "outOfStock": "Hết hàng"
+  },
   "cart": {
     "title": "Giỏ hàng",
     "empty": "Giỏ hàng đang trống",
@@ -256,6 +273,8 @@
     "phone": "Số điện thoại",
     "address": "Địa chỉ",
     "city": "Thành phố",
+    "district": "Quận / Huyện",
+    "districtPlaceholder": "-- Chọn quận/huyện (TP.HCM) --",
     "paymentMethod": "Phương thức thanh toán",
     "vnpay": "Thẻ ATM / VNPay",
     "momo": "Ví MoMo",
@@ -275,7 +294,11 @@
     "phonePlaceholder": "09xx xxx xxx",
     "cityPlaceholder": "Tân Bình",
     "addressPlaceholder": "Số nhà, tên đường",
-    "fillAllHint": "Vui lòng điền đủ họ tên, SĐT, địa chỉ và quận/huyện để đặt hàng."
+    "fillAllHint": "Vui lòng điền đủ họ tên, SĐT, địa chỉ và quận/huyện để đặt hàng.",
+    "errName": "Vui lòng nhập họ và tên.",
+    "errPhone": "Số điện thoại không hợp lệ (VD: 0901234567).",
+    "errAddress": "Địa chỉ quá ngắn, vui lòng nhập chi tiết hơn.",
+    "errDistrict": "Vui lòng chọn quận/huyện."
   },
   "orders": {
     "title": "Đơn hàng của bạn",
@@ -310,7 +333,11 @@
     "estimatedPriceNote": "Giá cuối cùng do xưởng xác nhận khi báo giá.",
     "estimatedTime": "Thời gian ước tính",
     "estimatedTimeUnit": "{{days}} ngày",
-    "saveDesign": "Lưu thiết kế & tìm xưởng",
+    "saveDesign": "Lưu & thêm vào giỏ",
+    "findWorkshop": "Tìm xưởng phù hợp",
+    "savedToast": "Đã lưu thiết kế & thêm vào giỏ ✓",
+    "goToCart": "Xem giỏ",
+    "customPrefix": "Thiết kế riêng",
     "types": {
       "table": { "name": "Bàn", "desc": "Bàn ăn, bàn làm việc, bàn trà" },
       "cabinet": { "name": "Tủ", "desc": "Tủ quần áo, tủ bếp, tủ trưng bày" },

@@ -74,7 +74,9 @@
       "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
       "registerLink": "Sign up",
-      "selectRole": "Log in as"
+      "selectRole": "Log in as",
+      "testAccountsTitle": "Test accounts (demo mode)",
+      "testAccountsHint": "Use any password (6+ chars). Any other email logs in as a Customer."
     },
     "roles": {
       "customer": "Customer",
@@ -237,6 +239,21 @@
       "price_desc": "Price: High to Low"
     }
   },
+  "product": {
+    "suppliedBy": "Supplied by",
+    "material": "Material",
+    "stock": "In stock",
+    "unit": "items",
+    "addToCart": "Add to cart",
+    "added": "Added ✓",
+    "buyNow": "Buy now",
+    "customize": "🪄 Customize this in the 3D Configurator",
+    "related": "Related products",
+    "notFound": "Product not found.",
+    "backToShop": "Back to shop",
+    "viewAr": "View AR/3D",
+    "outOfStock": "Out of stock"
+  },
   "cart": {
     "title": "Cart",
     "empty": "Your cart is empty",
@@ -256,6 +273,8 @@
     "phone": "Phone Number",
     "address": "Address",
     "city": "City",
+    "district": "District",
+    "districtPlaceholder": "-- Select a district (HCMC) --",
     "paymentMethod": "Payment Method",
     "vnpay": "ATM Card / VNPay",
     "momo": "MoMo Wallet",
@@ -275,7 +294,11 @@
     "phonePlaceholder": "09xx xxx xxx",
     "cityPlaceholder": "Tan Binh",
     "addressPlaceholder": "Street address",
-    "fillAllHint": "Please fill in your name, phone, address and city to place the order."
+    "fillAllHint": "Please fill in your name, phone, address and district to place the order.",
+    "errName": "Please enter your full name.",
+    "errPhone": "Invalid phone number (e.g. 0901234567).",
+    "errAddress": "Address is too short, please be more specific.",
+    "errDistrict": "Please select a district."
   },
   "orders": {
     "title": "Your Orders",
@@ -310,7 +333,11 @@
     "estimatedPriceNote": "Final price will be confirmed by the workshop when quoting.",
     "estimatedTime": "Estimated Time",
     "estimatedTimeUnit": "{{days}} days",
-    "saveDesign": "Save design & find workshop",
+    "saveDesign": "Save & add to cart",
+    "findWorkshop": "Find a workshop",
+    "savedToast": "Design saved & added to cart ✓",
+    "goToCart": "View cart",
+    "customPrefix": "Custom design",
     "types": {
       "table": { "name": "Table", "desc": "Dining tables, desks, coffee tables" },
       "cabinet": { "name": "Cabinet", "desc": "Wardrobes, kitchen cabinets, display cabinets" },

@@ -9,8 +9,8 @@ import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
 import { MailIcon, LockIcon } from '../components/ui/icons.jsx';
 import { redirectPathForRole } from '../utils/auth.js';
 
-// Chỉ chế độ mock mới cần nút chọn vai trò (để demo nhanh customer/supplier/admin).
-// BE thật xác định role từ tài khoản → không cho FE chọn, nên ẩn nút này đi.
+// Chế độ mock: hiện gợi ý 2 tài khoản test (supplier/admin) để demo khi chưa chạy BE.
+// BE thật xác định role từ tài khoản → không cần chọn role ở FE.
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
 
 export default function Login() {
@@ -18,7 +18,6 @@ export default function Login() {
   const location = useLocation();
   const setAuth = useAuthStore((s) => s.setAuth);
   const { t } = useTranslation();
-  const [role, setRole] = useState('customer');
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +27,8 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const { token, user } = await api.login({ ...form, role });
+      // Role do BE/mock tự xác định (mock: theo email test, mặc định customer) — FE không gửi role
+      const { token, user } = await api.login(form);
       setAuth({ token, user });
       navigate(redirectPathForRole(user.role, location.state?.from?.pathname), { replace: true });
     } catch (err) {
@@ -43,19 +43,20 @@ export default function Login() {
     }
   };
 
-  // Demo: chọn vai trò đăng nhập (BE thật xác định role từ tài khoản, không cho FE chọn)
-  const ROLES = [
-    ['customer', t('auth.roles.customer')],
-    ['supplier', t('auth.roles.supplier')],
-    ['admin', t('auth.roles.admin')],
-  ];
-
   return (
     <AuthLayout>
       <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.login.title')}</h1>
       <p className="text-base-content/60 mb-7">{t('auth.login.subtitle')}</p>
 
-      
+      {/* Demo (mock): gợi ý tài khoản test để đăng nhập supplier/admin khi chưa chạy BE */}
+      {USE_MOCK && (
+        <div className="text-xs bg-base-200 rounded-xl p-3 mb-5 text-base-content/70 flex flex-col gap-1">
+          <p className="font-medium text-base-content/80">{t('auth.login.testAccountsTitle')}</p>
+          <p>👤 {t('auth.roles.supplier')}: <span className="font-mono">supplier@woodhub.vn</span></p>
+          <p>🛠️ {t('auth.roles.admin')}: <span className="font-mono">admin@woodhub.vn</span></p>
+          <p className="text-base-content/50">{t('auth.login.testAccountsHint')}</p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <AuthField icon={MailIcon} type="email" required placeholder={t('auth.login.emailPlaceholder')}
