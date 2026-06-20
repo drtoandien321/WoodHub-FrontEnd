@@ -55,26 +55,7 @@ export default function Login() {
       <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.login.title')}</h1>
       <p className="text-base-content/60 mb-7">{t('auth.login.subtitle')}</p>
 
-      {/* Chọn vai trò — CHỈ hiện ở chế độ mock (BE thật tự lấy role từ tài khoản) */}
-      {USE_MOCK && (
-        <div className="mb-5">
-          <p className="text-sm font-medium text-base-content/70 mb-2">{t('auth.login.selectRole')}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {ROLES.map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setRole(value)}
-                className={`min-h-12 rounded-xl px-2 py-2 text-xs leading-tight font-medium transition-colors cursor-pointer ${
-                  role === value ? 'bg-primary text-primary-content' : 'border border-primary/40 text-primary hover:bg-primary/5'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <AuthField icon={MailIcon} type="email" required placeholder={t('auth.login.emailPlaceholder')}
