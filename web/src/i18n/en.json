@@ -141,9 +141,9 @@
   "about": {
     "title": "The WoodHub story",
     "paragraphs": [
-      "WoodHub started from a small woodworking shop in Tan Binh, where one founder's family has worked in the timber trade for two generations. We saw well-made, carefully crafted products struggle to reach customers beyond a few familiar streets.",
-      "Meanwhile, furniture buyers often struggled to picture how a piece would look in their own home, or wanted something custom-made but didn't know where to start.",
-      "WoodHub was created to connect both sides: a platform where Vietnamese workshops can showcase their products, take bulk orders from businesses, and receive custom design requests — while customers can shop, design their own pieces, and preview them at home with AI and AR/3D."
+      "Shopping for wooden furniture takes far too much time: customers search everywhere to find a piece they like, then compare prices across dozens of different workshops and suppliers — yet still struggle to picture how the item will actually look in their own room.",
+      "On the other side, small workshops and businesses have almost no online channel of their own. They depend almost entirely on nearby walk-in customers, so even with great craftsmanship they find it hard to reach new buyers.",
+      "WoodHub was started by Nguyễn Tuấn Toàn (team leader) to solve exactly these two problems: a platform that helps customers find, compare and preview products right in their real space, while opening a digital channel for small workshops. What sets WoodHub apart is AI product advice, AR/3D preview, made-to-order custom design, and a direct link between businesses and production workshops."
     ],
     "illustrationQuote": "From a workshop in Tan Binh",
     "illustrationDesc": "to a platform connecting hundreds of workshops with customers nationwide.",
@@ -154,8 +154,9 @@
       { "title": "Technology for a real experience", "desc": "AI advice and AR/3D previews help customers picture a product in their own space before ordering." }
     ],
     "timeline": [
-      { "year": "2018", "label": "From a Tân Bình wood workshop" },
-      { "year": "2024+", "label": "A platform connecting hundreds of workshops" }
+      { "year": "11/2025", "label": "WoodHub idea finalized" },
+      { "year": "06/2026", "label": "Research completed" },
+      { "year": "06/2026", "label": "MVP launch" }
     ]
   },
   "pricing": {
@@ -206,9 +207,9 @@
     "subjectPlaceholder": "Subject",
     "messagePlaceholder": "Message",
     "submit": "Send message",
-    "support": { "label": "Customer support", "value": "1900 9889 (8:00 – 17:30, Mon – Sat)" },
-    "emailInfo": { "label": "Email", "value": "support@woodhub.vn" },
-    "address": { "label": "Address", "value": "65/12 Bàu Cát, Ward 14, Tân Bình District, HCMC" },
+    "support": { "label": "Customer support", "value": "0793 105 329" },
+    "emailInfo": { "label": "Email", "value": "drtoandien321@gmail.com" },
+    "address": { "label": "Address", "value": "FPT University, HCMC" },
     "success": "Thank you! WoodHub has received your message and will get back to you soon.",
     "errors": {
       "name": "Please enter your name.",
@@ -376,6 +377,20 @@
   "admin": {
     "title": "Admin Dashboard",
     "comingSoon": "Coming soon — will be available in a future update."
+  },
+  "chatbot": {
+    "launcherLabel": "Open WoodHub assistant",
+    "title": "WoodHub Assistant",
+    "subtitle": "Wood furniture advisor",
+    "placeholder": "Ask me… (e.g. oak dining table under 10M)",
+    "send": "Send",
+    "close": "Close",
+    "replies": {
+      "greeting": "Hi 👋 I'm the WoodHub assistant. What kind of furniture are you looking for? Tell me the product type, wood material or your budget.",
+      "found": "Here are a few pieces that match:",
+      "featured": "Some popular pieces you might like:",
+      "none": "I couldn't find a match. Try a product type (table, chair, bed, shelf/cabinet…), a material (oak, walnut, pine…) or a budget (e.g. under 5M)."
+    }
   },
   "portal": {
     "nav": {

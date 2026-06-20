@@ -52,8 +52,6 @@ export default function Login() {
       {USE_MOCK && (
         <div className="text-xs bg-base-200 rounded-xl p-3 mb-5 text-base-content/70 flex flex-col gap-1">
           <p className="font-medium text-base-content/80">{t('auth.login.testAccountsTitle')}</p>
-          <p>👤 {t('auth.roles.supplier')}: <span className="font-mono">supplier@woodhub.vn</span></p>
-          <p>🛠️ {t('auth.roles.admin')}: <span className="font-mono">admin@woodhub.vn</span></p>
           <p className="text-base-content/50">{t('auth.login.testAccountsHint')}</p>
         </div>
       )}

@@ -6,6 +6,7 @@ import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
+import ChatWidget from './components/chatbot/ChatWidget.jsx';
 import { useUiStore } from './stores/uiStore.js';
 
 /*
@@ -50,6 +51,8 @@ export default function App() {
   return (
     <Suspense fallback={<PageLoader />}>
       <ScrollToTop />
+      {/* Chatbot nổi toàn cục — tự ẩn ở trang auth (xem ChatWidget) */}
+      <ChatWidget />
       <Routes>
         {/* Landing đứng riêng: hero full-screen, không dùng layout chung */}
         <Route path="/" element={<Landing />} />

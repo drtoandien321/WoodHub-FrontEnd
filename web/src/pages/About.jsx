@@ -34,12 +34,14 @@ export default function About() {
           {/* Lớp tối nhẹ ở đáy giúp panel timeline nổi rõ trên ảnh */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
           <div className="relative w-full rounded-2xl bg-base-100/80 backdrop-blur-md border border-white/40 p-5 flex items-center gap-2">
+            {/* key dùng index vì year có thể trùng (vd 2 mốc cùng 06/2026).
+                Vòng tròn hiển thị THÁNG (phần trước dấu "/"), bên dưới là đủ tháng/năm + nhãn. */}
             {timeline.map((m, i) => (
-              <Fragment key={m.year}>
+              <Fragment key={i}>
                 {i > 0 && <div className="flex-1 border-t border-dashed border-base-content/30 mb-6" />}
                 <div className="flex flex-col items-center text-center gap-1 flex-1">
                   <span className="w-11 h-11 rounded-full bg-primary/15 text-primary flex items-center justify-center font-display text-sm shrink-0">
-                    {m.year.replace('+', '')}
+                    {m.year.split('/')[0]}
                   </span>
                   <span className="font-medium text-sm">{m.year}</span>
                   <span className="text-xs text-base-content/60 leading-snug">{m.label}</span>

@@ -141,9 +141,9 @@
   "about": {
     "title": "Câu chuyện của WoodHub",
     "paragraphs": [
-      "WoodHub bắt đầu từ một xưởng mộc nhỏ ở Tân Bình, nơi gia đình của một thành viên sáng lập đã gắn bó với nghề gỗ qua hai thế hệ. Chúng tôi từng chứng kiến những sản phẩm chất lượng tốt, làm thủ công tỉ mỉ, nhưng lại khó tiếp cận khách hàng ngoài phạm vi vài con phố quen thuộc.",
-      "Trong khi đó, người mua nội thất gỗ thường gặp khó khi không hình dung được sản phẩm sẽ trông ra sao trong nhà mình, hoặc muốn một món đồ \"đo ni đóng giày\" nhưng không biết bắt đầu từ đâu.",
-      "WoodHub ra đời để kết nối hai phía: một nền tảng nơi các xưởng mộc Việt có thể trưng bày sản phẩm, nhận đơn số lượng lớn từ doanh nghiệp, và nhận các đơn thiết kế custom — còn khách hàng có thể mua sắm, đặt thiết kế riêng và xem trước sản phẩm bằng AI cùng công nghệ AR/3D ngay tại nhà."
+      "Mua sắm nội thất gỗ đang tốn quá nhiều thời gian: khách hàng phải lùng sục khắp nơi để tìm mẫu ưng ý, rồi so sánh giá giữa hàng loạt xưởng và nhà cung cấp khác nhau — mà vẫn khó hình dung món đồ sẽ trông thế nào trong chính căn phòng của mình.",
+      "Ở chiều ngược lại, các xưởng mộc và doanh nghiệp nhỏ gần như không có kênh online riêng. Họ phụ thuộc gần hết vào lượng khách quen quanh khu vực, nên dù tay nghề tốt vẫn rất khó tiếp cận khách hàng mới.",
+      "WoodHub được Nguyễn Tuấn Toàn (trưởng nhóm) khởi xướng để giải đúng hai bài toán đó: một nền tảng giúp khách tìm — so sánh — và xem trước sản phẩm ngay trong không gian thật, đồng thời mở ra kênh số cho các xưởng mộc nhỏ. Điểm khác biệt của WoodHub là AI tư vấn sản phẩm, xem trước bằng AR/3D, đặt thiết kế custom theo nhu cầu cá nhân, và kết nối trực tiếp giữa doanh nghiệp với xưởng sản xuất."
     ],
     "illustrationQuote": "Từ xưởng gỗ Tân Bình",
     "illustrationDesc": "đến nền tảng kết nối hàng trăm xưởng mộc với khách hàng trên cả nước.",
@@ -154,8 +154,9 @@
       { "title": "Công nghệ phục vụ trải nghiệm thật", "desc": "AI tư vấn và xem trước AR/3D giúp khách hình dung sản phẩm trong chính không gian của mình trước khi đặt hàng." }
     ],
     "timeline": [
-      { "year": "2018", "label": "Từ xưởng gỗ Tân Bình" },
-      { "year": "2024+", "label": "Nền tảng kết nối hàng trăm xưởng mộc" }
+      { "year": "11/2025", "label": "Chốt ý tưởng WoodHub" },
+      { "year": "06/2026", "label": "Hoàn thành nghiên cứu" },
+      { "year": "06/2026", "label": "Ra mắt phiên bản MVP" }
     ]
   },
   "pricing": {
@@ -206,9 +207,9 @@
     "subjectPlaceholder": "Chủ đề",
     "messagePlaceholder": "Nội dung",
     "submit": "Gửi liên hệ",
-    "support": { "label": "Hỗ trợ khách hàng", "value": "1900 9889 (8:00 – 17:30, T2 – T7)" },
-    "emailInfo": { "label": "Email", "value": "support@woodhub.vn" },
-    "address": { "label": "Địa chỉ", "value": "65/12 Bàu Cát, P.14, Q. Tân Bình, TP. HCM" },
+    "support": { "label": "Hỗ trợ khách hàng", "value": "0793 105 329" },
+    "emailInfo": { "label": "Email", "value": "drtoandien321@gmail.com" },
+    "address": { "label": "Địa chỉ", "value": "FPT University, TP. HCM" },
     "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi sớm.",
     "errors": {
       "name": "Vui lòng nhập họ tên.",
@@ -376,6 +377,20 @@
   "admin": {
     "title": "Trang quản trị",
     "comingSoon": "Đang được phát triển — sẽ có trong bản cập nhật tiếp theo."
+  },
+  "chatbot": {
+    "launcherLabel": "Mở trợ lý WoodHub",
+    "title": "Trợ lý WoodHub",
+    "subtitle": "Tư vấn nội thất gỗ",
+    "placeholder": "Nhập câu hỏi… (vd: bàn ăn gỗ sồi dưới 10 triệu)",
+    "send": "Gửi",
+    "close": "Đóng",
+    "replies": {
+      "greeting": "Chào bạn 👋 Mình là trợ lý WoodHub. Bạn cần tìm loại nội thất nào? Cho mình biết loại sản phẩm, chất liệu gỗ hoặc ngân sách nhé.",
+      "found": "Mình gợi ý vài mẫu phù hợp nhé:",
+      "featured": "Vài mẫu được yêu thích bạn có thể tham khảo:",
+      "none": "Mình chưa tìm thấy mẫu khớp. Bạn thử nói loại sản phẩm (bàn, ghế, giường, kệ/tủ…), chất liệu (sồi, óc chó, thông…) hoặc ngân sách (vd: dưới 5 triệu) nhé."
+    }
   },
   "portal": {
     "nav": {
