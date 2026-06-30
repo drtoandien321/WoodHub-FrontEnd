@@ -16,9 +16,11 @@ const fmtTime = (iso) => {
  * - user: phải, nền nâu nhạt (primary/10). supplier: trái, nền trắng.
  * - status (chỉ tin user): sending / sent / seen / error(nhấn gửi lại).
  */
-export default function ChatMessageBubble({ message, onRetry }) {
+export default function ChatMessageBubble({ message, onRetry, own }) {
   const { t } = useTranslation();
-  const isUser = message.sender === 'user';
+  // own: ép phía "của mình" (phải, nâu nhạt). Mặc định suy từ sender==='user' (khung chat khách).
+  // Portal supplier truyền own={sender==='me'} để tái dùng cho phía nhà cung cấp.
+  const isUser = own ?? message.sender === 'user';
 
   return (
     <motion.div

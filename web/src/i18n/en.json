@@ -80,7 +80,7 @@
       "registerLink": "Sign up",
       "selectRole": "Log in as",
       "testAccountsTitle": "Test accounts (demo mode)",
-      "testAccountsHint": "Use any password (6+ chars). Any other email logs in as a Customer."
+      "testAccountsHint": "ncc@woodhub.vn → Manufacturer · xuong@woodhub.vn → Workshop · admin@woodhub.vn → Admin. Use any password (6+ chars). Any other email = Customer."
     },
     "roles": {
       "customer": "Customer",
@@ -163,6 +163,12 @@
     "reviewsCount": "{{count}} reviews",
     "headerStats": { "perOrder": "/ order", "production": "Production time", "response": "Average response", "experience": "Experience", "ordersDone": "Completed orders" },
     "sectionAbout": "About",
+    "strengths": {
+      "naturalWood": "Premium natural wood",
+      "customDesign": "Made to order",
+      "inhouse": "In-house production",
+      "warranty": "Long-term warranty"
+    },
     "sectionCapabilities": "Production capabilities",
     "sectionPortfolio": "Portfolio",
     "sectionReviews": "Customer reviews",
@@ -559,6 +565,15 @@
       "store": "Store",
       "products": "Products",
       "orders": "Orders"
+    },
+    "chat": {
+      "openLabel": "Chat with customers",
+      "title": "Customer messages",
+      "online": "Active now",
+      "offline": "Offline",
+      "typing": "Customer is typing…",
+      "back": "List",
+      "close": "Close"
     },
     "dashboard": {
       "title": "Dashboard",

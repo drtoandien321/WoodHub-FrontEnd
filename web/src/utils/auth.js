@@ -3,8 +3,9 @@
  * (trước đây bị lặp ở mỗi file). supplier/admin có khu vực riêng; customer quay lại trang
  * đã định vào trước khi bị ProtectedRoute chặn (fromPath), mặc định về trang chủ.
  */
-export const redirectPathForRole = (role, fromPath) => {
-  if (role === 'supplier') return '/portal';
+export const redirectPathForRole = (role, fromPath, supplierType) => {
+  // Supplier tách 2 portal theo subtype: workshop (xưởng mộc) vs manufacturer (nhà cung cấp).
+  if (role === 'supplier') return supplierType === 'workshop' ? '/portal/workshop/dashboard' : '/portal/supplier/dashboard';
   if (role === 'admin') return '/admin';
   return fromPath ?? '/';
 };

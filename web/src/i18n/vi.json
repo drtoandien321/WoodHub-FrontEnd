@@ -80,7 +80,7 @@
       "registerLink": "Đăng ký",
       "selectRole": "Đăng nhập với vai trò",
       "testAccountsTitle": "Tài khoản test (chế độ demo)",
-      "testAccountsHint": "Mật khẩu nhập bất kỳ (≥ 6 ký tự). Email khác sẽ đăng nhập với vai trò Khách hàng."
+      "testAccountsHint": "ncc@woodhub.vn → Nhà cung cấp · xuong@woodhub.vn → Xưởng mộc · admin@woodhub.vn → Quản trị. Mật khẩu bất kỳ (≥ 6 ký tự). Email khác = Khách hàng."
     },
     "roles": {
       "customer": "Khách hàng",
@@ -163,6 +163,12 @@
     "reviewsCount": "{{count}} đánh giá",
     "headerStats": { "perOrder": "/ đơn", "production": "Thời gian sản xuất", "response": "Phản hồi trung bình", "experience": "Kinh nghiệm", "ordersDone": "Đơn hoàn thành" },
     "sectionAbout": "Giới thiệu",
+    "strengths": {
+      "naturalWood": "Gỗ tự nhiên cao cấp",
+      "customDesign": "Thiết kế theo yêu cầu",
+      "inhouse": "Sản xuất khép kín",
+      "warranty": "Bảo hành dài hạn"
+    },
     "sectionCapabilities": "Năng lực sản xuất",
     "sectionPortfolio": "Portfolio",
     "sectionReviews": "Đánh giá khách hàng",
@@ -559,6 +565,15 @@
       "store": "Gian hàng",
       "products": "Sản phẩm",
       "orders": "Đơn hàng"
+    },
+    "chat": {
+      "openLabel": "Chat với khách hàng",
+      "title": "Tin nhắn khách hàng",
+      "online": "Đang hoạt động",
+      "offline": "Ngoại tuyến",
+      "typing": "Khách đang nhập…",
+      "back": "Danh sách",
+      "close": "Đóng"
     },
     "dashboard": {
       "title": "Tổng quan",

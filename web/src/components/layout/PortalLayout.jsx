@@ -2,6 +2,8 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.js';
 import { MenuIcon } from '../ui/icons.jsx';
+import PortalChatButton from '../portal/PortalChatButton.jsx';
+import PortalChatDrawer from '../portal/PortalChatDrawer.jsx';
 
 const NAV_ITEMS = [
   { to: '/portal', key: 'dashboard', end: true },
@@ -36,6 +38,7 @@ export default function PortalLayout() {
             <span className="font-display text-lg text-primary">{t('nav.portal')}</span>
           </div>
           <div className="flex items-center gap-2">
+            <PortalChatButton />
             <span className="text-sm hidden sm:inline text-base-content/70">{user?.name}</span>
             <Link to="/" className="btn btn-ghost btn-sm">{t('forbidden.backHome')}</Link>
             <button onClick={logout} className="btn btn-outline btn-sm">{t('nav.logout')}</button>
@@ -46,6 +49,9 @@ export default function PortalLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Hộp thư chat với khách hàng (mock-first) */}
+      <PortalChatDrawer />
 
       {/* Sidebar */}
       <div className="drawer-side z-30">

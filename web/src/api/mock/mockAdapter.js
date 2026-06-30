@@ -77,7 +77,14 @@ const buildFacet = (list, idKey, nameKey) => {
 // Demo: 2 tài khoản test để đăng nhập supplier/admin khi KHÔNG chạy BE (BE thật xác định role từ DB)
 const TEST_ACCOUNTS = {
   'supplier@woodhub.vn': 'supplier',
+  'ncc@woodhub.vn': 'supplier', // Nhà cung cấp (manufacturer) — vào Portal /portal/supplier
+  'xuong@woodhub.vn': 'supplier', // Xưởng mộc (workshop) — vào Portal /portal/workshop
   'admin@woodhub.vn': 'admin',
+};
+// Subtype của supplier (manufacturer | workshop) — quyết định portal đích sau khi login.
+const SUPPLIER_TYPE = {
+  'xuong@woodhub.vn': 'workshop',
+  // còn lại (supplier@, ncc@) mặc định manufacturer
 };
 
 const ORDERS_KEY = 'woodhub:orders';
@@ -156,12 +163,19 @@ export const mockAdapter = {
     await delay(500);
     // Demo: mọi email/password đều pass. Role ưu tiên theo email test (supplier@/admin@),
     // còn lại mặc định 'customer'. BE thật sẽ tự xác định role từ tài khoản trong DB.
-    const role = TEST_ACCOUNTS[body.email?.toLowerCase()] ?? body.role ?? 'customer';
+    const email = body.email?.toLowerCase();
+    const role = TEST_ACCOUNTS[email] ?? body.role ?? 'customer';
+    const supplierType = role === 'supplier' ? (SUPPLIER_TYPE[email] ?? 'manufacturer') : undefined;
     // Demo: gắn tên hiển thị riêng cho supplier/admin để portal/admin có ngữ cảnh ngay sau khi login
-    const name = role === 'supplier' ? supplierStore.name : role === 'admin' ? 'Quản trị viên' : body.email.split('@')[0];
+    const name =
+      email === 'ncc@woodhub.vn' ? 'Nội Thất An Phát'
+      : email === 'xuong@woodhub.vn' ? 'Xưởng Mộc Tân Phát'
+      : role === 'supplier' ? supplierStore.name
+      : role === 'admin' ? 'Quản trị viên'
+      : body.email.split('@')[0];
     return {
       token: 'mock-jwt-token',
-      user: { id: 'u1', name, email: body.email, role },
+      user: { id: 'u1', name, email: body.email, role, ...(supplierType && { supplierType }) },
     };
   },
 

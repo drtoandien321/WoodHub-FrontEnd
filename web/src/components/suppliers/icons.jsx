@@ -129,3 +129,65 @@ export const RefreshCw = (p) => (
 export const ExternalLink = (p) => (
   <svg {...base} {...p}><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
 );
+
+// ===== Bổ sung cho Supplier Portal =====
+export const Home = (p) => (
+  <svg {...base} {...p}><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v10h14V10" /><path d="M9 20v-6h6v6" /></svg>
+);
+export const Store = (p) => (
+  <svg {...base} {...p}><path d="M3 9l1.5-5h15L21 9" /><path d="M4 9a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0" /><path d="M5 9.5V20h14V9.5" /><path d="M9 20v-5h4v5" /></svg>
+);
+export const Package = (p) => (
+  <svg {...base} {...p}><path d="m12 2 8 4.5v9L12 20l-8-4.5v-9L12 2z" /><path d="m4 6.5 8 4.5 8-4.5M12 11v9" /></svg>
+);
+export const ShoppingBag = (p) => (
+  <svg {...base} {...p}><path d="M6 7h12l-1 14H7L6 7z" /><path d="M9 7a3 3 0 0 1 6 0" /></svg>
+);
+export const Wallet = (p) => (
+  <svg {...base} {...p}><rect x="3" y="6" width="18" height="14" rx="2" /><path d="M3 9h18M16 13h2" /></svg>
+);
+export const Users = (p) => (
+  <svg {...base} {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11" /></svg>
+);
+export const Bell = (p) => (
+  <svg {...base} {...p}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+);
+export const LogOut = (p) => (
+  <svg {...base} {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>
+);
+export const Pencil = (p) => (
+  <svg {...base} {...p}><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+);
+export const Trash = (p) => (
+  <svg {...base} {...p}><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M6 6l1 14a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-14M10 11v6M14 11v6" /></svg>
+);
+export const Eye = (p) => (
+  <svg {...base} {...p}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+);
+export const EyeOff = (p) => (
+  <svg {...base} {...p}><path d="M9.9 4.2A10.5 10.5 0 0 1 12 4c6.5 0 10 8 10 8a18 18 0 0 1-3 4M6.6 6.6A18 18 0 0 0 2 12s3.5 8 10 8a10.5 10.5 0 0 0 5.4-1.5M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
+);
+export const BarChart = (p) => (
+  <svg {...base} {...p}><path d="M3 3v18h18" /><rect x="7" y="11" width="3" height="6" /><rect x="12" y="7" width="3" height="10" /><rect x="17" y="13" width="3" height="4" /></svg>
+);
+export const Gear = (p) => (
+  <svg {...base} {...p}><circle cx="12" cy="12" r="3" /><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.3a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.7 14H2.6a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.7 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 2.7h0A1.7 1.7 0 0 0 11 1.1V1a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 17 2.7a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.3 7" /></svg>
+);
+export const TrendingUp = (p) => (
+  <svg {...base} {...p}><path d="m3 17 6-6 4 4 8-8" /><path d="M17 7h4v4" /></svg>
+);
+export const Download = (p) => (
+  <svg {...base} {...p}><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+);
+export const CreditCard = (p) => (
+  <svg {...base} {...p}><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20M6 15h4" /></svg>
+);
+export const Filter = (p) => (
+  <svg {...base} {...p}><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>
+);
+export const Globe = (p) => (
+  <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z" /></svg>
+);
+export const DollarSign = (p) => (
+  <svg {...base} {...p}><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+);

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import SiteLayout from './components/layout/SiteLayout.jsx';
 import PortalLayout from './components/layout/PortalLayout.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
@@ -43,6 +43,27 @@ const PortalDashboard = lazy(() => import('./pages/portal/PortalDashboard.jsx'))
 const PortalStore = lazy(() => import('./pages/portal/PortalStore.jsx'));
 const PortalProducts = lazy(() => import('./pages/portal/PortalProducts.jsx'));
 const PortalOrders = lazy(() => import('./pages/portal/PortalOrders.jsx'));
+// Portal Nhà cung cấp (manufacturer) — khu vực mới /portal/supplier/*
+const SupplierPortalLayout = lazy(() => import('./components/layout/SupplierPortalLayout.jsx'));
+const SupplierDashboard = lazy(() => import('./pages/supplier/SupplierDashboard.jsx'));
+const SupplierBranches = lazy(() => import('./pages/supplier/SupplierBranches.jsx'));
+const SupplierBranchDetail = lazy(() => import('./pages/supplier/SupplierBranchDetail.jsx'));
+const SupplierProducts = lazy(() => import('./pages/supplier/SupplierProducts.jsx'));
+const SupplierProductDetail = lazy(() => import('./pages/supplier/SupplierProductDetail.jsx'));
+const SupplierOrders = lazy(() => import('./pages/supplier/SupplierOrders.jsx'));
+const SupplierReviewsPage = lazy(() => import('./pages/supplier/SupplierReviews.jsx'));
+const SupplierProfilePage = lazy(() => import('./pages/supplier/SupplierProfilePage.jsx'));
+const SupplierReports = lazy(() => import('./pages/supplier/SupplierReports.jsx'));
+const SupplierSettings = lazy(() => import('./pages/supplier/SupplierSettings.jsx'));
+// Portal Xưởng mộc (workshop) — /portal/workshop/*
+const WorkshopPortalLayout = lazy(() => import('./components/layout/WorkshopPortalLayout.jsx'));
+const WorkshopDashboard = lazy(() => import('./pages/workshop/WorkshopDashboard.jsx'));
+const WorkshopOrders = lazy(() => import('./pages/workshop/WorkshopOrders.jsx'));
+const WorkshopProduction = lazy(() => import('./pages/workshop/WorkshopProduction.jsx'));
+const WorkshopPortfolio = lazy(() => import('./pages/workshop/WorkshopPortfolio.jsx'));
+const WorkshopReviews = lazy(() => import('./pages/workshop/WorkshopReviews.jsx'));
+const WorkshopReports = lazy(() => import('./pages/workshop/WorkshopReports.jsx'));
+const WorkshopSettings = lazy(() => import('./pages/workshop/WorkshopSettings.jsx'));
 
 export default function App() {
   const theme = useUiStore((s) => s.theme);
@@ -105,11 +126,39 @@ export default function App() {
 
         {/* Supplier Portal: layout riêng (sidebar + topbar), chỉ role supplier */}
         <Route element={<ProtectedRoute allow={['supplier']} />}>
+          {/* Portal cũ (giữ nguyên — workshop sẽ dùng/đổi sau) */}
           <Route path="/portal" element={<PortalLayout />}>
             <Route index element={<PortalDashboard />} />
             <Route path="store" element={<PortalStore />} />
             <Route path="products" element={<PortalProducts />} />
             <Route path="orders" element={<PortalOrders />} />
+          </Route>
+
+          {/* Portal Nhà cung cấp (manufacturer): /portal/supplier/* */}
+          <Route path="/portal/supplier" element={<SupplierPortalLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<SupplierDashboard />} />
+            <Route path="branches" element={<SupplierBranches />} />
+            <Route path="branches/:branchId" element={<SupplierBranchDetail />} />
+            <Route path="products" element={<SupplierProducts />} />
+            <Route path="products/:productId" element={<SupplierProductDetail />} />
+            <Route path="orders" element={<SupplierOrders />} />
+            <Route path="reviews" element={<SupplierReviewsPage />} />
+            <Route path="profile" element={<SupplierProfilePage />} />
+            <Route path="reports" element={<SupplierReports />} />
+            <Route path="settings" element={<SupplierSettings />} />
+          </Route>
+
+          {/* Portal Xưởng mộc (workshop): /portal/workshop/* */}
+          <Route path="/portal/workshop" element={<WorkshopPortalLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<WorkshopDashboard />} />
+            <Route path="orders" element={<WorkshopOrders />} />
+            <Route path="production" element={<WorkshopProduction />} />
+            <Route path="portfolio" element={<WorkshopPortfolio />} />
+            <Route path="reviews" element={<WorkshopReviews />} />
+            <Route path="reports" element={<WorkshopReports />} />
+            <Route path="settings" element={<WorkshopSettings />} />
           </Route>
         </Route>
       </Routes>

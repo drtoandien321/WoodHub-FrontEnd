@@ -2,6 +2,8 @@ import { useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useChatStore } from '../../stores/chatStore.js';
+import { useSupplierChatStore } from '../../stores/supplierChatStore.js';
+import { usePortalChatStore } from '../../stores/portalChatStore.js';
 import ChatPanel from './ChatPanel.jsx';
 
 // Ẩn chatbot ở các trang xác thực (đăng nhập/đăng ký/OTP)
@@ -22,11 +24,16 @@ export default function ChatWidget() {
   const toggleOpen = useChatStore((s) => s.toggleOpen);
   const position = useChatStore((s) => s.position);
   const setPosition = useChatStore((s) => s.setPosition);
+  // Khi khung chat với NHÀ CUNG CẤP (khách) hoặc hộp thư chat KHÁCH HÀNG (portal) đang mở
+  // → ẩn nút AI nổi để không đè lên drawer.
+  const supplierChatOpen = useSupplierChatStore((s) => s.isOpen);
+  const portalChatOpen = usePortalChatStore((s) => s.isOpen);
 
   // ref giữ trạng thái kéo để phân biệt "kéo" với "click"
   const drag = useRef({ active: false, moved: false, startX: 0, startY: 0, offsetX: 0, offsetY: 0 });
 
-  if (HIDDEN_PATHS.includes(pathname)) return null;
+  // Ẩn ở trang auth và TOÀN BỘ khu Portal (Supplier có kênh "Chat với khách hàng" riêng, không cần AI chatbot)
+  if (HIDDEN_PATHS.includes(pathname) || pathname.startsWith('/portal')) return null;
 
   const onPointerDown = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -61,8 +68,8 @@ export default function ChatWidget() {
     <>
       {isOpen && <ChatPanel />}
 
-      {/* Nút nổi — ẩn khi panel đang mở để khỏi chồng lên panel */}
-      {!isOpen && (
+      {/* Nút nổi — ẩn khi panel AI mở, hoặc khi drawer chat NCC / hộp thư portal đang mở */}
+      {!isOpen && !supplierChatOpen && !portalChatOpen && (
         <button
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}

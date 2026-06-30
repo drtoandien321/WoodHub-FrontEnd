@@ -30,7 +30,7 @@ export default function Login() {
       // Role do BE/mock tự xác định (mock: theo email test, mặc định customer) — FE không gửi role
       const { token, user } = await api.login(form);
       setAuth({ token, user });
-      navigate(redirectPathForRole(user.role, location.state?.from?.pathname), { replace: true });
+      navigate(redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType), { replace: true });
     } catch (err) {
       // BE trả 403 khi email chưa xác thực → đưa sang màn nhập OTP
       if (err?.response?.status === 403) {

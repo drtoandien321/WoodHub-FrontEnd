@@ -5,6 +5,7 @@
 > làm **FE, BE và Database** đúng hướng ngay từ đầu.
 >
 > Đây là **BẢN LỀ** (tóm tắt + điều hướng), KHÔNG chép lại chi tiết. Nguồn chi tiết:
+>
 > - **Contract FE↔BE (shape API — nguồn sự thật):** [`docs/API_CONTRACT.md`](docs/API_CONTRACT.md)
 > - **Kế hoạch FE/BE/AI:** `../../Idea/files/WoodHub_FE_Plan.md`, `WoodHub_BE_Plan.md`, `WoodHub_AI_Plan.md`
 > - **Quy ước dev cá nhân (profile + stack + style):** `../../CLAUDE.md`
@@ -15,12 +16,17 @@
 
 ---
 
+---
+
+Hãy đóng vai là 1 Senior Frontend Developer, tiếng Việt giao tiếp, đã có kinh nghiệm 5 năm, đã được training về dự án, hãy dựa vào đây để trả lời các câu hỏi về frontend và UI/UX
+Codex sẽ là AI xem và duyệt lại code của bạn
+
 ## 0. Quy ước trạng thái (dùng xuyên suốt file)
 
-| Nhãn | Ý nghĩa |
-|---|---|
-| ✅ **Đã có** | FE chạy thật (qua mock hoặc BE), dùng được ngay |
-| 🟡 **Mock** | FE đã dựng UI + luồng, nhưng dữ liệu giả ở `mockAdapter`, BE chưa có |
+| Nhãn              | Ý nghĩa                                                                       |
+| ----------------- | ----------------------------------------------------------------------------- |
+| ✅ **Đã có**      | FE chạy thật (qua mock hoặc BE), dùng được ngay                               |
+| 🟡 **Mock**       | FE đã dựng UI + luồng, nhưng dữ liệu giả ở `mockAdapter`, BE chưa có          |
 | 🔵 **Định hướng** | Đã chốt hướng nhưng **chưa code** (V1/V2) — phần này cần BE/DB chuẩn bị trước |
 
 ---
@@ -41,13 +47,13 @@ Boot + PostgreSQL/Supabase — repo riêng). DB host trên Supabase, ảnh/model
 Hệ thống có 3 role kỹ thuật (`customer | supplier | admin`), trong đó **customer** và **supplier**
 mỗi loại chia 2 **subtype** về nghiệp vụ:
 
-| Role | Subtype | Mô tả | Làm được gì |
-|---|---|---|---|
-| `customer` | **individual** (cá nhân) | Khách B2C thường | Mua sẵn, đặt custom, chat xưởng |
-| `customer` | **business** (B2B) | Doanh nghiệp — có **mã số thuế, địa chỉ, tên công ty** | Mua sẵn + **yêu cầu báo giá số lượng lớn**, xuất hóa đơn VAT |
-| `supplier` | **workshop** (xưởng mộc) | **Không có catalog cố định** — chỉ **nhận custom** hoặc nhận đặt làm theo spec (ảnh/thông số rõ) | Nhận đơn custom, báo giá, chat với khách. Hiện ở trang `/suppliers` |
-| `supplier` | **manufacturer** (nhà cung cấp/brand: Nhà Xinh, Dũng Phát…) | **Có catalog** sản phẩm rõ thông số/hình ảnh, **KHÔNG nhận custom** | Bán sản phẩm sẵn trên `/shop`, báo giá ship cho B2B |
-| `admin` | — | Quản trị sàn | Duyệt supplier, quản lý hệ thống |
+| Role       | Subtype                                                     | Mô tả                                                                                            | Làm được gì                                                         |
+| ---------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `customer` | **individual** (cá nhân)                                    | Khách B2C thường                                                                                 | Mua sẵn, đặt custom, chat xưởng                                     |
+| `customer` | **business** (B2B)                                          | Doanh nghiệp — có **mã số thuế, địa chỉ, tên công ty**                                           | Mua sẵn + **yêu cầu báo giá số lượng lớn**, xuất hóa đơn VAT        |
+| `supplier` | **workshop** (xưởng mộc)                                    | **Không có catalog cố định** — chỉ **nhận custom** hoặc nhận đặt làm theo spec (ảnh/thông số rõ) | Nhận đơn custom, báo giá, chat với khách. Hiện ở trang `/suppliers` |
+| `supplier` | **manufacturer** (nhà cung cấp/brand: Nhà Xinh, Dũng Phát…) | **Có catalog** sản phẩm rõ thông số/hình ảnh, **KHÔNG nhận custom**                              | Bán sản phẩm sẵn trên `/shop`, báo giá ship cho B2B                 |
+| `admin`    | —                                                           | Quản trị sàn                                                                                     | Duyệt supplier, quản lý hệ thống                                    |
 
 > **Trong code hiện tại:** role = `customer | supplier | admin` (xem `authStore`, `mockAdapter`
 > `TEST_ACCOUNTS`). Subtype (individual/business, workshop/manufacturer) **chưa tách rõ ở DB** —
@@ -55,6 +61,7 @@ mỗi loại chia 2 **subtype** về nghiệp vụ:
 > `WORKSHOPS` (xưởng) và `PRODUCTS.supplierId` (nhà cung cấp có catalog).
 
 **Nhà cung cấp (manufacturer) có thể có NHIỀU CHI NHÁNH** 🔵 — mỗi chi nhánh ở một quận. Hệ quả:
+
 - **Giỏ hàng / sản phẩm:** hiển thị rõ sản phẩm thuộc **chi nhánh quận nào**.
 - **Hồ sơ nhà cung cấp:** liệt kê chi nhánh **chỉ theo Quận + Thành phố** (KHÔNG hiện địa chỉ đường chi tiết).
 
@@ -67,43 +74,49 @@ Tài khoản test (mock): `supplier@woodhub.vn` → supplier, `admin@woodhub.vn`
 Routes thật trong `web/src/App.jsx`.
 
 ### Công khai (SiteLayout: header + footer)
-| Route | Trang | Mục đích | Trạng thái |
-|---|---|---|---|
-| `/` | Landing | Hero, giới thiệu 3 luồng dùng | ✅ |
-| `/shop`, `/shop/:category` | Shop | Catalog sản phẩm sẵn (của manufacturer) | 🟡 (mock catalog) |
-| `/product/:id` | ProductDetail | Chi tiết sản phẩm | 🟡 |
-| `/cart` | Cart | Giỏ hàng — SP custom **click xem ảnh/thông số chi tiết**; SP nhiều chi nhánh hiện rõ **quận** | 🟡🔵 |
-| `/custom` | CustomSelect | Điểm vào **luồng Custom duy nhất** (chọn mẫu 3D / upload ảnh) | ✅ |
-| `/custom/models` | CustomModels | Gallery mẫu 3D + **upload ảnh 2D → dựng 3D (Meshy)** | 🟡 (mock Meshy) |
-| `/custom/models/:slug` | CustomModelViewer | Xem 3D + **AR mobile-web** + chỉnh vật liệu/màu/kích thước → giá+thời gian | 🟡 |
-| `/custom/configure/:type` | CustomConfigure | Trình chỉnh 3D **mock** (khối hộp "parametric") — bản tạm, **sẽ hợp nhất vào luồng Meshy** | 🟡 |
-| `/suppliers` | Suppliers | Danh sách **xưởng** (lọc, tìm) | 🟡 |
-| `/suppliers/:slug` | SupplierProfile | Hồ sơ xưởng (năng lực, portfolio, review, liên hệ) | 🟡 |
-| `/b2b` | B2b | Trang giới thiệu B2B | ✅ (tĩnh) · luồng báo giá 🔵 |
-| `/about`, `/pricing`, `/contact` | — | Giới thiệu / Bảng giá / Liên hệ | ✅ (contact submit 🟡) |
+
+| Route                            | Trang             | Mục đích                                                                                      | Trạng thái                   |
+| -------------------------------- | ----------------- | --------------------------------------------------------------------------------------------- | ---------------------------- |
+| `/`                              | Landing           | Hero, giới thiệu 3 luồng dùng                                                                 | ✅                           |
+| `/shop`, `/shop/:category`       | Shop              | Catalog sản phẩm sẵn (của manufacturer)                                                       | 🟡 (mock catalog)            |
+| `/product/:id`                   | ProductDetail     | Chi tiết sản phẩm                                                                             | 🟡                           |
+| `/cart`                          | Cart              | Giỏ hàng — SP custom **click xem ảnh/thông số chi tiết**; SP nhiều chi nhánh hiện rõ **quận** | 🟡🔵                         |
+| `/custom`                        | CustomSelect      | Điểm vào **luồng Custom duy nhất** (chọn mẫu 3D / upload ảnh)                                 | ✅                           |
+| `/custom/models`                 | CustomModels      | Gallery mẫu 3D + **upload ảnh 2D → dựng 3D (Meshy)**                                          | 🟡 (mock Meshy)              |
+| `/custom/models/:slug`           | CustomModelViewer | Xem 3D + **AR mobile-web** + chỉnh vật liệu/màu/kích thước → giá+thời gian                    | 🟡                           |
+| `/custom/configure/:type`        | CustomConfigure   | Trình chỉnh 3D **mock** (khối hộp "parametric") — bản tạm, **sẽ hợp nhất vào luồng Meshy**    | 🟡                           |
+| `/suppliers`                     | Suppliers         | Danh sách **xưởng** (lọc, tìm)                                                                | 🟡                           |
+| `/suppliers/:slug`               | SupplierProfile   | Hồ sơ xưởng (năng lực, portfolio, review, liên hệ)                                            | 🟡                           |
+| `/b2b`                           | B2b               | Trang giới thiệu B2B                                                                          | ✅ (tĩnh) · luồng báo giá 🔵 |
+| `/about`, `/pricing`, `/contact` | —                 | Giới thiệu / Bảng giá / Liên hệ                                                               | ✅ (contact submit 🟡)       |
 
 ### Xác thực (AuthLayout riêng, không header/footer)
-| Route | Mục đích | Trạng thái |
-|---|---|---|
-| `/login`, `/register` | Đăng nhập / đăng ký | ✅ (gắn BE thật) |
-| `/verify-otp` | Xác thực OTP email | ✅ (register→OTP→token) |
+
+| Route                 | Mục đích            | Trạng thái              |
+| --------------------- | ------------------- | ----------------------- |
+| `/login`, `/register` | Đăng nhập / đăng ký | ✅ (gắn BE thật)        |
+| `/verify-otp`         | Xác thực OTP email  | ✅ (register→OTP→token) |
 
 ### Cần đăng nhập (customer)
-| Route | Mục đích | Trạng thái |
-|---|---|---|
-| `/checkout` | Thanh toán | 🟡 |
-| `/profile` | Hồ sơ cá nhân | 🟡 |
-| `/orders`, `/orders/:id` | Đơn hàng + chi tiết | 🟡 |
+
+| Route                     | Mục đích                                   | Trạng thái           |
+| ------------------------- | ------------------------------------------ | -------------------- |
+| `/checkout`               | Thanh toán                                 | 🟡                   |
+| `/profile`                | Hồ sơ cá nhân                              | 🟡                   |
+| `/orders`, `/orders/:id`  | Đơn hàng + chi tiết                        | 🟡                   |
 | `/custom/match/:designId` | **Ghép xưởng** phù hợp với thiết kế custom | 🟡 (rule-based mock) |
 
 ### Supplier Portal (`/portal`, role `supplier`)
+
 **Dashboard** · Store · Products · Orders — **cả xưởng mộc lẫn nhà cung cấp** đều có, quản lý
 gian hàng/sản phẩm/đơn + trả lời chat. 🟡 (mock)
 
 ### Admin (`/admin`, role `admin`)
+
 AdminDashboard — 🟡 ("đang phát triển").
 
 ### Xuyên suốt
+
 AI Chatbot widget (nổi góc phải) 🟡 · i18n VI/EN ✅ · Dark mode ✅ · Giỏ hàng ✅.
 
 ---
@@ -111,11 +124,11 @@ AI Chatbot widget (nổi góc phải) 🟡 · i18n VI/EN ✅ · Dark mode ✅ ·
 ## 4. Luồng nghiệp vụ chính
 
 1. **B2C mua sẵn** ✅🟡: Shop → ProductDetail → Cart → Checkout → Orders. Sản phẩm thuộc
-   supplier loại *manufacturer* (có thể nhiều chi nhánh — giỏ hàng hiện rõ quận).
-2. **Custom design — MỘT luồng duy nhất** 🟡🔵: `/custom` → khách **chọn mẫu 3D có sẵn** *hoặc*
+   supplier loại _manufacturer_ (có thể nhiều chi nhánh — giỏ hàng hiện rõ quận).
+2. **Custom design — MỘT luồng duy nhất** 🟡🔵: `/custom` → khách **chọn mẫu 3D có sẵn** _hoặc_
    **upload ảnh 2D** → **Meshy** chuyển ảnh 2D → mô hình 3D → khách **chỉnh màu / chất liệu /
    kích thước** → ra **giá + thời gian ước tính** → gửi yêu cầu / ghép xưởng.
-   > ⚠️ **Không tách 2 loại custom.** *Hiện tại đang là MOCK:* trình chỉnh 3D dựng từ khối hộp
+   > ⚠️ **Không tách 2 loại custom.** _Hiện tại đang là MOCK:_ trình chỉnh 3D dựng từ khối hộp
    > (`/custom/configure/:type`, gọi là "parametric") + thư viện mẫu giả lập — chỉ để demo việc
    > chỉnh 3D + ra giá. **Sẽ thay/hợp nhất bằng Meshy** khi tích hợp (xem memory `meshyai-3d-direction`).
 3. **Ghép xưởng + chat báo giá custom (kiểu Shopee)** 🟡🔵: từ thiết kế custom → ghép xưởng phù
@@ -156,57 +169,63 @@ Suy ra từ UI hiện tại + `API_CONTRACT.md` + mock data + định hướng �
 (DB `snake_case`, JSON `camelCase`). 🟡/🔵 = chưa có ở mock, cần thiết kế mới.
 
 ### Người dùng & supplier
+
 - **users**: `id, full_name, email(unique), password_hash, role(customer|supplier|admin),
-  customer_type(individual|business) 🔵, email_verified, created_at`. OTP xem bảng riêng.
+customer_type(individual|business) 🔵, email_verified, created_at`. OTP xem bảng riêng.
 - **business_profiles** 🔵 (1–1 với user business): `user_id, company_name, tax_code, address, …`.
 - **user_locations** 🔵 (cho phí ship): `user_id, label, address, lat, lng, is_default`.
 - **suppliers**: `id, user_id(owner), name, supplier_type(workshop|manufacturer) 🔵, verified,
-  rating, district, lat, lng 🔵, description, experience_years, response_time, …`.
+rating, district, lat, lng 🔵, description, experience_years, response_time, …`.
   - workshop thêm **capability**: `types[](table/chair/cabinet/shelf/bed), max_width_cm,
-    materials[]` (đang ở `WORKSHOPS.capability`).
+materials[]` (đang ở `WORKSHOPS.capability`).
   - manufacturer: gắn với **products** (catalog).
 - **supplier_branches** 🔵 (manufacturer nhiều chi nhánh): `id, supplier_id, district, city,
-  lat, lng, is_primary`. **Chỉ hiển thị Quận + Thành phố** (không lộ địa chỉ đường). Dùng cho
+lat, lng, is_primary`. **Chỉ hiển thị Quận + Thành phố** (không lộ địa chỉ đường). Dùng cho
   giỏ hàng (hiện quận của SP) + tính phí ship theo chi nhánh gần nhất.
 - **supplier_reviews** 🟡→: `id, supplier_id, author_name, rating, content, created_at`.
 
 ### Catalog
+
 - **categories**, **materials**: bảng tham chiếu (id, name vi/en).
 - **products**: `id, supplier_id, name(vi/en), description(vi/en), category_id, material_id,
-  price(int VND), stock, rating, status, image, has_model_3d, created_at, updated_at`
+price(int VND), stock, rating, status, image, has_model_3d, created_at, updated_at`
   (khớp `PRODUCTS` trong mock).
 
 ### Mua hàng
+
 - **carts / cart_items** (hiện FE localStorage): `product_id, qty, branch_id 🔵 (chi nhánh →
-  hiện quận), custom_design_id 🔵 (nếu là SP custom → **click xem ảnh/thông số chi tiết**)`.
+hiện quận), custom_design_id 🔵 (nếu là SP custom → **click xem ảnh/thông số chi tiết**)`.
 - **orders**: `id, user_id, total, shipping_fee 🔵, status(processing|packing|shipping|completed),
-  shipping_address, distance_km 🔵, eta_days 🔵, created_at`.
+shipping_address, distance_km 🔵, eta_days 🔵, created_at`.
 - **order_items**: `order_id, product_id, name, qty, price, image, branch_id 🔵`.
 - **order_timeline**: `order_id, status, done, at`.
 
 ### Custom & matching
+
 - **custom_designs** (1 luồng — 1 thiết kế = 1 mô hình 3D đã tuỳ chỉnh): `id, user_id,
-  source(template|image), source_image_url, glb_url, usdz_url 🔵, name, material_id, finish_id
-  (màu), dimensions{w,h,d}|scale, estimate_price, estimate_days, meshy_task_id 🔵,
-  status(pending|succeeded|failed) 🔵, created_at`.
-  > *Hiện mock:* chỉ lưu `product_type + dimensions + material + finish` (trình chỉnh khối hộp,
+source(template|image), source_image_url, glb_url, usdz_url 🔵, name, material_id, finish_id
+(màu), dimensions{w,h,d}|scale, estimate_price, estimate_days, meshy_task_id 🔵,
+status(pending|succeeded|failed) 🔵, created_at`.
+  > _Hiện mock:_ chỉ lưu `product_type + dimensions + material + finish` (trình chỉnh khối hộp,
   > khớp `POST /custom/designs`). Khi có Meshy: thêm `source / glb_url / usdz_url`.
   > **KHÔNG tách 2 bảng custom — đây là 1 luồng duy nhất.**
 - **quote_requests** 🔵: `id, user_id, target_supplier_id, design_id|product_id, qty,
-  type(custom|b2b), status, quoted_price, quoted_eta, shipping_fee, created_at` (đầu ra của
+type(custom|b2b), status, quoted_price, quoted_eta, shipping_fee, created_at` (đầu ra của
   ghép xưởng custom **và** báo giá B2B; thường gắn với 1 chat_thread).
 
 ### Chat & AI
+
 - **chat_threads** 🔵: `id, customer_id, supplier_id, context_type(custom_design|product|order),
-  context_id, created_at`.
+context_id, created_at`.
 - **chat_messages** 🔵: `id, thread_id, sender_id, body, attachments[] (ảnh 2D / SP custom đã
-  dựng / thông số), created_at, read_at`. **Lưu remote DB** → đóng web/chat vẫn còn lịch sử
+dựng / thông số), created_at, read_at`. **Lưu remote DB** → đóng web/chat vẫn còn lịch sử
   (kiểu Shopee). Khung chat tự đính các `custom_designs` của khách.
 - **chatbot_conversations** 🔵: `id, user_id, created_at`.
 - **chatbot_messages** 🔵: `id, conversation_id, role(user|assistant), content, refs(product_ids|
-  order_id), created_at` — phục vụ **lịch sử + theo dõi đơn hàng**.
+order_id), created_at` — phục vụ **lịch sử + theo dõi đơn hàng**.
 
 ### Khác
+
 - **plans** (Pricing): nhóm `b2c|supplier|custom`, features[]. (xem `GET /plans`.)
 - **contacts**: `name, email, subject, message, created_at`.
 
@@ -248,4 +267,4 @@ Những điểm dưới mình **suy luận** (chưa có trong UI/contract) — x
 
 ---
 
-*File này cập nhật khi luồng/role/trang thay đổi. Khi sửa, đồng bộ luôn `API_CONTRACT.md`.*
+_File này cập nhật khi luồng/role/trang thay đổi. Khi sửa, đồng bộ luôn `API_CONTRACT.md`._

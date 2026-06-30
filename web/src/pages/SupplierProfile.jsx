@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useWorkshop } from '../hooks/useProducts.js';
+import { useSupplierChatStore } from '../stores/supplierChatStore.js';
 import SupplierProfileHeader from '../components/suppliers/SupplierProfileHeader.jsx';
 import SectionCard from '../components/suppliers/SectionCard.jsx';
 import SupplierCapabilities from '../components/suppliers/SupplierCapabilities.jsx';
@@ -9,6 +10,7 @@ import SupplierPortfolio from '../components/suppliers/SupplierPortfolio.jsx';
 import SupplierReviews from '../components/suppliers/SupplierReviews.jsx';
 import SupplierWorkflow from '../components/suppliers/SupplierWorkflow.jsx';
 import SupplierQuickInfo from '../components/suppliers/SupplierQuickInfo.jsx';
+import SupplierStrengths from '../components/suppliers/SupplierStrengths.jsx';
 import { Info, Send } from '../components/suppliers/icons.jsx';
 
 export default function SupplierProfile() {
@@ -17,10 +19,13 @@ export default function SupplierProfile() {
   const { t } = useTranslation();
   const { data: supplier, isLoading, isError } = useWorkshop(slug);
   const [fav, setFav] = useState(false);
+  const openChat = useSupplierChatStore((s) => s.openFromSupplier);
 
   // Đặt thiết kế custom → mang theo supplierId để bước cấu hình biết xưởng nguồn (route custom hiện có)
   const orderCustom = () => navigate(`/custom/configure/table?supplierId=${supplier.id}`);
-  // "Liên hệ tư vấn" → cuộn tới khối Thông tin nhanh (chứa số điện thoại/email)
+  // "Liên hệ tư vấn" → mở khung chat real-time với xưởng (mock-first; xem supplierChatStore)
+  const contactSupplier = () => openChat({ id: supplier.id, name: supplier.name });
+  // Dùng cho "Xem tất cả" portfolio/review + quick info → cuộn tới khối Thông tin nhanh
   const scrollToContact = () =>
     document.getElementById('supplier-quick-info')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -57,13 +62,14 @@ export default function SupplierProfile() {
         <span className="font-medium text-base-content/80">{supplier.name}</span>
       </nav>
 
-      <SupplierProfileHeader supplier={supplier} onOrderCustom={orderCustom} onContact={scrollToContact} />
+      <SupplierProfileHeader supplier={supplier} onOrderCustom={orderCustom} onContact={contactSupplier} />
 
       {/* Bố cục 2 cột: nội dung (≈70%) + sidebar (≈30%) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="flex flex-col gap-6">
           <SectionCard icon={Info} title={t('suppliers.sectionAbout')}>
             <p className="leading-relaxed text-base-content/75">{supplier.about}</p>
+            <SupplierStrengths strengths={supplier.strengths} />
           </SectionCard>
 
           <SupplierCapabilities supplier={supplier} />
