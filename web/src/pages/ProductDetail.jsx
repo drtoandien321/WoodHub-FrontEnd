@@ -1,10 +1,11 @@
-import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProduct } from '../hooks/useProducts.js';
 import { useCartStore } from '../stores/cartStore.js';
-import { formatVnd } from '../utils/format.js';
-import ProductCard from '../components/ui/ProductCard.jsx';
+import { useSupplierChatStore } from '../stores/supplierChatStore.js';
+import ProductGallery from '../components/product/ProductGallery.jsx';
+import ProductInfo from '../components/product/ProductInfo.jsx';
+import RelatedProducts from '../components/product/RelatedProducts.jsx';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -12,10 +13,23 @@ export default function ProductDetail() {
   const { t } = useTranslation();
   const { data: product, isLoading, isError } = useProduct(id);
   const addItem = useCartStore((s) => s.addItem);
-  const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const openChat = useSupplierChatStore((s) => s.openFromProduct);
 
-  if (isLoading) return <div className="skeleton h-96 rounded-2xl" />;
+  if (isLoading) {
+    return (
+      <div className="grid gap-8 md:grid-cols-2">
+        <div className="skeleton aspect-[4/3] rounded-3xl" />
+        <div className="flex flex-col gap-4">
+          <div className="skeleton h-9 w-3/4 rounded-lg" />
+          <div className="skeleton h-5 w-1/2 rounded-lg" />
+          <div className="skeleton h-8 w-40 rounded-lg" />
+          <div className="skeleton h-24 w-full rounded-lg" />
+          <div className="skeleton h-12 w-full rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
   if (isError || !product)
     return (
       <p className="text-error">
@@ -24,67 +38,39 @@ export default function ProductDetail() {
     );
 
   const outOfStock = product.status === 'out_of_stock' || product.stock === 0;
+  // Badge ảnh: hết hàng (đỏ) hoặc rating cao → "Bán chạy" (gold). Heuristic mock, dễ thay bằng cờ BE.
+  const badge = outOfStock
+    ? { label: t('product.outOfStock'), tone: 'error' }
+    : product.rating >= 4.8
+      ? { label: t('product.bestseller'), tone: 'accent' }
+      : null;
 
-  const handleAdd = () => {
-    addItem(product, qty);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
-  };
+  const buyNow = (qty) => { addItem(product, qty); navigate('/cart'); };
 
   return (
     <div className="flex flex-col gap-12">
-      <div className="grid md:grid-cols-2 gap-8">
-        <figure className="rounded-2xl overflow-hidden bg-base-200 aspect-[4/3]">
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-        </figure>
+      {/* Breadcrumb */}
+      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-base-content/55">
+        <Link to="/" className="hover:text-primary">{t('suppliers.breadcrumbHome')}</Link>
+        <span>/</span>
+        <Link to="/shop" className="hover:text-primary">{t('nav.shop')}</Link>
+        <span>/</span>
+        <span className="text-base-content/70">{product.supplierName}</span>
+        <span>/</span>
+        <span className="line-clamp-1 font-medium text-base-content/80">{product.name}</span>
+      </nav>
 
-        <div className="flex flex-col gap-4">
-          <h1 className="font-display text-3xl">{product.name}</h1>
-          <p className="text-sm text-base-content/60">
-            {t('product.suppliedBy')} <span className="font-medium">{product.supplierName}</span>
-            {product.rating > 0 && <> · ★ {product.rating}</>}
-          </p>
-          <p className="text-2xl font-semibold text-primary">{formatVnd(product.price)}</p>
-          <p className="text-base-content/80">{product.description}</p>
-
-          <table className="table table-sm max-w-xs">
-            <tbody>
-              <tr><td className="text-base-content/60">{t('product.material')}</td><td>{product.materialName}</td></tr>
-              <tr>
-                <td className="text-base-content/60">{t('product.stock')}</td>
-                <td>{outOfStock ? <span className="text-error">{t('product.outOfStock')}</span> : `${product.stock} ${t('product.unit')}`}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {outOfStock ? (
-            <button className="btn btn-disabled self-start mt-2">{t('product.outOfStock')}</button>
-          ) : (
-            <div className="flex items-center gap-3 mt-2">
-              <input type="number" min={1} max={product.stock} value={qty} onChange={(e) => setQty(Math.max(1, Math.min(product.stock, Number(e.target.value))))} className="input input-bordered w-20" />
-              <button onClick={handleAdd} className={`btn ${added ? 'btn-success' : 'btn-primary'}`}>
-                {added ? t('product.added') : t('product.addToCart')}
-              </button>
-              <button onClick={() => { addItem(product, qty); navigate('/cart'); }} className="btn btn-outline">{t('product.buyNow')}</button>
-            </div>
-          )}
-
-          {product.hasModel3d && (
-            <Link to="/custom" className="btn btn-accent btn-outline btn-sm self-start mt-2">
-              {t('product.customize')}
-            </Link>
-          )}
-        </div>
+      <div className="grid items-start gap-8 md:grid-cols-2 lg:gap-12">
+        <ProductGallery images={product.gallery} alt={product.name} badge={badge} />
+        <ProductInfo
+          product={product}
+          onAddToCart={(qty) => addItem(product, qty)}
+          onBuyNow={buyNow}
+          onChat={() => openChat(product)}
+        />
       </div>
 
-      {product.related?.length > 0 && (
-        <section>
-          <h2 className="font-display text-2xl mb-4">{t('product.related')}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {product.related.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
-        </section>
-      )}
+      <RelatedProducts products={product.related} />
     </div>
   );
 }

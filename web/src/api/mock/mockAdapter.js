@@ -3,6 +3,7 @@ import { PRODUCTS, WORKSHOPS } from './data.js';
 import { PRODUCT_TYPES } from './customData.js';
 import { PLANS } from './plansData.js';
 import { DEFAULT_SUPPLIER_STORE, DEFAULT_SUPPLIER_PRODUCTS, DEFAULT_SUPPLIER_ORDERS, ORDER_STATUS_SEQUENCE } from './supplierData.js';
+import { MODELS_3D, buildGeneratedModel } from './models3dData.js';
 import { storage } from '../../services/storage.js';
 
 /*
@@ -29,6 +30,36 @@ const localizeProduct = (p) => ({
   description: loc(p.description),
   categoryName: loc(p.category),
   materialName: loc(p.material),
+});
+
+/*
+ * ===== LÀM GIÀU DỮ LIỆU CHO TRANG CHI TIẾT (gallery + sizes) =====
+ * Mock data gốc mỗi sản phẩm chỉ có 1 `image` + 1 thông số. Trang chi tiết mới cần GALLERY
+ * nhiều ảnh + tuỳ chọn KÍCH THƯỚC. Để không phải sửa từng sản phẩm, ta sinh fallback tập trung
+ * tại đây — khi BE thật trả `gallery`/`sizes` thì các field này có sẵn, UI không phải đổi.
+ *   - gallery: ưu tiên p.gallery; nếu không có → [ảnh thật, + vài biến thể picsum theo seed id].
+ *   - sizes:   ưu tiên p.sizes;   nếu không có → bộ kích thước mặc định theo categoryId (có thể rỗng).
+ */
+const DEFAULT_SIZES_BY_CATEGORY = {
+  cat_dining: ['120 × 75 × 75 cm', '160 × 80 × 75 cm', '180 × 90 × 75 cm'],
+  cat_table: ['80 × 45 × 45 cm', '100 × 50 × 45 cm', '120 × 55 × 45 cm'],
+  cat_storage: ['60 × 30 × 180 cm', '70 × 30 × 180 cm', '80 × 30 × 180 cm'],
+  cat_desk: ['100 × 60 × 75 cm', '120 × 60 × 75 cm', '140 × 70 × 75 cm'],
+  cat_bed: ['Queen 160 × 200 cm', 'King 180 × 200 cm'],
+  cat_chair: ['Tiêu chuẩn', 'Có tựa tay'],
+};
+
+const buildGallery = (p) => {
+  if (Array.isArray(p.gallery) && p.gallery.length) return p.gallery;
+  // Ảnh thật luôn đứng đầu (chạy offline được); 5 biến thể minh hoạ thêm để demo gallery.
+  const extra = Array.from({ length: 5 }, (_, i) => `https://picsum.photos/seed/${p.id}-${i + 1}/800/600`);
+  return [p.image, ...extra];
+};
+
+const enrichProductDetail = (p) => ({
+  ...localizeProduct(p),
+  gallery: buildGallery(p),
+  sizes: Array.isArray(p.sizes) && p.sizes.length ? p.sizes : (DEFAULT_SIZES_BY_CATEGORY[p.categoryId] ?? []),
 });
 
 // Cửa hàng demo hiển thị TẤT CẢ sản phẩm trong data (kể cả draft/archived) theo yêu cầu.
@@ -63,6 +94,9 @@ const SUPPLIER_ORDERS_KEY = 'woodhub:supplier-orders';
 const memoryDb = {
   orders: new Map(storage.getItem(ORDERS_KEY, [])),
   designs: new Map(storage.getItem(DESIGNS_KEY, [])),
+  // Luồng AI 3D (Phase 0, ephemeral — không persist): task dựng model + model đã sinh ra
+  genTasks: new Map(),
+  genModels: new Map(),
 };
 const persistOrders = () => storage.setItem(ORDERS_KEY, Array.from(memoryDb.orders.entries()));
 const persistDesigns = () => storage.setItem(DESIGNS_KEY, Array.from(memoryDb.designs.entries()));
@@ -169,7 +203,7 @@ export const mockAdapter = {
     const product = PRODUCTS.find((p) => p.id === id);
     if (!product) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
     const related = PRODUCTS.filter((p) => p.id !== id && p.categoryId === product.categoryId);
-    return { ...localizeProduct(product), related: related.map(localizeProduct) };
+    return { ...enrichProductDetail(product), related: related.map(localizeProduct) };
   },
 
   async createOrder(body) {
@@ -266,6 +300,60 @@ export const mockAdapter = {
   async getWorkshops() {
     await delay(250);
     return { items: WORKSHOPS };
+  },
+
+  // GET /workshops/:slug — hồ sơ 1 xưởng (trang /suppliers/:slug). Tra theo slug, fallback theo id.
+  async getWorkshop(slug) {
+    await delay(250);
+    const workshop = WORKSHOPS.find((w) => w.slug === slug || w.id === slug);
+    if (!workshop) throw new Error('WORKSHOP_NOT_FOUND');
+    return workshop;
+  },
+
+  // ===== AI 3D (nhánh Mẫu 3D / Upload) =====
+  // GET /custom/models — thư viện mẫu 3D dựng sẵn
+  async getModels3d() {
+    await delay(250);
+    return { items: MODELS_3D };
+  },
+
+  // GET /custom/models/:slug — 1 mẫu (gồm cả model do user vừa sinh từ ảnh)
+  async getModel3d(slug) {
+    await delay(200);
+    const model = memoryDb.genModels.get(slug) ?? MODELS_3D.find((m) => m.slug === slug || m.id === slug);
+    if (!model) throw new Error('MODEL_NOT_FOUND');
+    return model;
+  },
+
+  /*
+   * POST /custom/ai/generate — bắt đầu dựng 3D từ ảnh.
+   * Mock: tạo task, trả taskId ngay. (Thật: BE proxy gọi Meshy image-to-3D, KHÔNG để key ở FE.)
+   */
+  async generate3D({ imageName } = {}) {
+    await delay(400);
+    const taskId = `task_${Date.now().toString(36)}`;
+    memoryDb.genTasks.set(taskId, { startedAt: Date.now(), imageName: imageName ?? null });
+    return { taskId };
+  },
+
+  /*
+   * GET /custom/ai/tasks/:taskId — poll tiến trình dựng.
+   * Mock: giả lập ~7s rồi 'succeeded' + đăng ký model mới để getModel3d trả về.
+   */
+  async getGenTask(taskId) {
+    await delay(150);
+    const task = memoryDb.genTasks.get(taskId);
+    if (!task) throw new Error('TASK_NOT_FOUND');
+    const TOTAL_MS = 7000;
+    const elapsed = Date.now() - task.startedAt;
+    if (elapsed >= TOTAL_MS) {
+      const slug = `gen-${taskId}`;
+      if (!memoryDb.genModels.has(slug)) {
+        memoryDb.genModels.set(slug, buildGeneratedModel(taskId, task.imageName));
+      }
+      return { status: 'succeeded', progress: 100, modelSlug: slug };
+    }
+    return { status: 'pending', progress: Math.min(95, Math.round((elapsed / TOTAL_MS) * 100)) };
   },
 
   async getPlans() {

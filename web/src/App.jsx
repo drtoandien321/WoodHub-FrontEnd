@@ -7,6 +7,7 @@ import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
 import ChatWidget from './components/chatbot/ChatWidget.jsx';
+import ChatDrawer from './components/chat/ChatDrawer.jsx';
 import { useUiStore } from './stores/uiStore.js';
 
 /*
@@ -26,8 +27,11 @@ const Register = lazy(() => import('./pages/Register.jsx'));
 const VerifyOtp = lazy(() => import('./pages/VerifyOtp.jsx'));
 const CustomSelect = lazy(() => import('./pages/CustomSelect.jsx'));
 const CustomConfigure = lazy(() => import('./pages/CustomConfigure.jsx'));
+const CustomModels = lazy(() => import('./pages/CustomModels.jsx'));
+const CustomModelViewer = lazy(() => import('./pages/CustomModelViewer.jsx'));
 const WorkshopMatch = lazy(() => import('./pages/WorkshopMatch.jsx'));
 const Suppliers = lazy(() => import('./pages/Suppliers.jsx'));
+const SupplierProfile = lazy(() => import('./pages/SupplierProfile.jsx'));
 const B2b = lazy(() => import('./pages/B2b.jsx'));
 const About = lazy(() => import('./pages/About.jsx'));
 const Pricing = lazy(() => import('./pages/Pricing.jsx'));
@@ -53,6 +57,8 @@ export default function App() {
       <ScrollToTop />
       {/* Chatbot nổi toàn cục — tự ẩn ở trang auth (xem ChatWidget) */}
       <ChatWidget />
+      {/* Khung chat với nhà cung cấp (mở từ trang sản phẩm / hồ sơ NCC) */}
+      <ChatDrawer />
       <Routes>
         {/* Landing đứng riêng: hero full-screen, không dùng layout chung */}
         <Route path="/" element={<Landing />} />
@@ -69,8 +75,11 @@ export default function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/custom" element={<CustomSelect />} />
+          <Route path="/custom/models" element={<CustomModels />} />
+          <Route path="/custom/models/:slug" element={<CustomModelViewer />} />
           <Route path="/custom/configure/:type" element={<CustomConfigure />} />
           <Route path="/suppliers" element={<Suppliers />} />
+          <Route path="/suppliers/:slug" element={<SupplierProfile />} />
           <Route path="/b2b" element={<B2b />} />
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />

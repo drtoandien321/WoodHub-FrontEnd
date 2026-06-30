@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.js';
+import ShopMegaMenu from './ShopMegaMenu.jsx';
 
 // Icon inline (chevron) thay vì cài lucide-react — đỡ 1 dependency
 export const ArrowUpRight = ({ className }) => (
@@ -11,7 +13,7 @@ export const ChevronRight = ({ className }) => (
 );
 
 const MENU = [
-  { key: 'shop', to: '/shop' },
+  { key: 'shop', to: '/shop', mega: true }, // mega: hover mở mega menu "Cửa hàng"
   { key: 'custom', to: '/custom', hasDropdown: true },
   { key: 'suppliers', to: '/suppliers' },
   { key: 'b2b', to: '/b2b', hasDropdown: true },
@@ -21,8 +23,15 @@ const MENU = [
 export default function HeroNavbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuthStore();
+  // Mega menu "Cửa hàng": mở khi hover item shop, đóng khi rời <nav> (panel là CON
+  // của nav nên rê chuột trong panel không kích hoạt mouseleave).
+  const [shopOpen, setShopOpen] = useState(false);
+
   return (
-    <nav className="flex items-center justify-between gap-4 py-3 px-5 sm:px-6 md:px-8 mx-3 sm:mx-5 md:mx-6 mt-3 sm:mt-4 rounded-full bg-ivory/80 backdrop-blur-md border border-white/50 shadow-[0_4px_24px_rgba(74,53,34,0.06)] relative z-10">
+    <nav
+      onMouseLeave={() => setShopOpen(false)}
+      className="flex items-center justify-between gap-4 py-3 px-5 sm:px-6 md:px-8 mx-3 sm:mx-5 md:mx-6 mt-3 sm:mt-4 rounded-full bg-ivory/80 backdrop-blur-md border border-white/50 shadow-[0_4px_24px_rgba(74,53,34,0.06)] relative z-10"
+    >
       {/* Logo — desktop: flex-1 để nav menu căn giữa */}
       <div className="flex-1 hidden md:block">
         <Link to="/" className="font-display tracking-tighter text-2xl text-hero-ink/95">WoodHub</Link>
@@ -31,11 +40,29 @@ export default function HeroNavbar() {
       {/* Menu items — chỉ hiển thị trên desktop */}
       <ul className="hidden md:flex items-center gap-6 lg:gap-8 text-[rgb(58,44,31)] font-normal text-sm">
         {MENU.map((item) => (
-          <li key={item.key} className="cursor-pointer hover:opacity-70 transition-opacity flex items-center gap-1 group whitespace-nowrap">
-            <Link to={item.to} className="flex items-center gap-1">
+          <li
+            key={item.key}
+            onMouseEnter={() => setShopOpen(!!item.mega)}
+            // relative: neo panel mega menu vào ĐÚNG nút "Cửa hàng" → Cột 1 luôn đứng yên,
+            // các cột sâu hơn chỉ mọc sang phải (không bị dịch ngang khi đổi số cột).
+            // LƯU Ý: KHÔNG đặt opacity ở đây — opacity của <li> sẽ áp lên cả panel con
+            // (làm panel mờ xuyên thấu). Hiệu ứng hover mờ chuyển xuống <Link> nhãn.
+            className={`cursor-pointer flex items-center gap-1 group whitespace-nowrap ${item.mega ? 'relative' : ''}`}
+          >
+            <Link to={item.to} className="flex items-center gap-1 hover:opacity-70 transition-opacity">
               {t(`nav.${item.key}`)}
-              {item.hasDropdown && <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />}
+              {item.mega
+                ? <ChevronRight className={`w-4 h-4 transition-transform ${shopOpen ? 'rotate-90' : ''}`} />
+                : item.hasDropdown && <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />}
             </Link>
+
+            {/* Panel mega menu — absolute ngay dưới "Cửa hàng". pt-2 tạo "cầu" trong suốt
+                để chuột đi từ nút xuống panel không bị hở. z-50 để nổi trên nội dung hero. */}
+            {item.mega && shopOpen && (
+              <div className="absolute left-0 top-full pt-2 z-50">
+                <ShopMegaMenu onNavigate={() => setShopOpen(false)} />
+              </div>
+            )}
           </li>
         ))}
       </ul>

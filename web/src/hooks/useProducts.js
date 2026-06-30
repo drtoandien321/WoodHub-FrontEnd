@@ -48,6 +48,10 @@ export const useWorkshopMatch = (designId) =>
 export const useWorkshops = () =>
   useQuery({ queryKey: ['workshops'], queryFn: api.getWorkshops });
 
+// Hồ sơ 1 xưởng theo slug — dùng ở trang /suppliers/:slug. retry:false để 404 hiện empty state ngay.
+export const useWorkshop = (slug) =>
+  useQuery({ queryKey: ['workshop', slug], queryFn: () => api.getWorkshop(slug), enabled: !!slug, retry: false });
+
 export const usePlans = () =>
   useQuery({ queryKey: ['plans'], queryFn: api.getPlans });
 

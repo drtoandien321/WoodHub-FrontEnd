@@ -146,6 +146,18 @@ export const api = {
   // ===== WORKSHOPS (trang Suppliers) =====
   // GET /workshops — danh sách xưởng/nhà cung cấp
   getWorkshops: () => call(() => http.get('/workshops'), 'getWorkshops'),
+  // GET /workshops/:slug — hồ sơ chi tiết 1 xưởng
+  getWorkshop: (slug) => call(() => http.get(`/workshops/${slug}`), 'getWorkshop', slug),
+
+  // ===== AI 3D (nhánh Mẫu 3D / Upload — Meshy sau này) =====
+  // GET /custom/models — thư viện mẫu 3D
+  getModels3d: () => call(() => http.get('/custom/models'), 'getModels3d'),
+  // GET /custom/models/:slug — 1 mẫu (gồm model vừa sinh từ ảnh)
+  getModel3d: (slug) => call(() => http.get(`/custom/models/${slug}`), 'getModel3d', slug),
+  // POST /custom/ai/generate — dựng 3D từ ảnh (BE proxy Meshy, giữ API key ở BE)
+  generate3D: (body) => call(() => http.post('/custom/ai/generate', body), 'generate3D', body),
+  // GET /custom/ai/tasks/:taskId — poll tiến trình dựng
+  getGenTask: (taskId) => call(() => http.get(`/custom/ai/tasks/${taskId}`), 'getGenTask', taskId),
 
   // ===== PLANS (trang Pricing) =====
   // GET /plans — danh sách gói subscription theo nhóm (b2c | supplier | custom)
