@@ -4,11 +4,13 @@ import SafeImage from './SafeImage.jsx';
 import { Image, ChevronRight } from './icons.jsx';
 
 /*
- * Section "Portfolio" — grid ảnh sản phẩm/xưởng (3x2 desktop, 2 cột tablet, 1–2 cột mobile).
- * "Xem tất cả" để placeholder (chưa có trang gallery riêng) — gắn route sau khi có.
+ * Section "Portfolio" — items từ PortfolioResponse[] (GET /suppliers/{id}/portfolio), KHÔNG
+ * còn lấy từ supplier.portfolio (field đó không tồn tại ở SupplierPublicResponse). Ẩn cả section
+ * nếu supplier chưa có mục portfolio nào.
  */
-export default function SupplierPortfolio({ supplier, onViewAll }) {
+export default function SupplierPortfolio({ items = [], supplierName, onViewAll }) {
   const { t } = useTranslation();
+  if (!items.length) return null;
 
   const viewAll = (
     <button onClick={onViewAll} className="btn btn-ghost btn-sm gap-1 text-primary">
@@ -19,11 +21,11 @@ export default function SupplierPortfolio({ supplier, onViewAll }) {
   return (
     <SectionCard icon={Image} title={t('suppliers.sectionPortfolio')} action={viewAll}>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {supplier.portfolio.map((src, i) => (
+        {items.map((item) => (
           <SafeImage
-            key={i}
-            src={src}
-            alt={`${supplier.name} — ${i + 1}`}
+            key={item.id}
+            src={item.imageUrl}
+            alt={item.title || `${supplierName} — portfolio`}
             className="aspect-[4/3] w-full rounded-2xl transition-transform duration-300 hover:scale-[1.03]"
           />
         ))}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.js';
+import { useLogout } from '../../hooks/useLogout.js';
 import ShopMegaMenu from './ShopMegaMenu.jsx';
 
 // Icon inline (chevron) thay vì cài lucide-react — đỡ 1 dependency
@@ -22,7 +23,8 @@ const MENU = [
 
 export default function HeroNavbar() {
   const { t } = useTranslation();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
+  const logout = useLogout();
   // Mega menu "Cửa hàng": mở khi hover item shop, đóng khi rời <nav> (panel là CON
   // của nav nên rê chuột trong panel không kích hoạt mouseleave).
   const [shopOpen, setShopOpen] = useState(false);

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../../stores/cartStore.js';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
+import { useLogout } from '../../hooks/useLogout.js';
+import { redirectPathForRole } from '../../utils/auth.js';
 import LanguageSwitcher from '../ui/LanguageSwitcher.jsx';
 import { SunIcon, MoonIcon, CartIcon, UserIcon, ChevronDownIcon } from '../ui/icons.jsx';
 
@@ -17,7 +19,8 @@ const MENU = [
 
 export default function Header() {
   const itemCount = useCartStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
+  const logout = useLogout();
   const { theme, toggleTheme } = useUiStore();
   const { t } = useTranslation();
   const isDark = theme === 'woodhub-dark';
@@ -25,9 +28,10 @@ export default function Header() {
   // Người mua = chưa đăng nhập (guest) hoặc role customer → mới có Giỏ hàng
   const isBuyer = !user || user.role === 'customer';
 
-  // "Khu vực riêng" theo role — hiện trong dropdown tài khoản
+  // "Khu vực riêng" theo role — hiện trong dropdown tài khoản.
+  // Supplier trỏ thẳng portal đúng subtype (workshop/nhà cung cấp) qua helper dùng chung với Login.
   const roleArea =
-    user?.role === 'supplier' ? { to: '/portal', label: t('nav.portal') }
+    user?.role === 'supplier' ? { to: redirectPathForRole('supplier', undefined, user.supplierType), label: t('nav.portal') }
     : user?.role === 'admin' ? { to: '/admin', label: t('nav.admin') }
     : { to: '/orders', label: t('nav.orders') };
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { useAuthStore } from '../../stores/authStore.js';
+import { useLogout } from '../../hooks/useLogout.js';
 import PortalChatButton from '../portal/PortalChatButton.jsx';
 import PortalChatDrawer from '../portal/PortalChatDrawer.jsx';
 import { MenuIcon } from '../ui/icons.jsx';
@@ -15,7 +15,7 @@ import { LogOut, Bell, X } from '../suppliers/icons.jsx';
  * Props: nav [{to,label,icon}], brandName, home (path dashboard).
  */
 export default function PortalShell({ nav, brandName, brandInitials, home, title = 'Portal Nhà cung cấp' }) {
-  const { logout } = useAuthStore();
+  const logout = useLogout();
   const [open, setOpen] = useState(false);
 
   const linkClass = ({ isActive }) =>

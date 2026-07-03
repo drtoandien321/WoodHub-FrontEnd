@@ -1,23 +1,29 @@
 import { create } from 'zustand';
+import { api, USE_MOCK } from '../api/client.js';
+import { useAuthStore } from './authStore.js';
+import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocket.js';
 
 /*
  * supplierChatStore — state cho khung CHAT VỚI NHÀ CUNG CẤP (khác AI chatbot ở chatStore.js).
  *
- * ⚠️ MOCK-FIRST: đây là bản giả lập client-only để dựng UI/UX (kiểu Shopee). Khi BE có
- * WebSocket/STOMP thật, chỉ cần thay phần `send`/`receive` bằng socket — UI (ChatDrawer + components)
- * KHÔNG phải sửa vì chỉ đọc state từ store này.
- *
- * Mô hình dữ liệu:
- * - conversations: { [supplierId]: Message[] }  — lưu lịch sử theo từng nhà cung cấp (đổi NCC vẫn giữ).
+ * Mô hình dữ liệu (UI, KHÔNG đổi khi nối BE thật — ChatDrawer.jsx đọc y nguyên shape này):
+ * - conversations: { [supplierId]: Message[] }  — lưu lịch sử theo từng nhà cung cấp.
  * - context: { supplier, product? }             — NCC đang chat + (nếu mở từ trang SP) product context.
- * - typing: NCC có đang "nhập" không (hiển thị typing indicator).
- *
+ * - typing: NCC có đang "nhập" không (chỉ có ý nghĩa ở mock — BE thật không có sự kiện typing).
  * Message = { id, sender:'user'|'supplier', text, at(ISO), status?:'sending'|'sent'|'seen'|'error' }
+ *
+ * ⚠️ CHẾ ĐỘ THẬT (VITE_USE_MOCK=false): `conversationIdBySupplier` map supplierId → conversationId
+ * thật (UUID) của BE — cần để gọi getMessages/sendMessage/markAsRead. `openFromProduct` chỉ hoạt
+ * động ĐÚNG với supplier THẬT (product.supplierId phải là UUID BE nhận dạng được) — trang
+ * ProductDetail.jsx hiện vẫn dùng catalog MOCK (đã ghi nhận là việc CÒN DỞ ở Module 5), nên trong
+ * thực tế chat thật chỉ chạy ổn định qua `openFromSupplier` (gọi từ SupplierProfile.jsx, đã có
+ * supplier.id thật). Đây KHÔNG phải bug của module Chat — chỉ là phụ thuộc vào việc nối catalog
+ * thật, việc đó nằm ngoài phạm vi Module 7.
  */
 let counter = 0;
 const nextId = () => `scm_${Date.now()}_${counter++}`;
 
-// Reply mock theo từ khoá — chỉ để demo luồng hỏi/đáp, KHÔNG phải AI thật.
+// Reply mock theo từ khoá — CHỈ dùng ở chế độ mock, để demo luồng hỏi/đáp khi chưa có BE.
 const mockReply = (text) => {
   const q = (text || '').toLowerCase();
   if (q.includes('còn hàng') || q.includes('còn không')) return 'Dạ sản phẩm hiện còn hàng ạ. Bạn cần số lượng bao nhiêu để bên mình giữ hàng nhé?';
@@ -28,11 +34,22 @@ const mockReply = (text) => {
   return 'Dạ WoodHub đã nhận tin của bạn, nhà cung cấp sẽ phản hồi ngay ạ. Bạn cứ mô tả nhu cầu để được tư vấn nhanh nhất nhé!';
 };
 
+// BE ChatMessageResponse { id, conversationId, senderId, senderName, content, attachmentUrl, createdAt }
+// → UI Message { id, sender:'user'|'supplier', text, at, status:'sent' }
+const toUiMessage = (m, myUserId) => ({
+  id: m.id,
+  sender: m.senderId === myUserId ? 'user' : 'supplier',
+  text: m.content ?? '',
+  at: m.createdAt,
+  status: 'sent',
+});
+
 export const useSupplierChatStore = create((set, get) => ({
   isOpen: false,
   context: null,            // { supplier:{id,name}, product?:{id,name,image,price,supplierName} }
   showProductCard: true,    // người dùng có thể ẩn product card (nút pin/close)
   conversations: {},
+  conversationIdBySupplier: {}, // CHỈ dùng ở chế độ thật
   typing: false,
 
   // Mở chat từ TRANG SẢN PHẨM — tự gắn product context + suy ra supplier từ product.
@@ -42,76 +59,105 @@ export const useSupplierChatStore = create((set, get) => ({
     set((s) => ({
       isOpen: true,
       showProductCard: true,
-      context: {
-        supplier,
-        product: {
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          price: product.price,
-          supplierName: product.supplierName,
-        },
-      },
-      // Seed lời chào của NCC nếu chưa có hội thoại nào với supplier này
-      conversations: s.conversations[supplier.id]
-        ? s.conversations
-        : { ...s.conversations, [supplier.id]: [welcome(supplier.name)] },
+      context: { supplier, product: { id: product.id, name: product.name, image: product.image, price: product.price, supplierName: product.supplierName } },
     }));
+    if (USE_MOCK) {
+      set((s) => ({
+        conversations: s.conversations[supplier.id] ? s.conversations : { ...s.conversations, [supplier.id]: [welcome(supplier.name)] },
+      }));
+      return;
+    }
+    loadRealConversation(get, set, supplier, product.id);
   },
 
-  // Mở chat từ TRANG HỒ SƠ NCC (không kèm product) — dùng ở Phase sau.
+  // Mở chat từ TRANG HỒ SƠ NCC (không kèm product).
   openFromSupplier: (supplier) => {
     if (!supplier?.id) return;
-    set((s) => ({
-      isOpen: true,
-      showProductCard: false,
-      context: { supplier: { id: supplier.id, name: supplier.name } },
-      conversations: s.conversations[supplier.id]
-        ? s.conversations
-        : { ...s.conversations, [supplier.id]: [welcome(supplier.name)] },
-    }));
+    set({ isOpen: true, showProductCard: false, context: { supplier: { id: supplier.id, name: supplier.name } } });
+    if (USE_MOCK) {
+      set((s) => ({
+        conversations: s.conversations[supplier.id] ? s.conversations : { ...s.conversations, [supplier.id]: [welcome(supplier.name)] },
+      }));
+      return;
+    }
+    loadRealConversation(get, set, supplier, null);
   },
 
   close: () => set({ isOpen: false }),
   toggleProductCard: () => set((s) => ({ showProductCard: !s.showProductCard })),
 
-  // Gửi tin: thêm bubble user (status 'sending' → 'sent'), rồi NCC "đang nhập" → auto-reply.
+  // Gửi tin. Mock: giả lập bubble 'sending'→'sent' + NCC tự trả lời. Thật: publish qua STOMP
+  // (không optimistic — tin thật quay về qua onMessage, kể cả của chính mình) hoặc fallback REST.
   send: (text) => {
     const body = (text || '').trim();
     const supplierId = get().context?.supplier?.id;
     if (!body || !supplierId) return;
 
+    if (!USE_MOCK) {
+      const conversationId = get().conversationIdBySupplier[supplierId];
+      if (!conversationId) return; // hội thoại chưa tạo xong (đang loadRealConversation) — bỏ qua, tránh gửi lạc
+      const sentViaSocket = sendViaSocket(conversationId, { content: body });
+      if (!sentViaSocket) {
+        api.sendMessage({ conversationId, content: body }).then((m) => {
+          const myUserId = useAuthStore.getState().user?.id;
+          set((s) => ({ conversations: pushMsgDedup(s.conversations, supplierId, toUiMessage(m, myUserId)) }));
+        });
+      }
+      return;
+    }
+
     const msg = { id: nextId(), sender: 'user', text: body, at: new Date().toISOString(), status: 'sending' };
     set((s) => ({ conversations: pushMsg(s.conversations, supplierId, msg) }));
 
-    // Giả lập đã gửi tới server
     setTimeout(() => {
       set((s) => ({ conversations: patchMsg(s.conversations, supplierId, msg.id, { status: 'sent' }), typing: true }));
     }, 350);
 
-    // Giả lập NCC trả lời
     setTimeout(() => {
       const reply = { id: nextId(), sender: 'supplier', text: mockReply(body), at: new Date().toISOString() };
       set((s) => ({
         typing: false,
-        conversations: patchMsg(
-          // đánh dấu tin user đã 'seen' khi NCC trả lời
-          pushMsg(s.conversations, supplierId, reply),
-          supplierId,
-          msg.id,
-          { status: 'seen' }
-        ),
+        conversations: patchMsg(pushMsg(s.conversations, supplierId, reply), supplierId, msg.id, { status: 'seen' }),
       }));
     }, 1500);
   },
 
-  // Gửi lại tin bị lỗi (UI gọi khi status==='error')
+  // Gửi lại tin bị lỗi (UI gọi khi status==='error') — chỉ có ý nghĩa ở mock (chế độ thật không tự set 'error').
   retry: (messageId) => {
     const supplierId = get().context?.supplier?.id;
     if (!supplierId) return;
     set((s) => ({ conversations: patchMsg(s.conversations, supplierId, messageId, { status: 'sent' }) }));
   },
 }));
+
+// ---- Chế độ THẬT: tạo/lấy hội thoại + tải lịch sử + subscribe socket ----
+function loadRealConversation(get, set, supplier, productId) {
+  ensureConnected();
+  ensureSubscribed(get, set);
+
+  api.startConversation({ supplierId: supplier.id, productId: productId ?? undefined }).then(async (conv) => {
+    set((s) => ({ conversationIdBySupplier: { ...s.conversationIdBySupplier, [supplier.id]: conv.id } }));
+    const myUserId = useAuthStore.getState().user?.id;
+    const page = await api.getMessages({ conversationId: conv.id });
+    const items = [...(page.content ?? [])].reverse().map((m) => toUiMessage(m, myUserId)); // BE trả mới nhất trước → đảo lại
+    set((s) => ({ conversations: { ...s.conversations, [supplier.id]: items } }));
+    api.markAsRead(conv.id).catch(() => {});
+  });
+}
+
+// Đăng ký DUY NHẤT 1 lần nhận tin từ chatSocket, định tuyến theo conversationId đã biết.
+let subscribed = false;
+function ensureSubscribed(get, set) {
+  if (subscribed) return;
+  subscribed = true;
+  onMessage((m) => {
+    const bySupplier = get().conversationIdBySupplier;
+    const supplierId = Object.keys(bySupplier).find((sid) => bySupplier[sid] === m.conversationId);
+    if (!supplierId) return; // tin của hội thoại chưa mở ở khung chat này (vd hộp thư Portal xử lý riêng)
+    const myUserId = useAuthStore.getState().user?.id;
+    set((s) => ({ conversations: pushMsgDedup(s.conversations, supplierId, toUiMessage(m, myUserId)) }));
+  });
+}
 
 // ---- helpers thuần (không phụ thuộc store) ----
 const welcome = (name) => ({
@@ -125,6 +171,13 @@ const pushMsg = (conversations, supplierId, msg) => ({
   ...conversations,
   [supplierId]: [...(conversations[supplierId] ?? []), msg],
 });
+
+// Giống pushMsg nhưng bỏ qua nếu id đã có sẵn — tránh trùng khi socket đẩy lại tin đã tải qua getMessages.
+const pushMsgDedup = (conversations, supplierId, msg) => {
+  const list = conversations[supplierId] ?? [];
+  if (list.some((m) => m.id === msg.id)) return conversations;
+  return { ...conversations, [supplierId]: [...list, msg] };
+};
 
 const patchMsg = (conversations, supplierId, id, patch) => ({
   ...conversations,

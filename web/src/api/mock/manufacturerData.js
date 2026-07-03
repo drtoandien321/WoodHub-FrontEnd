@@ -3,7 +3,7 @@
  * nhiều chi nhánh, KHÔNG custom). Self-contained để dựng UI trước; khi có BE thì thay bằng API
  * (giữ shape camelCase). Tiền là số nguyên VND (format bằng formatVnd).
  *
- * ⚠️ Đây là portal khác với /portal cũ (workshop-ish). Không đụng tới supplierData.js.
+ * (Portal cũ /portal + supplierData.js đã xoá — chỉ còn portal này và portal workshop.)
  */
 
 // ---- Hồ sơ doanh nghiệp ----

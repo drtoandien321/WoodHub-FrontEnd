@@ -55,9 +55,12 @@ export default function GoogleAuthButton({ mode = 'login' }) {
     setError('');
     setLoading(true);
     try {
-      const { token, user } = await api.loginWithGoogle({ idToken });
-      setAuth({ token, user });
-      navigate(redirectPathForRole(user.role, location.state?.from?.pathname), { replace: true });
+      const { token, refreshToken, user } = await api.loginWithGoogle({ idToken });
+      setAuth({ token, refreshToken, user });
+      navigate(
+        user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType),
+        { replace: true }
+      );
     } catch {
       setError(t('auth.google.error'));
     } finally {

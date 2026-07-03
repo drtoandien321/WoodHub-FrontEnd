@@ -12,9 +12,18 @@ export const useAuthStore = create(
   persist(
     (set) => ({
       token: null,
-      user: null, // { id, name, email, role: 'customer' | 'supplier' | 'admin' }
-      setAuth: ({ token, user }) => set({ token, user }),
-      logout: () => set({ token: null, user: null }),
+      refreshToken: null, // dùng cho POST /auth/refresh khi access token hết hạn (xem api/client.js)
+      // user: { id, name, email, role: 'customer'|'supplier'|'admin', customerType?: 'individual'|'business',
+      //         mustChangePassword?: boolean — true = tài khoản do admin tạo (vd supplier), phải đổi mật khẩu
+      //         trước khi dùng Portal (xem routes/ProtectedRoute.jsx + pages/ChangePasswordRequired.jsx) }
+      user: null,
+      setAuth: ({ token, refreshToken, user }) => set({ token, refreshToken, user }),
+      // Gọi sau khi đổi mật khẩu bắt buộc thành công — bỏ cờ để ProtectedRoute cho vào Portal
+      clearMustChangePassword: () =>
+        set((s) => ({ user: s.user ? { ...s.user, mustChangePassword: false } : s.user })),
+      // Cập nhật 1 phần user (vd sau khi sửa fullName/phone ở Profile) — không đụng token/refreshToken
+      patchUser: (patch) => set((s) => ({ user: s.user ? { ...s.user, ...patch } : s.user })),
+      logout: () => set({ token: null, refreshToken: null, user: null }),
     }),
     { name: 'woodhub-auth' }
   )

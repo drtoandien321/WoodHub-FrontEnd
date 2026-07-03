@@ -23,7 +23,7 @@ export const woodSvg = (c1, c2, label) =>
  * Bảng dịch danh mục & vật liệu — dùng lại cho từng sản phẩm để không lặp chuỗi.
  * id giữ đúng như mockapi (cat_*, mat_*).
  */
-const CATEGORY_NAMES = {
+export const CATEGORY_NAMES = {
   cat_dining: { vi: 'Bàn ăn', en: 'Dining Tables' },
   cat_storage: { vi: 'Kệ & Tủ', en: 'Storage & Cabinets' },
   cat_chair: { vi: 'Ghế', en: 'Chairs' },
@@ -32,7 +32,7 @@ const CATEGORY_NAMES = {
   cat_table: { vi: 'Bàn trà', en: 'Coffee Tables' },
 };
 
-const MATERIAL_NAMES = {
+export const MATERIAL_NAMES = {
   mat_oak: { vi: 'Gỗ sồi', en: 'Oak' },
   mat_walnut: { vi: 'Gỗ óc chó', en: 'Walnut' },
   mat_rubberwood: { vi: 'Gỗ cao su', en: 'Rubberwood' },

@@ -1,15 +1,10 @@
-import { MapPin, Star, Bolt, Sofa, Cabinet, Tree, Layers } from './icons.jsx';
+import { Layers, Store, Tree } from './icons.jsx';
 
-// Icon gợi nhớ cho từng chip (theo id filter). id 'all' không có icon.
+// Icon gợi nhớ cho từng chip lọc loại supplier (retailer/workshop — khớp param `type` của BE).
 const FILTER_ICONS = {
-  near: MapPin,
-  topRated: Star,
-  fast: Bolt,
-  chairs: Sofa,
-  cabinets: Cabinet,
-  oak: Tree,
-  hcm: MapPin,
   all: Layers,
+  retailer: Store,
+  workshop: Tree,
 };
 
 /*

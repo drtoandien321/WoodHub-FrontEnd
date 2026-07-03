@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import SiteLayout from './components/layout/SiteLayout.jsx';
-import PortalLayout from './components/layout/PortalLayout.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
@@ -25,6 +24,9 @@ const Profile = lazy(() => import('./pages/Profile.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
 const VerifyOtp = lazy(() => import('./pages/VerifyOtp.jsx'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
+const ChangePasswordRequired = lazy(() => import('./pages/ChangePasswordRequired.jsx'));
 const CustomSelect = lazy(() => import('./pages/CustomSelect.jsx'));
 const CustomConfigure = lazy(() => import('./pages/CustomConfigure.jsx'));
 const CustomModels = lazy(() => import('./pages/CustomModels.jsx'));
@@ -39,10 +41,6 @@ const Contact = lazy(() => import('./pages/Contact.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 const Forbidden = lazy(() => import('./pages/Forbidden.jsx'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'));
-const PortalDashboard = lazy(() => import('./pages/portal/PortalDashboard.jsx'));
-const PortalStore = lazy(() => import('./pages/portal/PortalStore.jsx'));
-const PortalProducts = lazy(() => import('./pages/portal/PortalProducts.jsx'));
-const PortalOrders = lazy(() => import('./pages/portal/PortalOrders.jsx'));
 // Portal Nhà cung cấp (manufacturer) — khu vực mới /portal/supplier/*
 const SupplierPortalLayout = lazy(() => import('./components/layout/SupplierPortalLayout.jsx'));
 const SupplierDashboard = lazy(() => import('./pages/supplier/SupplierDashboard.jsx'));
@@ -88,6 +86,14 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* Ép đổi mật khẩu (tài khoản supplier do admin tạo) — cần đăng nhập, không cần role cụ thể.
+            ProtectedRoute tự redirect vào đây nếu user.mustChangePassword=true (xem routes/ProtectedRoute.jsx) */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/change-password" element={<ChangePasswordRequired />} />
+        </Route>
 
         {/* Các trang còn lại dùng SiteLayout (header + footer) qua nested route */}
         <Route element={<SiteLayout />}>
@@ -100,7 +106,8 @@ export default function App() {
           <Route path="/custom/models/:slug" element={<CustomModelViewer />} />
           <Route path="/custom/configure/:type" element={<CustomConfigure />} />
           <Route path="/suppliers" element={<Suppliers />} />
-          <Route path="/suppliers/:slug" element={<SupplierProfile />} />
+          {/* BE không có slug — định danh bằng UUID */}
+          <Route path="/suppliers/:id" element={<SupplierProfile />} />
           <Route path="/b2b" element={<B2b />} />
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
@@ -124,15 +131,10 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
 
-        {/* Supplier Portal: layout riêng (sidebar + topbar), chỉ role supplier */}
+        {/* Supplier Portal: layout riêng (sidebar + topbar), chỉ role supplier.
+            /portal trần (portal cũ đã xoá) → đưa về portal nhà cung cấp cho link cũ khỏi 404. */}
         <Route element={<ProtectedRoute allow={['supplier']} />}>
-          {/* Portal cũ (giữ nguyên — workshop sẽ dùng/đổi sau) */}
-          <Route path="/portal" element={<PortalLayout />}>
-            <Route index element={<PortalDashboard />} />
-            <Route path="store" element={<PortalStore />} />
-            <Route path="products" element={<PortalProducts />} />
-            <Route path="orders" element={<PortalOrders />} />
-          </Route>
+          <Route path="/portal" element={<Navigate to="/portal/supplier/dashboard" replace />} />
 
           {/* Portal Nhà cung cấp (manufacturer): /portal/supplier/* */}
           <Route path="/portal/supplier" element={<SupplierPortalLayout />}>

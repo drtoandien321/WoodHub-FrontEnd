@@ -5,12 +5,18 @@ import { api } from '../api/client.js';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
-import { UserIcon, MailIcon, PhoneIcon, LockIcon } from '../components/ui/icons.jsx';
+import { UserIcon, MailIcon, PhoneIcon, LockIcon, BuildingIcon } from '../components/ui/icons.jsx';
 
 /*
  * Register — CHỈ đăng ký khách hàng (customer). BE luôn tạo role=customer + yêu cầu xác thực email.
  * Luồng: submit → BE gửi OTP → chuyển /verify-otp (không auto-login).
- * Biến thể ?type=business: vẫn là tài khoản customer, chỉ đổi nhãn + thêm trường doanh nghiệp.
+ *
+ * Biến thể ?type=business: customerType='business' + 3 field doanh nghiệp (companyName/taxCode/
+ * companyAddress) gửi kèm — BE validate các field này là bắt buộc khi customerType=business
+ * (không phải ở DTO, nên FE tự đánh dấu required trên UI cho rõ ràng).
+ * ⚠️ Trước đây field "name" bị dùng lẫn lộn làm cả tên người lẫn tên công ty tuỳ biến thể —
+ * đã tách rõ: "name" LUÔN là họ tên người đăng ký (BE yêu cầu fullName ở mọi trường hợp),
+ * "companyName" là field RIÊNG chỉ hiện khi đăng ký doanh nghiệp.
  */
 export default function Register() {
   const navigate = useNavigate();
@@ -18,7 +24,10 @@ export default function Register() {
   const [searchParams] = useSearchParams();
   const isBusiness = searchParams.get('type') === 'business';
 
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '', password: '',
+    companyName: '', taxCode: '', companyAddress: '',
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,13 +36,17 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      // BE chỉ nhận email/password/fullName/phone (role luôn = customer).
-      // Tài khoản doanh nghiệp cũng là customer — "name" chính là tên doanh nghiệp.
       const body = {
         name: form.name,
         email: form.email,
         phone: form.phone,
         password: form.password,
+        customerType: isBusiness ? 'business' : 'individual',
+        ...(isBusiness && {
+          companyName: form.companyName,
+          taxCode: form.taxCode,
+          companyAddress: form.companyAddress,
+        }),
       };
       await api.register(body);
       // register KHÔNG còn trả token — sang màn nhập OTP, mang theo email
@@ -60,13 +73,23 @@ export default function Register() {
         <AuthField
           icon={UserIcon}
           required
-          placeholder={isBusiness ? t('auth.register.companyNamePlaceholder') : t('auth.register.namePlaceholder')}
+          placeholder={t('auth.register.namePlaceholder')}
           value={form.name}
           onChange={set('name')}
         />
         <AuthField icon={MailIcon} type="email" required placeholder={t('auth.register.emailPlaceholder')} value={form.email} onChange={set('email')} />
         <AuthField icon={PhoneIcon} type="tel" required placeholder={t('auth.register.phonePlaceholder')} value={form.phone} onChange={set('phone')} />
         <AuthField icon={LockIcon} password required minLength={6} placeholder={t('auth.register.passwordPlaceholder')} value={form.password} onChange={set('password')} />
+
+        {/* Chỉ hiện khi đăng ký doanh nghiệp (?type=business) — gửi kèm customerType='business' */}
+        {isBusiness && (
+          <>
+            <div className="divider my-0 text-xs text-base-content/40">{t('auth.register.businessSectionTitle')}</div>
+            <AuthField icon={BuildingIcon} required placeholder={t('auth.register.companyNamePlaceholder')} value={form.companyName} onChange={set('companyName')} />
+            <AuthField icon={BuildingIcon} placeholder={t('auth.register.taxCodePlaceholder')} value={form.taxCode} onChange={set('taxCode')} />
+            <AuthField icon={BuildingIcon} placeholder={t('auth.register.companyAddressPlaceholder')} value={form.companyAddress} onChange={set('companyAddress')} />
+          </>
+        )}
 
         {error && <p className="text-error text-sm">{error}</p>}
         <button

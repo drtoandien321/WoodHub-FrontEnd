@@ -45,12 +45,8 @@ export const useWorkshopMatch = (designId) =>
     enabled: !!designId,
   });
 
-export const useWorkshops = () =>
-  useQuery({ queryKey: ['workshops'], queryFn: api.getWorkshops });
-
-// Hồ sơ 1 xưởng theo slug — dùng ở trang /suppliers/:slug. retry:false để 404 hiện empty state ngay.
-export const useWorkshop = (slug) =>
-  useQuery({ queryKey: ['workshop', slug], queryFn: () => api.getWorkshop(slug), enabled: !!slug, retry: false });
+// (Đã chuyển sang hooks/usePublicSuppliers.js — usePublicSuppliers/useSupplierPublicProfile —
+// khớp đúng shape SupplierPublicResponse của BE thật, không dùng slug mà dùng UUID.)
 
 export const usePlans = () =>
   useQuery({ queryKey: ['plans'], queryFn: api.getPlans });

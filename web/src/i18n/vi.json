@@ -64,8 +64,20 @@
   "profile": {
     "title": "Thông tin cá nhân",
     "name": "Họ tên",
+    "phone": "Số điện thoại",
     "email": "Email",
-    "role": "Vai trò"
+    "role": "Vai trò",
+    "save": "Lưu thay đổi",
+    "saved": "Đã lưu ✓",
+    "saveError": "Không lưu được thông tin. Vui lòng thử lại.",
+    "changePasswordTitle": "Đổi mật khẩu",
+    "currentPasswordPlaceholder": "Mật khẩu hiện tại",
+    "newPasswordPlaceholder": "Mật khẩu mới (≥ 6 ký tự)",
+    "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+    "changePasswordSubmit": "Đổi mật khẩu",
+    "passwordMismatch": "Mật khẩu nhập lại không khớp.",
+    "passwordError": "Không đổi được mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.",
+    "passwordChanged": "Đổi mật khẩu thành công."
   },
   "auth": {
     "login": {
@@ -80,7 +92,7 @@
       "registerLink": "Đăng ký",
       "selectRole": "Đăng nhập với vai trò",
       "testAccountsTitle": "Tài khoản test (chế độ demo)",
-      "testAccountsHint": "ncc@woodhub.vn → Nhà cung cấp · xuong@woodhub.vn → Xưởng mộc · admin@woodhub.vn → Quản trị. Mật khẩu bất kỳ (≥ 6 ký tự). Email khác = Khách hàng."
+      "testAccountsHint": "ncc@woodhub.vn → Nhà cung cấp · xuong@woodhub.vn → Xưởng mộc · newsupplier@woodhub.vn → NCC mới (demo bắt đổi mật khẩu) · admin@woodhub.vn → Quản trị. Mật khẩu bất kỳ (≥ 6 ký tự). Email khác = Khách hàng."
     },
     "roles": {
       "customer": "Khách hàng",
@@ -99,7 +111,10 @@
       "loginLink": "Đăng nhập",
       "businessTitle": "Tạo tài khoản doanh nghiệp",
       "businessSubtitle": "Dành cho doanh nghiệp mua số lượng lớn — nhận báo giá & xuất hóa đơn VAT.",
-      "companyNamePlaceholder": "Tên doanh nghiệp"
+      "businessSectionTitle": "Thông tin doanh nghiệp",
+      "companyNamePlaceholder": "Tên doanh nghiệp",
+      "taxCodePlaceholder": "Mã số thuế (không bắt buộc)",
+      "companyAddressPlaceholder": "Địa chỉ doanh nghiệp (không bắt buộc)"
     },
     "divider": "Hoặc",
     "google": {
@@ -117,6 +132,35 @@
       "error": "Mã không đúng hoặc đã hết hạn.",
       "resent": "Đã gửi lại mã mới tới email của bạn.",
       "missingEmail": "Thiếu thông tin email — vui lòng đăng ký lại."
+    },
+    "forgotPassword": {
+      "title": "Quên mật khẩu",
+      "subtitle": "Nhập email đã đăng ký, chúng tôi sẽ gửi mã xác nhận để đặt lại mật khẩu.",
+      "emailPlaceholder": "Nhập email của bạn",
+      "submit": "Gửi mã xác nhận",
+      "error": "Không gửi được mã. Vui lòng kiểm tra lại email.",
+      "backToLogin": "Quay lại đăng nhập"
+    },
+    "resetPassword": {
+      "title": "Đặt lại mật khẩu",
+      "subtitle": "Nhập mã đã gửi tới {{email}} và mật khẩu mới",
+      "newPasswordPlaceholder": "Mật khẩu mới (≥ 6 ký tự)",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+      "submit": "Đặt lại mật khẩu",
+      "error": "Mã không đúng hoặc đã hết hạn.",
+      "mismatch": "Mật khẩu nhập lại không khớp.",
+      "missingEmail": "Thiếu thông tin email — vui lòng thực hiện lại từ bước quên mật khẩu."
+    },
+    "changePasswordRequired": {
+      "title": "Đổi mật khẩu",
+      "subtitle": "Tài khoản của bạn được tạo bởi quản trị viên — vui lòng đổi mật khẩu tạm trước khi tiếp tục.",
+      "currentPasswordPlaceholder": "Mật khẩu tạm (đã gửi qua email)",
+      "newPasswordPlaceholder": "Mật khẩu mới (≥ 6 ký tự)",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+      "submit": "Xác nhận đổi mật khẩu",
+      "error": "Không đổi được mật khẩu. Vui lòng kiểm tra lại mật khẩu tạm.",
+      "mismatch": "Mật khẩu nhập lại không khớp.",
+      "logout": "Đăng xuất"
     }
   },
   "suppliers": {
@@ -170,9 +214,12 @@
       "warranty": "Bảo hành dài hạn"
     },
     "sectionCapabilities": "Năng lực sản xuất",
+    "sectionBranches": "Chi nhánh",
     "sectionPortfolio": "Portfolio",
     "sectionReviews": "Đánh giá khách hàng",
     "sectionWorkflow": "Quy trình làm việc",
+    "typeFilters": { "all": "Tất cả", "retailer": "Nhà cung cấp", "workshop": "Xưởng mộc" },
+    "noContact": "Nhà cung cấp chưa cập nhật thông tin liên hệ.",
     "viewAll": "Xem tất cả",
     "viewAllReviews": "Xem tất cả đánh giá",
     "cap": { "specialty": "Chuyên môn", "capacity": "Công suất sản xuất", "serviceArea": "Khu vực phục vụ", "products": "Sản phẩm hỗ trợ", "wood": "Gỗ hỗ trợ" },

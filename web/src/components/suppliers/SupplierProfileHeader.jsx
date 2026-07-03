@@ -1,46 +1,45 @@
 import { useTranslation } from 'react-i18next';
 import SafeImage from './SafeImage.jsx';
 import LogoBadge from './LogoBadge.jsx';
-import { MapPin, CheckCircle, Star, Calendar, Clock, MessageCircle, Award, Send } from './icons.jsx';
+import Stars from './Stars.jsx';
+import { MessageCircle, Send } from './icons.jsx';
 
 /*
- * Header hồ sơ xưởng: banner + logo đè lên, thông tin chính, dải stats và 2 CTA.
- * Hành động đẩy lên trang cha qua onOrderCustom/onContact để tách logic khỏi UI.
+ * Header hồ sơ supplier: banner (gradient — BE không có field ảnh cover) + logo đè lên,
+ * tên + loại + mô tả, và 2 CTA. Đã bỏ badge "verified" + dải stats (rating/đơn hoàn thành/
+ * thời gian sản xuất/phản hồi/kinh nghiệm) — KHÔNG field nào trong số này tồn tại ở
+ * SupplierPublicResponse. reviewSummary (average/count) là dữ liệu THẬT duy nhất còn giữ được,
+ * lấy riêng qua /api/reviews/summary — chỉ hiện khi count > 0.
  */
-export default function SupplierProfileHeader({ supplier, onOrderCustom, onContact }) {
+export default function SupplierProfileHeader({ supplier, reviewSummary, onOrderCustom, onContact }) {
   const { t } = useTranslation();
-
-  const stats = [
-    { icon: Star, value: supplier.rating, label: t('suppliers.reviewsCount', { count: supplier.reviewCount }) },
-    { icon: Calendar, value: supplier.ordersDisplay, label: t('suppliers.headerStats.ordersDone') },
-    { icon: Clock, value: `${supplier.leadTimeLabel} ${t('suppliers.headerStats.perOrder')}`, label: t('suppliers.headerStats.production') },
-    { icon: MessageCircle, value: `~${supplier.responseTime}`, label: t('suppliers.headerStats.response') },
-    { icon: Award, value: supplier.experience, label: t('suppliers.headerStats.experience') },
-  ];
 
   return (
     <section className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-      {/* Banner */}
-      <SafeImage src={supplier.cover} alt={supplier.name} className="h-44 w-full md:h-56" />
+      <SafeImage alt={supplier.businessName} className="h-32 w-full md:h-40" />
 
       <div className="px-5 pb-5 md:px-7 md:pb-7">
-        {/* Hàng thông tin chính: logo + tên + CTA */}
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <LogoBadge name={supplier.name} className="-mt-12 h-24 w-24 shrink-0 rounded-2xl border-4 border-base-100 text-2xl shadow-md md:-mt-16 md:h-28 md:w-28" />
+            <LogoBadge
+              name={supplier.businessName}
+              className="-mt-10 h-24 w-24 shrink-0 rounded-2xl border-4 border-base-100 text-2xl shadow-md md:-mt-12 md:h-28 md:w-28"
+            />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-display text-2xl md:text-3xl">{supplier.name}</h1>
-                {supplier.verified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-1 text-xs font-medium text-success">
-                    <CheckCircle width={13} height={13} /> {t('suppliers.verified')}
-                  </span>
-                )}
+                <h1 className="font-display text-2xl md:text-3xl">{supplier.businessName}</h1>
+                <span className="rounded-full bg-base-200 px-2.5 py-1 text-xs font-medium text-base-content/70">
+                  {t(`suppliers.typeFilters.${supplier.type}`)}
+                </span>
               </div>
-              <p className="mt-1 flex items-center gap-1 text-sm text-base-content/60">
-                <MapPin width={14} height={14} /> {supplier.district}
-              </p>
-              <p className="mt-2 max-w-2xl text-sm text-base-content/75">{supplier.description}</p>
+              {reviewSummary?.count > 0 && (
+                <p className="mt-1.5 flex items-center gap-1.5 text-sm">
+                  <Stars value={reviewSummary.average} size={14} />
+                  <span className="font-medium">{reviewSummary.average.toFixed(1)}</span>
+                  <span className="text-base-content/50">{t('suppliers.reviewsCount', { count: reviewSummary.count })}</span>
+                </p>
+              )}
+              {supplier.description && <p className="mt-2 max-w-2xl text-sm text-base-content/75">{supplier.description}</p>}
             </div>
           </div>
 
@@ -52,21 +51,6 @@ export default function SupplierProfileHeader({ supplier, onOrderCustom, onConta
               <MessageCircle width={16} height={16} /> {t('suppliers.contactConsult')}
             </button>
           </div>
-        </div>
-
-        {/* Dải stats */}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {stats.map((s) => (
-            <div key={s.label} className="flex items-center gap-2.5 rounded-2xl bg-base-200/60 p-3">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                <s.icon width={18} height={18} />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-base font-semibold leading-tight">{s.value}</p>
-                <p className="truncate text-xs text-base-content/55">{s.label}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>

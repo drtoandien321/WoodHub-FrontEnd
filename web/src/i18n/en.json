@@ -64,8 +64,20 @@
   "profile": {
     "title": "My profile",
     "name": "Full name",
+    "phone": "Phone number",
     "email": "Email",
-    "role": "Role"
+    "role": "Role",
+    "save": "Save changes",
+    "saved": "Saved ✓",
+    "saveError": "Couldn't save your info. Please try again.",
+    "changePasswordTitle": "Change password",
+    "currentPasswordPlaceholder": "Current password",
+    "newPasswordPlaceholder": "New password (6+ characters)",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "changePasswordSubmit": "Change password",
+    "passwordMismatch": "Passwords do not match.",
+    "passwordError": "Couldn't change password. Please check your current password.",
+    "passwordChanged": "Password changed successfully."
   },
   "auth": {
     "login": {
@@ -80,7 +92,7 @@
       "registerLink": "Sign up",
       "selectRole": "Log in as",
       "testAccountsTitle": "Test accounts (demo mode)",
-      "testAccountsHint": "ncc@woodhub.vn → Manufacturer · xuong@woodhub.vn → Workshop · admin@woodhub.vn → Admin. Use any password (6+ chars). Any other email = Customer."
+      "testAccountsHint": "ncc@woodhub.vn → Manufacturer · xuong@woodhub.vn → Workshop · newsupplier@woodhub.vn → New supplier (demo forced password change) · admin@woodhub.vn → Admin. Use any password (6+ chars). Any other email = Customer."
     },
     "roles": {
       "customer": "Customer",
@@ -99,7 +111,10 @@
       "loginLink": "Log in",
       "businessTitle": "Create a business account",
       "businessSubtitle": "For businesses buying in bulk — get quotes & VAT invoices.",
-      "companyNamePlaceholder": "Company name"
+      "businessSectionTitle": "Business information",
+      "companyNamePlaceholder": "Company name",
+      "taxCodePlaceholder": "Tax code (optional)",
+      "companyAddressPlaceholder": "Company address (optional)"
     },
     "divider": "Or",
     "google": {
@@ -117,6 +132,35 @@
       "error": "Invalid or expired code.",
       "resent": "A new code has been sent to your email.",
       "missingEmail": "Missing email — please register again."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your registered email and we'll send you a code to reset your password.",
+      "emailPlaceholder": "Enter your email",
+      "submit": "Send code",
+      "error": "Couldn't send the code. Please check your email.",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "subtitle": "Enter the code sent to {{email}} and your new password",
+      "newPasswordPlaceholder": "New password (6+ characters)",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "submit": "Reset password",
+      "error": "Invalid or expired code.",
+      "mismatch": "Passwords do not match.",
+      "missingEmail": "Missing email — please start again from Forgot Password."
+    },
+    "changePasswordRequired": {
+      "title": "Change password",
+      "subtitle": "Your account was created by an administrator — please change your temporary password before continuing.",
+      "currentPasswordPlaceholder": "Temporary password (sent via email)",
+      "newPasswordPlaceholder": "New password (6+ characters)",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "submit": "Confirm password change",
+      "error": "Couldn't change password. Please check your temporary password.",
+      "mismatch": "Passwords do not match.",
+      "logout": "Log out"
     }
   },
   "suppliers": {
@@ -170,9 +214,12 @@
       "warranty": "Long-term warranty"
     },
     "sectionCapabilities": "Production capabilities",
+    "sectionBranches": "Branches",
     "sectionPortfolio": "Portfolio",
     "sectionReviews": "Customer reviews",
     "sectionWorkflow": "How we work",
+    "typeFilters": { "all": "All", "retailer": "Supplier", "workshop": "Workshop" },
+    "noContact": "This supplier hasn't added contact info yet.",
     "viewAll": "View all",
     "viewAllReviews": "View all reviews",
     "cap": { "specialty": "Specialty", "capacity": "Production capacity", "serviceArea": "Service area", "products": "Supported products", "wood": "Supported wood" },

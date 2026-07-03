@@ -28,9 +28,13 @@ export default function Login() {
     setLoading(true);
     try {
       // Role do BE/mock tự xác định (mock: theo email test, mặc định customer) — FE không gửi role
-      const { token, user } = await api.login(form);
-      setAuth({ token, user });
-      navigate(redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType), { replace: true });
+      const { token, refreshToken, user } = await api.login(form);
+      setAuth({ token, refreshToken, user });
+      // Tài khoản supplier do admin tạo (mật khẩu tạm) → ép đổi mật khẩu trước, chưa vào Portal
+      navigate(
+        user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType),
+        { replace: true }
+      );
     } catch (err) {
       // BE trả 403 khi email chưa xác thực → đưa sang màn nhập OTP
       if (err?.response?.status === 403) {
@@ -63,10 +67,9 @@ export default function Login() {
           <AuthField icon={LockIcon} password required minLength={6} placeholder={t('auth.login.passwordPlaceholder')}
             value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           <div className="text-right mt-2">
-            {/* Chưa có luồng quên mật khẩu — link để sẵn cho V1 */}
-            <button type="button" className="text-sm font-medium text-primary hover:underline cursor-pointer">
+            <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
               {t('auth.login.forgotPassword')}
-            </button>
+            </Link>
           </div>
         </div>
         {error && <p className="text-error text-sm">{error}</p>}

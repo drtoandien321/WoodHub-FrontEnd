@@ -48,9 +48,9 @@ export default function VerifyOtp() {
     setError('');
     setLoading(true);
     try {
-      const { token, user } = await api.verifyOtp({ email, code });
-      setAuth({ token, user });
-      navigate(redirectPathForRole(user.role), { replace: true });
+      const { token, refreshToken, user } = await api.verifyOtp({ email, code });
+      setAuth({ token, refreshToken, user });
+      navigate(user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role), { replace: true });
     } catch (err) {
       setError(err?.response?.data?.message || t('auth.otp.error'));
     } finally {

@@ -27,11 +27,16 @@ export const ORDER_STEPS = [
   { key: 'completed', label: 'Hoàn tất' },
 ];
 
+/*
+ * Khớp đúng enum ProductStatus của BE thật: draft | active | hidden.
+ * ⚠️ Trước đây có thêm "low"/"out" (sắp hết hàng/hết hàng) — đó là suy diễn từ TỒN KHO,
+ * một khái niệm THUỘC MODULE KHÁC (Store Inventory — theo cặp chi nhánh×variant, xem
+ * StoreInventoryController), KHÔNG phải trạng thái của Product. Bỏ 2 giá trị đó ở đây.
+ */
 export const PRODUCT_STATUS = {
+  draft: { label: 'Nháp', cls: PASTEL.neutral },
   active: { label: 'Đang bán', cls: PASTEL.success },
-  low: { label: 'Sắp hết hàng', cls: PASTEL.warning },
-  out: { label: 'Hết hàng', cls: PASTEL.error },
-  hidden: { label: 'Đang ẩn', cls: PASTEL.neutral },
+  hidden: { label: 'Đang ẩn', cls: PASTEL.warning },
 };
 
 export const BRANCH_STATUS = {
