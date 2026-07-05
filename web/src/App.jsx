@@ -40,7 +40,14 @@ const Pricing = lazy(() => import('./pages/Pricing.jsx'));
 const Contact = lazy(() => import('./pages/Contact.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 const Forbidden = lazy(() => import('./pages/Forbidden.jsx'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'));
+// Portal Quản trị viên — /admin/*
+const AdminPortalLayout = lazy(() => import('./components/layout/AdminPortalLayout.jsx'));
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories.jsx'));
+const AdminMaterials = lazy(() => import('./pages/admin/AdminMaterials.jsx'));
+const AdminSuppliers = lazy(() => import('./pages/admin/AdminSuppliers.jsx'));
+const AdminSupplierDetail = lazy(() => import('./pages/admin/AdminSupplierDetail.jsx'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers.jsx'));
+const AdminUserDetail = lazy(() => import('./pages/admin/AdminUserDetail.jsx'));
 // Portal Nhà cung cấp (manufacturer) — khu vực mới /portal/supplier/*
 const SupplierPortalLayout = lazy(() => import('./components/layout/SupplierPortalLayout.jsx'));
 const SupplierDashboard = lazy(() => import('./pages/supplier/SupplierDashboard.jsx'));
@@ -122,11 +129,6 @@ export default function App() {
             <Route path="/custom/match/:designId" element={<WorkshopMatch />} />
           </Route>
 
-          {/* allow=['admin']: chỉ role admin vào được, role khác bị đẩy sang /403 */}
-          <Route element={<ProtectedRoute allow={['admin']} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Route>
-
           <Route path="/403" element={<Forbidden />} />
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -161,6 +163,19 @@ export default function App() {
             <Route path="reviews" element={<WorkshopReviews />} />
             <Route path="reports" element={<WorkshopReports />} />
             <Route path="settings" element={<WorkshopSettings />} />
+          </Route>
+        </Route>
+
+        {/* Portal Quản trị viên: layout riêng, chỉ role admin. */}
+        <Route element={<ProtectedRoute allow={['admin']} />}>
+          <Route path="/admin" element={<AdminPortalLayout />}>
+            <Route index element={<Navigate to="users" replace />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:id" element={<AdminUserDetail />} />
+            <Route path="categories" element={<AdminCategories />} />
+            <Route path="materials" element={<AdminMaterials />} />
+            <Route path="suppliers" element={<AdminSuppliers />} />
+            <Route path="suppliers/:id" element={<AdminSupplierDetail />} />
           </Route>
         </Route>
       </Routes>

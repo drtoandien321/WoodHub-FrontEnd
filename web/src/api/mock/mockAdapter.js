@@ -156,6 +156,73 @@ const CHAT_MESSAGES_KEY = 'woodhub:chat-messages-v1';
 let mockChatMessages = storage.getItem(CHAT_MESSAGES_KEY, []);
 const persistChatMessages = () => storage.setItem(CHAT_MESSAGES_KEY, mockChatMessages);
 
+/*
+ * "DB" cho CATEGORY (Portal Quản trị /admin/categories) — mutable, hỗ trợ cha-con thật để test
+ * cây trong chế độ mock. Seed từ CATEGORY_NAMES (bilingual, gốc là danh mục phẳng) — bản ghi mới
+ * do Admin tạo chỉ có tên đơn ngữ (giống CategoryResponse thật, BE không có i18n cho category).
+ */
+const MOCK_CATEGORIES_KEY = 'woodhub:admin-categories-v1';
+let mockCategories = storage.getItem(MOCK_CATEGORIES_KEY, null) ?? Object.entries(CATEGORY_NAMES).map(([id, name]) => ({
+  id, name: loc(name), slug: id.replace(/^cat_/, ''), parentId: null, createdAt: new Date().toISOString(),
+}));
+const persistMockCategories = () => storage.setItem(MOCK_CATEGORIES_KEY, mockCategories);
+
+const slugify = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/(^-+|-+$)/g, '');
+
+const buildCategoryTree = (items, parentId = null) =>
+  items.filter((c) => (c.parentId ?? null) === parentId).map((c) => ({
+    id: c.id, name: c.name, slug: c.slug, createdAt: c.createdAt, children: buildCategoryTree(items, c.id),
+  }));
+
+// Tra tên category theo id — ưu tiên bảng mutable (kể cả danh mục mới Admin vừa tạo), fallback
+// CATEGORY_NAMES song ngữ gốc — để dropdown chọn danh mục ở form Thêm sản phẩm (Portal Nhà cung
+// cấp) vẫn hiện đúng tên dù danh mục đó mới được Admin tạo trong phiên mock hiện tại.
+const categoryNameById = (id) => mockCategories.find((c) => c.id === id)?.name ?? loc(CATEGORY_NAMES[id]);
+
+/*
+ * "DB" cho MATERIAL (Portal Quản trị /admin/materials) — mảng mutable, giống category nhưng
+ * phẳng (không cha-con). Seed từ MATERIAL_NAMES (bilingual) — bản ghi mới do Admin tạo chỉ có
+ * tên đơn ngữ (giống MaterialResponse thật, BE không có i18n cho material).
+ */
+const MOCK_MATERIALS_KEY = 'woodhub:admin-materials-v1';
+let mockMaterials = storage.getItem(MOCK_MATERIALS_KEY, null) ?? Object.entries(MATERIAL_NAMES).map(([id, name]) => ({
+  id, name: loc(name), createdAt: new Date().toISOString(),
+}));
+const persistMockMaterials = () => storage.setItem(MOCK_MATERIALS_KEY, mockMaterials);
+
+const materialNameById = (id) => mockMaterials.find((m) => m.id === id)?.name ?? loc(MATERIAL_NAMES[id]);
+
+/*
+ * "DB" cho SUPPLIER quản trị (Portal Quản trị /admin/suppliers) — khác hẳn WORKSHOPS (dữ liệu
+ * browse công khai, phong phú nhưng thiếu field nội bộ). Bắt đầu RỖNG (không seed) — Admin tự
+ * tạo qua UI mới, giống trải nghiệm thật (admin tạo supplier từ đầu, không có sẵn "demo data").
+ */
+const MOCK_ADMIN_SUPPLIERS_KEY = 'woodhub:admin-suppliers-v1';
+let mockAdminSuppliers = storage.getItem(MOCK_ADMIN_SUPPLIERS_KEY, []);
+const persistMockAdminSuppliers = () => storage.setItem(MOCK_ADMIN_SUPPLIERS_KEY, mockAdminSuppliers);
+
+/*
+ * "DB" cho USER quản trị (Portal Quản trị /admin/users) — seed vài user mẫu + tự thêm user đang
+ * đăng nhập (nếu có) để demo sửa/xoá thấy có tác dụng thật trong phiên hiện tại.
+ */
+const MOCK_ADMIN_USERS_KEY = 'woodhub:admin-users-v1';
+const seedAdminUsers = () => {
+  const now = new Date().toISOString();
+  const base = [
+    { id: 'demo-u1', email: 'khach1@example.com', fullName: 'Nguyễn Văn A', phone: '0901111111', role: 'customer', customerType: 'individual', createdAt: now, updatedAt: now },
+    { id: 'demo-u2', email: 'doanhnghiep@example.com', fullName: 'Công ty TNHH ABC', phone: '0902222222', role: 'customer', customerType: 'business', createdAt: now, updatedAt: now },
+    { id: 'demo-u3', email: 'supplier@woodhub.vn', fullName: 'Nhà cung cấp Demo', phone: '0903333333', role: 'supplier', customerType: 'individual', createdAt: now, updatedAt: now },
+  ];
+  const me = useAuthStore.getState().user;
+  if (me?.id && !base.some((u) => u.id === me.id)) {
+    base.unshift({ id: me.id, email: me.email, fullName: me.name, phone: me.phone ?? '', role: me.role, customerType: me.customerType ?? 'individual', createdAt: now, updatedAt: now });
+  }
+  return base;
+};
+let mockAdminUsers = storage.getItem(MOCK_ADMIN_USERS_KEY, null) ?? seedAdminUsers();
+const persistMockAdminUsers = () => storage.setItem(MOCK_ADMIN_USERS_KEY, mockAdminUsers);
+
 const toStoreInventoryResponse = (inv) => {
   const found = findVariantWithProduct(inv.variantId);
   return {
@@ -284,9 +351,20 @@ export const mockAdapter = {
     };
   },
 
-  // PUT /users/{id} demo — chỉ trả lại giá trị vừa gửi lên (không cần "DB" riêng cho demo)
+  /*
+   * PUT /users/{id} — dùng chung cho Profile.jsx (tự sửa) VÀ Admin sửa hộ user khác
+   * (Portal Quản trị /admin/users). Ưu tiên tìm trong mockAdminUsers (để admin sửa user KHÁC
+   * mình vẫn thấy đúng email/role của NGƯỜI ĐÓ, không lộn sang thông tin của admin đang đăng
+   * nhập) — fallback về authStore khi user không có trong danh sách mock (tự sửa hồ sơ mình).
+   */
   async updateUser({ id, fullName, phone }) {
     await delay(400);
+    const idx = mockAdminUsers.findIndex((u) => u.id === id);
+    if (idx !== -1) {
+      mockAdminUsers[idx] = { ...mockAdminUsers[idx], fullName, phone, updatedAt: new Date().toISOString() };
+      persistMockAdminUsers();
+      return mockAdminUsers[idx];
+    }
     const user = useAuthStore.getState().user;
     return {
       id, fullName, phone,
@@ -367,28 +445,95 @@ export const mockAdapter = {
     return { ...enrichProductDetail(product), related: related.map(localizeProduct) };
   },
 
-  // ===== CATEGORY / MATERIAL — project CATEGORY_NAMES/MATERIAL_NAMES (id + tên song ngữ) xuống
-  // đúng shape CategoryResponse/MaterialResponse của BE thật (id/name/slug/createdAt) =====
+  // ===== CATEGORY (Portal Quản trị /admin/categories) — mảng mutable mockCategories, hỗ trợ cây thật =====
   async getCategories() {
     await delay(200);
-    return Object.entries(CATEGORY_NAMES).map(([id, name]) => ({
-      id, parentId: null, parentName: null, name: loc(name), slug: id.replace(/^cat_/, ''), createdAt: new Date().toISOString(),
+    return mockCategories.map((c) => ({
+      id: c.id, parentId: c.parentId,
+      parentName: c.parentId ? (mockCategories.find((p) => p.id === c.parentId)?.name ?? null) : null,
+      name: c.name, slug: c.slug, createdAt: c.createdAt,
     }));
   },
 
   async getCategoryTree() {
     await delay(200);
-    // Mock hiện không có phân cấp cha/con — trả cây phẳng (children rỗng), đúng shape CategoryTreeResponse
-    return Object.entries(CATEGORY_NAMES).map(([id, name]) => ({
-      id, name: loc(name), slug: id.replace(/^cat_/, ''), createdAt: new Date().toISOString(), children: [],
-    }));
+    return buildCategoryTree(mockCategories);
   },
 
+  async createCategory({ name, slug, parentId }) {
+    await delay(300);
+    if (parentId && !mockCategories.some((c) => c.id === parentId)) {
+      throw Object.assign(new Error('parentId không tồn tại'), { response: { status: 400, data: { message: 'Danh mục cha không tồn tại' } } });
+    }
+    const cat = { id: nextId('cat'), name: name.trim(), slug: slug?.trim() || slugify(name), parentId: parentId || null, createdAt: new Date().toISOString() };
+    mockCategories = [...mockCategories, cat];
+    persistMockCategories();
+    return { id: cat.id, parentId: cat.parentId, parentName: mockCategories.find((p) => p.id === cat.parentId)?.name ?? null, name: cat.name, slug: cat.slug, createdAt: cat.createdAt };
+  },
+
+  async updateCategory({ id, name, slug, parentId }) {
+    await delay(300);
+    const idx = mockCategories.findIndex((c) => c.id === id);
+    if (idx === -1) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    if (parentId && parentId === id) {
+      throw Object.assign(new Error('cycle'), { response: { status: 400, data: { message: 'Không thể chọn chính danh mục này làm danh mục cha' } } });
+    }
+    mockCategories[idx] = { ...mockCategories[idx], name: name.trim(), slug: slug?.trim() || mockCategories[idx].slug, parentId: parentId || null };
+    persistMockCategories();
+    const c = mockCategories[idx];
+    return { id: c.id, parentId: c.parentId, parentName: mockCategories.find((p) => p.id === c.parentId)?.name ?? null, name: c.name, slug: c.slug, createdAt: c.createdAt };
+  },
+
+  // Mô phỏng đúng 2 rủi ro thật của BE: category có sản phẩm dùng → 409 (chặn xoá);
+  // category có con → SET NULL (con tự thành gốc), không lỗi.
+  async deleteCategory(id) {
+    await delay(300);
+    const inUse = PRODUCTS.some((p) => p.categoryId === id) || myProducts.some((p) => p.categoryId === id);
+    if (inUse) {
+      throw Object.assign(new Error('in use'), { response: { status: 409, data: { message: 'Danh mục đang được sử dụng bởi sản phẩm' } } });
+    }
+    mockCategories = mockCategories.filter((c) => c.id !== id).map((c) => (c.parentId === id ? { ...c, parentId: null } : c));
+    persistMockCategories();
+    return {};
+  },
+
+  // ===== MATERIAL (Portal Quản trị /admin/materials) — mảng mutable mockMaterials =====
   async getMaterials() {
     await delay(200);
-    return Object.entries(MATERIAL_NAMES).map(([id, name]) => ({
-      id, name: loc(name), createdAt: new Date().toISOString(),
-    }));
+    return mockMaterials.map((m) => ({ id: m.id, name: m.name, createdAt: m.createdAt }));
+  },
+
+  async createMaterial({ name }) {
+    await delay(300);
+    const trimmed = name.trim();
+    if (mockMaterials.some((m) => m.name.toLowerCase() === trimmed.toLowerCase())) {
+      throw Object.assign(new Error('Đã tồn tại'), { response: { status: 409, data: { message: 'Tên vật liệu đã tồn tại' } } });
+    }
+    const material = { id: nextId('mat'), name: trimmed, createdAt: new Date().toISOString() };
+    mockMaterials = [...mockMaterials, material];
+    persistMockMaterials();
+    return material;
+  },
+
+  async updateMaterial({ id, name }) {
+    await delay(300);
+    const idx = mockMaterials.findIndex((m) => m.id === id);
+    if (idx === -1) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    const trimmed = name.trim();
+    if (mockMaterials.some((m) => m.id !== id && m.name.toLowerCase() === trimmed.toLowerCase())) {
+      throw Object.assign(new Error('Đã tồn tại'), { response: { status: 409, data: { message: 'Tên vật liệu đã tồn tại' } } });
+    }
+    mockMaterials[idx] = { ...mockMaterials[idx], name: trimmed };
+    persistMockMaterials();
+    return mockMaterials[idx];
+  },
+
+  // AN TOÀN khi đang có sản phẩm dùng — giống BE (material_id ON DELETE SET NULL), không chặn xoá.
+  async deleteMaterial(id) {
+    await delay(300);
+    mockMaterials = mockMaterials.filter((m) => m.id !== id);
+    persistMockMaterials();
+    return {};
   },
 
   // ===== PRODUCT (Portal Nhà cung cấp — /portal/supplier/products) =====
@@ -402,8 +547,8 @@ export const mockAdapter = {
     }));
     const product = {
       id, supplierId: 'mock-supplier', supplierName: 'Cửa hàng của bạn (demo)',
-      categoryId: body.categoryId, categoryName: loc(CATEGORY_NAMES[body.categoryId]) ?? '',
-      materialId: body.materialId || null, materialName: body.materialId ? loc(MATERIAL_NAMES[body.materialId]) : null,
+      categoryId: body.categoryId, categoryName: categoryNameById(body.categoryId) ?? '',
+      materialId: body.materialId || null, materialName: body.materialId ? materialNameById(body.materialId) : null,
       name: body.name, description: body.description ?? '',
       status: body.status ?? 'draft', createdAt: now, updatedAt: now,
       variants, images: [],
@@ -440,9 +585,9 @@ export const mockAdapter = {
     if (idx === -1) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
     myProducts[idx] = {
       ...myProducts[idx], name, description, categoryId,
-      categoryName: loc(CATEGORY_NAMES[categoryId]) ?? myProducts[idx].categoryName,
+      categoryName: categoryNameById(categoryId) ?? myProducts[idx].categoryName,
       materialId: materialId || null,
-      materialName: materialId ? loc(MATERIAL_NAMES[materialId]) : null,
+      materialName: materialId ? materialNameById(materialId) : null,
       updatedAt: new Date().toISOString(),
     };
     persistMyProducts();
@@ -802,6 +947,74 @@ export const mockAdapter = {
     const reviews = w?.reviews ?? [];
     const average = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
     return { targetType: params.targetType, targetId: params.targetId, average, count: reviews.length };
+  },
+
+  // ===== USER quản trị (Portal Quản trị /admin/users) =====
+  async getAdminUsers() {
+    await delay(300);
+    return { content: mockAdminUsers, page: { size: mockAdminUsers.length || 20, number: 0, totalElements: mockAdminUsers.length, totalPages: 1 } };
+  },
+
+  async getAdminUserDetail(id) {
+    await delay(200);
+    const u = mockAdminUsers.find((x) => x.id === id);
+    if (!u) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    return u;
+  },
+
+  async deleteUser(id) {
+    await delay(300);
+    mockAdminUsers = mockAdminUsers.filter((u) => u.id !== id);
+    persistMockAdminUsers();
+    return {};
+  },
+
+  // ===== SUPPLIER quản trị (Portal Quản trị /admin/suppliers) =====
+  async getAdminSuppliers(params = {}) {
+    await delay(300);
+    let items = mockAdminSuppliers;
+    if (params.status) items = items.filter((s) => s.status === params.status);
+    if (params.type) items = items.filter((s) => s.type === params.type);
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+  },
+
+  async getAdminSupplierDetail(id) {
+    await delay(200);
+    const s = mockAdminSuppliers.find((x) => x.id === id);
+    if (!s) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    return s;
+  },
+
+  // Mô phỏng: tạo user + supplier, KHÔNG thật sự gửi email (mock không có mail server) — chỉ demo UI/luồng.
+  async createSupplier(body) {
+    await delay(500);
+    if (mockAdminSuppliers.some((s) => s.contactEmail && s.contactEmail === body.contactEmail)) {
+      throw Object.assign(new Error('Đã tồn tại'), { response: { status: 409, data: { message: 'Email hoặc mã số thuế đã tồn tại' } } });
+    }
+    const now = new Date().toISOString();
+    const supplier = {
+      id: nextId('sup'), userId: nextId('user'), businessName: body.businessName,
+      taxCode: body.taxCode ?? null, legalDocumentUrl: body.legalDocumentUrl ?? null,
+      contactEmail: body.contactEmail ?? null, contactPhone: body.contactPhone ?? null,
+      description: body.description ?? null, type: body.type, status: 'active',
+      commissionRate: body.commissionRate ?? 0, createdAt: now, updatedAt: now,
+    };
+    mockAdminSuppliers = [supplier, ...mockAdminSuppliers];
+    persistMockAdminSuppliers();
+    return supplier;
+  },
+
+  async updateSupplierStatus({ id, status, commissionRate }) {
+    await delay(300);
+    const idx = mockAdminSuppliers.findIndex((s) => s.id === id);
+    if (idx === -1) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    mockAdminSuppliers[idx] = {
+      ...mockAdminSuppliers[idx], status,
+      commissionRate: commissionRate ?? mockAdminSuppliers[idx].commissionRate,
+      updatedAt: new Date().toISOString(),
+    };
+    persistMockAdminSuppliers();
+    return mockAdminSuppliers[idx];
   },
 
   // ===== AI 3D (nhánh Mẫu 3D / Upload) =====

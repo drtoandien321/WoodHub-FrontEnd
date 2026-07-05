@@ -40,6 +40,14 @@ const REAL_ENDPOINTS = new Set([
   'getStoreInventory', 'addStock', 'adjustStock', 'deleteStock', 'getVariantInventory',
   // Module Chat (REST — lịch sử/khởi tạo hội thoại; tin realtime qua STOMP, xem services/chatSocket.js)
   'startConversation', 'getConversations', 'getMessages', 'sendMessage', 'markAsRead', 'getPresence',
+  // Module Admin — Category CRUD (Portal Quản trị /admin/categories)
+  'createCategory', 'updateCategory', 'deleteCategory',
+  // Module Admin — Material CRUD (Portal Quản trị /admin/materials)
+  'createMaterial', 'updateMaterial', 'deleteMaterial',
+  // Module Admin — Supplier quản trị (Portal Quản trị /admin/suppliers)
+  'getAdminSuppliers', 'getAdminSupplierDetail', 'createSupplier', 'updateSupplierStatus',
+  // Module Admin — User quản trị (Portal Quản trị /admin/users)
+  'getAdminUsers', 'getAdminUserDetail', 'deleteUser',
 ]);
 
 /*
@@ -227,8 +235,22 @@ export const api = {
   // GET /api/users/me → UserResponse { id, email, fullName, phone, role, customerType, createdAt, updatedAt }
   getMe: () => call(() => http.get('/users/me'), 'getMe'),
   // PUT /api/users/{id}  body: { fullName, phone } (BE chỉ nhận đúng 2 field này, KHÔNG đổi được email)
+  // Dùng chung cho cả tự sửa hồ sơ (Profile.jsx) LẪN admin sửa hộ user khác (Portal Quản trị) — cùng 1 endpoint.
   updateUser: ({ id, ...body }) =>
     call(() => http.put(`/users/${id}`, { fullName: body.fullName, phone: body.phone }), 'updateUser', { id, ...body }),
+
+  /*
+   * ===== USER (quản trị — Portal Quản trị /admin/users) — CHỈ ADMIN =====
+   * GET /users KHÔNG có filter/search (chỉ Pageable) — cố tình KHÔNG thêm ô tìm kiếm tự do ở UI,
+   * tránh filter client-side trên 1 trang gây hiểu nhầm kết quả.
+   */
+  // GET /users?page=&size= → Page<UserResponse> — chỉ admin
+  getAdminUsers: (params) => call(() => http.get('/users', { params }), 'getAdminUsers', params),
+  // GET /users/{id} → UserResponse — chính chủ hoặc admin
+  getAdminUserDetail: (id) => call(() => http.get(`/users/${id}`), 'getAdminUserDetail', id),
+  // DELETE /users/{id} — chỉ admin. XOÁ CỨNG (hard delete), BE không có cơ chế khoá/mở khoá user thường
+  // (đã ghi nhận ở Pha 0A — "API khóa user — chờ BE bổ sung", ngoài phạm vi module này).
+  deleteUser: (id) => call(() => http.delete(`/users/${id}`), 'deleteUser', id),
 
   // ===== PRODUCTS (B2C catalog) =====
   // GET /products?category=&material=&minPrice=&maxPrice=&sort=&page=
@@ -238,13 +260,25 @@ export const api = {
   // GET /products/:id
   getProduct: (id) => call(() => http.get(`/products/${id}`), 'getProduct', id),
 
-  // ===== CATEGORY / MATERIAL (bảng tham chiếu — chỉ GET, tạo/sửa/xoá là admin, chưa có UI) =====
+  // ===== CATEGORY / MATERIAL (bảng tham chiếu — GET công khai; tạo/sửa/xoá chỉ admin, xem Portal Quản trị) =====
   // GET /categories → CategoryResponse[] { id, parentId, parentName, name, slug, createdAt } (danh sách phẳng)
   getCategories: () => call(() => http.get('/categories'), 'getCategories'),
-  // GET /categories/tree → CategoryTreeResponse[] { id, name, slug, createdAt, children[] } (đã dựng cây)
+  // GET /categories/tree → CategoryTreeResponse[] { id, name, slug, createdAt, children[] } (đã dựng cây — BE tự build, FE không cần buildTree)
   getCategoryTree: () => call(() => http.get('/categories/tree'), 'getCategoryTree'),
-  // GET /materials → MaterialResponse[] { id, name, createdAt }
+  // POST /categories  body: { name*, slug?, parentId? } → CategoryResponse, 201 — chỉ admin
+  createCategory: (body) => call(() => http.post('/categories', body), 'createCategory', body),
+  // PUT /categories/{id}  body: giống POST — chỉ admin
+  updateCategory: ({ id, ...body }) => call(() => http.put(`/categories/${id}`, body), 'updateCategory', { id, ...body }),
+  // DELETE /categories/{id} — chỉ admin. Có thể 409/500 nếu danh mục đang có sản phẩm gắn vào (xem TestCase.md)
+  deleteCategory: (id) => call(() => http.delete(`/categories/${id}`), 'deleteCategory', id),
+  // GET /materials → MaterialResponse[] { id, name, createdAt } — BE không phân trang
   getMaterials: () => call(() => http.get('/materials'), 'getMaterials'),
+  // POST /materials  body: { name* (max100) } → MaterialResponse, 201 — chỉ admin. 409 nếu tên trùng
+  createMaterial: (body) => call(() => http.post('/materials', body), 'createMaterial', body),
+  // PUT /materials/{id}  body: { name* } — chỉ admin. 404/409
+  updateMaterial: ({ id, ...body }) => call(() => http.put(`/materials/${id}`, body), 'updateMaterial', { id, ...body }),
+  // DELETE /materials/{id} — chỉ admin. AN TOÀN khi đang có sản phẩm dùng (BE tự SET NULL, không lỗi)
+  deleteMaterial: (id) => call(() => http.delete(`/materials/${id}`), 'deleteMaterial', id),
 
   /*
    * ===== PRODUCT (Portal Nhà cung cấp tự quản lý sản phẩm — /portal/supplier/products) =====
@@ -394,6 +428,25 @@ export const api = {
   getReviews: (params) => call(() => http.get('/reviews', { params }), 'getReviews', params),
   // GET /reviews/summary?targetType=&targetId= → { targetType, targetId, average, count }
   getReviewSummary: (params) => call(() => http.get('/reviews/summary', { params }), 'getReviewSummary', params),
+
+  /*
+   * ===== SUPPLIER (quản trị — Portal Quản trị /admin/suppliers) — CHỈ ADMIN =====
+   * Khác hẳn nhóm public ở trên: SupplierResponse đầy đủ (có taxCode/status/commissionRate/userId),
+   * thấy được cả supplier pending/suspended.
+   */
+  // GET /suppliers?status=&type=&page=&size= → Page<SupplierResponse> — chỉ admin
+  getAdminSuppliers: (params) => call(() => http.get('/suppliers', { params }), 'getAdminSuppliers', params),
+  // GET /suppliers/{id} → SupplierResponse (đầy đủ) — chỉ admin
+  getAdminSupplierDetail: (id) => call(() => http.get(`/suppliers/${id}`), 'getAdminSupplierDetail', id),
+  // POST /suppliers  body: CreateSupplierRequest { email*, password*, fullName*, phone, businessName*,
+  // type*(retailer|workshop), taxCode?, legalDocumentUrl?, contactEmail?, contactPhone?, description?,
+  // commissionRate? } → SupplierResponse, 201 — chỉ admin. BE TỰ gửi email tài khoản+mật khẩu tạm,
+  // set status=active ngay (không phải pending chờ duyệt), mustChangePassword=true cho user mới.
+  createSupplier: (body) => call(() => http.post('/suppliers', body), 'createSupplier', body),
+  // PUT /suppliers/{id}/status  body: { status*(pending|active|suspended), commissionRate? } → SupplierResponse
+  // — chỉ admin. ĐÂY LÀ API duyệt/khoá supplier (không có endpoint approve/reject riêng). Đổi sang
+  // suspended → BE tự hạ User.role về customer; active → tự nâng lại supplier (syncUserRole tự động).
+  updateSupplierStatus: ({ id, ...body }) => call(() => http.put(`/suppliers/${id}/status`, body), 'updateSupplierStatus', { id, ...body }),
 
   // ===== AI 3D (nhánh Mẫu 3D / Upload — Meshy sau này) =====
   // GET /custom/models — thư viện mẫu 3D

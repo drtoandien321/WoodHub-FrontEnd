@@ -13,8 +13,11 @@ import { LogOut, Bell, X } from '../suppliers/icons.jsx';
  * - Logo trỏ về `home` (Dashboard của portal) — supplier khu biệt trong portal, không về Landing.
  *
  * Props: nav [{to,label,icon}], brandName, home (path dashboard).
+ * showChat: Portal Nhà cung cấp/Xưởng mộc cần chat với khách hàng (mặc định true, KHÔNG đổi
+ * hành vi cũ). Portal Admin không có Supplier gắn với tài khoản → PortalChatButton/Drawer gọi
+ * GET /conversations?role=supplier sẽ bị BE trả 403 — truyền showChat={false} để ẩn hẳn.
  */
-export default function PortalShell({ nav, brandName, brandInitials, home, title = 'Portal Nhà cung cấp' }) {
+export default function PortalShell({ nav, brandName, brandInitials, home, title = 'Portal Nhà cung cấp', showChat = true }) {
   const logout = useLogout();
   const [open, setOpen] = useState(false);
 
@@ -70,7 +73,7 @@ export default function PortalShell({ nav, brandName, brandInitials, home, title
             <span className="font-display text-lg text-primary">{title}</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <PortalChatButton />
+            {showChat && <PortalChatButton />}
             <button type="button" aria-label="Thông báo" className="btn btn-ghost btn-sm btn-circle relative">
               <Bell width={18} height={18} />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error" />
@@ -89,8 +92,8 @@ export default function PortalShell({ nav, brandName, brandInitials, home, title
         </main>
       </div>
 
-      {/* Chat với khách hàng */}
-      <PortalChatDrawer />
+      {/* Chat với khách hàng — chỉ Supplier/Workshop, xem ghi chú prop showChat ở trên */}
+      {showChat && <PortalChatDrawer />}
     </div>
   );
 }
