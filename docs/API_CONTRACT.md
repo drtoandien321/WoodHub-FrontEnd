@@ -19,6 +19,27 @@ BE trả `401` nếu thiếu/sai (FE bắt 401 → tự logout).
 
 ---
 
+## 0. Quy ước tên field TỌA ĐỘ (đọc trước khi code BẤT KỲ tính năng nào liên quan vị trí)
+
+> Nhầm tên field toạ độ giữa 3 ngữ cảnh dưới đây là lỗi thật đã xảy ra khi lập kế hoạch tính
+> năng GPS (2026-07) — ghi lại đây để không lặp lại. **Tự self-check bảng này trước khi commit
+> bất kỳ dòng code nào đọc/ghi toạ độ**, ở mọi module (Store, Checkout, Custom order...).
+
+| Ngữ cảnh | Tên field | Ví dụ | Nguồn |
+|---|---|---|---|
+| Trình duyệt trả về (Geolocation API) | `coords.latitude`, `coords.longitude` | `position.coords.latitude` | `navigator.geolocation.getCurrentPosition(position => ...)` |
+| Body JSON gửi lên BE (tạo/sửa Store) | `latitude`, `longitude` | `{ "latitude": 10.77, "longitude": 106.70 }` | `CreateStoreRequest` / `UpdateStoreRequest` / `StoreResponse` |
+| Query param của API gợi ý vị trí gần | `lat`, `lng` | `GET /stores/nearby/workshops?lat=10.77&lng=106.70` | `GET /stores/nearby/*` (3 endpoint) |
+
+**Lưu ý quan trọng:** `latitude`/`longitude` trong `Store` entity/DTO **KHÔNG `NOT NULL`** ở BE
+(cột DB không có ràng buộc, service chỉ validate range nếu có giá trị) — BE cố ý cho phép
+`null` để 3 API gợi ý gần tự lọc `WHERE latitude IS NOT NULL` thay vì chặn cứng dữ liệu cũ.
+**Việc bắt buộc nhập toạ độ khi supplier tạo chi nhánh MỚI là quyết định của FE** (data-quality
+gate — chi nhánh không toạ độ sẽ vô hình với mọi tính năng gợi ý sau này), **không phải vì BE
+ép buộc**. Khi SỬA chi nhánh cũ chưa có toạ độ, FE không chặn cứng — chỉ nhắc bổ sung.
+
+---
+
 ## 1. Auth
 
 ### POST /auth/register

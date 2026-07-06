@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../stores/cartStore.js';
+import { useLocationStore } from '../stores/locationStore.js';
 import { useCreateOrder } from '../hooks/useProducts.js';
 import { paymentService } from '../services/paymentService.js';
 import { formatVnd } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
+import NearbyBranchPicker from '../components/checkout/NearbyBranchPicker.jsx';
 
 // Danh sách quận/huyện TP.HCM cho dropdown địa chỉ giao hàng
 const HCMC_DISTRICTS = [
@@ -22,6 +24,7 @@ export default function Checkout() {
   const { t } = useTranslation();
   const { items, clear } = useCartStore();
   const subtotal = useCartStore((s) => s.subtotal());
+  const coords = useLocationStore((s) => s.coords);
   const navigate = useNavigate();
   const createOrder = useCreateOrder();
 
@@ -30,6 +33,19 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('vnpay');
   const [processing, setProcessing] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [selectedBranches, setSelectedBranches] = useState({}); // { [supplierId]: StoreResponse }
+
+  /*
+   * LUỒNG 1 (Pha 3, tính năng GPS) — mỗi supplier khác nhau trong giỏ có thể có nhiều chi nhánh,
+   * API gợi ý gần lại CHỈ nhận 1 supplierId/lần gọi (xem StoreController.java) — nên phải tách
+   * theo từng supplier riêng, mỗi supplier 1 khối <NearbyBranchPicker> độc lập. Bỏ qua item không
+   * có supplierId (chưa nối catalog thật/thiếu dữ liệu) — progressive enhancement, không chặn gì.
+   */
+  const uniqueSuppliers = useMemo(() => {
+    const map = new Map();
+    items.forEach((i) => { if (i.supplierId && !map.has(i.supplierId)) map.set(i.supplierId, i.supplierName); });
+    return Array.from(map, ([supplierId, supplierName]) => ({ supplierId, supplierName }));
+  }, [items]);
 
   // Phí ship giả định, miễn phí trên 5tr
   const shippingFee = subtotal > 5000000 ? 0 : 50000;
@@ -125,6 +141,25 @@ export default function Checkout() {
     <div className="grid lg:grid-cols-[1fr_320px] gap-8 max-w-5xl mx-auto">
       <div className="flex flex-col gap-4">
         <h1 className="font-display text-3xl">{t('checkout.title')}</h1>
+
+        {/* Gợi ý chi nhánh gần (Pha 3, tính năng GPS) — CHỈ hiện khi đã có toạ độ khách (coords)
+            VÀ có ít nhất 1 supplier trong giỏ có chi nhánh gắn toạ độ (NearbyBranchPicker tự ẩn
+            khi rỗng). Thiếu 1 trong 2 điều kiện → không render gì, giữ nguyên luồng checkout cũ. */}
+        {coords && uniqueSuppliers.length > 0 && (
+          <div className="flex flex-col gap-2.5">
+            {uniqueSuppliers.map((s) => (
+              <NearbyBranchPicker
+                key={s.supplierId}
+                supplierId={s.supplierId}
+                supplierName={s.supplierName}
+                coords={coords}
+                selectedId={selectedBranches[s.supplierId]?.id}
+                onSelect={(store) => setSelectedBranches((prev) => ({ ...prev, [s.supplierId]: store }))}
+              />
+            ))}
+          </div>
+        )}
+
         <h2 className="font-medium mt-2">{t('checkout.shippingAddress')}</h2>
         {field('fullName', t('checkout.fullName'), t('checkout.namePlaceholder'))}
         <div className="grid grid-cols-2 gap-3">

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useMyStores, useDeleteStore } from '../../hooks/useStores.js';
+import { useSupplierMe } from '../../hooks/useSupplierMe.js';
 import StoreFormModal from '../../components/supplier/StoreFormModal.jsx';
 import { Search, Store, Plus, MapPin, Phone, Eye, Pencil, Trash } from '../../components/suppliers/icons.jsx';
 
@@ -9,10 +10,15 @@ import { Search, Store, Plus, MapPin, Phone, Eye, Pencil, Trash } from '../../co
  * ⚠️ Store thật (StoreResponse) CHỈ có: address/ward/district/city/phone/latitude/longitude —
  * KHÔNG có name/manager/status/performance/monthRevenue/rating/hours như mock cũ
  * (api/mock/manufacturerData.js) nên các KPI/hiệu suất giả đã bỏ hẳn, không bịa dữ liệu.
+ *
+ * Workshop chỉ được TỐI ĐA 1 chi nhánh — BE đã chặn ở tầng service (409) + unique index DB,
+ * nhưng FE vẫn nên ẩn/disable nút sớm để trải nghiệm mượt hơn (validate 2 lớp, giống cách
+ * AdminRoute chỉ là UX còn bảo mật thật nằm ở BE).
  */
 export default function SupplierBranches() {
   const [q, setQ] = useState('');
   const { data: stores, isLoading } = useMyStores();
+  const { data: me } = useSupplierMe();
   const deleteStore = useDeleteStore();
   const [modalMode, setModalMode] = useState(null); // null | 'create' | store object (đang sửa)
 
@@ -21,6 +27,8 @@ export default function SupplierBranches() {
     () => items.filter((s) => [s.address, s.district, s.city].filter(Boolean).join(' ').toLowerCase().includes(q.toLowerCase())),
     [items, q]
   );
+
+  const isWorkshopLimited = me?.type === 'workshop' && items.length >= 1;
 
   const handleDelete = (s) => {
     if (window.confirm(`Xoá chi nhánh "${s.address}"? Hành động này không thể hoàn tác.`)) deleteStore.mutate(s.id);
@@ -38,7 +46,11 @@ export default function SupplierBranches() {
           <Search width={16} height={16} className="text-base-content/40" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm kiếm theo địa chỉ, quận…" className="grow" />
         </label>
-        <button onClick={() => setModalMode('create')} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Thêm chi nhánh</button>
+        <div className="tooltip tooltip-left" data-tip={isWorkshopLimited ? 'Xưởng sản xuất chỉ được đăng ký 1 địa chỉ' : undefined}>
+          <button onClick={() => setModalMode('create')} disabled={isWorkshopLimited} className="btn btn-primary gap-2">
+            <Plus width={16} height={16} /> Thêm chi nhánh
+          </button>
+        </div>
       </div>
 
       <section className="rounded-2xl border border-base-300 bg-base-100 p-2 shadow-sm md:p-4">

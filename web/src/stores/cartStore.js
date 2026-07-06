@@ -8,7 +8,7 @@ import { persist } from 'zustand/middleware';
 export const useCartStore = create(
   persist(
     (set, get) => ({
-      items: [], // { productId, name, price, image, qty }
+      items: [], // { productId, name, price, image, qty, supplierId?, supplierName? }
 
       addItem: (product, qty = 1) =>
         set((state) => {
@@ -23,7 +23,12 @@ export const useCartStore = create(
           return {
             items: [
               ...state.items,
-              { productId: product.id, name: product.name, price: product.price, image: product.image, qty },
+              {
+                productId: product.id, name: product.name, price: product.price, image: product.image, qty,
+                // supplierId/supplierName copy từ ProductResponse (đã có sẵn ở BE lẫn mock) — dùng
+                // cho gợi ý chi nhánh gần lúc checkout (Pha 3 tính năng GPS), KHÔNG cần refactor cart.
+                supplierId: product.supplierId, supplierName: product.supplierName,
+              },
             ],
           };
         }),

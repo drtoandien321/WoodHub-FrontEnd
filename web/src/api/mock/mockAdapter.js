@@ -949,6 +949,29 @@ export const mockAdapter = {
     return { targetType: params.targetType, targetId: params.targetId, average, count: reviews.length };
   },
 
+  // ===== SUPPLIER (hồ sơ CHÍNH supplier đang đăng nhập) =====
+  async getSupplierMe() {
+    await delay(200);
+    const user = useAuthStore.getState().user;
+    return {
+      id: 'mock-supplier-id', userId: user?.id ?? 'u1',
+      businessName: user?.name ?? 'Cửa hàng của bạn (demo)',
+      taxCode: null, legalDocumentUrl: null, contactEmail: null, contactPhone: null, description: null,
+      type: user?.supplierType ?? 'retailer', status: 'active', commissionRate: 0,
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    };
+  },
+
+  /*
+   * ===== GỢI Ý VỊ TRÍ (GPS) — mock trả rỗng =====
+   * Mock không có store nào gắn toạ độ thật (catalog mock cũng dùng supplierId giả 'sup_01'...,
+   * không khớp UUID thật) — trả [] để UI tự ẩn khối gợi ý (đúng luồng fallback "không có dữ
+   * liệu toạ độ" đã thiết kế), KHÔNG bịa dữ liệu giả có distanceKm gây hiểu lầm khi demo.
+   */
+  async getNearbyStoresBySupplier() { await delay(300); return []; },
+  async getNearestWorkshops() { await delay(300); return []; },
+  async getWorkshopsWithinRadius() { await delay(300); return []; },
+
   // ===== USER quản trị (Portal Quản trị /admin/users) =====
   async getAdminUsers() {
     await delay(300);

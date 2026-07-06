@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../api/client.js';
 import { useAuthStore } from '../../stores/authStore.js';
+import { requestLocationOnce } from '../../services/geolocation.js';
 import { redirectPathForRole } from '../../utils/auth.js';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
@@ -57,6 +58,9 @@ export default function GoogleAuthButton({ mode = 'login' }) {
     try {
       const { token, refreshToken, user } = await api.loginWithGoogle({ idToken });
       setAuth({ token, refreshToken, user });
+      // Xin quyền vị trí ngay sau login THẬT (Pha 2 tính năng GPS) — chỉ customer, không chặn
+      // navigate() bên dưới (fire-and-forget, xem services/geolocation.js).
+      if (user.role === 'customer') requestLocationOnce();
       navigate(
         user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType),
         { replace: true }

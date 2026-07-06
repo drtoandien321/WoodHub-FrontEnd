@@ -12,4 +12,9 @@ export default defineConfig({
   // áp cho bước PRE-BUNDLE dependency của dev server (chính là file sockjs-client.js?v=... bị lỗi).
   define: { global: 'globalThis' },
   optimizeDeps: { esbuildOptions: { define: { global: 'globalThis' } } },
+  // Mặc định Vite chỉ bind theo tên "localhost" — trên nhiều máy Windows, Node phân giải
+  // "localhost" ưu tiên IPv6 (::1) nên http://127.0.0.1:5173 (IPv4) không kết nối được dù cùng
+  // trỏ về máy này. host:true ép Vite lắng nghe mọi địa chỉ (0.0.0.0 + ::), bao gồm cả 127.0.0.1
+  // — cần thiết vì Goong Maps giới hạn domain theo đúng chuỗi "127.0.0.1:5173", khác "localhost:5173".
+  server: { host: true },
 });

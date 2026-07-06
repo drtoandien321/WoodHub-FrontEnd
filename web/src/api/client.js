@@ -48,6 +48,10 @@ const REAL_ENDPOINTS = new Set([
   'getAdminSuppliers', 'getAdminSupplierDetail', 'createSupplier', 'updateSupplierStatus',
   // Module Admin — User quản trị (Portal Quản trị /admin/users)
   'getAdminUsers', 'getAdminUserDetail', 'deleteUser',
+  // Module GPS/Vị trí — hồ sơ supplier tự thân (biết type để gate UI)
+  'getSupplierMe',
+  // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
+  'getNearbyStoresBySupplier', 'getNearestWorkshops', 'getWorkshopsWithinRadius',
 ]);
 
 /*
@@ -71,7 +75,10 @@ const toAuthResult = (data) => ({
   },
 });
 
-export const http = axios.create({ baseURL: BASE_URL, timeout: 10_000 });
+// timeout dài (60s) vì Render free-tier "ngủ" khi không có request — lần gọi đầu sau khi ngủ
+// có thể mất 30-60s để container khởi động lại. 10s cũ quá ngắn, khiến request bị coi là lỗi
+// kết nối dù BE chỉ đang khởi động (không phải bug — user vẫn phải đợi, chỉ là không báo lỗi sai).
+export const http = axios.create({ baseURL: BASE_URL, timeout: 60_000 });
 
 /*
  * Interceptor = "middleware" của axios: chạy trước mỗi request.
@@ -447,6 +454,33 @@ export const api = {
   // — chỉ admin. ĐÂY LÀ API duyệt/khoá supplier (không có endpoint approve/reject riêng). Đổi sang
   // suspended → BE tự hạ User.role về customer; active → tự nâng lại supplier (syncUserRole tự động).
   updateSupplierStatus: ({ id, ...body }) => call(() => http.put(`/suppliers/${id}/status`, body), 'updateSupplierStatus', { id, ...body }),
+
+  /*
+   * ===== SUPPLIER (hồ sơ của CHÍNH supplier đang đăng nhập) =====
+   * GET /suppliers/me → SupplierResponse đầy đủ (có `type`: retailer|workshop). Dùng để biết
+   * đúng loại supplier hiện tại — vd gate nút "Thêm chi nhánh" cho workshop (Module Store/GPS).
+   * ⚠️ authStore.user KHÔNG có field supplierType (AuthResponse của BE không trả field này) —
+   * đây là hook DUY NHẤT lấy đúng type thật, không suy đoán từ đâu khác.
+   */
+  getSupplierMe: () => call(() => http.get('/suppliers/me'), 'getSupplierMe'),
+
+  /*
+   * ===== GỢI Ý VỊ TRÍ (GPS) — 3 API, đọc trực tiếp StoreController.java, KHÔNG suy đoán path =====
+   * Cả 3 đều yêu cầu đăng nhập (không whitelist trong SecurityConfig). Query param `lat`/`lng`
+   * (KHÁC tên `latitude`/`longitude` ở body Store — xem docs/API_CONTRACT.md mục 0).
+   * Response KHÔNG có toạ độ (NearbyStoreResponse cố tình bỏ) — chỉ list + distanceKm, không vẽ
+   * bản đồ ghim cho khách được.
+   */
+  // LUỒNG 1 (Pha 3, checkout): GET /stores/nearby/by-supplier/{supplierId}?lat=&lng=
+  // → NearbyStoreResponse[] — TẤT CẢ chi nhánh của 1 supplier cụ thể, gần→xa.
+  getNearbyStoresBySupplier: ({ supplierId, lat, lng }) =>
+    call(() => http.get(`/stores/nearby/by-supplier/${supplierId}`, { params: { lat, lng } }), 'getNearbyStoresBySupplier', { supplierId, lat, lng }),
+  // LUỒNG 2 (Pha 4, custom order) — top N xưởng gần nhất: GET /stores/nearby/workshops?lat=&lng=&limit=5
+  getNearestWorkshops: ({ lat, lng, limit }) =>
+    call(() => http.get('/stores/nearby/workshops', { params: { lat, lng, limit } }), 'getNearestWorkshops', { lat, lng, limit }),
+  // LUỒNG 2 biến thể bán kính: GET /stores/nearby/workshops/radius?lat=&lng=&radiusKm=
+  getWorkshopsWithinRadius: ({ lat, lng, radiusKm }) =>
+    call(() => http.get('/stores/nearby/workshops/radius', { params: { lat, lng, radiusKm } }), 'getWorkshopsWithinRadius', { lat, lng, radiusKm }),
 
   // ===== AI 3D (nhánh Mẫu 3D / Upload — Meshy sau này) =====
   // GET /custom/models — thư viện mẫu 3D
