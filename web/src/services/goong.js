@@ -10,9 +10,28 @@
 const API_KEY = import.meta.env.VITE_GOONG_API_KEY;
 const BASE_URL = 'https://rsapi.goong.io';
 
+/*
+ * Goong KHÔNG gắn nhãn (type) cho từng phần tử address_components — field "types" trả về luôn
+ * rỗng (đã kiểm chứng qua doc chính thức docs.goong.io/rest/geocode), khác Google Maps. Nhưng thứ
+ * tự trả về luôn cố định từ CỤ THỂ → TỔNG QUÁT: [đường/số nhà, ..., Phường/Xã, Quận/Huyện,
+ * Tỉnh/Thành phố]. Nên phải suy luận theo VỊ TRÍ TÍNH TỪ CUỐI mảng (không tính từ đầu), để vẫn
+ * đúng dù địa chỉ có thêm cấp (hẻm/ngõ/thôn) khiến mảng dài ngắn khác nhau.
+ */
+function parseAddressComponents(components) {
+  const clean = (c) => (c?.long_name ?? '').trim();
+  const n = components?.length ?? 0;
+  return {
+    city: n >= 1 ? clean(components[n - 1]) : '',
+    district: n >= 2 ? clean(components[n - 2]) : '',
+    ward: n >= 3 ? clean(components[n - 3]) : '',
+    street: components.slice(0, Math.max(0, n - 3)).map(clean).join(', '),
+  };
+}
+
 /**
- * Geocode 1 chuỗi địa chỉ → { latitude, longitude, formattedAddress } hoặc null nếu không tìm thấy.
- * Ném lỗi nếu request thất bại (mất mạng, key sai...) — phân biệt với "không tìm thấy" (trả null).
+ * Geocode 1 chuỗi địa chỉ → { latitude, longitude, formattedAddress, street, ward, district, city }
+ * hoặc null nếu không tìm thấy. Ném lỗi nếu request thất bại (mất mạng, key sai...) — phân biệt
+ * với "không tìm thấy" (trả null).
  */
 export async function geocodeAddress(address) {
   const url = `${BASE_URL}/geocode?address=${encodeURIComponent(address)}&api_key=${API_KEY}`;
@@ -25,6 +44,7 @@ export async function geocodeAddress(address) {
     latitude: first.geometry.location.lat,
     longitude: first.geometry.location.lng,
     formattedAddress: first.formatted_address,
+    ...parseAddressComponents(first.address_components),
   };
 }
 

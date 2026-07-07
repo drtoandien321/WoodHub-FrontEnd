@@ -35,19 +35,31 @@ export default function StoreFormModal({ open, onClose, initial = null }) {
   if (!open) return null;
   const set = (k) => (e) => setForm((s) => ({ ...s, [k]: e.target.value }));
 
+  /*
+   * Chỉ cần gõ "Địa chỉ" (dù gõ đủ hay chỉ số nhà+đường, thậm chí lẫn tên phường/quận cũng
+   * không sao) rồi bấm "Định vị" — Goong tự tách Phường/Quận/Tỉnh từ kết quả geocode (xem
+   * parseAddressComponents trong goong.js) và điền vào, đỡ phải gõ tay từng ô. Dùng `|| s.xxx`
+   * khi set để KHÔNG xoá giá trị supplier đã tự gõ nếu Goong không tách được cấp đó.
+   */
   const handleLocate = async () => {
-    const parts = [form.address, form.ward, form.district, form.city].filter((s) => s.trim());
-    if (!parts.length) { setGeocodeErr('Vui lòng nhập ít nhất địa chỉ trước khi định vị'); return; }
+    if (!form.address.trim()) { setGeocodeErr('Vui lòng nhập địa chỉ trước khi định vị'); return; }
     setGeocoding(true);
     setGeocodeErr('');
     try {
-      const result = await geocodeAddress(parts.join(', '));
+      const result = await geocodeAddress(form.address);
       if (!result) {
         setGeocodeErr('Không tìm thấy vị trí, vui lòng kiểm tra lại địa chỉ hoặc chọn thủ công trên bản đồ');
         return;
       }
       setLatitude(result.latitude);
       setLongitude(result.longitude);
+      setForm((s) => ({
+        ...s,
+        address: result.street || s.address,
+        ward: result.ward || s.ward,
+        district: result.district || s.district,
+        city: result.city || s.city,
+      }));
     } catch {
       setGeocodeErr('Không thể kết nối dịch vụ bản đồ, vui lòng thử lại hoặc chọn thủ công trên bản đồ');
     } finally {
@@ -92,23 +104,24 @@ export default function StoreFormModal({ open, onClose, initial = null }) {
           <div className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-sm text-base-content/70">Địa chỉ<span className="text-error"> *</span></span>
-              <input value={form.address} onChange={set('address')} className="input input-bordered w-full" placeholder="Số nhà, tên đường…" />
+              <input value={form.address} onChange={set('address')} className="input input-bordered w-full" placeholder="Số nhà, tên đường, phường, quận, tỉnh…" />
               {err && <span className="text-xs text-error">{err}</span>}
+              <span className="text-xs text-base-content/45">Gõ càng đủ càng tốt rồi bấm "Định vị từ địa chỉ" bên dưới — Phường/Quận/Tỉnh sẽ tự điền, không cần gõ tay từng ô.</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm text-base-content/70">Phường/Xã</span>
-                <input value={form.ward} onChange={set('ward')} className="input input-bordered w-full" />
+                <input value={form.ward} onChange={set('ward')} className="input input-bordered w-full" placeholder="Tự điền sau khi định vị" />
               </label>
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm text-base-content/70">Quận/Huyện</span>
-                <input value={form.district} onChange={set('district')} className="input input-bordered w-full" />
+                <input value={form.district} onChange={set('district')} className="input input-bordered w-full" placeholder="Tự điền sau khi định vị" />
               </label>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm text-base-content/70">Tỉnh/Thành</span>
-                <input value={form.city} onChange={set('city')} className="input input-bordered w-full" />
+                <input value={form.city} onChange={set('city')} className="input input-bordered w-full" placeholder="Tự điền sau khi định vị" />
               </label>
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm text-base-content/70">Số điện thoại</span>
