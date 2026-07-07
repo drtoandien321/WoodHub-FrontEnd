@@ -11,9 +11,14 @@ import { UserIcon, MailIcon, PhoneIcon, LockIcon, BuildingIcon } from '../compon
  * Register — CHỈ đăng ký khách hàng (customer). BE luôn tạo role=customer + yêu cầu xác thực email.
  * Luồng: submit → BE gửi OTP → chuyển /verify-otp (không auto-login).
  *
- * Biến thể ?type=business: customerType='business' + 3 field doanh nghiệp (companyName/taxCode/
- * companyAddress) gửi kèm — BE validate các field này là bắt buộc khi customerType=business
- * (không phải ở DTO, nên FE tự đánh dấu required trên UI cho rõ ràng).
+ * 2 tab Cá nhân/Doanh nghiệp NGAY TRÊN trang (không chỉ qua link ?type=business từ /b2b nữa) —
+ * đọc query param lúc vào trang để hỗ trợ deep-link cũ (link "Đăng ký doanh nghiệp" ở /b2b vẫn
+ * mở thẳng tab Doanh nghiệp), nhưng sau đó supplier tự bấm đổi tab được, đồng bộ ngược lại URL
+ * bằng setSearchParams để F5/back vẫn giữ đúng tab đang chọn.
+ *
+ * customerType='business' + 3 field doanh nghiệp (companyName/taxCode/companyAddress) gửi kèm —
+ * BE validate các field này là bắt buộc khi customerType=business (không phải ở DTO, nên FE tự
+ * đánh dấu required trên UI cho rõ ràng).
  * ⚠️ Trước đây field "name" bị dùng lẫn lộn làm cả tên người lẫn tên công ty tuỳ biến thể —
  * đã tách rõ: "name" LUÔN là họ tên người đăng ký (BE yêu cầu fullName ở mọi trường hợp),
  * "companyName" là field RIÊNG chỉ hiện khi đăng ký doanh nghiệp.
@@ -21,8 +26,13 @@ import { UserIcon, MailIcon, PhoneIcon, LockIcon, BuildingIcon } from '../compon
 export default function Register() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [searchParams] = useSearchParams();
-  const isBusiness = searchParams.get('type') === 'business';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isBusiness, setIsBusiness] = useState(searchParams.get('type') === 'business');
+
+  const selectTab = (business) => {
+    setIsBusiness(business);
+    setSearchParams(business ? { type: 'business' } : {}, { replace: true });
+  };
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '', password: '',
@@ -65,9 +75,26 @@ export default function Register() {
       <h1 className="font-display text-4xl md:text-5xl mb-2">
         {isBusiness ? t('auth.register.businessTitle') : t('auth.register.title')}
       </h1>
-      <p className="text-base-content/60 mb-7">
+      <p className="text-base-content/60 mb-5">
         {isBusiness ? t('auth.register.businessSubtitle') : t('auth.register.subtitle')}
       </p>
+
+      <div role="tablist" className="tabs tabs-boxed mb-6 w-fit">
+        <button
+          type="button" role="tab"
+          className={`tab ${!isBusiness ? 'tab-active' : ''}`}
+          onClick={() => selectTab(false)}
+        >
+          {t('auth.register.tabIndividual')}
+        </button>
+        <button
+          type="button" role="tab"
+          className={`tab ${isBusiness ? 'tab-active' : ''}`}
+          onClick={() => selectTab(true)}
+        >
+          {t('auth.register.tabBusiness')}
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <AuthField

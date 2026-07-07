@@ -102,6 +102,8 @@
     "register": {
       "title": "Create account",
       "subtitle": "Join WoodHub to explore the world of wooden interiors",
+      "tabIndividual": "Individual",
+      "tabBusiness": "Business",
       "namePlaceholder": "Full name",
       "emailPlaceholder": "Email",
       "phonePlaceholder": "Phone number",

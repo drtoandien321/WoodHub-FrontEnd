@@ -102,6 +102,8 @@
     "register": {
       "title": "Tạo tài khoản",
       "subtitle": "Tham gia WoodHub để khám phá thế giới nội thất gỗ",
+      "tabIndividual": "Cá nhân",
+      "tabBusiness": "Doanh nghiệp",
       "namePlaceholder": "Họ tên",
       "emailPlaceholder": "Email",
       "phonePlaceholder": "Số điện thoại",
