@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useLogout } from '../../hooks/useLogout.js';
+import { redirectPathForRole } from '../../utils/auth.js';
 import ShopMegaMenu from './ShopMegaMenu.jsx';
 
 // Icon inline (chevron) thay vì cài lucide-react — đỡ 1 dependency
@@ -25,6 +26,13 @@ export default function HeroNavbar() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
   const logout = useLogout();
+  // "Khu vực riêng" theo role — GIỐNG HỆT logic ở Header.jsx (dùng ở mọi trang khác). Trang chủ
+  // dùng navbar riêng (HeroNavbar) nên trước đây KHÔNG có link này — bug đã báo: đăng nhập
+  // supplier/admin xong về trang chủ thì không bấm quay lại portal được, chỉ có link /profile.
+  const roleArea =
+    user?.role === 'supplier' ? { to: redirectPathForRole('supplier', undefined, user.supplierType), label: t('nav.portal') }
+    : user?.role === 'admin' ? { to: '/admin', label: t('nav.admin') }
+    : { to: '/orders', label: t('nav.orders') };
   // Mega menu "Cửa hàng": mở khi hover item shop, đóng khi rời <nav> (panel là CON
   // của nav nên rê chuột trong panel không kích hoạt mouseleave).
   const [shopOpen, setShopOpen] = useState(false);
@@ -77,18 +85,22 @@ export default function HeroNavbar() {
       {/* Bên phải: Sign In / Sign Up (khách) hoặc lời chào + đăng xuất (đã đăng nhập) */}
       <div className="flex-1 hidden md:flex items-center justify-end gap-3">
         {user ? (
-          <>
-            <Link to="/profile" className="text-sm text-hero-ink/90 hover:opacity-70 transition-opacity">
-              {t('nav.greeting', { name: user.name })}
-            </Link>
-            <button
-              type="button"
-              onClick={logout}
-              className="rounded-full border border-hero-ink/25 px-5 py-2 text-sm text-hero-ink/90 hover:bg-white/40 transition-colors cursor-pointer"
+          // Dropdown giống Header.jsx — bấm lời chào để xổ ra Portal/Đơn hàng/Gói của tôi/Hồ sơ/Đăng xuất
+          <div className="dropdown dropdown-end">
+            <div
+              tabIndex={0}
+              role="button"
+              className="text-sm text-hero-ink/90 hover:opacity-70 transition-opacity cursor-pointer"
             >
-              {t('nav.logout')}
-            </button>
-          </>
+              {t('nav.greeting', { name: user.name })}
+            </div>
+            <ul tabIndex={0} className="dropdown-content menu bg-base-100 text-base-content rounded-box z-20 w-48 p-2 shadow border border-base-300 mt-2">
+              <li><Link to={roleArea.to}>{roleArea.label}</Link></li>
+              {user.role === 'customer' && <li><Link to="/account/subscription">{t('nav.subscription')}</Link></li>}
+              <li><Link to="/profile">{t('nav.profile')}</Link></li>
+              <li><button onClick={logout}>{t('nav.logout')}</button></li>
+            </ul>
+          </div>
         ) : (
           <>
             <Link

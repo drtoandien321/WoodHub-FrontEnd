@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client.js';
+import { useAuthStore } from '../stores/authStore.js';
+import { redirectPathForRole } from '../utils/auth.js';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
@@ -26,8 +28,14 @@ import { UserIcon, MailIcon, PhoneIcon, LockIcon, BuildingIcon } from '../compon
 export default function Register() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { token, user } = useAuthStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isBusiness, setIsBusiness] = useState(searchParams.get('type') === 'business');
+
+  // Đã đăng nhập sẵn mà vào /register → đẩy về đúng khu vực của role đó (giống fix ở Login.jsx)
+  if (token && user) {
+    return <Navigate to={user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, undefined, user.supplierType)} replace />;
+  }
 
   const selectTab = (business) => {
     setIsBusiness(business);

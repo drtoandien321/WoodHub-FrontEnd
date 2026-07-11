@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client.js';
 import { useAuthStore } from '../stores/authStore.js';
@@ -18,11 +18,22 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { token, user } = useAuthStore();
   const setAuth = useAuthStore((s) => s.setAuth);
   const { t } = useTranslation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  /*
+   * Đã đăng nhập sẵn mà vào /login (gõ tay URL, bấm back, hoặc trang chủ HeroNavbar không có
+   * link quay lại portal — bug đã sửa riêng) → tự đẩy về đúng khu vực của role đó thay vì hiện
+   * lại form đăng nhập như đang bị logout. KHÔNG đặt trong handleSubmit vì đây là lúc VÀO trang,
+   * không phải sau khi submit.
+   */
+  if (token && user) {
+    return <Navigate to={user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, undefined, user.supplierType)} replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
