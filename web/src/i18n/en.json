@@ -29,7 +29,8 @@
     "orders": "Orders",
     "portal": "Supplier Portal",
     "admin": "Admin",
-    "profile": "My profile"
+    "profile": "My profile",
+    "subscription": "My subscription"
   },
   "megaMenu": {
     "viewDetail": "View details",
@@ -283,41 +284,11 @@
     "title": "Pricing",
     "subtitle": "Flexible to your needs, optimized for every type of customer.",
     "perMonth": "/ month",
-    "subscribe": "Subscribe",
-    "popular": "Popular",
-    "toastMessage": "Subscription payment flow is coming in V1",
-    "groups": {
-      "b2c": {
-        "title": "Retail customers (B2C)",
-        "desc": "Enhanced AR/3D experience for furniture shopping.",
-        "features": [
-          "Unlimited AR/3D viewing for every product",
-          "Priority AI advisor — faster responses",
-          "Save unlimited tried-on AR room setups",
-          "Free shipping on orders from 2,000,000đ"
-        ]
-      },
-      "supplier": {
-        "title": "Workshops & Suppliers",
-        "desc": "Sales management tools for workshops.",
-        "features": [
-          "Unlimited product listings on the B2C marketplace",
-          "Order & inventory management dashboard",
-          "Priority placement in workshop matching results",
-          "Monthly revenue & performance reports"
-        ]
-      },
-      "custom": {
-        "title": "Custom Design customers",
-        "desc": "Priority matching with verified workshops for custom orders.",
-        "features": [
-          "Priority matching with verified workshops",
-          "Unlimited 3D design revisions",
-          "1-on-1 technical support before confirming",
-          "Extended warranty for custom products"
-        ]
-      }
-    }
+    "free": "Free",
+    "subscribe": "Choose plan",
+    "currentPlan": "Current plan",
+    "switchedTo": "Switched to {{name}}.",
+    "genericError": "Something went wrong, please try again."
   },
   "contact": {
     "title": "Contact",

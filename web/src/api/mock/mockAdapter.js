@@ -1,7 +1,6 @@
 import i18n from '../../i18n/index.js';
 import { PRODUCTS, WORKSHOPS, CATEGORY_NAMES, MATERIAL_NAMES } from './data.js';
 import { PRODUCT_TYPES } from './customData.js';
-import { PLANS } from './plansData.js';
 import { MODELS_3D, buildGeneratedModel } from './models3dData.js';
 import { storage } from '../../services/storage.js';
 import { useAuthStore } from '../../stores/authStore.js';
@@ -238,6 +237,37 @@ const toStoreInventoryResponse = (inv) => {
     updatedAt: inv.updatedAt,
   };
 };
+
+/*
+ * "DB" cho SUBSCRIPTION (gói đăng ký) — 3 mảng mutable: gói đang bán (seed sẵn Free + 1 gói trả
+ * phí, để trang Pricing mock có gì hiển thị), gói user đang dùng (null = chưa có gói active,
+ * giống BE trả 404 ở GET /subscriptions/me), lịch sử thanh toán. Persist qua localStorage để demo
+ * không mất khi F5, giống các module Admin khác ở trên.
+ */
+const MOCK_SUBSCRIPTION_PLANS_KEY = 'woodhub:subscription-plans-v1';
+let mockSubscriptionPlans = storage.getItem(MOCK_SUBSCRIPTION_PLANS_KEY, null) ?? [
+  {
+    id: 'plan_free', name: 'free', displayName: 'Gói Free', description: 'Trải nghiệm cơ bản', price: 0,
+    featureLimits: { ai_chat: 10, design: 3, export: 0, ar_3d: 0 },
+    displayFeatures: ['Chat AI 10 lượt/tháng', 'Thiết kế 3 mẫu/tháng'],
+    isActive: true, sortOrder: 0, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: 'plan_premium', name: 'b2c_premium', displayName: 'B2C Premium AR/3D', description: 'Đầy đủ tính năng', price: 99000,
+    featureLimits: { ai_chat: -1, design: 50, export: 20, ar_3d: 20 },
+    displayFeatures: ['Chat AI không giới hạn', 'Thiết kế 50 mẫu/tháng', 'Xuất file 20 lượt/tháng', 'AR/3D 20 lượt/tháng'],
+    isActive: true, sortOrder: 1, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
+  },
+];
+const persistMockSubscriptionPlans = () => storage.setItem(MOCK_SUBSCRIPTION_PLANS_KEY, mockSubscriptionPlans);
+
+const MOCK_MY_SUBSCRIPTION_KEY = 'woodhub:my-subscription-v1';
+let mockMySubscription = storage.getItem(MOCK_MY_SUBSCRIPTION_KEY, null);
+const persistMockMySubscription = () => storage.setItem(MOCK_MY_SUBSCRIPTION_KEY, mockMySubscription);
+
+const MOCK_PAYMENTS_KEY = 'woodhub:subscription-payments-v1';
+let mockPayments = storage.getItem(MOCK_PAYMENTS_KEY, []);
+const persistMockPayments = () => storage.setItem(MOCK_PAYMENTS_KEY, mockPayments);
 
 let seq = 1;
 const nextId = (prefix) => `${prefix}_${Date.now()}_${seq++}`;
@@ -1086,11 +1116,6 @@ export const mockAdapter = {
     return { status: 'pending', progress: Math.min(95, Math.round((elapsed / TOTAL_MS) * 100)) };
   },
 
-  async getPlans() {
-    await delay(250);
-    return { items: PLANS };
-  },
-
   async submitContact(body) {
     await delay(500);
     return { ok: true };
@@ -1146,5 +1171,177 @@ export const mockAdapter = {
   async getPresence(userId) {
     await delay(150);
     return { userId, online: false, lastSeenAt: null };
+  },
+
+  // ===== SUBSCRIPTION PLANS (trang Pricing — công khai) =====
+  async getSubscriptionPlans() {
+    await delay(250);
+    return mockSubscriptionPlans.filter((p) => p.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+
+  // ===== SUBSCRIPTION PLANS — quản trị (Portal Quản trị /admin/subscription-plans) =====
+  async getAllSubscriptionPlans() {
+    await delay(250);
+    return [...mockSubscriptionPlans].sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+
+  async createSubscriptionPlan(body) {
+    await delay(350);
+    if (mockSubscriptionPlans.some((p) => p.name === body.name)) {
+      throw Object.assign(new Error('Conflict'), { response: { status: 409, data: { message: 'Mã gói đã tồn tại' } } });
+    }
+    const now = new Date().toISOString();
+    const plan = {
+      id: nextId('plan'), name: body.name, displayName: body.displayName, description: body.description ?? '',
+      price: body.price, featureLimits: body.featureLimits ?? {}, displayFeatures: body.displayFeatures ?? [],
+      isActive: body.isActive ?? true, sortOrder: body.sortOrder ?? 0, createdAt: now, updatedAt: now,
+    };
+    mockSubscriptionPlans = [...mockSubscriptionPlans, plan];
+    persistMockSubscriptionPlans();
+    return plan;
+  },
+
+  async updateSubscriptionPlan({ id, ...body }) {
+    await delay(350);
+    const idx = mockSubscriptionPlans.findIndex((p) => p.id === id);
+    if (idx === -1) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    if (mockSubscriptionPlans.some((p) => p.id !== id && p.name === body.name)) {
+      throw Object.assign(new Error('Conflict'), { response: { status: 409, data: { message: 'Mã gói đã tồn tại' } } });
+    }
+    mockSubscriptionPlans[idx] = {
+      ...mockSubscriptionPlans[idx], name: body.name, displayName: body.displayName,
+      description: body.description ?? '', price: body.price, featureLimits: body.featureLimits ?? {},
+      displayFeatures: body.displayFeatures ?? [], isActive: body.isActive ?? true, sortOrder: body.sortOrder ?? 0,
+      updatedAt: new Date().toISOString(),
+    };
+    persistMockSubscriptionPlans();
+    return mockSubscriptionPlans[idx];
+  },
+
+  async deleteSubscriptionPlan(id) {
+    await delay(300);
+    if (mockMySubscription?.plan?.id === id) {
+      throw Object.assign(new Error('Conflict'), { response: { status: 409, data: { message: 'Gói đang có người dùng, không thể xoá' } } });
+    }
+    mockSubscriptionPlans = mockSubscriptionPlans.filter((p) => p.id !== id);
+    persistMockSubscriptionPlans();
+    return {};
+  },
+
+  // ===== SUBSCRIPTIONS (gói của user đang đăng nhập) =====
+  async subscribe(planId) {
+    await delay(400);
+    const plan = mockSubscriptionPlans.find((p) => p.id === planId);
+    if (!plan) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Không tìm thấy gói' } } });
+    if (plan.price > 0) {
+      throw Object.assign(new Error('Bad request'), { response: { status: 400, data: { message: 'Gói trả phí phải thanh toán qua /payments/subscription' } } });
+    }
+    if (mockMySubscription?.status === 'active' && mockMySubscription.plan.id === planId) {
+      throw Object.assign(new Error('Conflict'), { response: { status: 409, data: { message: 'Bạn đang sử dụng gói này' } } });
+    }
+    const now = new Date().toISOString();
+    mockMySubscription = { id: nextId('sub'), userId: 'u1', status: 'active', startDate: now, endDate: null, createdAt: now, updatedAt: now, plan };
+    persistMockMySubscription();
+    return mockMySubscription;
+  },
+
+  async getMySubscription() {
+    await delay(200);
+    if (!mockMySubscription || mockMySubscription.status !== 'active') {
+      throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Chưa có gói active' } } });
+    }
+    return mockMySubscription;
+  },
+
+  async getMySubscriptionHistory() {
+    await delay(200);
+    return mockMySubscription ? [mockMySubscription] : [];
+  },
+
+  async renewMySubscription() {
+    await delay(300);
+    if (!mockMySubscription || mockMySubscription.status !== 'active') {
+      throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Chưa có gói active' } } });
+    }
+    if (mockMySubscription.plan.price === 0) {
+      throw Object.assign(new Error('Bad request'), { response: { status: 400, data: { message: 'Gói free không cần gia hạn' } } });
+    }
+    const base = mockMySubscription.endDate ? new Date(mockMySubscription.endDate) : new Date();
+    base.setMonth(base.getMonth() + 1);
+    mockMySubscription = { ...mockMySubscription, endDate: base.toISOString(), updatedAt: new Date().toISOString() };
+    persistMockMySubscription();
+    return mockMySubscription;
+  },
+
+  async cancelMySubscription() {
+    await delay(300);
+    if (!mockMySubscription || mockMySubscription.status !== 'active') {
+      throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Chưa có gói active' } } });
+    }
+    mockMySubscription = { ...mockMySubscription, status: 'cancelled', updatedAt: new Date().toISOString() };
+    persistMockMySubscription();
+    return {};
+  },
+
+  // ===== PAYMENTS (SePay VietQR — chỉ gói trả phí) =====
+  async createSubscriptionPayment(planId) {
+    await delay(400);
+    const plan = mockSubscriptionPlans.find((p) => p.id === planId);
+    if (!plan) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Không tìm thấy gói' } } });
+    const now = new Date();
+    const payment = {
+      id: nextId('pay'), purpose: 'subscription', amount: plan.price, status: 'pending',
+      txnRef: nextId('SUB').toUpperCase(),
+      qrUrl: `https://qr.sepay.vn/img?acc=demo&bank=DEMO&amount=${plan.price}&des=demo`,
+      expiresAt: new Date(now.getTime() + 15 * 60_000).toISOString(),
+      paidAt: null, paidAmount: null, createdAt: now.toISOString(),
+      planId: plan.id, planName: plan.displayName, _polls: 0,
+    };
+    mockPayments = [payment, ...mockPayments];
+    persistMockPayments();
+    return payment;
+  },
+
+  // Demo: sau 3 lần FE poll thì tự chuyển "paid" + kích hoạt gói, để test được luồng poll không cần SePay thật.
+  async getPayment(id) {
+    await delay(300);
+    const payment = mockPayments.find((p) => p.id === id);
+    if (!payment) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Không tìm thấy giao dịch' } } });
+    if (payment.status === 'pending') {
+      payment._polls += 1;
+      if (payment._polls >= 3) {
+        payment.status = 'paid';
+        payment.paidAt = new Date().toISOString();
+        payment.paidAmount = payment.amount;
+        const plan = mockSubscriptionPlans.find((p) => p.id === payment.planId);
+        const now = new Date();
+        mockMySubscription = {
+          id: nextId('sub'), userId: 'u1', status: 'active', startDate: now.toISOString(),
+          endDate: new Date(now.getTime() + 30 * 86_400_000).toISOString(),
+          createdAt: now.toISOString(), updatedAt: now.toISOString(), plan,
+        };
+        persistMockMySubscription();
+      }
+      persistMockPayments();
+    }
+    return payment;
+  },
+
+  async getMyPayments() {
+    await delay(200);
+    return mockPayments;
+  },
+
+  // ===== USAGE (hạn mức dùng theo tháng) — demo: luôn "chưa dùng gì" (used: 0) =====
+  async getMyUsage() {
+    await delay(200);
+    const limits = mockMySubscription?.status === 'active' ? mockMySubscription.plan.featureLimits : {};
+    const period = new Date().toISOString().slice(0, 7);
+    const features = ['ai_chat', 'design', 'export', 'ar_3d'];
+    return features.map((feature) => {
+      const limit = limits[feature] ?? 0;
+      const unlimited = limit === -1;
+      return { feature, period, used: 0, limit: unlimited ? null : limit, remaining: unlimited ? null : limit, unlimited };
+    });
   },
 };

@@ -52,6 +52,13 @@ const REAL_ENDPOINTS = new Set([
   'getSupplierMe',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
   'getNearbyStoresBySupplier', 'getNearestWorkshops', 'getWorkshopsWithinRadius',
+  // Module Subscription — gói đăng ký (trang Pricing + "Gói của tôi")
+  'getSubscriptionPlans', 'subscribe', 'getMySubscription', 'getMySubscriptionHistory',
+  'renewMySubscription', 'cancelMySubscription',
+  'createSubscriptionPayment', 'getPayment', 'getMyPayments',
+  'getMyUsage',
+  // Module Admin — quản lý gói đăng ký (Portal Quản trị /admin/subscription-plans)
+  'getAllSubscriptionPlans', 'createSubscriptionPlan', 'updateSubscriptionPlan', 'deleteSubscriptionPlan',
 ]);
 
 /*
@@ -492,9 +499,43 @@ export const api = {
   // GET /custom/ai/tasks/:taskId — poll tiến trình dựng
   getGenTask: (taskId) => call(() => http.get(`/custom/ai/tasks/${taskId}`), 'getGenTask', taskId),
 
-  // ===== PLANS (trang Pricing) =====
-  // GET /plans — danh sách gói subscription theo nhóm (b2c | supplier | custom)
-  getPlans: () => call(() => http.get('/plans'), 'getPlans'),
+  /*
+   * ===== SUBSCRIPTION (gói đăng ký) — đọc trực tiếp SubscriptionPlanController/UserSubscription-
+   * Controller/PaymentController/UsageLimitController.java, KHÔNG suy đoán path. =====
+   */
+  // GET /subscription-plans — công khai, danh sách gói ĐANG BÁN đã sắp sortOrder (trang Pricing)
+  getSubscriptionPlans: () => call(() => http.get('/subscription-plans'), 'getSubscriptionPlans'),
+
+  // POST /subscriptions  body: { planId } → UserSubscriptionResponse — CHỈ gói price=0 (BE 400 nếu trả phí)
+  subscribe: (planId) => call(() => http.post('/subscriptions', { planId }), 'subscribe', planId),
+  // GET /subscriptions/me → UserSubscriptionResponse, BE trả 404 nếu chưa có gói active
+  getMySubscription: () => call(() => http.get('/subscriptions/me'), 'getMySubscription'),
+  // GET /subscriptions/me/history → UserSubscriptionResponse[], mới nhất trước
+  getMySubscriptionHistory: () => call(() => http.get('/subscriptions/me/history'), 'getMySubscriptionHistory'),
+  // POST /subscriptions/me/renew — cộng dồn +1 tháng cho gói trả phí đang active (free → 400)
+  renewMySubscription: () => call(() => http.post('/subscriptions/me/renew'), 'renewMySubscription'),
+  // POST /subscriptions/me/cancel → 204
+  cancelMySubscription: () => call(() => http.post('/subscriptions/me/cancel'), 'cancelMySubscription'),
+
+  // POST /payments/subscription  body: { planId } → PaymentResponse (có qrUrl để hiện QR VietQR)
+  createSubscriptionPayment: (planId) => call(() => http.post('/payments/subscription', { planId }), 'createSubscriptionPayment', planId),
+  // GET /payments/{id} → PaymentResponse — FE poll tới status !== 'pending' (xem hooks/useSubscription.js)
+  getPayment: (id) => call(() => http.get(`/payments/${id}`), 'getPayment', id),
+  // GET /payments/me → PaymentResponse[], mới nhất trước
+  getMyPayments: () => call(() => http.get('/payments/me'), 'getMyPayments'),
+
+  // GET /usage/me → UsageStatusResponse[] — hạn mức mọi tính năng trong THÁNG NÀY
+  getMyUsage: () => call(() => http.get('/usage/me'), 'getMyUsage'),
+
+  // ===== SUBSCRIPTION PLANS — quản trị (chỉ admin) =====
+  // GET /subscription-plans/all → CẢ gói đã tắt (khác GET /subscription-plans công khai)
+  getAllSubscriptionPlans: () => call(() => http.get('/subscription-plans/all'), 'getAllSubscriptionPlans'),
+  // POST /subscription-plans  body: CreateSubscriptionPlanRequest
+  createSubscriptionPlan: (body) => call(() => http.post('/subscription-plans', body), 'createSubscriptionPlan', body),
+  // PUT /subscription-plans/{id}  body: UpdateSubscriptionPlanRequest
+  updateSubscriptionPlan: ({ id, ...body }) => call(() => http.put(`/subscription-plans/${id}`, body), 'updateSubscriptionPlan', { id, ...body }),
+  // DELETE /subscription-plans/{id} — 409 nếu đang có người dùng gói này
+  deleteSubscriptionPlan: (id) => call(() => http.delete(`/subscription-plans/${id}`), 'deleteSubscriptionPlan', id),
 
   // ===== CONTACT =====
   // POST /contact  body: { name, email, subject, message }

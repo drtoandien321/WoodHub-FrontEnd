@@ -21,6 +21,7 @@ const Checkout = lazy(() => import('./pages/Checkout.jsx'));
 const Orders = lazy(() => import('./pages/Orders.jsx'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
+const MySubscription = lazy(() => import('./pages/MySubscription.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
 const VerifyOtp = lazy(() => import('./pages/VerifyOtp.jsx'));
@@ -46,6 +47,7 @@ const AdminCategories = lazy(() => import('./pages/admin/AdminCategories.jsx'));
 const AdminMaterials = lazy(() => import('./pages/admin/AdminMaterials.jsx'));
 const AdminSuppliers = lazy(() => import('./pages/admin/AdminSuppliers.jsx'));
 const AdminSupplierDetail = lazy(() => import('./pages/admin/AdminSupplierDetail.jsx'));
+const AdminSubscriptionPlans = lazy(() => import('./pages/admin/AdminSubscriptionPlans.jsx'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers.jsx'));
 const AdminUserDetail = lazy(() => import('./pages/admin/AdminUserDetail.jsx'));
 // Portal Nhà cung cấp (manufacturer) — khu vực mới /portal/supplier/*
@@ -124,6 +126,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/account/subscription" element={<MySubscription />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/custom/match/:designId" element={<WorkshopMatch />} />
@@ -176,6 +179,7 @@ export default function App() {
             <Route path="materials" element={<AdminMaterials />} />
             <Route path="suppliers" element={<AdminSuppliers />} />
             <Route path="suppliers/:id" element={<AdminSupplierDetail />} />
+            <Route path="subscription-plans" element={<AdminSubscriptionPlans />} />
           </Route>
         </Route>
       </Routes>

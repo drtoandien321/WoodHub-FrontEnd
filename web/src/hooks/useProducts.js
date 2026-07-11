@@ -48,7 +48,4 @@ export const useWorkshopMatch = (designId) =>
 // (Đã chuyển sang hooks/usePublicSuppliers.js — usePublicSuppliers/useSupplierPublicProfile —
 // khớp đúng shape SupplierPublicResponse của BE thật, không dùng slug mà dùng UUID.)
 
-export const usePlans = () =>
-  useQuery({ queryKey: ['plans'], queryFn: api.getPlans });
-
 export const useSubmitContact = () => useMutation({ mutationFn: api.submitContact });

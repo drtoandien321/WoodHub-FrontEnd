@@ -93,6 +93,7 @@ export default function Header() {
               </div>
               <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-20 w-48 p-2 shadow border border-base-300 mt-2">
                 <li><Link to={roleArea.to}>{roleArea.label}</Link></li>
+                {user.role === 'customer' && <li><Link to="/account/subscription">{t('nav.subscription')}</Link></li>}
                 <li><Link to="/profile">{t('nav.profile')}</Link></li>
                 <li><button onClick={logout}>{t('nav.logout')}</button></li>
               </ul>

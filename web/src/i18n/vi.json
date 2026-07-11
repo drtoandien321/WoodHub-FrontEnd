@@ -29,7 +29,8 @@
     "orders": "Đơn hàng",
     "portal": "Portal Nhà cung cấp",
     "admin": "Quản trị",
-    "profile": "Thông tin cá nhân"
+    "profile": "Thông tin cá nhân",
+    "subscription": "Gói của tôi"
   },
   "megaMenu": {
     "viewDetail": "Xem chi tiết",
@@ -283,41 +284,11 @@
     "title": "Bảng giá",
     "subtitle": "Linh hoạt theo nhu cầu, tối ưu trải nghiệm cho từng đối tượng khách hàng.",
     "perMonth": "/ tháng",
-    "subscribe": "Đăng ký gói",
-    "popular": "Phổ biến",
-    "toastMessage": "Luồng thanh toán subscription sẽ có ở V1",
-    "groups": {
-      "b2c": {
-        "title": "Khách mua lẻ (B2C)",
-        "desc": "Trải nghiệm AR/3D nâng cao khi mua sắm nội thất.",
-        "features": [
-          "Xem AR/3D không giới hạn cho mọi sản phẩm",
-          "Tư vấn AI ưu tiên — phản hồi nhanh hơn",
-          "Lưu không giới hạn cấu hình phòng đã thử AR",
-          "Miễn phí vận chuyển cho đơn từ 2 triệu"
-        ]
-      },
-      "supplier": {
-        "title": "Xưởng & Nhà cung cấp",
-        "desc": "Công cụ quản lý bán hàng cho xưởng mộc.",
-        "features": [
-          "Đăng sản phẩm không giới hạn lên sàn B2C",
-          "Dashboard quản lý đơn hàng & tồn kho",
-          "Ưu tiên xuất hiện trong kết quả ghép xưởng (matching)",
-          "Báo cáo doanh thu & hiệu suất hàng tháng"
-        ]
-      },
-      "custom": {
-        "title": "Khách đặt thiết kế Custom",
-        "desc": "Ưu tiên ghép xưởng verified cho đơn custom.",
-        "features": [
-          "Ưu tiên ghép với xưởng đã xác minh (verified)",
-          "Không giới hạn số lượt chỉnh thiết kế 3D",
-          "Hỗ trợ kỹ thuật 1-1 trước khi chốt đơn",
-          "Bảo hành mở rộng cho sản phẩm custom"
-        ]
-      }
-    }
+    "free": "Miễn phí",
+    "subscribe": "Chọn gói",
+    "currentPlan": "Gói hiện tại",
+    "switchedTo": "Đã chuyển sang {{name}}.",
+    "genericError": "Có lỗi xảy ra, vui lòng thử lại."
   },
   "contact": {
     "title": "Liên hệ",

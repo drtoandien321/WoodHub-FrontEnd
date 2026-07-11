@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../api/client.js';
 import { useAuthStore } from '../stores/authStore.js';
 import { requestLocationOnce } from '../services/geolocation.js';
+import { ensureFreeSubscription } from '../services/subscription.js';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
@@ -33,7 +34,7 @@ export default function Login() {
       setAuth({ token, refreshToken, user });
       // Xin quyền vị trí ngay sau login THẬT (Pha 2 tính năng GPS) — chỉ customer, không chặn
       // navigate() bên dưới (fire-and-forget, xem services/geolocation.js).
-      if (user.role === 'customer') requestLocationOnce();
+      if (user.role === 'customer') { requestLocationOnce(); ensureFreeSubscription(); }
       // Tài khoản supplier do admin tạo (mật khẩu tạm) → ép đổi mật khẩu trước, chưa vào Portal
       navigate(
         user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType),
