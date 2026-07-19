@@ -119,8 +119,8 @@
       "businessSubtitle": "Dành cho doanh nghiệp mua số lượng lớn — nhận báo giá & xuất hóa đơn VAT.",
       "businessSectionTitle": "Thông tin doanh nghiệp",
       "companyNamePlaceholder": "Tên doanh nghiệp",
-      "taxCodePlaceholder": "Mã số thuế (không bắt buộc)",
-      "companyAddressPlaceholder": "Địa chỉ doanh nghiệp (không bắt buộc)"
+      "taxCodePlaceholder": "Mã số thuế (bắt buộc)",
+      "companyAddressPlaceholder": "Địa chỉ doanh nghiệp (bắt buộc)"
     },
     "divider": "Hoặc",
     "google": {
@@ -794,6 +794,15 @@
     "placeholder": "Nhập câu hỏi… (vd: bàn ăn gỗ sồi dưới 10 triệu)",
     "send": "Gửi",
     "close": "Đóng",
+    "newConversation": "Cuộc trò chuyện mới",
+    "loginRequired": "Đăng nhập để trò chuyện với trợ lý AI.",
+    "login": "Đăng nhập",
+    "retry": "Thử lại",
+    "errors": {
+      "quota": "Bạn đã dùng hết lượt chat AI trong tháng này. Nâng cấp gói để tiếp tục.",
+      "aiDown": "Trợ lý AI đang bận hoặc không phản hồi. Vui lòng thử lại sau.",
+      "generic": "Có lỗi xảy ra, vui lòng thử lại."
+    },
     "replies": {
       "greeting": "Chào bạn 👋 Mình là trợ lý WoodHub. Bạn cần tìm loại nội thất nào? Cho mình biết loại sản phẩm, chất liệu gỗ hoặc ngân sách nhé.",
       "found": "Mình gợi ý vài mẫu phù hợp nhé:",

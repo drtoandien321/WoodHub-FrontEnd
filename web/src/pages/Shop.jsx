@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useProducts } from '../hooks/useProducts.js';
 import { useCategoryTree, useMaterials, useRooms, useStyles } from '../hooks/useCatalog.js';
@@ -287,20 +288,30 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* Bộ lọc — mobile drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
-          <div className="absolute inset-y-0 left-0 w-[85%] max-w-sm overflow-y-auto bg-base-100 p-5 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl">{t('shop.filtersButton')}</h2>
-              <button onClick={() => setMobileOpen(false)} aria-label={t('shop.close')} className="btn btn-ghost btn-sm btn-circle">✕</button>
-            </div>
-            <FilterContent />
-            <button onClick={() => setMobileOpen(false)} className="btn btn-primary mt-6 w-full">{t('shop.applyFilters')}</button>
+      {/* Bộ lọc — mobile drawer (FE-7: transition trượt vào từ trái, cùng pattern ChatDrawer.jsx) */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} aria-hidden="true"
+            />
+            <motion.div
+              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              role="dialog" aria-modal="true" aria-label={t('shop.filtersButton')}
+              className="absolute inset-y-0 left-0 w-[85%] max-w-sm overflow-y-auto bg-base-100 p-5 shadow-xl"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-display text-xl">{t('shop.filtersButton')}</h2>
+                <button onClick={() => setMobileOpen(false)} aria-label={t('shop.close')} className="btn btn-ghost btn-sm btn-circle">✕</button>
+              </div>
+              <FilterContent />
+              <button onClick={() => setMobileOpen(false)} className="btn btn-primary mt-6 w-full">{t('shop.applyFilters')}</button>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { PRODUCT_TYPES } from './customData.js';
 import { MODELS_3D, buildGeneratedModel } from './models3dData.js';
 import { storage } from '../../services/storage.js';
 import { useAuthStore } from '../../stores/authStore.js';
+import { getAdvisorReply } from '../../services/chatbot/advisor.js';
 
 /*
  * Mock adapter — giả lập BE để FE chạy độc lập trước khi BE xong.
@@ -108,6 +109,8 @@ const CUSTOM_DESIGNS_KEY = 'woodhub:customDesigns'; // Custom Studio wizard (BE-
  */
 const QUOTES_KEY = 'woodhub:quotes'; // BE-8 — FE-6
 const CUSTOM_ORDERS_KEY = 'woodhub:customOrders'; // BE-8 — TÁCH khỏi memoryDb.orders (checkout B2C cũ)
+const AI_CHAT_SESSIONS_KEY = 'woodhub:aiChatSessions';
+const AI_CHAT_MESSAGES_KEY = 'woodhub:aiChatMessages';
 
 const memoryDb = {
   orders: new Map(storage.getItem(ORDERS_KEY, [])),
@@ -117,6 +120,8 @@ const memoryDb = {
   customDesigns: new Map(storage.getItem(CUSTOM_DESIGNS_KEY, [])),
   quotes: new Map(storage.getItem(QUOTES_KEY, [])),
   customOrders: new Map(storage.getItem(CUSTOM_ORDERS_KEY, [])),
+  aiChatSessions: new Map(storage.getItem(AI_CHAT_SESSIONS_KEY, [])),
+  aiChatMessages: new Map(storage.getItem(AI_CHAT_MESSAGES_KEY, [])), // sessionId -> message[]
 };
 const persistOrders = () => storage.setItem(ORDERS_KEY, Array.from(memoryDb.orders.entries()));
 const persistGenTasks = () => storage.setItem(GEN_TASKS_KEY, Array.from(memoryDb.genTasks.entries()));
@@ -124,6 +129,8 @@ const persistGenModels = () => storage.setItem(GEN_MODELS_KEY, Array.from(memory
 const persistCustomDesigns = () => storage.setItem(CUSTOM_DESIGNS_KEY, Array.from(memoryDb.customDesigns.entries()));
 const persistQuotes = () => storage.setItem(QUOTES_KEY, Array.from(memoryDb.quotes.entries()));
 const persistCustomOrders = () => storage.setItem(CUSTOM_ORDERS_KEY, Array.from(memoryDb.customOrders.entries()));
+const persistAiChatSessions = () => storage.setItem(AI_CHAT_SESSIONS_KEY, Array.from(memoryDb.aiChatSessions.entries()));
+const persistAiChatMessages = () => storage.setItem(AI_CHAT_MESSAGES_KEY, Array.from(memoryDb.aiChatMessages.entries()));
 
 /*
  * Xác định vai trò của user ĐANG ĐĂNG NHẬP so với 1 quote/order — mock đơn phiên (1 user/lần),
@@ -1294,6 +1301,67 @@ export const mockAdapter = {
     memoryDb.customOrders.set(id, order);
     persistCustomOrders();
     return order;
+  },
+
+  /*
+   * ===== AI CHAT — trợ lý AI tư vấn (chatbot nổi) =====
+   * "Bộ não" mock TÁI DÙNG getAdvisorReply() (dò từ khoá/ngân sách trên catalog PRODUCTS) — y hệt
+   * logic đã chạy offline từ trước, chỉ bọc lại đúng shape AiChatSessionResponse/AiChatMessageResponse
+   * thật (role 'user'|'assistant', suggestedProducts thay vì products) để bật REAL_ENDPOINTS không
+   * phải sửa UI. Khi BE thật nối xong Python AI service, chỉ cần bỏ USE_MOCK, không đổi gì ở đây.
+   */
+  async createAiChatSession({ title } = {}) {
+    await delay(300);
+    const me = useAuthStore.getState().user;
+    const id = nextId('chatsession');
+    const now = new Date().toISOString();
+    memoryDb.aiChatSessions.set(id, { id, userId: me?.id ?? 'mock-user', title: title ?? null, createdAt: now, updatedAt: now });
+    memoryDb.aiChatMessages.set(id, []);
+    persistAiChatSessions();
+    persistAiChatMessages();
+    const s = memoryDb.aiChatSessions.get(id);
+    return { id: s.id, title: s.title, createdAt: s.createdAt, updatedAt: s.updatedAt };
+  },
+
+  async getMyAiChatSessions() {
+    await delay(200);
+    const me = useAuthStore.getState().user;
+    return Array.from(memoryDb.aiChatSessions.values())
+      .filter((s) => s.userId === (me?.id ?? 'mock-user'))
+      .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))
+      .map((s) => ({ id: s.id, title: s.title, createdAt: s.createdAt, updatedAt: s.updatedAt }));
+  },
+
+  async getAiChatMessages(sessionId) {
+    await delay(200);
+    if (!memoryDb.aiChatSessions.has(sessionId)) throw Object.assign(new Error('SESSION_NOT_FOUND'), { response: { status: 404 } });
+    return memoryDb.aiChatMessages.get(sessionId) ?? [];
+  },
+
+  async sendAiChatMessage({ sessionId, content }) {
+    await delay(500);
+    const session = memoryDb.aiChatSessions.get(sessionId);
+    if (!session) throw Object.assign(new Error('SESSION_NOT_FOUND'), { response: { status: 404 } });
+    const list = memoryDb.aiChatMessages.get(sessionId) ?? [];
+
+    const userMsg = { id: nextId('chatmsg'), role: 'user', content, extractedParams: {}, suggestedProducts: [], createdAt: new Date().toISOString() };
+    const { textKey, products } = getAdvisorReply(content);
+    const assistantMsg = {
+      id: nextId('chatmsg'), role: 'assistant', content: i18n.t(textKey),
+      extractedParams: {}, suggestedProducts: products, createdAt: new Date().toISOString(),
+    };
+    list.push(userMsg, assistantMsg);
+    memoryDb.aiChatMessages.set(sessionId, list);
+    persistAiChatMessages();
+
+    // Tự đặt tên phiên từ tin nhắn đầu (giống hành vi thật — CreateAiChatSessionRequest.title "bỏ trống → tự đặt tên từ tin nhắn đầu tiên")
+    if (!session.title) {
+      session.title = content.slice(0, 60);
+      session.updatedAt = assistantMsg.createdAt;
+      memoryDb.aiChatSessions.set(sessionId, session);
+      persistAiChatSessions();
+    }
+    return assistantMsg;
   },
 
   /*

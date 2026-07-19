@@ -794,6 +794,15 @@
     "placeholder": "Ask me… (e.g. oak dining table under 10M)",
     "send": "Send",
     "close": "Close",
+    "newConversation": "New conversation",
+    "loginRequired": "Log in to chat with the AI assistant.",
+    "login": "Log in",
+    "retry": "Retry",
+    "errors": {
+      "quota": "You've used up your AI chat quota this month. Upgrade your plan to continue.",
+      "aiDown": "The AI assistant is busy or not responding. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    },
     "replies": {
       "greeting": "Hi 👋 I'm the WoodHub assistant. What kind of furniture are you looking for? Tell me the product type, wood material or your budget.",
       "found": "Here are a few pieces that match:",

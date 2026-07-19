@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useRoomSceneDetail } from '../hooks/useRoomScenes.js';
 import { useCartStore } from '../stores/cartStore.js';
@@ -85,34 +86,45 @@ export default function RoomSceneViewer() {
         </div>
       )}
 
-      {/* Preview khi bấm hotspot */}
-      {activeItem && (
-        <div className="modal modal-open" role="dialog" aria-modal="true">
-          <div className="modal-box max-w-sm rounded-3xl p-0 overflow-hidden">
-            <button onClick={() => setActiveItem(null)} aria-label={t('rooms.close')} className="btn btn-ghost btn-sm btn-circle absolute right-2 top-2 z-10 bg-base-100/80">✕</button>
-            {activeItem.product.primaryImageUrl && (
-              <img src={activeItem.product.primaryImageUrl} alt={activeItem.product.name} className="h-48 w-full object-cover" />
-            )}
-            <div className="flex flex-col gap-2 p-5">
-              <h3 className="font-display text-lg">{activeItem.product.name}</h3>
-              <p className="text-sm text-base-content/60">{activeItem.product.supplierName}</p>
-              <p className="text-xl font-semibold text-primary">{formatVnd(activeItem.product.priceFrom)}</p>
-              <div className="mt-2 flex gap-2">
-                <button
-                  onClick={() => { addItem({ ...activeItem.product, price: activeItem.product.priceFrom, image: activeItem.product.primaryImageUrl }, 1); setActiveItem(null); }}
-                  className="btn btn-outline btn-sm flex-1 border-base-300"
-                >
-                  {t('product.addToCart')}
-                </button>
-                <button onClick={() => navigate(`/product/${activeItem.product.id}`)} className="btn btn-primary btn-sm flex-1">
-                  {t('rooms.viewDetail')}
-                </button>
+      {/* Preview khi bấm hotspot (FE-7: fade + scale nhẹ vào/ra, cùng pattern ChatDrawer.jsx) */}
+      <AnimatePresence>
+        {activeItem && (
+          <div className="modal modal-open" role="dialog" aria-modal="true">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="modal-box max-w-sm rounded-3xl p-0 overflow-hidden"
+            >
+              <button onClick={() => setActiveItem(null)} aria-label={t('rooms.close')} className="btn btn-ghost btn-sm btn-circle absolute right-2 top-2 z-10 bg-base-100/80">✕</button>
+              {activeItem.product.primaryImageUrl && (
+                <img src={activeItem.product.primaryImageUrl} alt={activeItem.product.name} className="h-48 w-full object-cover" />
+              )}
+              <div className="flex flex-col gap-2 p-5">
+                <h3 className="font-display text-lg">{activeItem.product.name}</h3>
+                <p className="text-sm text-base-content/60">{activeItem.product.supplierName}</p>
+                <p className="text-xl font-semibold text-primary">{formatVnd(activeItem.product.priceFrom)}</p>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => { addItem({ ...activeItem.product, price: activeItem.product.priceFrom, image: activeItem.product.primaryImageUrl }, 1); setActiveItem(null); }}
+                    className="btn btn-outline btn-sm flex-1 border-base-300"
+                  >
+                    {t('product.addToCart')}
+                  </button>
+                  <button onClick={() => navigate(`/product/${activeItem.product.id}`)} className="btn btn-primary btn-sm flex-1">
+                    {t('rooms.viewDetail')}
+                  </button>
+                </div>
               </div>
-            </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="modal-backdrop bg-black/40" onClick={() => setActiveItem(null)}
+            />
           </div>
-          <div className="modal-backdrop bg-black/40" onClick={() => setActiveItem(null)} />
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

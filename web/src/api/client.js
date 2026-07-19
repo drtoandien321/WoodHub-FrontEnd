@@ -45,6 +45,9 @@ const REAL_ENDPOINTS = new Set([
   'getProducts', 'getProduct',
   // Module Room/Style (BE-7) — GET công khai, curl xác nhận hoạt động (mảng rỗng vì chưa seed, không phải lỗi)
   'getRooms', 'getRoomBySlug', 'getRoomScenes', 'getRoomSceneDetail', 'getStyles',
+  // Module AI Chat — đã curl xác nhận session/history hoạt động thật; sendMessage cũng REAL dù
+  // hiện trả 502 (AI provider phía BE chưa nối) — đó là trạng thái thật cần UI xử lý, không phải lý do để mock.
+  'createAiChatSession', 'getMyAiChatSessions', 'getAiChatMessages', 'sendAiChatMessage',
   // Module Product (Portal Nhà cung cấp tự quản lý — /portal/supplier/products)
   'createProduct', 'getMyProducts', 'getMyProductDetail', 'updateProduct', 'updateProductStatus', 'deleteProduct',
   'createVariant', 'getVariants', 'updateVariant', 'deleteVariant',
@@ -126,6 +129,17 @@ http.interceptors.request.use((config) => {
  * nếu refresh xong mà request vẫn 401 (token thật sự không hợp lệ).
  * refreshRequest: gom nhiều request 401 cùng lúc thành 1 lần gọi /auth/refresh duy nhất
  * (không phải mỗi request lỗi lại tự gọi refresh riêng, tránh cấp thừa refresh token).
+ *
+ * ⚠️ CŨNG bắt 403 giống 401 (khác quy ước REST thông thường) — đã test bằng browser thật + JWT
+ * hết hạn: BE trả 403 (KHÔNG phải 401) cho token hết hạn/không hợp lệ, xác nhận trên nhiều
+ * endpoint (getMe/getMySubscription/getMyDesigns đều 403), không phải hành vi riêng 1 API.
+ * Đây là bug BE (thiếu AuthenticationEntryPoint trả 401 đúng chuẩn Spring Security — token hết
+ * hạn đang bị xử lý như "không đủ quyền" thay vì "chưa xác thực") — ĐÃ báo BE, chưa có ETA fix.
+ * Vá tạm ở đây để phiên đăng nhập không tự vỡ mỗi 15 phút (JWT_ACCESS_EXPIRATION_MS). Đánh đổi
+ * chấp nhận được: 403 "hợp lệ" (vd thao tác không đủ quyền như tự accept offer của mình) sẽ tốn
+ * thêm 1 lượt refresh+gọi lại thừa (refresh vẫn thành công vì access token cũ tuy hết hạn nhưng
+ * refresh token còn hạn 7 ngày) — nhưng KHÔNG bị logout oan vì chỉ logout khi refresh THẤT BẠI,
+ * không logout chỉ vì request lặp lại vẫn lỗi (có thể vẫn là 403 hợp lệ, không phải hết hạn).
  */
 let refreshRequest = null;
 
@@ -134,9 +148,11 @@ http.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const isAuthEndpoint = originalRequest?.url?.startsWith('/auth/');
+    const status = error.response?.status;
+    const isAuthFailure = status === 401 || status === 403;
 
-    if (error.response?.status !== 401 || originalRequest._retry || isAuthEndpoint) {
-      if (error.response?.status === 401) useAuthStore.getState().logout();
+    if (!isAuthFailure || originalRequest._retry || isAuthEndpoint) {
+      if (status === 401) useAuthStore.getState().logout();
       return Promise.reject(error);
     }
 
@@ -687,6 +703,30 @@ export const api = {
   updateSubscriptionPlan: ({ id, ...body }) => call(() => http.put(`/subscription-plans/${id}`, body), 'updateSubscriptionPlan', { id, ...body }),
   // DELETE /subscription-plans/{id} — 409 nếu đang có người dùng gói này
   deleteSubscriptionPlan: (id) => call(() => http.delete(`/subscription-plans/${id}`), 'deleteSubscriptionPlan', id),
+
+  /*
+   * ===== AI CHAT (trợ lý AI tư vấn — chatbot nổi) =====
+   * Curl xác nhận trực tiếp trên BE deploy (2026-07-19): tạo/liệt kê session hoạt động đúng.
+   * Gửi tin nhắn (sendAiChatMessage) BE trả 502 "AI đang bận hoặc không phản hồi" — do BE chưa
+   * kết nối được tới service Python AI phía sau (biến env AI_API_URL), KHÔNG phải lỗi FE/BE logic
+   * (BE tự bắt lỗi, trả 502 có message rõ ràng, không crash) — UI phải xử lý đẹp case này vì đó
+   * là trạng thái THẬT hiện tại, không phải giả định.
+   * ⚠️ suggestedProducts trong AiChatMessageResponse là JSON tự do (Map<String,Object> phía BE,
+   * chưa có DTO cố định) — CHƯA test được response thành công (502 chặn) nên chưa biết chắc field
+   * names. UI đọc theo nhiều tên field khả dĩ (xem ChatPanel.jsx) — SẼ CẦN CHỈNH LẠI khi có ví dụ thật.
+   */
+  // POST /ai-chat/sessions  body: { title? } → AiChatSessionResponse (201)
+  createAiChatSession: (body) => call(() => http.post('/ai-chat/sessions', body ?? {}), 'createAiChatSession', body),
+  // GET /ai-chat/sessions → AiChatSessionResponse[] (KHÔNG phân trang, mảng phẳng)
+  getMyAiChatSessions: () => call(() => http.get('/ai-chat/sessions'), 'getMyAiChatSessions'),
+  // GET /ai-chat/sessions/:id/messages → AiChatMessageResponse[]
+  getAiChatMessages: (sessionId) => call(() => http.get(`/ai-chat/sessions/${sessionId}/messages`), 'getAiChatMessages', sessionId),
+  /*
+   * POST /ai-chat/sessions/:id/messages  body: { content, lat?, lng? } → AiChatMessageResponse
+   * (CHỈ trả tin nhắn trả lời của assistant, KHÔNG trả lại tin của user — FE tự hiện optimistic
+   * rồi refetch lịch sử để đồng bộ). Trừ 1 lượt `ai_chat` — hết → 429. AI lỗi/timeout → 502.
+   */
+  sendAiChatMessage: ({ sessionId, ...body }) => call(() => http.post(`/ai-chat/sessions/${sessionId}/messages`, body), 'sendAiChatMessage', { sessionId, ...body }),
 
   // ===== CONTACT =====
   // POST /contact  body: { name, email, subject, message }

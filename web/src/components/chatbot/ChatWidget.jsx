@@ -66,7 +66,9 @@ export default function ChatWidget() {
 
   return (
     <>
-      {isOpen && <ChatPanel />}
+      {/* Luôn mount (như ChatDrawer.jsx) — ChatPanel tự AnimatePresence theo isOpen để có transition
+          vào/ra (FE-7), thay vì mount/unmount cứng làm mất luôn draft input khi đóng mở lại. */}
+      <ChatPanel />
 
       {/* Nút nổi — ẩn khi panel AI mở, hoặc khi drawer chat NCC / hộp thư portal đang mở */}
       {!isOpen && !supplierChatOpen && !portalChatOpen && (
