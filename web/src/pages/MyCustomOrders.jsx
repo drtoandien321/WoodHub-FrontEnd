@@ -1,32 +1,27 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useIncomingCustomOrders } from '../../hooks/useQuotes.js';
-import { customOrderMeta } from '../../utils/quoteStatus.js';
-import StatusBadge from '../../components/supplier/StatusBadge.jsx';
-import { formatVnd } from '../../utils/format.js';
+import { useMyCustomOrders } from '../hooks/useQuotes.js';
+import { customOrderMeta } from '../utils/quoteStatus.js';
+import StatusBadge from '../components/supplier/StatusBadge.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import { formatVnd } from '../utils/format.js';
 
 const TABS = ['', 'pending', 'confirmed', 'in_production', 'completed', 'cancelled'];
 
-/*
- * Đơn custom xưởng đang xử lý — GET /custom-orders/incoming (BE-8, FE-6). Bấm vào → chi tiết
- * chung /custom-orders/:id (CustomOrderDetail.jsx tự nhận diện vai workshop, hiện đúng nút
- * xác nhận/bắt đầu sản xuất/hoàn thành/hủy theo be-8-state-machine.md).
- * ⚠️ Thay thế trang cũ (5 bước tự nghĩ received→designing→producing→finishing→delivering,
- * KHÔNG khớp state machine thật của BE — chỉ có pending/confirmed/in_production/completed/cancelled).
- */
-export default function WorkshopProduction() {
+// "Đơn custom của tôi" — GET /custom-orders/my (customer).
+export default function MyCustomOrders() {
   const { t } = useTranslation();
   const [status, setStatus] = useState('');
-  const { data, isLoading, isError, refetch } = useIncomingCustomOrders(status ? { status } : undefined);
+  const { data, isLoading, isError, refetch } = useMyCustomOrders(status ? { status } : undefined);
   const items = data?.content ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="font-display text-3xl">{t('order.incomingTitle')}</h1>
-        <p className="mt-1 text-base-content/60">{t('order.incomingSubtitle')}</p>
-      </header>
+    <div className="flex flex-col gap-6 max-w-4xl">
+      <div>
+        <h1 className="font-display text-3xl">{t('order.myOrdersTitle')}</h1>
+        <p className="mt-1 text-sm text-base-content/60">{t('order.myOrdersSubtitle')}</p>
+      </div>
 
       <div className="overflow-x-auto">
         <div className="inline-flex gap-1 rounded-2xl border border-base-300 bg-base-100 p-1 shadow-sm">
@@ -48,21 +43,21 @@ export default function WorkshopProduction() {
       ) : items.length ? (
         <div className="flex flex-col gap-3">
           {items.map((o) => (
-            <Link key={o.id} to={`/custom-orders/${o.id}`} className="flex items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-primary md:p-5">
+            <Link key={o.id} to={`/custom-orders/${o.id}`} className="flex items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-primary">
               {o.designSnapshot?.thumbnailUrl && <img src={o.designSnapshot.thumbnailUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-mono text-xs text-base-content/50">{o.orderNumber}</p>
                   <StatusBadge meta={customOrderMeta(o.status)} />
                 </div>
-                <p className="mt-0.5 font-medium">{o.customerName}</p>
+                <p className="mt-0.5 font-medium">{o.workshopName}</p>
               </div>
               <p className="shrink-0 font-semibold text-primary">{formatVnd(o.totalAmount)}</p>
             </Link>
           ))}
         </div>
       ) : (
-        <p className="py-10 text-center text-base-content/50">{t('order.emptyIncoming')}</p>
+        <EmptyState title={t('order.emptyTitle')} hint={t('order.emptyHint')} ctaLabel={t('quote.myQuotesTitle')} ctaTo="/quotes" />
       )}
     </div>
   );

@@ -16,6 +16,7 @@ export const ChevronRight = ({ className }) => (
 
 const MENU = [
   { key: 'shop', to: '/shop', mega: true }, // mega: hover mở mega menu "Cửa hàng"
+  { key: 'rooms', to: '/rooms' },
   { key: 'custom', to: '/custom', hasDropdown: true },
   { key: 'suppliers', to: '/suppliers' },
   { key: 'b2b', to: '/b2b', hasDropdown: true },

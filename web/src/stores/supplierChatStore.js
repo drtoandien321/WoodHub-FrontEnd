@@ -13,12 +13,11 @@ import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocke
  * Message = { id, sender:'user'|'supplier', text, at(ISO), status?:'sending'|'sent'|'seen'|'error' }
  *
  * ⚠️ CHẾ ĐỘ THẬT (VITE_USE_MOCK=false): `conversationIdBySupplier` map supplierId → conversationId
- * thật (UUID) của BE — cần để gọi getMessages/sendMessage/markAsRead. `openFromProduct` chỉ hoạt
- * động ĐÚNG với supplier THẬT (product.supplierId phải là UUID BE nhận dạng được) — trang
- * ProductDetail.jsx hiện vẫn dùng catalog MOCK (đã ghi nhận là việc CÒN DỞ ở Module 5), nên trong
- * thực tế chat thật chỉ chạy ổn định qua `openFromSupplier` (gọi từ SupplierProfile.jsx, đã có
- * supplier.id thật). Đây KHÔNG phải bug của module Chat — chỉ là phụ thuộc vào việc nối catalog
- * thật, việc đó nằm ngoài phạm vi Module 7.
+ * thật (UUID) của BE — cần để gọi getMessages/sendMessage/markAsRead. `openFromProduct` cần
+ * product.supplierId là UUID BE nhận dạng được — ĐÃ ĐÚNG từ FE-4 (ProductDetail.jsx nối catalog
+ * thật, `getProducts`/`getProduct` trong REAL_ENDPOINTS). Lưu ý: product THẬT không có field
+ * `image`/`price` ở top-level (ProductResponse dùng `images[]`/`variants[].price`) — nơi gọi
+ * `openFromProduct` phải tự chiếu 2 field này trước khi truyền vào (xem ProductDetail.jsx).
  */
 let counter = 0;
 const nextId = () => `scm_${Date.now()}_${counter++}`;

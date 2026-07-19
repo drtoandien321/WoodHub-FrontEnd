@@ -10,9 +10,9 @@ import { api } from '../api/client.js';
  * Với product (tên/mô tả song ngữ): thêm i18n.language vào queryKey → đổi VI/EN là key đổi →
  * refetch và mockAdapter trả dữ liệu đúng ngôn ngữ. (Cache riêng cho mỗi ngôn ngữ luôn.)
  */
-export const useProducts = (params) => {
+export const useProducts = (params, { enabled = true } = {}) => {
   const { i18n } = useTranslation();
-  return useQuery({ queryKey: ['products', params, i18n.language], queryFn: () => api.getProducts(params) });
+  return useQuery({ queryKey: ['products', params, i18n.language], queryFn: () => api.getProducts(params), enabled });
 };
 
 export const useFeaturedProducts = () => {

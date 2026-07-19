@@ -39,13 +39,16 @@ export default function CustomSelect() {
           </span>
           <h2 className="mt-3 font-display text-2xl md:text-3xl">{t('custom.ai.entryTitle')}</h2>
           <p className="mt-2 text-base-content/70">{t('custom.ai.entryDesc')}</p>
-          <Link to="/custom/models" className="btn btn-primary mt-5 gap-2">
-            {t('custom.ai.entryCta')} <Icon.arrow className="h-4 w-4" />
-          </Link>
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            <Link to="/custom/studio" className="btn btn-primary gap-2">
+              {t('custom.ai.entryCta')} <Icon.arrow className="h-4 w-4" />
+            </Link>
+            <Link to="/custom/models" className="text-sm font-medium text-primary hover:underline">{t('custom.ai.browseGallery')}</Link>
+          </div>
         </div>
 
         <Link
-          to="/custom/models"
+          to="/custom/studio"
           className="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-base-300 bg-gradient-to-br from-[#e7dcc6] to-[#bfa988]"
         >
           <img

@@ -16,6 +16,13 @@ import { useUiStore } from './stores/uiStore.js';
  */
 const Shop = lazy(() => import('./pages/Shop.jsx'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.jsx'));
+const RoomsIndex = lazy(() => import('./pages/RoomsIndex.jsx'));
+const RoomScenes = lazy(() => import('./pages/RoomScenes.jsx'));
+const RoomSceneViewer = lazy(() => import('./pages/RoomSceneViewer.jsx'));
+const MyQuotes = lazy(() => import('./pages/MyQuotes.jsx'));
+const QuoteDetail = lazy(() => import('./pages/QuoteDetail.jsx'));
+const MyCustomOrders = lazy(() => import('./pages/MyCustomOrders.jsx'));
+const CustomOrderDetail = lazy(() => import('./pages/CustomOrderDetail.jsx'));
 const Cart = lazy(() => import('./pages/Cart.jsx'));
 const Checkout = lazy(() => import('./pages/Checkout.jsx'));
 const Orders = lazy(() => import('./pages/Orders.jsx'));
@@ -32,6 +39,8 @@ const CustomSelect = lazy(() => import('./pages/CustomSelect.jsx'));
 const CustomConfigure = lazy(() => import('./pages/CustomConfigure.jsx'));
 const CustomModels = lazy(() => import('./pages/CustomModels.jsx'));
 const CustomModelViewer = lazy(() => import('./pages/CustomModelViewer.jsx'));
+const CustomStudio = lazy(() => import('./pages/CustomStudio.jsx'));
+const CustomDesigns = lazy(() => import('./pages/CustomDesigns.jsx'));
 const WorkshopMatch = lazy(() => import('./pages/WorkshopMatch.jsx'));
 const Suppliers = lazy(() => import('./pages/Suppliers.jsx'));
 const SupplierProfile = lazy(() => import('./pages/SupplierProfile.jsx'));
@@ -109,6 +118,10 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/:category" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          {/* Shop by Room (FE-5) — công khai, giống Shop */}
+          <Route path="/rooms" element={<RoomsIndex />} />
+          <Route path="/rooms/:roomSlug" element={<RoomScenes />} />
+          <Route path="/rooms/:roomSlug/scenes/:sceneId" element={<RoomSceneViewer />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/custom" element={<CustomSelect />} />
           <Route path="/custom/models" element={<CustomModels />} />
@@ -130,6 +143,15 @@ export default function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             <Route path="/custom/match/:designId" element={<WorkshopMatch />} />
+            {/* Custom Studio (FE-2): wizard 6 bước, cần đăng nhập vì generate/lưu thiết kế tính vào hạn mức `design` */}
+            <Route path="/custom/studio" element={<CustomStudio />} />
+            <Route path="/custom/designs" element={<CustomDesigns />} />
+            {/* Quote & Order (FE-6, BE-8) — DÙNG CHUNG customer/workshop, allow không giới hạn role
+                (chỉ cần đăng nhập) vì QuoteDetail/CustomOrderDetail tự nhận diện vai qua customerId */}
+            <Route path="/quotes" element={<MyQuotes />} />
+            <Route path="/quotes/:id" element={<QuoteDetail />} />
+            <Route path="/custom-orders" element={<MyCustomOrders />} />
+            <Route path="/custom-orders/:id" element={<CustomOrderDetail />} />
           </Route>
 
           <Route path="/403" element={<Forbidden />} />

@@ -13,6 +13,22 @@ export const PRODUCT_TYPES = [
   { id: 'chair', emoji: '🪑' },
 ];
 
+/*
+ * Loại sản phẩm cho bước 2 của Custom Studio (AI 3D — khác PRODUCT_TYPES của trình chỉnh khối
+ * hộp cũ ở trên). `productType` ở Model3dResponse là string tự do (BE chưa chốt enum cứng —
+ * xem api-guide-fe.md mục 1.2 ví dụ "decor | null"), nên đây là gợi ý UI, KHÔNG phải enum BE ép buộc.
+ * Tên hiển thị qua i18n: custom.studio.productTypes.<id>
+ */
+export const AI_PRODUCT_TYPES = [
+  { id: 'sofa', emoji: '🛋️' },
+  { id: 'chair', emoji: '🪑' },
+  { id: 'table', emoji: '🪵' },
+  { id: 'cabinet', emoji: '🚪' },
+  { id: 'shelf', emoji: '📚' },
+  { id: 'bed', emoji: '🛏️' },
+  { id: 'decor', emoji: '🏺' },
+];
+
 // Giới hạn kích thước theo loại — BE cũng phải validate đúng các giới hạn này
 export const PRODUCT_TYPE_DEFAULTS = {
   table:   { dimensions: { width: 140, height: 75, depth: 70 },  limits: { width: [60, 240], height: [40, 110], depth: [40, 120] } },

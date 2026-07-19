@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import Hero from '../components/hero/Hero.jsx';
 import ProductCard from '../components/ui/ProductCard.jsx';
@@ -7,6 +8,17 @@ import SideRail from '../components/ui/SideRail.jsx';
 import { useFeaturedProducts } from '../hooks/useProducts.js';
 
 const FLOW_LINKS = ['/shop', '/b2b', '/custom'];
+
+/*
+ * FE-7: "product cards xuất hiện theo scroll" — whileInView (không phải scroll-linked parallax,
+ * chỉ trigger 1 lần khi phần tử lọt vào viewport) + viewport.once để không lặp lại khi cuộn qua
+ * lại nhiều lần (tránh xao nhãng). reducedMotion đã xử lý toàn cục qua MotionConfig ở main.jsx.
+ */
+const REVEAL = {
+  initial: { opacity: 0, y: 16 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-40px' },
+};
 
 export default function Landing() {
   const { data, isLoading } = useFeaturedProducts();
@@ -23,11 +35,18 @@ export default function Landing() {
         <h2 className="font-display text-3xl text-center mb-10">{t('landing.flowsTitle')}</h2>
         <div className="grid md:grid-cols-3 gap-5">
           {flows.map((f, i) => (
-            <div key={f.title} className="card bg-base-200 border border-base-300 p-6 gap-3">
+            <motion.div
+              key={f.title}
+              className="card bg-base-200 border border-base-300 p-6 gap-3"
+              initial={REVEAL.initial}
+              whileInView={REVEAL.whileInView}
+              viewport={REVEAL.viewport}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+            >
               <h3 className="font-medium text-lg">{f.title}</h3>
               <p className="text-sm text-base-content/70 flex-1">{f.desc}</p>
               <Link to={FLOW_LINKS[i]} className="btn btn-outline btn-primary btn-sm self-start">{f.cta}</Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -44,7 +63,11 @@ export default function Landing() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {data?.items?.map((p) => <ProductCard key={p.id} product={p} />)}
+            {data?.items?.map((p, i) => (
+              <motion.div key={p.id} initial={REVEAL.initial} whileInView={REVEAL.whileInView} viewport={REVEAL.viewport} transition={{ duration: 0.35, delay: (i % 4) * 0.06 }}>
+                <ProductCard product={p} />
+              </motion.div>
+            ))}
           </div>
         )}
       </section>

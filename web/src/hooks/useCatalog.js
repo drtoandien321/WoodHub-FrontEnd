@@ -15,3 +15,10 @@ export const useCategoryTree = () =>
 
 export const useMaterials = () =>
   useQuery({ queryKey: ['materials'], queryFn: api.getMaterials, staleTime: REFERENCE_STALE_TIME });
+
+// Rooms/Styles (BE-7) — dùng cho filter Shop (FE-4) + trang Shop by Room (FE-5)
+export const useRooms = () =>
+  useQuery({ queryKey: ['rooms'], queryFn: api.getRooms, staleTime: REFERENCE_STALE_TIME });
+
+export const useStyles = () =>
+  useQuery({ queryKey: ['styles'], queryFn: api.getStyles, staleTime: REFERENCE_STALE_TIME });

@@ -129,3 +129,19 @@ body {
 .font-display {
   font-family: var(--font-display);
 }
+
+/*
+ * prefers-reduced-motion — baseline TOÀN APP (yêu cầu bắt buộc cho mọi màn hình, không riêng
+ * FE-7): giảm mọi animation/transition/scroll mượt về gần như tức thời cho user đã bật cờ này ở
+ * hệ điều hành (thường vì say chuyển động/tiền đình). Đặt ở đây 1 LẦN thay vì rải `motion-reduce:`
+ * ở từng component — FE-7 (hero/parallax/scroll-reveal) chỉ cần cộng thêm xử lý riêng nếu có,
+ * không phải làm lại phần nền này.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

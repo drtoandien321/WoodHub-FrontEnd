@@ -41,6 +41,82 @@ export const MATERIAL_NAMES = {
   mat_acacia: { vi: 'Gỗ tràm', en: 'Acacia' },
 };
 
+/*
+ * ROOMS/STYLES — khớp RoomResponse/StyleResponse thật (BE-7 mục 3.2). BE deploy hiện trả mảng
+ * RỖNG (chưa seed — xem docs/be-0-to-be-8-summary.md) nên mock seed sẵn vài mục để filter
+ * "Phòng"/"Phong cách" (FE-4) và trang Shop by Room (FE-5) có dữ liệu demo được ngay; KHÔNG có
+ * PRODUCTS nào gắn `roomId`/`styleId` thật ở BE nên mock cũng không giả lập việc gắn — 2 filter
+ * này chỉ có Ý NGHĨA thật khi cả BE lẫn dữ liệu sản phẩm được gắn phòng/phong cách.
+ */
+export const ROOMS = [
+  { id: 'room_living', name: { vi: 'Phòng khách', en: 'Living Room' }, slug: 'phong-khach', sortOrder: 0 },
+  { id: 'room_bedroom', name: { vi: 'Phòng ngủ', en: 'Bedroom' }, slug: 'phong-ngu', sortOrder: 1 },
+  { id: 'room_kitchen', name: { vi: 'Phòng bếp', en: 'Kitchen' }, slug: 'phong-bep', sortOrder: 2 },
+  { id: 'room_dining', name: { vi: 'Phòng ăn', en: 'Dining Room' }, slug: 'phong-an', sortOrder: 3 },
+  { id: 'room_office', name: { vi: 'Phòng làm việc', en: 'Home Office' }, slug: 'phong-lam-viec', sortOrder: 4 },
+];
+
+export const STYLES = [
+  { id: 'style_scandi', name: { vi: 'Bắc Âu', en: 'Scandinavian' }, slug: 'bac-au', sortOrder: 0 },
+  { id: 'style_modern', name: { vi: 'Hiện đại', en: 'Modern' }, slug: 'hien-dai', sortOrder: 1 },
+  { id: 'style_minimal', name: { vi: 'Tối giản', en: 'Minimalist' }, slug: 'toi-gian', sortOrder: 2 },
+  { id: 'style_classic', name: { vi: 'Cổ điển', en: 'Classic' }, slug: 'co-dien', sortOrder: 3 },
+];
+
+/*
+ * ROOM_SCENES — khớp RoomSceneSummaryResponse/RoomSceneResponse thật (BE-7 mục 3.3/3.4).
+ * Mỗi scene = 1 ảnh không gian + danh sách hotspot (xPercent/yPercent 0..100, đặt theo % —
+ * KHÔNG phải pixel, để responsive mọi kích thước ảnh). Ảnh dùng lại asset thật sẵn có trong
+ * public/ (living-room-3d.png, bep1.png, lamviec1.png); phòng ngủ/ăn CHƯA có ảnh không gian
+ * riêng trong dự án → picsum placeholder (rõ ràng là tạm, không phải ảnh thật).
+ * ⚠️ Toạ độ hotspot ở đây là ƯỚC LƯỢNG hợp lý (không nhìn trực tiếp ảnh để đặt chính xác từng
+ * điểm như admin thật sẽ làm qua UI kéo-thả) — đủ để demo hành vi click-hotspot-mở-preview,
+ * KHÔNG đảm bảo trùng khớp pixel-perfect vị trí đồ nội thất trong ảnh.
+ */
+export const ROOM_SCENES = [
+  {
+    id: 'scene_living_1', roomId: 'room_living', name: { vi: 'Phòng khách hiện đại', en: 'Modern living room' },
+    slug: 'phong-khach-hien-dai', backgroundImageUrl: '/hero/living-room-3d.png', sortOrder: 0, isPublished: true,
+    items: [
+      { id: 'hs_living_1', productId: 'p7', xPercent: 38, yPercent: 68, displayOrder: 0 },
+      { id: 'hs_living_2', productId: 'p3', xPercent: 68, yPercent: 55, displayOrder: 1 },
+      { id: 'hs_living_3', productId: 'p2', xPercent: 15, yPercent: 40, displayOrder: 2 },
+    ],
+  },
+  {
+    id: 'scene_bedroom_1', roomId: 'room_bedroom', name: { vi: 'Phòng ngủ ấm cúng', en: 'Cozy bedroom' },
+    slug: 'phong-ngu-am-cung', backgroundImageUrl: 'https://picsum.photos/seed/woodhub-bedroom/1200/800', sortOrder: 0, isPublished: true,
+    items: [
+      { id: 'hs_bedroom_1', productId: 'p6', xPercent: 50, yPercent: 60, displayOrder: 0 },
+      { id: 'hs_bedroom_2', productId: 'p4', xPercent: 82, yPercent: 45, displayOrder: 1 },
+    ],
+  },
+  {
+    id: 'scene_kitchen_1', roomId: 'room_kitchen', name: { vi: 'Bếp gia đình', en: 'Family kitchen' },
+    slug: 'bep-gia-dinh', backgroundImageUrl: '/image/bep1.png', sortOrder: 0, isPublished: true,
+    items: [
+      { id: 'hs_kitchen_1', productId: 'p8', xPercent: 30, yPercent: 50, displayOrder: 0 },
+      { id: 'hs_kitchen_2', productId: 'p10', xPercent: 70, yPercent: 62, displayOrder: 1 },
+    ],
+  },
+  {
+    id: 'scene_dining_1', roomId: 'room_dining', name: { vi: 'Phòng ăn gia đình', en: 'Family dining room' },
+    slug: 'phong-an-gia-dinh', backgroundImageUrl: 'https://picsum.photos/seed/woodhub-dining/1200/800', sortOrder: 0, isPublished: true,
+    items: [
+      { id: 'hs_dining_1', productId: 'p1', xPercent: 45, yPercent: 58, displayOrder: 0 },
+      { id: 'hs_dining_2', productId: 'p9', xPercent: 78, yPercent: 40, displayOrder: 1 },
+    ],
+  },
+  {
+    id: 'scene_office_1', roomId: 'room_office', name: { vi: 'Góc làm việc tại nhà', en: 'Home office corner' },
+    slug: 'goc-lam-viec-tai-nha', backgroundImageUrl: '/image/lamviec1.png', sortOrder: 0, isPublished: true,
+    items: [
+      { id: 'hs_office_1', productId: 'p5', xPercent: 42, yPercent: 55, displayOrder: 0 },
+      { id: 'hs_office_2', productId: 'p3', xPercent: 60, yPercent: 70, displayOrder: 1 },
+    ],
+  },
+];
+
 export const PRODUCTS = [
   {
     id: 'p1',

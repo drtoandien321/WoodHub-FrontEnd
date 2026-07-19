@@ -1,5 +1,5 @@
 import i18n from '../../i18n/index.js';
-import { PRODUCTS, WORKSHOPS, CATEGORY_NAMES, MATERIAL_NAMES } from './data.js';
+import { PRODUCTS, WORKSHOPS, CATEGORY_NAMES, MATERIAL_NAMES, ROOMS, STYLES, ROOM_SCENES } from './data.js';
 import { PRODUCT_TYPES } from './customData.js';
 import { MODELS_3D, buildGeneratedModel } from './models3dData.js';
 import { storage } from '../../services/storage.js';
@@ -21,15 +21,6 @@ const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms)); // giả lậ
 const currentLang = () => (i18n.language?.startsWith('en') ? 'en' : 'vi');
 const loc = (val) =>
   val && typeof val === 'object' && !Array.isArray(val) ? val[currentLang()] ?? val.vi : val;
-
-// Chuyển 1 product (field song ngữ) → shape phẳng mà UI dùng: name/description/categoryName/materialName là string
-const localizeProduct = (p) => ({
-  ...p,
-  name: loc(p.name),
-  description: loc(p.description),
-  categoryName: loc(p.category),
-  materialName: loc(p.material),
-});
 
 /*
  * ===== LÀM GIÀU DỮ LIỆU CHO TRANG CHI TIẾT (gallery + sizes) =====
@@ -55,23 +46,37 @@ const buildGallery = (p) => {
   return [p.image, ...extra];
 };
 
-const enrichProductDetail = (p) => ({
-  ...localizeProduct(p),
-  gallery: buildGallery(p),
-  sizes: Array.isArray(p.sizes) && p.sizes.length ? p.sizes : (DEFAULT_SIZES_BY_CATEGORY[p.categoryId] ?? []),
+// Kích thước fallback cho variant.dimensions khi sản phẩm mock không tự khai p.sizes
+const defaultDimensions = (p) => (Array.isArray(p.sizes) && p.sizes.length ? p.sizes[0] : (DEFAULT_SIZES_BY_CATEGORY[p.categoryId]?.[0] ?? null));
+
+/*
+ * Chiếu dữ liệu PRODUCTS (mock cũ, song ngữ, 1 giá/1 ảnh) XUỐNG ĐÚNG shape ProductSummaryResponse/
+ * ProductResponse thật của BE (đã curl xác nhận — xem client.js) — để bật REAL_ENDPOINTS không
+ * phải sửa UI. Mock chỉ có 1 "biến thể" (variant) mỗi sản phẩm — khác thật (có thể nhiều), nhưng
+ * đa số sản phẩm thật cũng chỉ có 1 variant nên đủ để demo UI chọn biến thể.
+ */
+const toProductSummary = (p) => ({
+  id: p.id, supplierId: p.supplierId, supplierName: p.supplierName,
+  categoryId: p.categoryId, categoryName: loc(p.category),
+  materialName: p.materialId ? loc(p.material) : null,
+  name: loc(p.name), status: p.status,
+  priceFrom: p.price, primaryImageUrl: p.image ?? null,
+  createdAt: p.createdAt,
 });
 
-// Cửa hàng demo hiển thị TẤT CẢ sản phẩm trong data (kể cả draft/archived) theo yêu cầu.
-// (Muốn ẩn bớt sau này thì lọc theo p.status ở getProducts.)
-
-// Dựng danh sách facet (danh mục/vật liệu) từ tập sản phẩm — distinct theo id, name đã localize
-const buildFacet = (list, idKey, nameKey) => {
-  const map = new Map();
-  list.forEach((p) => {
-    if (p[idKey] && !map.has(p[idKey])) map.set(p[idKey], loc(p[nameKey]));
-  });
-  return Array.from(map, ([id, name]) => ({ id, name }));
-};
+const toProductDetail = (p) => ({
+  id: p.id, supplierId: p.supplierId, supplierName: p.supplierName,
+  categoryId: p.categoryId, categoryName: loc(p.category),
+  materialId: p.materialId ?? null, materialName: p.materialId ? loc(p.material) : null,
+  name: loc(p.name), description: loc(p.description), status: p.status,
+  createdAt: p.createdAt, updatedAt: p.updatedAt ?? p.createdAt,
+  variants: [{
+    id: `${p.id}-v1`, productId: p.id, sku: null, color: null,
+    dimensions: defaultDimensions(p),
+    price: p.price, createdAt: p.createdAt, updatedAt: p.updatedAt ?? p.createdAt,
+  }],
+  images: buildGallery(p).map((url, i) => ({ id: `${p.id}-img${i}`, productId: p.id, url, primary: i === 0, sortOrder: i, createdAt: p.createdAt })),
+});
 
 // Demo: các tài khoản test để đăng nhập supplier/admin khi KHÔNG chạy BE (BE thật xác định role từ DB)
 const TEST_ACCOUNTS = {
@@ -82,28 +87,99 @@ const TEST_ACCOUNTS = {
   'newsupplier@woodhub.vn': 'supplier',
   'admin@woodhub.vn': 'admin',
 };
-// Subtype của supplier (manufacturer | workshop) — quyết định portal đích sau khi login.
+// Subtype của supplier (retailer | workshop) — quyết định portal đích sau khi login.
 const SUPPLIER_TYPE = {
   'xuong@woodhub.vn': 'workshop',
-  // còn lại (supplier@, ncc@) mặc định manufacturer
+  // còn lại (supplier@, ncc@) mặc định retailer
 };
 
 const ORDERS_KEY = 'woodhub:orders';
 const DESIGNS_KEY = 'woodhub:designs';
+const GEN_TASKS_KEY = 'woodhub:genTasks';
+const GEN_MODELS_KEY = 'woodhub:genModels';
+const CUSTOM_DESIGNS_KEY = 'woodhub:customDesigns'; // Custom Studio wizard (BE-6) — TÁCH khỏi memoryDb.designs (CustomConfigure cũ)
 
 /*
- * "DB" cho designs/orders — giữ trong Map (lookup nhanh theo id) nhưng đồng bộ
+ * "DB" cho designs/orders/AI-3D-tasks — giữ trong Map (lookup nhanh theo id) nhưng đồng bộ
  * với localStorage để dữ liệu không mất khi F5. Map không tự JSON.stringify được
  * nên lưu dưới dạng mảng [id, value] (entries) rồi dựng lại Map khi đọc.
+ * genTasks/genModels PERSIST (khác Phase 0 cũ) — FE-2 yêu cầu "rời trang vẫn tiếp tục kiểm tra
+ * task khi quay lại", nên task đang chạy phải sống sót qua điều hướng/F5, giống getMyGenTasks thật.
  */
+const QUOTES_KEY = 'woodhub:quotes'; // BE-8 — FE-6
+const CUSTOM_ORDERS_KEY = 'woodhub:customOrders'; // BE-8 — TÁCH khỏi memoryDb.orders (checkout B2C cũ)
+
 const memoryDb = {
   orders: new Map(storage.getItem(ORDERS_KEY, [])),
   designs: new Map(storage.getItem(DESIGNS_KEY, [])),
-  // Luồng AI 3D (Phase 0, ephemeral — không persist): task dựng model + model đã sinh ra
-  genTasks: new Map(),
-  genModels: new Map(),
+  genTasks: new Map(storage.getItem(GEN_TASKS_KEY, [])),
+  genModels: new Map(storage.getItem(GEN_MODELS_KEY, [])),
+  customDesigns: new Map(storage.getItem(CUSTOM_DESIGNS_KEY, [])),
+  quotes: new Map(storage.getItem(QUOTES_KEY, [])),
+  customOrders: new Map(storage.getItem(CUSTOM_ORDERS_KEY, [])),
 };
 const persistOrders = () => storage.setItem(ORDERS_KEY, Array.from(memoryDb.orders.entries()));
+const persistGenTasks = () => storage.setItem(GEN_TASKS_KEY, Array.from(memoryDb.genTasks.entries()));
+const persistGenModels = () => storage.setItem(GEN_MODELS_KEY, Array.from(memoryDb.genModels.entries()));
+const persistCustomDesigns = () => storage.setItem(CUSTOM_DESIGNS_KEY, Array.from(memoryDb.customDesigns.entries()));
+const persistQuotes = () => storage.setItem(QUOTES_KEY, Array.from(memoryDb.quotes.entries()));
+const persistCustomOrders = () => storage.setItem(CUSTOM_ORDERS_KEY, Array.from(memoryDb.customOrders.entries()));
+
+/*
+ * Xác định vai trò của user ĐANG ĐĂNG NHẬP so với 1 quote/order — mock đơn phiên (1 user/lần),
+ * không biết "workshopId của tôi" thật (đó là dữ liệu server-side thật ở BE) nên suy theo quy ước:
+ * user.id === customerId → 'customer'; role === 'admin' → 'admin'; còn lại (supplier) → 'workshop'.
+ * ĐỦ để demo hành vi 2 chiều (đăng nhập customer test 1 vai, đăng nhập workshop test vai kia) —
+ * KHÔNG mô phỏng nhiều workshop khác nhau cùng lúc trong 1 phiên trình duyệt.
+ */
+const actorRole = (entity) => {
+  const me = useAuthStore.getState().user;
+  if (!me) return 'customer';
+  if (me.role === 'admin') return 'admin';
+  if (me.id === entity.customerId) return 'customer';
+  return 'workshop';
+};
+
+/*
+ * Tính Ai3DTaskResponse hiện tại của 1 task từ dữ liệu lưu (lazy-on-read, giống Mock provider
+ * thật ở BE-2 — KHÔNG dùng setInterval nền). Mốc thời gian mô phỏng: queued 0-500ms, processing
+ * 500ms→7s (progress tăng dần), từ 7s → succeeded (hoặc failed nếu task.simulateFail).
+ */
+const resolveGenTask = async (taskId) => {
+  const task = memoryDb.genTasks.get(taskId);
+  if (!task) throw Object.assign(new Error('TASK_NOT_FOUND'), { response: { status: 404 } });
+
+  if (task.explicitStatus === 'cancelled') {
+    return { taskId, status: 'cancelled', progress: task.cancelledProgress ?? 0, modelSlug: null, posterUrl: null, modelUrl: null, errorCode: null, errorMessage: null };
+  }
+
+  const TOTAL_MS = 7000;
+  const elapsed = Date.now() - task.startedAt;
+
+  if (elapsed < TOTAL_MS) {
+    return {
+      taskId,
+      status: elapsed < 500 ? 'queued' : 'processing',
+      progress: elapsed < 500 ? 0 : Math.min(95, Math.round((elapsed / TOTAL_MS) * 100)),
+      modelSlug: null, posterUrl: null, modelUrl: null, errorCode: null, errorMessage: null,
+    };
+  }
+
+  if (task.simulateFail) {
+    return {
+      taskId, status: 'failed', progress: 100, modelSlug: null, posterUrl: null, modelUrl: null,
+      errorCode: 'PROVIDER_ERROR', errorMessage: 'Không dựng được model từ ảnh này (mô phỏng lỗi để demo retry).',
+    };
+  }
+
+  const slug = `gen-${taskId}`;
+  if (!memoryDb.genModels.has(slug)) {
+    memoryDb.genModels.set(slug, buildGeneratedModel(taskId, task.imageName));
+    persistGenModels();
+  }
+  const model = memoryDb.genModels.get(slug);
+  return { taskId, status: 'succeeded', progress: 100, modelSlug: slug, posterUrl: model.posterUrl, modelUrl: model.modelGlbUrl, errorCode: null, errorMessage: null };
+};
 
 /*
  * "DB" cho sản phẩm THẬT của Portal Nhà cung cấp (/portal/supplier/products) — model đúng
@@ -411,7 +487,7 @@ export const mockAdapter = {
     // còn lại mặc định 'customer'. BE thật sẽ tự xác định role từ tài khoản trong DB.
     const email = body.email?.toLowerCase();
     const role = TEST_ACCOUNTS[email] ?? body.role ?? 'customer';
-    const supplierType = role === 'supplier' ? (SUPPLIER_TYPE[email] ?? 'manufacturer') : undefined;
+    const supplierType = role === 'supplier' ? (SUPPLIER_TYPE[email] ?? 'retailer') : undefined;
     // Demo: gắn tên hiển thị riêng cho supplier/admin để portal/admin có ngữ cảnh ngay sau khi login
     const name =
       email === 'ncc@woodhub.vn' ? 'Nội Thất An Phát'
@@ -434,45 +510,52 @@ export const mockAdapter = {
     };
   },
 
+  /*
+   * GET /products — khớp query + Page<ProductSummaryResponse> thật (FE-4). room/style luôn trả
+   * rỗng (mock chưa gắn phòng/phong cách cho sản phẩm) — ĐÚNG hành vi BE thật lúc chưa seed
+   * (xem docs/be-0-to-be-8-summary.md BE-7), không phải thiếu sót riêng của mock.
+   */
   async getProducts(params = {}) {
     await delay();
-    // Hiển thị toàn bộ sản phẩm; facet danh mục+vật liệu dựng từ TẤT CẢ (không phụ thuộc filter)
-    const all = [...PRODUCTS];
-    const categories = buildFacet(all, 'categoryId', 'category');
-    const materials = buildFacet(all, 'materialId', 'material');
-
-    let items = all;
-    if (params.category) items = items.filter((p) => p.categoryId === params.category);
-    if (params.material) items = items.filter((p) => p.materialId === params.material);
+    let items = PRODUCTS.filter((p) => p.status === 'active');
+    const keyword = params.keyword?.toLowerCase().trim();
+    if (keyword) items = items.filter((p) => loc(p.name).toLowerCase().includes(keyword));
+    if (params.categoryId) items = items.filter((p) => p.categoryId === params.categoryId);
+    if (params.materialId) items = items.filter((p) => p.materialId === params.materialId);
     if (params.minPrice) items = items.filter((p) => p.price >= Number(params.minPrice));
     if (params.maxPrice) items = items.filter((p) => p.price <= Number(params.maxPrice));
-    if (params.sort === 'price_asc') items = [...items].sort((a, b) => a.price - b.price);
-    if (params.sort === 'price_desc') items = [...items].sort((a, b) => b.price - a.price);
+    if (String(params.has3d) === 'true') items = items.filter((p) => p.hasModel3d);
+    if (String(params.customizable) === 'true') items = items.filter((p) => p.hasModel3d);
+    if (String(params.available) === 'true') items = items.filter((p) => (p.stock ?? 0) > 0);
+    if (params.room || params.style) items = [];
 
-    // Pagination shape chuẩn — BE trả y hệt để FE không sửa
-    const page = Number(params.page ?? 1);
-    const pageSize = Number(params.pageSize ?? 12);
-    return {
-      items: items.slice((page - 1) * pageSize, page * pageSize).map(localizeProduct),
-      page,
-      pageSize,
-      total: items.length,
-      categories,
-      materials,
-    };
+    const [sortField, sortDir] = (params.sort ?? '').split(',');
+    const dirMul = sortDir === 'desc' ? -1 : 1;
+    if (sortField === 'priceFrom') items = [...items].sort((a, b) => (a.price - b.price) * dirMul);
+    else if (sortField === 'name') items = [...items].sort((a, b) => loc(a.name).localeCompare(loc(b.name)) * dirMul);
+    else if (sortField === 'createdAt') items = [...items].sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1) * dirMul);
+
+    const size = Number(params.size) || 12;
+    const number = Number(params.page) || 0;
+    const totalElements = items.length;
+    const content = items.slice(number * size, number * size + size).map(toProductSummary);
+    return { content, page: { size, number, totalElements, totalPages: Math.max(1, Math.ceil(totalElements / size)) } };
   },
 
+  // GET /products/featured — endpoint thật đang 400 (xem client.js), mock giữ nguyên wrapper {items}
+  // cũ vì KHÔNG biết shape thật (Landing.jsx đọc data.items — không đổi để khỏi đoán sai).
   async getFeaturedProducts() {
     await delay(250);
-    return { items: PRODUCTS.filter((p) => p.status === 'active').slice(0, 4).map(localizeProduct) };
+    return { items: PRODUCTS.filter((p) => p.status === 'active').slice(0, 4).map(toProductSummary) };
   },
 
+  // GET /products/:id → ProductResponse thật (variants[]/images[], KHÔNG có `related` — related
+  // dựng ở FE bằng 1 lượt getProducts({categoryId}) riêng, xem ProductDetail.jsx)
   async getProduct(id) {
     await delay(250);
     const product = PRODUCTS.find((p) => p.id === id);
     if (!product) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
-    const related = PRODUCTS.filter((p) => p.id !== id && p.categoryId === product.categoryId);
-    return { ...enrichProductDetail(product), related: related.map(localizeProduct) };
+    return toProductDetail(product);
   },
 
   // ===== CATEGORY (Portal Quản trị /admin/categories) — mảng mutable mockCategories, hỗ trợ cây thật =====
@@ -564,6 +647,48 @@ export const mockAdapter = {
     mockMaterials = mockMaterials.filter((m) => m.id !== id);
     persistMockMaterials();
     return {};
+  },
+
+  // ===== ROOM / STYLE / ROOM SCENE (BE-7) — xem ghi chú seed demo ở data.js =====
+  async getRooms() {
+    await delay(200);
+    return ROOMS.map((r) => ({ id: r.id, name: loc(r.name), slug: r.slug, sortOrder: r.sortOrder }));
+  },
+  async getRoomBySlug(slug) {
+    await delay(200);
+    const r = ROOMS.find((x) => x.slug === slug);
+    if (!r) throw Object.assign(new Error('ROOM_NOT_FOUND'), { response: { status: 404 } });
+    return { id: r.id, name: loc(r.name), slug: r.slug, sortOrder: r.sortOrder };
+  },
+  async getRoomScenes(slug) {
+    await delay(250);
+    const room = ROOMS.find((x) => x.slug === slug);
+    if (!room) throw Object.assign(new Error('ROOM_NOT_FOUND'), { response: { status: 404 } });
+    return ROOM_SCENES.filter((s) => s.roomId === room.id && s.isPublished).map((s) => ({
+      id: s.id, name: loc(s.name), slug: s.slug, backgroundImageUrl: s.backgroundImageUrl, sortOrder: s.sortOrder,
+    }));
+  },
+  async getRoomSceneDetail(id) {
+    await delay(250);
+    const scene = ROOM_SCENES.find((s) => s.id === id && s.isPublished);
+    if (!scene) throw Object.assign(new Error('SCENE_NOT_FOUND'), { response: { status: 404 } });
+    const room = ROOMS.find((r) => r.id === scene.roomId);
+    return {
+      id: scene.id, room: room ? { id: room.id, name: loc(room.name), slug: room.slug, sortOrder: room.sortOrder } : null,
+      name: loc(scene.name), slug: scene.slug, backgroundImageUrl: scene.backgroundImageUrl,
+      items: scene.items
+        .map((item) => {
+          const product = PRODUCTS.find((p) => p.id === item.productId && p.status === 'active');
+          if (!product) return null; // hotspot chỉ gồm SP đang bán — khớp hành vi BE thật
+          return { id: item.id, xPercent: item.xPercent, yPercent: item.yPercent, displayOrder: item.displayOrder, product: toProductSummary(product) };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.displayOrder - b.displayOrder),
+    };
+  },
+  async getStyles() {
+    await delay(200);
+    return STYLES.map((s) => ({ id: s.id, name: loc(s.name), slug: s.slug, sortOrder: s.sortOrder }));
   },
 
   // ===== PRODUCT (Portal Nhà cung cấp — /portal/supplier/products) =====
@@ -923,6 +1048,255 @@ export const mockAdapter = {
   },
 
   /*
+   * ===== CUSTOM DESIGN (BE-6) — Custom Studio wizard bước 5/6 =====
+   * Shape khớp CustomDesignResponse thật: { id,name,modelId,modelSlug,configuration,thumbnailUrl,
+   * status,completedAt,version,createdAt,updatedAt }. Optimistic locking: version lệch → 409.
+   */
+  async createDesign({ name, modelId, configuration, thumbnailUrl } = {}) {
+    await delay(400);
+    const id = nextId('cdsg');
+    const now = new Date().toISOString();
+    // BE loại field giá do FE gửi trong configuration — mock cũng bỏ để đúng hành vi
+    const { price, estimatePrice, ...safeConfig } = configuration ?? {};
+    const model = memoryDb.genModels.get(modelId) ?? MODELS_3D.find((m) => m.id === modelId);
+    const design = {
+      id, name: name ?? 'Thiết kế chưa đặt tên', modelId: modelId ?? null, modelSlug: model?.slug ?? null,
+      configuration: safeConfig, thumbnailUrl: thumbnailUrl ?? null,
+      status: 'draft', completedAt: null, version: 1, createdAt: now, updatedAt: now,
+    };
+    memoryDb.customDesigns.set(id, design);
+    persistCustomDesigns();
+    return design;
+  },
+
+  async getDesignDetail(id) {
+    await delay(250);
+    const design = memoryDb.customDesigns.get(id);
+    if (!design) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404 } });
+    return design;
+  },
+
+  async updateDesign({ id, name, configuration, thumbnailUrl, status, version }) {
+    await delay(400);
+    const design = memoryDb.customDesigns.get(id);
+    if (!design) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404 } });
+    if (version !== design.version) {
+      throw Object.assign(new Error('VERSION_CONFLICT'), { response: { status: 409, data: { message: 'Thiết kế đã bị thay đổi ở nơi khác — vui lòng tải lại.' } } });
+    }
+    const { price, estimatePrice, ...safeConfig } = configuration ?? design.configuration;
+    const wasCompleted = design.status === 'completed';
+    const updated = {
+      ...design,
+      name: name ?? design.name,
+      configuration: safeConfig,
+      thumbnailUrl: thumbnailUrl ?? design.thumbnailUrl,
+      status: status ?? design.status,
+      completedAt: !wasCompleted && status === 'completed' ? new Date().toISOString() : design.completedAt,
+      version: design.version + 1,
+      updatedAt: new Date().toISOString(),
+    };
+    memoryDb.customDesigns.set(id, updated);
+    persistCustomDesigns();
+    return updated;
+  },
+
+  async deleteDesign(id) {
+    await delay(300);
+    memoryDb.customDesigns.delete(id);
+    persistCustomDesigns();
+    return {};
+  },
+
+  async getMyDesigns(params = {}) {
+    await delay(250);
+    const all = Array.from(memoryDb.customDesigns.values()).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    const items = all.filter((d) => !params?.status || d.status === params.status);
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+  },
+
+  /*
+   * ===== QUOTE & CUSTOM ORDER (BE-8, FE-6) — state machine đầy đủ ở docs/be-8-state-machine.md.
+   * offeredBy/actor role suy theo actorRole() (xem ghi chú ở trên) — hạn chế mock đơn phiên.
+   */
+  async createQuote({ workshopId, customDesignId, quantity, location, note, expiresAt }) {
+    await delay(400);
+    const design = memoryDb.customDesigns.get(customDesignId);
+    if (!design) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404, data: { message: 'Không tìm thấy thiết kế' } } });
+    const me = useAuthStore.getState().user;
+    const id = nextId('quote');
+    const now = new Date().toISOString();
+    const workshop = findWorkshop(workshopId);
+    const quote = {
+      id, customerId: me?.id ?? 'mock-user', customerName: me?.name ?? 'Khách',
+      workshopId, workshopName: workshop?.name ?? 'Xưởng mộc',
+      customDesignId,
+      designSnapshot: { modelId: design.modelId, modelSlug: design.modelSlug, configuration: design.configuration, thumbnailUrl: design.thumbnailUrl },
+      quantity: quantity ?? 1, location: location ?? null, note: note ?? null,
+      status: 'pending', expiresAt: expiresAt ?? null, createdAt: now,
+      offers: [],
+    };
+    memoryDb.quotes.set(id, quote);
+    persistQuotes();
+    return quote;
+  },
+
+  async getMyQuotes(params = {}) {
+    await delay(250);
+    const me = useAuthStore.getState().user;
+    let items = Array.from(memoryDb.quotes.values()).filter((q) => q.customerId === me?.id);
+    if (params?.status) items = items.filter((q) => q.status === params.status);
+    items = items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((q) => ({ ...q, offers: null }));
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+  },
+
+  // Mock đơn phiên: "incoming" = mọi quote KHÔNG do chính user hiện tại tạo (xem ghi chú actorRole)
+  async getIncomingQuotes(params = {}) {
+    await delay(250);
+    const me = useAuthStore.getState().user;
+    let items = Array.from(memoryDb.quotes.values()).filter((q) => q.customerId !== me?.id);
+    if (params?.status) items = items.filter((q) => q.status === params.status);
+    items = items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((q) => ({ ...q, offers: null }));
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+  },
+
+  async getQuoteDetail(id) {
+    await delay(200);
+    const quote = memoryDb.quotes.get(id);
+    if (!quote) throw Object.assign(new Error('QUOTE_NOT_FOUND'), { response: { status: 404 } });
+    return quote;
+  },
+
+  async cancelQuote(id) {
+    await delay(300);
+    const quote = memoryDb.quotes.get(id);
+    if (!quote) throw Object.assign(new Error('QUOTE_NOT_FOUND'), { response: { status: 404 } });
+    if (['accepted', 'rejected', 'expired', 'cancelled'].includes(quote.status)) {
+      throw Object.assign(new Error('QUOTE_ALREADY_CLOSED'), { response: { status: 409, data: { message: 'Yêu cầu báo giá đã kết thúc.' } } });
+    }
+    quote.status = 'cancelled';
+    memoryDb.quotes.set(id, quote);
+    persistQuotes();
+    return quote;
+  },
+
+  async createOffer({ quoteId, price, leadTimeDays, note, expiresAt }) {
+    await delay(400);
+    const quote = memoryDb.quotes.get(quoteId);
+    if (!quote) throw Object.assign(new Error('QUOTE_NOT_FOUND'), { response: { status: 404 } });
+    if (['accepted', 'rejected', 'expired', 'cancelled'].includes(quote.status)) {
+      throw Object.assign(new Error('QUOTE_ALREADY_CLOSED'), { response: { status: 409, data: { message: 'Yêu cầu báo giá đã kết thúc, không thể ra giá thêm.' } } });
+    }
+    const offeredBy = actorRole(quote) === 'customer' ? 'customer' : 'workshop';
+    quote.offers.forEach((o) => { if (o.status === 'pending') o.status = 'superseded'; });
+    const offer = {
+      id: nextId('offer'), offeredBy, price, leadTimeDays, note: note ?? null,
+      status: 'pending', expiresAt: expiresAt ?? null, createdAt: new Date().toISOString(),
+    };
+    quote.offers.push(offer);
+    quote.status = 'negotiating';
+    memoryDb.quotes.set(quoteId, quote);
+    persistQuotes();
+    return offer;
+  },
+
+  async acceptOffer({ quoteId, offerId }) {
+    await delay(400);
+    const quote = memoryDb.quotes.get(quoteId);
+    if (!quote) throw Object.assign(new Error('QUOTE_NOT_FOUND'), { response: { status: 404 } });
+    const offer = quote.offers.find((o) => o.id === offerId);
+    if (!offer) throw Object.assign(new Error('OFFER_NOT_FOUND'), { response: { status: 404 } });
+    if (offer.status !== 'pending') throw Object.assign(new Error('OFFER_NOT_PENDING'), { response: { status: 409, data: { message: 'Offer đã hết hạn hoặc không còn hiệu lực.' } } });
+    const myRole = actorRole(quote);
+    if (myRole === offer.offeredBy) throw Object.assign(new Error('CANNOT_ACCEPT_OWN_OFFER'), { response: { status: 403, data: { message: 'Chỉ bên còn lại mới được chấp nhận offer này.' } } });
+
+    offer.status = 'accepted';
+    quote.status = 'accepted';
+    memoryDb.quotes.set(quoteId, quote);
+    persistQuotes();
+
+    const orderId = nextId('corder');
+    const now = new Date().toISOString();
+    const orderNumber = `CO-${now.slice(0, 10).replace(/-/g, '')}-${orderId.slice(-6).toUpperCase()}`;
+    const order = {
+      id: orderId, orderNumber, quoteRequestId: quote.id,
+      customerId: quote.customerId, customerName: quote.customerName,
+      workshopId: quote.workshopId, workshopName: quote.workshopName,
+      customDesignId: quote.customDesignId, designSnapshot: quote.designSnapshot,
+      unitPrice: offer.price, quantity: quote.quantity, totalAmount: offer.price * quote.quantity, leadTimeDays: offer.leadTimeDays,
+      location: quote.location, note: quote.note, status: 'pending', createdAt: now, updatedAt: now,
+      history: [{ id: nextId('coh'), fromStatus: null, toStatus: 'pending', changedById: useAuthStore.getState().user?.id ?? 'mock-user', changedByRole: myRole, note: null, createdAt: now }],
+    };
+    memoryDb.customOrders.set(orderId, order);
+    persistCustomOrders();
+    return order;
+  },
+
+  async rejectOffer({ quoteId, offerId }) {
+    await delay(300);
+    const quote = memoryDb.quotes.get(quoteId);
+    if (!quote) throw Object.assign(new Error('QUOTE_NOT_FOUND'), { response: { status: 404 } });
+    const offer = quote.offers.find((o) => o.id === offerId);
+    if (!offer) throw Object.assign(new Error('OFFER_NOT_FOUND'), { response: { status: 404 } });
+    if (offer.status !== 'pending') throw Object.assign(new Error('OFFER_NOT_PENDING'), { response: { status: 409 } });
+    const myRole = actorRole(quote);
+    if (myRole === offer.offeredBy) throw Object.assign(new Error('CANNOT_REJECT_OWN_OFFER'), { response: { status: 403, data: { message: 'Chỉ bên còn lại mới được từ chối offer này.' } } });
+    offer.status = 'rejected';
+    quote.status = 'rejected';
+    memoryDb.quotes.set(quoteId, quote);
+    persistQuotes();
+    return quote;
+  },
+
+  async getMyCustomOrders(params = {}) {
+    await delay(250);
+    const me = useAuthStore.getState().user;
+    let items = Array.from(memoryDb.customOrders.values()).filter((o) => o.customerId === me?.id);
+    if (params?.status) items = items.filter((o) => o.status === params.status);
+    items = items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((o) => ({ ...o, history: undefined }));
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+  },
+
+  async getIncomingCustomOrders(params = {}) {
+    await delay(250);
+    const me = useAuthStore.getState().user;
+    let items = Array.from(memoryDb.customOrders.values()).filter((o) => o.customerId !== me?.id);
+    if (params?.status) items = items.filter((o) => o.status === params.status);
+    items = items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((o) => ({ ...o, history: undefined }));
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+  },
+
+  async getCustomOrderDetail(id) {
+    await delay(200);
+    const order = memoryDb.customOrders.get(id);
+    if (!order) throw Object.assign(new Error('ORDER_NOT_FOUND'), { response: { status: 404 } });
+    return order;
+  },
+
+  // Chuyển hợp lệ + ai được phép — đúng bảng ở docs/be-8-state-machine.md mục 3
+  async updateCustomOrderStatus({ id, status, note }) {
+    await delay(350);
+    const order = memoryDb.customOrders.get(id);
+    if (!order) throw Object.assign(new Error('ORDER_NOT_FOUND'), { response: { status: 404 } });
+    const myRole = actorRole(order);
+    const ALLOWED = {
+      pending: { confirmed: ['workshop', 'admin'], cancelled: ['customer', 'workshop', 'admin'] },
+      confirmed: { in_production: ['workshop', 'admin'], cancelled: ['workshop', 'admin'] },
+      in_production: { completed: ['workshop', 'admin'], cancelled: ['workshop', 'admin'] },
+    };
+    const allowedRoles = ALLOWED[order.status]?.[status];
+    if (!allowedRoles) throw Object.assign(new Error('INVALID_TRANSITION'), { response: { status: 409, data: { message: `Không thể chuyển từ ${order.status} sang ${status}.` } } });
+    if (!allowedRoles.includes(myRole)) throw Object.assign(new Error('FORBIDDEN_TRANSITION'), { response: { status: 403, data: { message: 'Bạn không có quyền thực hiện thao tác này.' } } });
+
+    const now = new Date().toISOString();
+    order.history.push({ id: nextId('coh'), fromStatus: order.status, toStatus: status, changedById: useAuthStore.getState().user?.id ?? 'mock-user', changedByRole: myRole, note: note ?? null, createdAt: now });
+    order.status = status;
+    order.updatedAt = now;
+    memoryDb.customOrders.set(id, order);
+    persistCustomOrders();
+    return order;
+  },
+
+  /*
    * ===== SUPPLIER (browse công khai) =====
    * Project dữ liệu phong phú của WORKSHOPS (mock cũ) XUỐNG ĐÚNG shape BE thật trả về
    * (SupplierPublicResponse/StorePublicResponse/PortfolioResponse/ReviewResponse) — để component
@@ -1070,50 +1444,100 @@ export const mockAdapter = {
     return mockAdminSuppliers[idx];
   },
 
-  // ===== AI 3D (nhánh Mẫu 3D / Upload) =====
-  // GET /custom/models — thư viện mẫu 3D dựng sẵn
-  async getModels3d() {
+  // ===== AI 3D (nhánh Mẫu 3D / Upload) — shape khớp Model3dResponse/Ai3DTaskResponse thật (BE-4) =====
+  // GET /custom/models?keyword=&productType=&sort=&page=&size= → Page<Model3dResponse>
+  // CHỈ lọc/sort đúng những gì BE thật hỗ trợ (keyword/productType/sort=createdAt,desc) — xem
+  // ghi chú ở CustomModels.jsx (FE-3): style/material/featured KHÔNG có tham số lọc ở BE.
+  async getModels3d(params = {}) {
     await delay(250);
-    return { items: MODELS_3D };
+    // "công khai" — CHỈ mẫu isPublic (đúng theo BE-1: owner_user_id null cho mẫu public).
+    // Model AI đã sinh riêng của user (isPublic=false) tra bằng slug (getModel3d), KHÔNG lọt vào đây.
+    const keyword = params?.keyword?.toLowerCase().trim();
+    let items = MODELS_3D.filter((m) =>
+      m.isPublic &&
+      (!keyword || m.name.toLowerCase().includes(keyword)) &&
+      (!params?.productType || m.productType === params.productType)
+    );
+    if (params?.sort === 'createdAt,desc') items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+
+    const size = Number(params?.size) || 20;
+    const number = Number(params?.page) || 0;
+    const totalElements = items.length;
+    const paged = items.slice(number * size, number * size + size);
+    return { content: paged, page: { size, number, totalElements, totalPages: Math.max(1, Math.ceil(totalElements / size)) } };
   },
 
-  // GET /custom/models/:slug — 1 mẫu (gồm cả model do user vừa sinh từ ảnh)
+  // GET /custom/models/:slug → Model3dResponse (gồm cả model do user vừa sinh từ ảnh)
   async getModel3d(slug) {
     await delay(200);
     const model = memoryDb.genModels.get(slug) ?? MODELS_3D.find((m) => m.slug === slug || m.id === slug);
-    if (!model) throw new Error('MODEL_NOT_FOUND');
+    if (!model) throw Object.assign(new Error('MODEL_NOT_FOUND'), { response: { status: 404 } });
     return model;
   },
 
   /*
-   * POST /custom/ai/generate — bắt đầu dựng 3D từ ảnh.
-   * Mock: tạo task, trả taskId ngay. (Thật: BE proxy gọi Meshy image-to-3D, KHÔNG để key ở FE.)
+   * POST /custom/ai/generate — bắt đầu dựng 3D từ ảnh, trả NGAY (202), không chờ AI xong.
+   * Mock: tạo task 'queued', trả { taskId, status, progress } đúng shape thật.
+   * (Thật: BE proxy gọi Meshy image-to-3D, KHÔNG để key ở FE.)
+   * Testability: đặt tên file chứa "fail" (không phân biệt hoa/thường) → mô phỏng task 'failed'
+   * khi dựng xong, để FE dựng UI retry/error mà không cần BE thật (giống cờ simulateFail của BE).
    */
-  async generate3D({ imageName } = {}) {
+  async generate3D({ image, templateId } = {}) {
     await delay(400);
     const taskId = `task_${Date.now().toString(36)}`;
-    memoryDb.genTasks.set(taskId, { startedAt: Date.now(), imageName: imageName ?? null });
-    return { taskId };
+    const imageName = image?.name ?? null;
+    memoryDb.genTasks.set(taskId, {
+      taskId, startedAt: Date.now(), imageName, templateId: templateId ?? null,
+      simulateFail: !!imageName?.toLowerCase().includes('fail'),
+      explicitStatus: null, retryCount: 0,
+    });
+    persistGenTasks();
+    return { taskId, status: 'queued', progress: 0 };
   },
 
   /*
-   * GET /custom/ai/tasks/:taskId — poll tiến trình dựng.
-   * Mock: giả lập ~7s rồi 'succeeded' + đăng ký model mới để getModel3d trả về.
+   * GET /custom/ai/tasks/:taskId → Ai3DTaskResponse — poll tiến trình dựng.
+   * Mock: lazy-on-read (tính trạng thái từ startedAt, KHÔNG dùng timer nền) — mô phỏng
+   * queued (~0.5s đầu) → processing → succeeded/failed (~7s), giống chiến lược Mock provider thật ở BE-2.
    */
-  async getGenTask(taskId) {
-    await delay(150);
+  async getGenTask(taskId) { return resolveGenTask(taskId); },
+
+  // POST /custom/ai/tasks/:taskId/retry — chỉ khi đang 'failed', tối đa 3 lần (vượt → 429)
+  async retryGenTask(taskId) {
+    await delay(200);
     const task = memoryDb.genTasks.get(taskId);
-    if (!task) throw new Error('TASK_NOT_FOUND');
-    const TOTAL_MS = 7000;
-    const elapsed = Date.now() - task.startedAt;
-    if (elapsed >= TOTAL_MS) {
-      const slug = `gen-${taskId}`;
-      if (!memoryDb.genModels.has(slug)) {
-        memoryDb.genModels.set(slug, buildGeneratedModel(taskId, task.imageName));
-      }
-      return { status: 'succeeded', progress: 100, modelSlug: slug };
+    if (!task) throw Object.assign(new Error('TASK_NOT_FOUND'), { response: { status: 404 } });
+    const current = await resolveGenTask(taskId);
+    if (current.status !== 'failed') throw Object.assign(new Error('TASK_NOT_FAILED'), { response: { status: 409 } });
+    if (task.retryCount >= 3) throw Object.assign(new Error('RETRY_LIMIT'), { response: { status: 429 } });
+    task.retryCount += 1;
+    task.startedAt = Date.now();
+    task.explicitStatus = null;
+    persistGenTasks();
+    return resolveGenTask(taskId);
+  },
+
+  // POST /custom/ai/tasks/:taskId/cancel — chỉ khi CHƯA terminal (đã kết thúc → 409)
+  async cancelGenTask(taskId) {
+    await delay(200);
+    const task = memoryDb.genTasks.get(taskId);
+    if (!task) throw Object.assign(new Error('TASK_NOT_FOUND'), { response: { status: 404 } });
+    const current = await resolveGenTask(taskId);
+    if (['succeeded', 'failed', 'cancelled'].includes(current.status)) {
+      throw Object.assign(new Error('TASK_ALREADY_TERMINAL'), { response: { status: 409 } });
     }
-    return { status: 'pending', progress: Math.min(95, Math.round((elapsed / TOTAL_MS) * 100)) };
+    task.explicitStatus = 'cancelled';
+    task.cancelledProgress = current.progress;
+    persistGenTasks();
+    return resolveGenTask(taskId);
+  },
+
+  // GET /custom/ai/tasks/my?status=&page=&size= → Page<Ai3DTaskResponse>
+  async getMyGenTasks(params = {}) {
+    await delay(250);
+    const all = await Promise.all(Array.from(memoryDb.genTasks.keys()).map(resolveGenTask));
+    const items = all.filter((t) => !params?.status || t.status === params.status).sort((a, b) => b.taskId < a.taskId ? -1 : 1);
+    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
   },
 
   async submitContact(body) {

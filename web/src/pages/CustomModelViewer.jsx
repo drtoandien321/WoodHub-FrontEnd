@@ -1,21 +1,28 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModel3d } from '../hooks/useModels3d.js';
 import { WOOD_MATERIALS } from '../api/mock/customData.js';
+import { useCustomStudioStore } from '../stores/customStudioStore.js';
 import ModelViewer from '../components/custom3d/ModelViewer.jsx';
 
+/*
+ * Xem nhanh 1 mẫu 3D — trang CÔNG KHAI (không cần đăng nhập), dùng để duyệt/preview trước khi
+ * cam kết. Đổi màu ở đây chỉ là xem trước tạm thời (local state, KHÔNG lưu) — muốn chỉnh sửa
+ * thật (material/kích thước theo editableOptions) + lưu thiết kế thì qua Custom Studio (FE-2),
+ * cần đăng nhập vì tính vào hạn mức `design`.
+ */
 export default function CustomModelViewer() {
   const { slug } = useParams();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: model, isLoading, isError } = useModel3d(slug);
+  const chooseTemplate = useCustomStudioStore((s) => s.chooseTemplate);
 
   const [color, setColor] = useState(null); // null = giữ texture gốc (Mặc định)
   const [scale, setScale] = useState(1);
-  const [toast, setToast] = useState(false);
 
-  // Gửi yêu cầu báo giá — Phase 0 chỉ hiện toast demo; nối luồng saveDesign/ghép xưởng ở Phase 2
-  const requestQuote = () => { setToast(true); setTimeout(() => setToast(false), 3000); };
+  const customizeThis = () => { chooseTemplate(model); navigate('/custom/studio'); };
 
   if (isLoading) {
     return (
@@ -42,13 +49,13 @@ export default function CustomModelViewer() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
         {/* Khung 3D/AR */}
         <div className="relative h-[58vh] min-h-[360px] overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-b from-[#efe7d8] to-[#e0d3bc]">
-          <ModelViewer src={model.glbUrl} poster={model.poster} alt={model.name} color={color} scale={scale} iosSrc={model.usdzUrl} />
+          <ModelViewer src={model.modelGlbUrl} poster={model.posterUrl} alt={model.name} color={color} scale={scale} iosSrc={model.modelUsdzUrl} showControls />
         </div>
 
         {/* Panel tuỳ chỉnh */}
         <aside className="flex flex-col gap-5 rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <div>
-            <span className="text-xs font-medium text-base-content/50">{model.category}</span>
+            {model.productType && <span className="text-xs font-medium text-base-content/50">{model.productType}</span>}
             <h1 className="font-display text-2xl">{model.name}</h1>
           </div>
 
@@ -98,19 +105,10 @@ export default function CustomModelViewer() {
             {t('custom.ai.arHint')}
           </div>
 
-          {/* CTA */}
-          <div className="flex flex-col gap-2">
-            <button onClick={requestQuote} className="btn btn-primary">{t('custom.ai.requestQuote')}</button>
-            <Link to="/suppliers" className="btn btn-outline border-base-300 hover:border-primary hover:bg-primary/10">{t('custom.ai.saveDesign')}</Link>
-          </div>
+          {/* CTA — mở Custom Studio để chỉnh sửa thật + lưu (cần đăng nhập) */}
+          <button onClick={customizeThis} className="btn btn-primary">{t('custom.ai.customizeThis')}</button>
         </aside>
       </div>
-
-      {toast && (
-        <div className="toast toast-top toast-center z-50">
-          <div className="alert alert-success shadow-lg"><span>{t('custom.ai.quoteSent')}</span></div>
-        </div>
-      )}
     </div>
   );
 }

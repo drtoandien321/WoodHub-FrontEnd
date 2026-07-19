@@ -55,7 +55,7 @@ export default function VerifyOtp() {
       // Xin quyền vị trí ngay sau login THẬT (Pha 2 tính năng GPS) — chỉ customer, không chặn
       // navigate() bên dưới (fire-and-forget, xem services/geolocation.js).
       if (user.role === 'customer') { requestLocationOnce(); ensureFreeSubscription(); }
-      navigate(user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role), { replace: true });
+      navigate(user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, undefined, user.supplierType), { replace: true });
     } catch (err) {
       setError(err?.response?.data?.message || t('auth.otp.error'));
     } finally {

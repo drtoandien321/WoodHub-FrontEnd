@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useProduct } from '../hooks/useProducts.js';
+import { useProduct, useProducts } from '../hooks/useProducts.js';
 import { useCartStore } from '../stores/cartStore.js';
 import { useSupplierChatStore } from '../stores/supplierChatStore.js';
 import ProductGallery from '../components/product/ProductGallery.jsx';
@@ -12,6 +12,11 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: product, isLoading, isError } = useProduct(id);
+  // "Sản phẩm cùng loại": BE không trả sẵn `related` trong ProductResponse — tự lấy 1 trang cùng
+  // categoryId rồi loại sản phẩm hiện tại (KHÔNG gọi thêm API riêng cho "related").
+  const { data: relatedPage } = useProducts({ categoryId: product?.categoryId, size: 5 }, { enabled: !!product });
+  const related = (relatedPage?.content ?? []).filter((p) => p.id !== id).slice(0, 4);
+
   const addItem = useCartStore((s) => s.addItem);
   const openChat = useSupplierChatStore((s) => s.openFromProduct);
 
@@ -37,15 +42,12 @@ export default function ProductDetail() {
       </p>
     );
 
-  const outOfStock = product.status === 'out_of_stock' || product.stock === 0;
-  // Badge ảnh: hết hàng (đỏ) hoặc rating cao → "Bán chạy" (gold). Heuristic mock, dễ thay bằng cờ BE.
-  const badge = outOfStock
-    ? { label: t('product.outOfStock'), tone: 'error' }
-    : product.rating >= 4.8
-      ? { label: t('product.bestseller'), tone: 'accent' }
-      : null;
-
-  const buyNow = (qty) => { addItem(product, qty); navigate('/cart'); };
+  // cartStore lưu 1 giá/sản phẩm theo productId (chưa tách theo variant) — dùng giá của variant
+  // ĐANG CHỌN tại thời điểm thêm vào giỏ. Đủ đúng cho sản phẩm có đúng 1 variant (đa số trường
+  // hợp thật hiện tại); sản phẩm nhiều variant giá khác nhau sẽ cần tách cart theo variantId ở
+  // 1 sprint riêng (ngoài phạm vi FE-4 — không đụng cart/checkout để tránh vỡ luồng hiện có).
+  const addToCart = (qty, variant) => addItem({ ...product, price: variant.price, image: product.images?.[0]?.url }, qty);
+  const buyNow = (qty, variant) => { addToCart(qty, variant); navigate('/cart'); };
 
   return (
     <div className="flex flex-col gap-12">
@@ -61,16 +63,17 @@ export default function ProductDetail() {
       </nav>
 
       <div className="grid items-start gap-8 md:grid-cols-2 lg:gap-12">
-        <ProductGallery images={product.gallery} alt={product.name} badge={badge} />
+        <ProductGallery images={(product.images ?? []).map((img) => img.url)} alt={product.name} />
         <ProductInfo
           product={product}
-          onAddToCart={(qty) => addItem(product, qty)}
+          onAddToCart={addToCart}
           onBuyNow={buyNow}
-          onChat={() => openChat(product)}
+          // openFromProduct (chat) kỳ vọng shape cũ {image, price} — chiếu từ product.images[0]/variants[0]
+          onChat={() => openChat({ ...product, image: product.images?.[0]?.url, price: product.variants?.[0]?.price })}
         />
       </div>
 
-      <RelatedProducts products={product.related} />
+      <RelatedProducts products={related} />
     </div>
   );
 }

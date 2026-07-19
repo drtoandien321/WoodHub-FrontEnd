@@ -28,10 +28,24 @@ const REAL_ENDPOINTS = new Set([
   'getReviews', 'getReviewSummary',
   // Module Category/Material — đã xác nhận BE thật (curl local)
   'getCategories', 'getCategoryTree', 'getMaterials',
+  /*
+   * Module Product — catalog công khai (FE-4, curl trực tiếp BE deploy 2026-07-19 xác nhận):
+   * GET /products (danh sách, có data thật — 25 SP), GET /products/{id} (chi tiết, có variants[]/
+   * images[]) đều hoạt động đúng Page<ProductSummaryResponse>/ProductResponse thật. ĐÃ cập nhật
+   * ProductDetail.jsx/ProductInfo.jsx/ProductCard.jsx/Shop.jsx theo đúng shape mới (xem FE-4).
+   * ⚠️ 2 lỗi BE đã phát hiện, KHÔNG tự sửa (không được sửa backend):
+   *   - sort=priceFrom,asc|desc → 500 Internal Server Error (sort=name/createdAt thì OK) → FE
+   *     tạm ẩn tuỳ chọn sắp theo giá (Shop.jsx), không giả vờ hoạt động.
+   *   - GET /products/featured → 400 Bad Request (nghi bị khớp nhầm vào /products/{id} với
+   *     id="featured") → 'getFeaturedProducts' CHƯA thêm vào set này, Landing.jsx vẫn dùng mock.
+   * 'getProduct' giờ TRÙNG hành vi với 'getMyProductDetail' (cùng GET /products/{id}) — vẫn giữ
+   * 2 tên hàm riêng vì 2 trang dùng khác mục đích (công khai vs portal tự quản lý), không phải vì
+   * shape khác nhau nữa.
+   */
+  'getProducts', 'getProduct',
+  // Module Room/Style (BE-7) — GET công khai, curl xác nhận hoạt động (mảng rỗng vì chưa seed, không phải lỗi)
+  'getRooms', 'getRoomBySlug', 'getRoomScenes', 'getRoomSceneDetail', 'getStyles',
   // Module Product (Portal Nhà cung cấp tự quản lý — /portal/supplier/products)
-  // LƯU Ý: 'getMyProductDetail' TÁCH RIÊNG khỏi 'getProduct' dù cùng gọi GET /products/{id} —
-  // 'getProduct' còn phục vụ trang công khai ProductDetail.jsx (CHƯA làm đợt này, shape UI
-  // chưa đổi) nên không được bật chung, kẻo trang đó vỡ vì đổi sang shape thật giữa chừng.
   'createProduct', 'getMyProducts', 'getMyProductDetail', 'updateProduct', 'updateProductStatus', 'deleteProduct',
   'createVariant', 'getVariants', 'updateVariant', 'deleteVariant',
   'uploadProductImage', 'getProductImages', 'setPrimaryImage', 'updateProductImage', 'deleteProductImage',
@@ -63,11 +77,14 @@ const REAL_ENDPOINTS = new Set([
 
 /*
  * Lớp chuyển đổi shape: BE trả phẳng AuthResponse
- *   { token, refreshToken, tokenType, userId, email, fullName, role, customerType, mustChangePassword }
+ *   { token, refreshToken, tokenType, userId, email, fullName, role, customerType, supplierType, mustChangePassword }
  * còn toàn bộ FE (authStore, các page) dùng { token, refreshToken, user: { id, name, email, role, ... } }.
  * Gom về đúng 1 chỗ này để không phải sửa UI khi shape BE khác mock.
  * (Trước đây hàm này chỉ lấy 4 field — bỏ mất refreshToken/customerType/mustChangePassword nên
  * không thể làm refresh-token flow hay bắt supplier đổi mật khẩu lần đầu. Đã bổ sung đủ.)
+ * supplierType (BE-0): 'retailer' | 'workshop' | null (customer/admin/supplier-chưa-có-hồ-sơ).
+ * redirectPathForRole (utils/auth.js) dùng field này để tách 2 portal — THIẾU field này thì mọi
+ * supplier (kể cả workshop) đều rơi vào nhánh else và bị đẩy nhầm sang portal retailer.
  */
 const toAuthResult = (data) => ({
   token: data.token,
@@ -78,6 +95,7 @@ const toAuthResult = (data) => ({
     email: data.email,
     role: data.role,
     customerType: data.customerType,
+    supplierType: data.supplierType ?? null,
     mustChangePassword: data.mustChangePassword ?? false,
   },
 });
@@ -266,12 +284,19 @@ export const api = {
   // (đã ghi nhận ở Pha 0A — "API khóa user — chờ BE bổ sung", ngoài phạm vi module này).
   deleteUser: (id) => call(() => http.delete(`/users/${id}`), 'deleteUser', id),
 
-  // ===== PRODUCTS (B2C catalog) =====
-  // GET /products?category=&material=&minPrice=&maxPrice=&sort=&page=
+  /*
+   * ===== PRODUCTS (B2C catalog công khai — /shop, /product/:id) — FE-4 =====
+   * GET /products?keyword=&categoryId=&materialId=&minPrice=&maxPrice=&room=&style=&available=&
+   * has3d=&customizable=&sort=&page=&size= → Page<ProductSummaryResponse>
+   * { id,supplierId,supplierName,categoryId,categoryName,materialName,name,status,priceFrom,
+   *   primaryImageUrl,createdAt }. room/style luôn rỗng tới khi BE-7 seed dữ liệu (xem FE-5).
+   * sort hỗ trợ 'name,asc|desc' và 'createdAt,asc|desc' — 'priceFrom,*' đang lỗi 500 ở BE (đã báo).
+   */
   getProducts: (params) => call(() => http.get('/products', { params }), 'getProducts', params),
-  // GET /products/featured — cho landing page
+  // GET /products/featured — cho landing page. ⚠️ Đang 400 Bad Request trên BE (xem REAL_ENDPOINTS) — còn mock.
   getFeaturedProducts: () => call(() => http.get('/products/featured'), 'getFeaturedProducts'),
-  // GET /products/:id
+  // GET /products/:id → ProductResponse { ...ProductSummaryResponse trừ priceFrom/primaryImageUrl,
+  // + description,materialId,updatedAt, variants:[{id,sku,color,dimensions,price,...}], images:[{id,url,primary,sortOrder,...}] }
   getProduct: (id) => call(() => http.get(`/products/${id}`), 'getProduct', id),
 
   // ===== CATEGORY / MATERIAL (bảng tham chiếu — GET công khai; tạo/sửa/xoá chỉ admin, xem Portal Quản trị) =====
@@ -293,6 +318,29 @@ export const api = {
   updateMaterial: ({ id, ...body }) => call(() => http.put(`/materials/${id}`, body), 'updateMaterial', { id, ...body }),
   // DELETE /materials/{id} — chỉ admin. AN TOÀN khi đang có sản phẩm dùng (BE tự SET NULL, không lỗi)
   deleteMaterial: (id) => call(() => http.delete(`/materials/${id}`), 'deleteMaterial', id),
+
+  /*
+   * ===== ROOM / STYLE (BE-7, mục 3.2 api-guide-fe.md) — bảng tham chiếu công khai, KHÔNG phân trang.
+   * Dùng cho filter "Phòng"/"Phong cách" ở Shop (FE-4) và trang Shop by Room (FE-5).
+   * ⚠️ Curl xác nhận (2026-07-19): 2 endpoint chạy đúng nhưng CHƯA có dữ liệu (BE chưa seed
+   * rooms/scenes — đúng như docs/be-0-to-be-8-summary.md BE-7 đã ghi chú) → mảng rỗng, KHÔNG
+   * phải lỗi FE. Sidebar Shop tự ẩn nhóm filter này khi danh sách rỗng thay vì hiện ô trống.
+   */
+  // GET /rooms → RoomResponse[] { id, name, slug, sortOrder }
+  getRooms: () => call(() => http.get('/rooms'), 'getRooms'),
+  // GET /rooms/:slug → RoomResponse — chi tiết 1 phòng (dùng cho breadcrumb/tiêu đề trang scene)
+  getRoomBySlug: (slug) => call(() => http.get(`/rooms/${slug}`), 'getRoomBySlug', slug),
+  // GET /rooms/:slug/scenes → RoomSceneSummaryResponse[] { id,name,slug,backgroundImageUrl,sortOrder }
+  getRoomScenes: (slug) => call(() => http.get(`/rooms/${slug}/scenes`), 'getRoomScenes', slug),
+  /*
+   * GET /room-scenes/:id → RoomSceneResponse (CHỈ scene đã publish; hotspot chỉ gồm SP đang bán):
+   * { id, room:{id,name,slug,sortOrder}, name, slug, backgroundImageUrl,
+   *   items: [{ id, xPercent, yPercent, displayOrder, product: ProductSummaryResponse }] }
+   * Hotspot toạ độ % (0..100) — đặt bằng CSS left/top, KHÔNG hardcode toạ độ ở FE (FE-5).
+   */
+  getRoomSceneDetail: (id) => call(() => http.get(`/room-scenes/${id}`), 'getRoomSceneDetail', id),
+  // GET /styles → StyleResponse[] { id, name, slug, sortOrder }
+  getStyles: () => call(() => http.get('/styles'), 'getStyles'),
 
   /*
    * ===== PRODUCT (Portal Nhà cung cấp tự quản lý sản phẩm — /portal/supplier/products) =====
@@ -425,6 +473,70 @@ export const api = {
   matchWorkshops: (body) => call(() => http.post('/custom/match', body), 'matchWorkshops', body),
 
   /*
+   * ===== CUSTOM DESIGN (BE-6) — Custom Studio wizard (bước 5/6, mục 2 api-guide-fe.md) =====
+   * ⚠️ CÙNG path REST `/custom/designs` với saveDesign/getDesign ở trên nhưng body/response
+   * KHÁC HẲN shape (saveDesign phục vụ CustomConfigure.jsx — trình chỉnh "khối hộp" cũ,
+   * {productType,dimensions,materialId,finishId}; nhóm dưới đây đúng contract CustomDesignResponse
+   * thật — {name,modelId,configuration jsonb gộp,thumbnailUrl,status,version}). Tách riêng tên hàm
+   * để KHÔNG đụng luồng cũ (chưa gộp 2 luồng — xem CLAUDE.md mục 4.2 "sẽ hợp nhất vào luồng Meshy").
+   * CHƯA thêm vào REAL_ENDPOINTS — cùng lý do domain AI 3D ở trên (gallery mock/thật lệch slug).
+   */
+  // POST /custom/designs  body: { name, modelId, configuration, thumbnailUrl } → CustomDesignResponse (201), luôn tạo 'draft'
+  createDesign: (body) => call(() => http.post('/custom/designs', body), 'createDesign', body),
+  // GET /custom/designs/:id → CustomDesignResponse — chỉ chủ sở hữu/admin
+  getDesignDetail: (id) => call(() => http.get(`/custom/designs/${id}`), 'getDesignDetail', id),
+  /*
+   * PUT /custom/designs/:id  body: { name, configuration, thumbnailUrl, status, version } — `version`
+   * BẮT BUỘC (optimistic locking: gửi đúng version đang giữ, lệch → 409 → FE phải tải lại bản mới
+   * nhất rồi thử lại, KHÔNG tự ý ghi đè). status:'completed' lần đầu → trừ 1 lượt `design` (429 nếu hết).
+   */
+  updateDesign: ({ id, ...body }) => call(() => http.put(`/custom/designs/${id}`, body), 'updateDesign', { id, ...body }),
+  // DELETE /custom/designs/:id → 204
+  deleteDesign: (id) => call(() => http.delete(`/custom/designs/${id}`), 'deleteDesign', id),
+  // GET /custom/designs/my?status=draft|completed&page=&size= → Page<CustomDesignResponse> — "Thiết kế của tôi"
+  getMyDesigns: (params) => call(() => http.get('/custom/designs/my', { params }), 'getMyDesigns', params),
+
+  /*
+   * ===== QUOTE & CUSTOM ORDER (BE-8) — báo giá & đơn custom customer ↔ workshop (FE-6) =====
+   * State machine đầy đủ: backend/docs/be-8-state-machine.md. Contract: api-guide-fe.md mục 4.
+   * ⚠️ CHƯA thêm vào REAL_ENDPOINTS: `customDesignId` BẮT BUỘC là 1 CustomDesign CÓ THẬT ở BE —
+   * đã curl xác nhận (2026-07-19): POST /quotes với customDesignId ngẫu nhiên → 404 "Không tìm
+   * thấy thiết kế" (logic BE ĐÚNG, không phải bug). Domain CustomDesign đang mock (phụ thuộc dây
+   * chuyền vào bug GET /api/custom/models — xem nhóm AI 3D phía trên), nên Quote/Order KHÔNG THỂ
+   * bật thật cho tới khi gốc rễ đó được BE fix, dù bản thân API Quote/Order (đã test) hoạt động tốt.
+   */
+  // POST /quotes  body: { workshopId, customDesignId, quantity, location?, note?, expiresAt? } → QuoteRequestResponse (201)
+  createQuote: (body) => call(() => http.post('/quotes', body), 'createQuote', body),
+  // GET /quotes/my?status=&page=&size= → Page<QuoteRequestResponse> (list: offers=null) — customer
+  getMyQuotes: (params) => call(() => http.get('/quotes/my', { params }), 'getMyQuotes', params),
+  // GET /quotes/incoming?status=&page=&size= — workshop
+  getIncomingQuotes: (params) => call(() => http.get('/quotes/incoming', { params }), 'getIncomingQuotes', params),
+  // GET /quotes/:id → QuoteRequestResponse (kèm offers[]) — customer/workshop/admin liên quan
+  getQuoteDetail: (id) => call(() => http.get(`/quotes/${id}`), 'getQuoteDetail', id),
+  // POST /quotes/:id/cancel — customer, chỉ khi chưa chốt (pending/negotiating)
+  cancelQuote: (id) => call(() => http.post(`/quotes/${id}/cancel`), 'cancelQuote', id),
+  // POST /quotes/:id/offers  body: { price, leadTimeDays, note?, expiresAt? } → QuoteOfferResponse (201)
+  // offeredBy tự suy từ vai người gọi (customer hoặc workshop) — dùng chung cho ra giá LẪN counter-offer
+  createOffer: ({ quoteId, ...body }) => call(() => http.post(`/quotes/${quoteId}/offers`, body), 'createOffer', { quoteId, ...body }),
+  // POST /quotes/:id/offers/:offerId/accept — CHỈ bên KHÔNG tạo offer đó → tạo CustomOrderResponse (201)
+  acceptOffer: ({ quoteId, offerId }) => call(() => http.post(`/quotes/${quoteId}/offers/${offerId}/accept`), 'acceptOffer', { quoteId, offerId }),
+  // POST /quotes/:id/offers/:offerId/reject — kết thúc đàm phán (quote → rejected, muốn tiếp thì counter-offer)
+  rejectOffer: ({ quoteId, offerId }) => call(() => http.post(`/quotes/${quoteId}/offers/${offerId}/reject`), 'rejectOffer', { quoteId, offerId }),
+
+  // GET /custom-orders/my?status=&page=&size= — customer
+  getMyCustomOrders: (params) => call(() => http.get('/custom-orders/my', { params }), 'getMyCustomOrders', params),
+  // GET /custom-orders/incoming?status=&page=&size= — workshop
+  getIncomingCustomOrders: (params) => call(() => http.get('/custom-orders/incoming', { params }), 'getIncomingCustomOrders', params),
+  // GET /custom-orders/:id → CustomOrderResponse (kèm history[])
+  getCustomOrderDetail: (id) => call(() => http.get(`/custom-orders/${id}`), 'getCustomOrderDetail', id),
+  /*
+   * PATCH /custom-orders/:id/status  body: { status, note? } → CustomOrderResponse (kèm history mới)
+   * Chuyển hợp lệ (sai → 409): pending→confirmed/cancelled, confirmed→in_production/cancelled,
+   * in_production→completed/cancelled. Customer CHỈ được cancel khi còn 'pending'.
+   */
+  updateCustomOrderStatus: ({ id, ...body }) => call(() => http.patch(`/custom-orders/${id}/status`, body), 'updateCustomOrderStatus', { id, ...body }),
+
+  /*
    * ===== SUPPLIER (browse công khai — trang /suppliers, /suppliers/:id) =====
    * PublicResponse của BE CỐ TÌNH bỏ field nội bộ/nhạy cảm (status, commissionRate, taxCode...)
    * và KHÔNG có rating/portfolio/capability nhúng sẵn — phải gọi riêng portfolio/reviews.
@@ -466,8 +578,8 @@ export const api = {
    * ===== SUPPLIER (hồ sơ của CHÍNH supplier đang đăng nhập) =====
    * GET /suppliers/me → SupplierResponse đầy đủ (có `type`: retailer|workshop). Dùng để biết
    * đúng loại supplier hiện tại — vd gate nút "Thêm chi nhánh" cho workshop (Module Store/GPS).
-   * ⚠️ authStore.user KHÔNG có field supplierType (AuthResponse của BE không trả field này) —
-   * đây là hook DUY NHẤT lấy đúng type thật, không suy đoán từ đâu khác.
+   * authStore.user.supplierType (AuthResponse, BE-0) đủ cho điều hướng/hiển thị; dùng hàm này khi
+   * cần các field khác của hồ sơ supplier (status, commissionRate, taxCode...) mà AuthResponse không có.
    */
   getSupplierMe: () => call(() => http.get('/suppliers/me'), 'getSupplierMe'),
 
@@ -489,15 +601,54 @@ export const api = {
   getWorkshopsWithinRadius: ({ lat, lng, radiusKm }) =>
     call(() => http.get('/stores/nearby/workshops/radius', { params: { lat, lng, radiusKm } }), 'getWorkshopsWithinRadius', { lat, lng, radiusKm }),
 
-  // ===== AI 3D (nhánh Mẫu 3D / Upload — Meshy sau này) =====
-  // GET /custom/models — thư viện mẫu 3D
-  getModels3d: () => call(() => http.get('/custom/models'), 'getModels3d'),
-  // GET /custom/models/:slug — 1 mẫu (gồm model vừa sinh từ ảnh)
+  /*
+   * ===== AI 3D (BE-1→BE-4) — thư viện mẫu 3D + sinh model 3D bằng AI từ ảnh =====
+   * Contract đầy đủ: backend/docs/api-guide-fe.md mục 1. Model3dResponse/Ai3DTaskResponse —
+   * xem shape trong mockAdapter (đã khớp 1-1 để bật REAL_ENDPOINTS không phải sửa UI).
+   * ⚠️ CHƯA thêm vào REAL_ENDPOINTS: curl trực tiếp BE deploy (2026-07-19) cho thấy
+   * GET /api/custom/models (danh sách, phân trang) trả 500 Internal Server Error, dù
+   * GET /api/custom/models/{slug} (chi tiết) chạy đúng — lỗi ở BE (nghi query phân trang/tìm
+   * kiếm trong CustomModelServiceImpl), KHÔNG sửa ở đây theo đúng nguyên tắc "không tự ý sửa
+   * backend". Cố tình bật CẢ NHÓM cùng lúc (không bật lẻ getModel3d) vì gallery mock sinh slug
+   * riêng — bật lẻ sẽ khiến FE gọi thẳng BE thật với slug BE không biết → vỡ luồng generate.
+   * Bật lại khi BE fix xong endpoint danh sách.
+   */
+  // GET /custom/models?keyword=&productType=&page=&size= → Page<Model3dResponse>
+  getModels3d: (params) => call(() => http.get('/custom/models', { params }), 'getModels3d', params),
+  // GET /custom/models/:slug → Model3dResponse (công khai; model riêng của user cần đăng nhập)
   getModel3d: (slug) => call(() => http.get(`/custom/models/${slug}`), 'getModel3d', slug),
-  // POST /custom/ai/generate — dựng 3D từ ảnh (BE proxy Meshy, giữ API key ở BE)
-  generate3D: (body) => call(() => http.post('/custom/ai/generate', body), 'generate3D', body),
-  // GET /custom/ai/tasks/:taskId — poll tiến trình dựng
+  /*
+   * POST /custom/ai/generate — multipart/form-data (KHÔNG qua call() vì cần FormData, giống
+   * uploadProductImage). Trừ 1 lượt `design` (hết → 429, xem docs/subscription-fe.md). Trả NGAY
+   * (202), không chờ AI xong: { taskId, status:'queued', progress:0 }.
+   * ⚠️ Cố tình check thêm REAL_ENDPOINTS (khác uploadProductImage chỉ check USE_MOCK) — hàm này
+   * SINH RA taskId mà getGenTask/retryGenTask/cancelGenTask (đi qua call()) đang tra cứu ở mock
+   * (chưa có trong REAL_ENDPOINTS, xem comment nhóm AI 3D phía trên). Nếu chỉ theo USE_MOCK,
+   * lúc VITE_USE_MOCK=false hàm này sẽ gọi BE thật còn 4 hàm kia vẫn tra mock → taskId thật
+   * không tồn tại trong mock → 404 ngay sau khi generate xong.
+   */
+  generate3D: async ({ image, templateId, removeBackground, quality }) => {
+    if (USE_MOCK || !REAL_ENDPOINTS.has('getGenTask')) return mockAdapter.generate3D({ image, templateId, removeBackground, quality });
+    const form = new FormData();
+    form.append('image', image);
+    if (templateId != null) form.append('templateId', templateId);
+    if (removeBackground != null) form.append('removeBackground', String(removeBackground));
+    if (quality != null) form.append('quality', quality);
+    const res = await http.post('/custom/ai/generate', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return res.data;
+  },
+  /*
+   * GET /custom/ai/tasks/:taskId → Ai3DTaskResponse — FE poll định kỳ (khuyến nghị 1.5-3s, xem
+   * hooks/useModels3d.js) tới khi status là 1 trong 5 trạng thái TERMINAL: succeeded/failed/cancelled
+   * (queued/processing là đang chạy, PHẢI tiếp tục poll).
+   */
   getGenTask: (taskId) => call(() => http.get(`/custom/ai/tasks/${taskId}`), 'getGenTask', taskId),
+  // POST /custom/ai/tasks/:taskId/retry — chỉ khi task đang 'failed', giới hạn số lần (mặc định 3, vượt → 429)
+  retryGenTask: (taskId) => call(() => http.post(`/custom/ai/tasks/${taskId}/retry`), 'retryGenTask', taskId),
+  // POST /custom/ai/tasks/:taskId/cancel — chỉ khi task CHƯA terminal (đã kết thúc → 409)
+  cancelGenTask: (taskId) => call(() => http.post(`/custom/ai/tasks/${taskId}/cancel`), 'cancelGenTask', taskId),
+  // GET /custom/ai/tasks/my?status=&page=&size= → Page<Ai3DTaskResponse> — để wizard tự resume task khi quay lại trang
+  getMyGenTasks: (params) => call(() => http.get('/custom/ai/tasks/my', { params }), 'getMyGenTasks', params),
 
   /*
    * ===== SUBSCRIPTION (gói đăng ký) — đọc trực tiếp SubscriptionPlanController/UserSubscription-

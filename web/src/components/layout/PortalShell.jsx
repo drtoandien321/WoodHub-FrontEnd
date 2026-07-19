@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { useLogout } from '../../hooks/useLogout.js';
 import PortalChatButton from '../portal/PortalChatButton.jsx';
 import PortalChatDrawer from '../portal/PortalChatDrawer.jsx';
@@ -19,6 +20,7 @@ import { LogOut, Bell, X } from '../suppliers/icons.jsx';
  */
 export default function PortalShell({ nav, brandName, brandInitials, home, title = 'Portal Nhà cung cấp', showChat = true }) {
   const logout = useLogout();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
 
   const linkClass = ({ isActive }) =>
@@ -87,7 +89,10 @@ export default function PortalShell({ nav, brandName, brandInitials, home, title
 
         <main className="flex-1 p-4 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1400px]">
-            <Outlet />
+            {/* Page transition nhẹ (FE-7) — cùng cơ chế với SiteLayout.jsx: key={pathname} remount → fade nhẹ */}
+            <motion.div key={location.pathname} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease: 'easeOut' }}>
+              <Outlet />
+            </motion.div>
           </div>
         </main>
       </div>

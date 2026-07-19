@@ -3,8 +3,9 @@ import { api } from '../api/client.js';
 
 /*
  * useSupplierMe — hồ sơ supplier CHÍNH đang đăng nhập (GET /suppliers/me).
- * Dùng khi cần biết đúng `type` (retailer|workshop) — KHÔNG lấy từ authStore.user.supplierType
- * vì field đó luôn undefined ở chế độ thật (AuthResponse của BE không có field này).
+ * authStore.user.supplierType (từ AuthResponse, BE-0) đủ để biết retailer|workshop cho việc
+ * điều hướng portal/hiển thị nhãn — dùng hook này khi cần THÊM field khác của hồ sơ (status,
+ * commissionRate, taxCode...) mà AuthResponse không có, vd gate nút "Thêm chi nhánh".
  */
 export const useSupplierMe = () =>
   useQuery({ queryKey: ['supplierMe'], queryFn: api.getSupplierMe, staleTime: 5 * 60_000 });

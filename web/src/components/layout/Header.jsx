@@ -11,6 +11,7 @@ import { SunIcon, MoonIcon, CartIcon, UserIcon, ChevronDownIcon } from '../ui/ic
 // "Giới thiệu" giờ là 1 trang gộp (Câu chuyện + Bảng giá + Liên hệ) → link thẳng /about, bỏ dropdown
 const MENU = [
   { key: 'shop', to: '/shop' },
+  { key: 'rooms', to: '/rooms' },
   { key: 'custom', to: '/custom' },
   { key: 'suppliers', to: '/suppliers' },
   { key: 'b2b', to: '/b2b' },
@@ -93,6 +94,9 @@ export default function Header() {
               </div>
               <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-20 w-48 p-2 shadow border border-base-300 mt-2">
                 <li><Link to={roleArea.to}>{roleArea.label}</Link></li>
+                {user.role === 'customer' && <li><Link to="/custom/designs">{t('custom.studio.designs.title')}</Link></li>}
+                {user.role === 'customer' && <li><Link to="/quotes">{t('nav.quotes')}</Link></li>}
+                {user.role === 'customer' && <li><Link to="/custom-orders">{t('nav.customOrders')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/account/subscription">{t('nav.subscription')}</Link></li>}
                 <li><Link to="/profile">{t('nav.profile')}</Link></li>
                 <li><button onClick={logout}>{t('nav.logout')}</button></li>

@@ -1,30 +1,26 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useIncomingQuotes } from '../../hooks/useQuotes.js';
-import { quoteMeta } from '../../utils/quoteStatus.js';
-import StatusBadge from '../../components/supplier/StatusBadge.jsx';
+import { useMyQuotes } from '../hooks/useQuotes.js';
+import { quoteMeta } from '../utils/quoteStatus.js';
+import StatusBadge from '../components/supplier/StatusBadge.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
 
 const TABS = ['', 'pending', 'negotiating', 'accepted', 'rejected', 'expired', 'cancelled'];
 
-/*
- * Yêu cầu báo giá gửi tới xưởng — GET /quotes/incoming (BE-8, FE-6). Bấm vào → chi tiết chung
- * /quotes/:id (component QuoteDetail.jsx tự nhận diện vai workshop, cho ra giá/chấp nhận/từ chối).
- * ⚠️ Thay thế hoàn toàn trang cũ (dữ liệu tĩnh W_ORDERS + nút "Gửi báo giá" không làm gì cả) —
- * đúng yêu cầu FE-6 #7 "không dùng toast giả để mô phỏng đã gửi báo giá".
- */
-export default function WorkshopOrders() {
+// "Yêu cầu báo giá của tôi" — GET /quotes/my (customer). Bấm vào → chi tiết /quotes/:id.
+export default function MyQuotes() {
   const { t } = useTranslation();
   const [status, setStatus] = useState('');
-  const { data, isLoading, isError, refetch } = useIncomingQuotes(status ? { status } : undefined);
+  const { data, isLoading, isError, refetch } = useMyQuotes(status ? { status } : undefined);
   const items = data?.content ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="font-display text-3xl">{t('quote.incomingTitle')}</h1>
-        <p className="mt-1 text-base-content/60">{t('quote.incomingSubtitle')}</p>
-      </header>
+    <div className="flex flex-col gap-6 max-w-4xl">
+      <div>
+        <h1 className="font-display text-3xl">{t('quote.myQuotesTitle')}</h1>
+        <p className="mt-1 text-sm text-base-content/60">{t('quote.myQuotesSubtitle')}</p>
+      </div>
 
       <div className="overflow-x-auto">
         <div className="inline-flex gap-1 rounded-2xl border border-base-300 bg-base-100 p-1 shadow-sm">
@@ -46,11 +42,11 @@ export default function WorkshopOrders() {
       ) : items.length ? (
         <div className="flex flex-col gap-3">
           {items.map((q) => (
-            <Link key={q.id} to={`/quotes/${q.id}`} className="flex items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-primary md:p-5">
+            <Link key={q.id} to={`/quotes/${q.id}`} className="flex items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-primary">
               {q.designSnapshot?.thumbnailUrl && <img src={q.designSnapshot.thumbnailUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium">{q.customerName}</p>
+                  <p className="font-medium">{q.workshopName}</p>
                   <StatusBadge meta={quoteMeta(q.status)} />
                 </div>
                 <p className="mt-0.5 text-sm text-base-content/60">{t('quote.quantity')}: {q.quantity}{q.location ? ` · ${q.location}` : ''}</p>
@@ -59,7 +55,7 @@ export default function WorkshopOrders() {
           ))}
         </div>
       ) : (
-        <p className="py-10 text-center text-base-content/50">{t('quote.emptyIncoming')}</p>
+        <EmptyState title={t('quote.emptyTitle')} hint={t('quote.emptyHint')} ctaLabel={t('custom.studio.designs.title')} ctaTo="/custom/designs" />
       )}
     </div>
   );

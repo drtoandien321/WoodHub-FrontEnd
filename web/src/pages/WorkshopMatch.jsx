@@ -48,7 +48,12 @@ export default function WorkshopMatch() {
                   {t('workshopMatch.workshopInfo', { district: w.district, rating: w.rating, jobs: w.completedJobs, days: w.leadTimeDays })}
                 </p>
               </div>
-              <button className="btn btn-primary btn-sm">{t('workshopMatch.requestQuote')}</button>
+              {/* Luồng custom "khối hộp" cũ chưa hợp nhất vào CustomDesign thật (BE-6) nên chưa gọi
+                  được POST /quotes (cần customDesignId thật) — vô hiệu hoá thay vì nút chết không rõ lý do.
+                  Luồng thật: Custom Studio (/custom/studio) → "Thiết kế của tôi" → Yêu cầu báo giá. */}
+              <button disabled title={t('workshopMatch.requestQuoteDisabledHint')} className="btn btn-primary btn-sm">
+                {t('workshopMatch.requestQuote')}
+              </button>
             </div>
           ))}
         </div>
