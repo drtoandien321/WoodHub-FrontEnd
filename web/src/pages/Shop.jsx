@@ -230,16 +230,20 @@ export default function Shop() {
           <button onClick={() => setCollapsed((c) => !c)} className="btn btn-ghost btn-sm hidden lg:inline-flex">
             {collapsed ? t('shop.expandFilters') : t('shop.collapseFilters')}
           </button>
+          {/*
+            * sort theo giá dùng field `price` (KHÔNG phải `priceFrom`) — Product entity có cột
+            * @Formula tên `price` (MIN giá các variant), DTO chỉ đổi tên thành `priceFrom` lúc
+            * serialize response. BE đã fix (2026-07-20, đã curl xác nhận tăng/giảm dần đúng) nên
+            * bật lại, không còn nhãn "sắp ra mắt".
+            */}
           <select value={sort} onChange={(e) => setParam('sort', e.target.value || null)} className="select select-bordered select-sm w-44">
             <option value="">{t('shop.sort.default')}</option>
+            <option value="price,asc">{t('shop.sort.price_asc')}</option>
+            <option value="price,desc">{t('shop.sort.price_desc')}</option>
             <option value="name,asc">{t('shop.sort.name_asc')}</option>
             <option value="name,desc">{t('shop.sort.name_desc')}</option>
             <option value="createdAt,desc">{t('shop.sort.newest')}</option>
           </select>
-          {/* Sắp xếp theo giá đang lỗi 500 ở BE (sort=priceFrom,*) — hiện "sắp ra mắt" thay vì âm thầm gọi API lỗi */}
-          <span title={t('shop.priceSortComingSoonHint')} className="hidden cursor-not-allowed rounded-full border border-dashed border-base-300 px-3 py-1.5 text-xs text-base-content/35 sm:inline">
-            {t('shop.sort.price')} · {t('shop.priceSortComingSoon')}
-          </span>
           {hasFilters && (
             <button onClick={clearFilters} className="btn btn-ghost btn-sm text-error">
               {t('shop.clearFilter')} ({filterCount})

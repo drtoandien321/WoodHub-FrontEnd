@@ -33,11 +33,12 @@ const REAL_ENDPOINTS = new Set([
    * GET /products (danh sách, có data thật — 25 SP), GET /products/{id} (chi tiết, có variants[]/
    * images[]) đều hoạt động đúng Page<ProductSummaryResponse>/ProductResponse thật. ĐÃ cập nhật
    * ProductDetail.jsx/ProductInfo.jsx/ProductCard.jsx/Shop.jsx theo đúng shape mới (xem FE-4).
-   * ⚠️ 2 lỗi BE đã phát hiện, KHÔNG tự sửa (không được sửa backend):
-   *   - sort=priceFrom,asc|desc → 500 Internal Server Error (sort=name/createdAt thì OK) → FE
-   *     tạm ẩn tuỳ chọn sắp theo giá (Shop.jsx), không giả vờ hoạt động.
-   *   - GET /products/featured → 400 Bad Request (nghi bị khớp nhầm vào /products/{id} với
-   *     id="featured") → 'getFeaturedProducts' CHƯA thêm vào set này, Landing.jsx vẫn dùng mock.
+   * ✅ 2026-07-20: BE đã fix + curl xác nhận lại — sort theo giá giờ dùng field `price` (KHÔNG
+   * phải `priceFrom` như suy đoán ban đầu — Product entity có cột @Formula tên `price`, DTO chỉ
+   * ĐỔI TÊN thành `priceFrom` lúc serialize): `sort=price,asc` / `sort=price,desc` chạy đúng thật
+   * (đã curl thấy giá tăng/giảm dần chính xác) → Shop.jsx đã bật lại tuỳ chọn sắp theo giá.
+   * ⚠️ Còn 1 lỗi CHƯA fix: GET /products/featured → 400 Bad Request (nghi bị khớp nhầm vào
+   * /products/{id} với id="featured") → 'getFeaturedProducts' CHƯA thêm vào set này, Landing.jsx vẫn dùng mock.
    * 'getProduct' giờ TRÙNG hành vi với 'getMyProductDetail' (cùng GET /products/{id}) — vẫn giữ
    * 2 tên hàm riêng vì 2 trang dùng khác mục đích (công khai vs portal tự quản lý), không phải vì
    * shape khác nhau nữa.
@@ -76,6 +77,18 @@ const REAL_ENDPOINTS = new Set([
   'getMyUsage',
   // Module Admin — quản lý gói đăng ký (Portal Quản trị /admin/subscription-plans)
   'getAllSubscriptionPlans', 'createSubscriptionPlan', 'updateSubscriptionPlan', 'deleteSubscriptionPlan',
+  /*
+   * ✅ 2026-07-20: BE fix xong lỗi gốc chặn cả domain này (GET /api/custom/models 500 do
+   * lower(bytea) — đã cast tường minh sang string trong JPQL) — curl xác nhận LIST + DETAIL đều
+   * chạy đúng thật (có data thật: 1 template seed + ≥2 model AI đã sinh thành công qua Meshy thật,
+   * shape khớp 100% những gì FE đã code). Bật thật CẢ NHÓM AI 3D + CustomDesign + Quote/Order —
+   * xem chi tiết từng hàm ở nơi định nghĩa (đã cập nhật comment, không còn "CHƯA thêm vào set này").
+   */
+  'getModels3d', 'getModel3d', 'getGenTask', 'retryGenTask', 'cancelGenTask', 'getMyGenTasks',
+  'createDesign', 'getDesignDetail', 'updateDesign', 'deleteDesign', 'getMyDesigns',
+  'createQuote', 'getMyQuotes', 'getIncomingQuotes', 'getQuoteDetail', 'cancelQuote',
+  'createOffer', 'acceptOffer', 'rejectOffer',
+  'getMyCustomOrders', 'getIncomingCustomOrders', 'getCustomOrderDetail', 'updateCustomOrderStatus',
 ]);
 
 /*
@@ -495,7 +508,8 @@ export const api = {
    * {productType,dimensions,materialId,finishId}; nhóm dưới đây đúng contract CustomDesignResponse
    * thật — {name,modelId,configuration jsonb gộp,thumbnailUrl,status,version}). Tách riêng tên hàm
    * để KHÔNG đụng luồng cũ (chưa gộp 2 luồng — xem CLAUDE.md mục 4.2 "sẽ hợp nhất vào luồng Meshy").
-   * CHƯA thêm vào REAL_ENDPOINTS — cùng lý do domain AI 3D ở trên (gallery mock/thật lệch slug).
+   * ✅ 2026-07-20: đã bật thật (REAL_ENDPOINTS) — domain AI 3D không còn bị chặn (xem ghi chú ở
+   * getModels3d bên dưới), customDesignId dùng cho Quote (BE-8) giờ trỏ đúng bản ghi thật ở BE.
    */
   // POST /custom/designs  body: { name, modelId, configuration, thumbnailUrl } → CustomDesignResponse (201), luôn tạo 'draft'
   createDesign: (body) => call(() => http.post('/custom/designs', body), 'createDesign', body),
@@ -515,11 +529,12 @@ export const api = {
   /*
    * ===== QUOTE & CUSTOM ORDER (BE-8) — báo giá & đơn custom customer ↔ workshop (FE-6) =====
    * State machine đầy đủ: backend/docs/be-8-state-machine.md. Contract: api-guide-fe.md mục 4.
-   * ⚠️ CHƯA thêm vào REAL_ENDPOINTS: `customDesignId` BẮT BUỘC là 1 CustomDesign CÓ THẬT ở BE —
-   * đã curl xác nhận (2026-07-19): POST /quotes với customDesignId ngẫu nhiên → 404 "Không tìm
-   * thấy thiết kế" (logic BE ĐÚNG, không phải bug). Domain CustomDesign đang mock (phụ thuộc dây
-   * chuyền vào bug GET /api/custom/models — xem nhóm AI 3D phía trên), nên Quote/Order KHÔNG THỂ
-   * bật thật cho tới khi gốc rễ đó được BE fix, dù bản thân API Quote/Order (đã test) hoạt động tốt.
+   * ✅ 2026-07-20: đã bật thật (REAL_ENDPOINTS). `customDesignId` BẮT BUỘC là 1 CustomDesign CÓ
+   * THẬT ở BE (đã curl xác nhận trước đó: customDesignId ngẫu nhiên → 404 "Không tìm thấy thiết
+   * kế", logic BE đúng) — giờ CustomDesign đã real (xem block ở trên) nên điều kiện này tự đáp ứng.
+   * ⚠️ Domain Quote/Order hiện CHƯA có dữ liệu thật (GET /quotes/my, /custom-orders/my đều rỗng
+   * lúc curl xác nhận) — luồng đầy đủ (tạo quote → offer → accept → order) CHƯA được test end-to-end
+   * qua BE thật, chỉ xác nhận API tồn tại/đúng logic 404 ở bước tạo. Cần test kỹ khi dùng thật.
    */
   // POST /quotes  body: { workshopId, customDesignId, quantity, location?, note?, expiresAt? } → QuoteRequestResponse (201)
   createQuote: (body) => call(() => http.post('/quotes', body), 'createQuote', body),
@@ -620,14 +635,17 @@ export const api = {
   /*
    * ===== AI 3D (BE-1→BE-4) — thư viện mẫu 3D + sinh model 3D bằng AI từ ảnh =====
    * Contract đầy đủ: backend/docs/api-guide-fe.md mục 1. Model3dResponse/Ai3DTaskResponse —
-   * xem shape trong mockAdapter (đã khớp 1-1 để bật REAL_ENDPOINTS không phải sửa UI).
-   * ⚠️ CHƯA thêm vào REAL_ENDPOINTS: curl trực tiếp BE deploy (2026-07-19) cho thấy
-   * GET /api/custom/models (danh sách, phân trang) trả 500 Internal Server Error, dù
-   * GET /api/custom/models/{slug} (chi tiết) chạy đúng — lỗi ở BE (nghi query phân trang/tìm
-   * kiếm trong CustomModelServiceImpl), KHÔNG sửa ở đây theo đúng nguyên tắc "không tự ý sửa
-   * backend". Cố tình bật CẢ NHÓM cùng lúc (không bật lẻ getModel3d) vì gallery mock sinh slug
-   * riêng — bật lẻ sẽ khiến FE gọi thẳng BE thật với slug BE không biết → vỡ luồng generate.
-   * Bật lại khi BE fix xong endpoint danh sách.
+   * xem shape trong mockAdapter (đã khớp 1-1, giữ lại làm fallback khi VITE_USE_MOCK=true).
+   * ✅ 2026-07-20: BE đã fix bug gốc (GET /api/custom/models 500 do `lower(bytea)` khi keyword/
+   * productType null — giờ cast tường minh sang string trong JPQL) — đã curl xác nhận LẠI: danh
+   * sách + chi tiết đều 200, có 1 template seed + ≥2 model đã sinh thật qua Meshy (isPublic=false,
+   * cần đăng nhập đúng chủ mới xem được — khớp thiết kế "công khai; model riêng cần đăng nhập").
+   * File upload cũng đã nới lỏng validate (BE-4 fix): chỉ soi magic bytes thật của file, KHÔNG
+   * còn đối chiếu Content-Type/đuôi file client khai báo → ảnh đổi đuôi/sai Content-Type vẫn qua
+   * được miễn nội dung đúng là JPEG/PNG/WEBP. ✅ Test thật qua UI (2026-07-20): upload 1 ảnh PNG
+   * thật nhưng đổi đuôi thành .jpg (mismatch cố ý) qua Custom Studio → POST /custom/ai/generate
+   * trả 202 {taskId, status:'queued'} bình thường, task tiến triển tới ~22% không lỗi — xác nhận
+   * BE nhận diện đúng theo nội dung, không còn chặn nhầm như hành vi cũ.
    */
   // GET /custom/models?keyword=&productType=&page=&size= → Page<Model3dResponse>
   getModels3d: (params) => call(() => http.get('/custom/models', { params }), 'getModels3d', params),
@@ -637,11 +655,11 @@ export const api = {
    * POST /custom/ai/generate — multipart/form-data (KHÔNG qua call() vì cần FormData, giống
    * uploadProductImage). Trừ 1 lượt `design` (hết → 429, xem docs/subscription-fe.md). Trả NGAY
    * (202), không chờ AI xong: { taskId, status:'queued', progress:0 }.
-   * ⚠️ Cố tình check thêm REAL_ENDPOINTS (khác uploadProductImage chỉ check USE_MOCK) — hàm này
-   * SINH RA taskId mà getGenTask/retryGenTask/cancelGenTask (đi qua call()) đang tra cứu ở mock
-   * (chưa có trong REAL_ENDPOINTS, xem comment nhóm AI 3D phía trên). Nếu chỉ theo USE_MOCK,
-   * lúc VITE_USE_MOCK=false hàm này sẽ gọi BE thật còn 4 hàm kia vẫn tra mock → taskId thật
-   * không tồn tại trong mock → 404 ngay sau khi generate xong.
+   * Check thêm REAL_ENDPOINTS.has('getGenTask') (khác uploadProductImage chỉ check USE_MOCK) —
+   * hàm này SINH RA taskId mà getGenTask/retryGenTask/cancelGenTask phải tra cứu ĐÚNG CÙNG NGUỒN
+   * (cùng thật hoặc cùng mock) — nay cả nhóm đã vào REAL_ENDPOINTS nên tự động dùng BE thật, gọi
+   * Meshy thật qua BE proxy và trừ quota `design` thật. ⚠️ Từ đây generate3D KHÔNG còn miễn phí/
+   * không giới hạn như lúc mock — mỗi lần gọi tốn 1 lượt design + chi phí Meshy thật phía BE.
    */
   generate3D: async ({ image, templateId, removeBackground, quality }) => {
     if (USE_MOCK || !REAL_ENDPOINTS.has('getGenTask')) return mockAdapter.generate3D({ image, templateId, removeBackground, quality });
@@ -706,14 +724,14 @@ export const api = {
 
   /*
    * ===== AI CHAT (trợ lý AI tư vấn — chatbot nổi) =====
-   * Curl xác nhận trực tiếp trên BE deploy (2026-07-19): tạo/liệt kê session hoạt động đúng.
-   * Gửi tin nhắn (sendAiChatMessage) BE trả 502 "AI đang bận hoặc không phản hồi" — do BE chưa
-   * kết nối được tới service Python AI phía sau (biến env AI_API_URL), KHÔNG phải lỗi FE/BE logic
-   * (BE tự bắt lỗi, trả 502 có message rõ ràng, không crash) — UI phải xử lý đẹp case này vì đó
-   * là trạng thái THẬT hiện tại, không phải giả định.
-   * ⚠️ suggestedProducts trong AiChatMessageResponse là JSON tự do (Map<String,Object> phía BE,
-   * chưa có DTO cố định) — CHƯA test được response thành công (502 chặn) nên chưa biết chắc field
-   * names. UI đọc theo nhiều tên field khả dĩ (xem ChatPanel.jsx) — SẼ CẦN CHỈNH LẠI khi có ví dụ thật.
+   * ✅ 2026-07-20: BE đã fix xong lỗi 502 (thiếu AI_API_URL trong render.yaml, xem đầu file) —
+   * đã test thật qua UI (gửi "Tôi muốn tìm bàn ăn gỗ sồi"): POST trả 200 với reply + gợi ý sản
+   * phẩm đúng (không còn lỗi kết nối service Python AI phía sau). UI vẫn giữ nguyên xử lý 502/429
+   * (xem chatErrorKey trong ChatPanel.jsx) vì AI provider vẫn có thể timeout/bận lúc khác.
+   * suggestedProducts trong AiChatMessageResponse — đã xác nhận field THẬT (curl UI 2026-07-20):
+   * [{ id, name, description, status, price }] — KHÔNG có productId/title/priceFrom/image như FE
+   * dự phòng trước đó (ProductSuggestion trong ChatPanel.jsx vẫn giữ các fallback đó phòng khi AI
+   * trả biến thể sản phẩm khác thiếu ảnh, nhưng field chính đã biết chắc là id/name/price).
    */
   // POST /ai-chat/sessions  body: { title? } → AiChatSessionResponse (201)
   createAiChatSession: (body) => call(() => http.post('/ai-chat/sessions', body ?? {}), 'createAiChatSession', body),

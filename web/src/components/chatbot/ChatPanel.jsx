@@ -31,10 +31,10 @@ const chatErrorKey = (error) => {
 };
 
 /*
- * Thẻ sản phẩm gợi ý trong tin nhắn bot. `suggestedProducts` của BE thật là JSON tự do
- * (Map<String,Object>, chưa có DTO cố định — CHƯA test được response thành công do AI service
- * phía BE đang 502, xem ghi chú ở client.js) — đọc theo NHIỀU tên field khả dĩ để có cơ hội hiển
- * thị đúng dù chưa biết chắc field name thật; mock (getAdvisorReply) dùng {id,name,material,price,image}.
+ * Thẻ sản phẩm gợi ý trong tin nhắn bot. `suggestedProducts` của BE thật đã xác nhận thật
+ * (2026-07-20, test qua UI sau khi BE fix 502): [{id,name,description,status,price}] — không có
+ * ảnh. Vẫn đọc thêm vài tên field khả dĩ (productId/title/priceFrom/image) để tương thích ngược
+ * với mock (getAdvisorReply dùng {id,name,material,price,image}) và phòng AI trả biến thể khác.
  */
 function ProductSuggestion({ product, onNavigate }) {
   const id = product.id ?? product.productId;

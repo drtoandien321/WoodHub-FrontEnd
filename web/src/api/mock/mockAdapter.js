@@ -538,7 +538,8 @@ export const mockAdapter = {
 
     const [sortField, sortDir] = (params.sort ?? '').split(',');
     const dirMul = sortDir === 'desc' ? -1 : 1;
-    if (sortField === 'priceFrom') items = [...items].sort((a, b) => (a.price - b.price) * dirMul);
+    // Query param thật là `price` (khớp cột @Formula ở BE), KHÔNG phải `priceFrom` (đó là tên field response) — đã xác nhận 2026-07-20
+    if (sortField === 'price') items = [...items].sort((a, b) => (a.price - b.price) * dirMul);
     else if (sortField === 'name') items = [...items].sort((a, b) => loc(a.name).localeCompare(loc(b.name)) * dirMul);
     else if (sortField === 'createdAt') items = [...items].sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1) * dirMul);
 
