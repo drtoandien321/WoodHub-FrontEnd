@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { api, USE_MOCK } from '../api/client.js';
 import { useAuthStore } from './authStore.js';
 import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocket.js';
+import { formatVnd } from '../utils/format.js';
+import { productChatLink } from '../utils/chatProductLink.js';
 
 /*
  * supplierChatStore — state cho khung CHAT VỚI NHÀ CUNG CẤP (khác AI chatbot ở chatStore.js).
@@ -10,7 +12,13 @@ import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocke
  * - conversations: { [supplierId]: Message[] }  — lưu lịch sử theo từng nhà cung cấp.
  * - context: { supplier, product? }             — NCC đang chat + (nếu mở từ trang SP) product context.
  * - typing: NCC có đang "nhập" không (chỉ có ý nghĩa ở mock — BE thật không có sự kiện typing).
- * Message = { id, sender:'user'|'supplier', text, at(ISO), status?:'sending'|'sent'|'seen'|'error' }
+ * Message = { id, sender:'user'|'supplier', text, attachmentUrl?, at(ISO), status?:'sending'|'sent'|'seen'|'error' }
+ *
+ * ⚠️ 1 NCC CHỈ CÓ 1 HỘI THOẠI (UNIQUE customer_id+supplier_id ở BE, kiểu Shopee) — mở chat từ
+ * sản phẩm khác nhau vẫn cùng 1 lịch sử. Để không lẫn lộn đang hỏi sản phẩm nào, mỗi lần
+ * openFromProduct() với 1 sản phẩm MỚI (khác tin ngữ cảnh gần nhất) sẽ tự "gửi" 1 tin nhắn thẻ
+ * sản phẩm (announceProduct*) — đánh dấu bằng attachmentUrl=/product/:id (xem chatProductLink.js),
+ * ChatMessageBubble tự nhận diện để hiện thẻ thay vì bong bóng text. KHÔNG cần cột DB mới.
  *
  * ⚠️ CHẾ ĐỘ THẬT (VITE_USE_MOCK=false): `conversationIdBySupplier` map supplierId → conversationId
  * thật (UUID) của BE — cần để gọi getMessages/sendMessage/markAsRead. `openFromProduct` cần
@@ -21,6 +29,10 @@ import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocke
  */
 let counter = 0;
 const nextId = () => `scm_${Date.now()}_${counter++}`;
+
+// Nội dung tin nhắn thẻ sản phẩm — dùng chung cho mock lẫn tin gửi thật.
+const productContextText = (product) =>
+  product.price != null ? `${product.name} · ${formatVnd(product.price)}` : product.name;
 
 // Reply mock theo từ khoá — CHỈ dùng ở chế độ mock, để demo luồng hỏi/đáp khi chưa có BE.
 const mockReply = (text) => {
@@ -39,6 +51,7 @@ const toUiMessage = (m, myUserId) => ({
   id: m.id,
   sender: m.senderId === myUserId ? 'user' : 'supplier',
   text: m.content ?? '',
+  attachmentUrl: m.attachmentUrl,
   at: m.createdAt,
   status: 'sent',
 });
@@ -55,18 +68,28 @@ export const useSupplierChatStore = create((set, get) => ({
   openFromProduct: (product) => {
     if (!product) return;
     const supplier = { id: product.supplierId, name: product.supplierName };
-    set((s) => ({
+    set(() => ({
       isOpen: true,
       showProductCard: true,
       context: { supplier, product: { id: product.id, name: product.name, image: product.image, price: product.price, supplierName: product.supplierName } },
     }));
+
     if (USE_MOCK) {
-      set((s) => ({
-        conversations: s.conversations[supplier.id] ? s.conversations : { ...s.conversations, [supplier.id]: [welcome(supplier.name)] },
-      }));
+      set((s) => {
+        const base = s.conversations[supplier.id] ?? [welcome(supplier.name)];
+        const last = base[base.length - 1];
+        // Tin ngữ cảnh gần nhất đã đúng sản phẩm này rồi → khỏi gửi thẻ trùng lặp.
+        if (last?.attachmentUrl === productChatLink(product.id)) return { conversations: { ...s.conversations, [supplier.id]: base } };
+        const productMsg = {
+          id: nextId(), sender: 'user', text: productContextText(product),
+          attachmentUrl: productChatLink(product.id), at: new Date().toISOString(), status: 'sent',
+        };
+        return { conversations: { ...s.conversations, [supplier.id]: [...base, productMsg] } };
+      });
       return;
     }
-    loadRealConversation(get, set, supplier, product.id);
+
+    loadRealConversation(get, set, supplier, product.id).then(() => announceProduct(get, set, supplier, product));
   },
 
   // Mở chat từ TRANG HỒ SƠ NCC (không kèm product).
@@ -134,7 +157,7 @@ function loadRealConversation(get, set, supplier, productId) {
   ensureConnected();
   ensureSubscribed(get, set);
 
-  api.startConversation({ supplierId: supplier.id, productId: productId ?? undefined }).then(async (conv) => {
+  return api.startConversation({ supplierId: supplier.id, productId: productId ?? undefined }).then(async (conv) => {
     set((s) => ({ conversationIdBySupplier: { ...s.conversationIdBySupplier, [supplier.id]: conv.id } }));
     const myUserId = useAuthStore.getState().user?.id;
     const page = await api.getMessages({ conversationId: conv.id });
@@ -142,6 +165,26 @@ function loadRealConversation(get, set, supplier, productId) {
     set((s) => ({ conversations: { ...s.conversations, [supplier.id]: items } }));
     api.markAsRead(conv.id).catch(() => {});
   });
+}
+
+// Gửi 1 tin nhắn thẻ sản phẩm (announce) khi mở chat từ sản phẩm — bỏ qua nếu tin ngữ cảnh gần
+// nhất trong lịch sử đã tải về đúng là sản phẩm này rồi (tránh spam khi bấm lại nhiều lần).
+function announceProduct(get, set, supplier, product) {
+  const conversationId = get().conversationIdBySupplier[supplier.id];
+  if (!conversationId) return;
+  const list = get().conversations[supplier.id] ?? [];
+  const last = list[list.length - 1];
+  const attachmentUrl = productChatLink(product.id);
+  if (last?.attachmentUrl === attachmentUrl) return;
+
+  const content = productContextText(product);
+  const sentViaSocket = sendViaSocket(conversationId, { content, attachmentUrl });
+  if (!sentViaSocket) {
+    api.sendMessage({ conversationId, content, attachmentUrl }).then((m) => {
+      const myUserId = useAuthStore.getState().user?.id;
+      set((s) => ({ conversations: pushMsgDedup(s.conversations, supplier.id, toUiMessage(m, myUserId)) }));
+    });
+  }
 }
 
 // Đăng ký DUY NHẤT 1 lần nhận tin từ chatSocket, định tuyến theo conversationId đã biết.

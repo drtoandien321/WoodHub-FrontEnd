@@ -546,13 +546,6 @@ export const mockAdapter = {
     return { content, page: { size, number, totalElements, totalPages: Math.max(1, Math.ceil(totalElements / size)) } };
   },
 
-  // GET /products/featured — endpoint thật đang 400 (xem client.js), mock giữ nguyên wrapper {items}
-  // cũ vì KHÔNG biết shape thật (Landing.jsx đọc data.items — không đổi để khỏi đoán sai).
-  async getFeaturedProducts() {
-    await delay(250);
-    return { items: PRODUCTS.filter((p) => p.status === 'active').slice(0, 4).map(toProductSummary) };
-  },
-
   // GET /products/:id → ProductResponse thật (variants[]/images[], KHÔNG có `related` — related
   // dựng ở FE bằng 1 lượt getProducts({categoryId}) riêng, xem ProductDetail.jsx)
   async getProduct(id) {

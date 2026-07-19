@@ -37,8 +37,9 @@ const REAL_ENDPOINTS = new Set([
    * phải `priceFrom` như suy đoán ban đầu — Product entity có cột @Formula tên `price`, DTO chỉ
    * ĐỔI TÊN thành `priceFrom` lúc serialize): `sort=price,asc` / `sort=price,desc` chạy đúng thật
    * (đã curl thấy giá tăng/giảm dần chính xác) → Shop.jsx đã bật lại tuỳ chọn sắp theo giá.
-   * ⚠️ Còn 1 lỗi CHƯA fix: GET /products/featured → 400 Bad Request (nghi bị khớp nhầm vào
-   * /products/{id} với id="featured") → 'getFeaturedProducts' CHƯA thêm vào set này, Landing.jsx vẫn dùng mock.
+   * ⚠️ GET /products/featured vẫn 400 Bad Request (nghi bị khớp nhầm vào /products/{id} với
+   * id="featured") nên KHÔNG dùng — Landing.jsx lấy "sản phẩm nổi bật" bằng chính getProducts()
+   * này (sort=createdAt,desc, size=4), cùng nguồn dữ liệu thật với Shop.jsx.
    * 'getProduct' giờ TRÙNG hành vi với 'getMyProductDetail' (cùng GET /products/{id}) — vẫn giữ
    * 2 tên hàm riêng vì 2 trang dùng khác mục đích (công khai vs portal tự quản lý), không phải vì
    * shape khác nhau nữa.
@@ -322,8 +323,6 @@ export const api = {
    * sort hỗ trợ 'name,asc|desc' và 'createdAt,asc|desc' — 'priceFrom,*' đang lỗi 500 ở BE (đã báo).
    */
   getProducts: (params) => call(() => http.get('/products', { params }), 'getProducts', params),
-  // GET /products/featured — cho landing page. ⚠️ Đang 400 Bad Request trên BE (xem REAL_ENDPOINTS) — còn mock.
-  getFeaturedProducts: () => call(() => http.get('/products/featured'), 'getFeaturedProducts'),
   // GET /products/:id → ProductResponse { ...ProductSummaryResponse trừ priceFrom/primaryImageUrl,
   // + description,materialId,updatedAt, variants:[{id,sku,color,dimensions,price,...}], images:[{id,url,primary,sortOrder,...}] }
   getProduct: (id) => call(() => http.get(`/products/${id}`), 'getProduct', id),

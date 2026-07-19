@@ -91,7 +91,7 @@ export default function ChatDrawer() {
 
               <div className="flex flex-col gap-3 py-1">
                 {messages.map((m) => (
-                  <ChatMessageBubble key={m.id} message={m} onRetry={retry} />
+                  <ChatMessageBubble key={m.id} message={m} onRetry={retry} onNavigate={close} />
                 ))}
 
                 {typing && (

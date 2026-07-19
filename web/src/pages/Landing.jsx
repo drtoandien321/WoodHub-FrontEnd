@@ -5,7 +5,7 @@ import Hero from '../components/hero/Hero.jsx';
 import ProductCard from '../components/ui/ProductCard.jsx';
 import Footer from '../components/layout/Footer.jsx';
 import SideRail from '../components/ui/SideRail.jsx';
-import { useFeaturedProducts } from '../hooks/useProducts.js';
+import { useProducts } from '../hooks/useProducts.js';
 
 const FLOW_LINKS = ['/shop', '/b2b', '/custom'];
 
@@ -20,8 +20,12 @@ const REVEAL = {
   viewport: { once: true, margin: '-40px' },
 };
 
+// Sản phẩm nổi bật ở Landing dùng CHUNG nguồn dữ liệu thật với trang Shop (GET /products) — không
+// có endpoint /products/featured riêng (đang lỗi 400 ở BE), nên lấy 4 sản phẩm mới nhất thay thế.
+const FEATURED_PARAMS = { size: 4, sort: 'createdAt,desc' };
+
 export default function Landing() {
-  const { data, isLoading } = useFeaturedProducts();
+  const { data, isLoading } = useProducts(FEATURED_PARAMS);
   const { t } = useTranslation();
   const flows = t('landing.flows', { returnObjects: true });
 
@@ -51,7 +55,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Sản phẩm nổi bật — GET /products/featured */}
+      {/* Sản phẩm nổi bật — GET /products (xem FEATURED_PARAMS ở trên) */}
       <section className="max-w-7xl mx-auto px-4 md:px-8 pb-20">
         <div className="flex items-baseline justify-between mb-6">
           <h2 className="font-display text-3xl">{t('landing.featuredTitle')}</h2>
@@ -63,7 +67,7 @@ export default function Landing() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {data?.items?.map((p, i) => (
+            {(data?.content ?? []).map((p, i) => (
               <motion.div key={p.id} initial={REVEAL.initial} whileInView={REVEAL.whileInView} viewport={REVEAL.viewport} transition={{ duration: 0.35, delay: (i % 4) * 0.06 }}>
                 <ProductCard product={p} />
               </motion.div>

@@ -400,6 +400,7 @@
     "placeholder": "Type a message…",
     "viewProduct": "View product",
     "hideProduct": "Hide product",
+    "productContext": "Asking about this product",
     "supplierFallback": "Supplier",
     "more": "More",
     "close": "Close",

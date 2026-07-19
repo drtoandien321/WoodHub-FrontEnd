@@ -15,11 +15,6 @@ export const useProducts = (params, { enabled = true } = {}) => {
   return useQuery({ queryKey: ['products', params, i18n.language], queryFn: () => api.getProducts(params), enabled });
 };
 
-export const useFeaturedProducts = () => {
-  const { i18n } = useTranslation();
-  return useQuery({ queryKey: ['products', 'featured', i18n.language], queryFn: api.getFeaturedProducts });
-};
-
 export const useProduct = (id) => {
   const { i18n } = useTranslation();
   return useQuery({ queryKey: ['product', id, i18n.language], queryFn: () => api.getProduct(id), enabled: !!id });

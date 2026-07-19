@@ -52,10 +52,13 @@ const mockCustomerReply = (text) => {
 };
 
 // BE ChatMessageResponse → UI Message (own='me' khi senderId là chính nhà cung cấp đang đăng nhập)
+// attachmentUrl=/product/:id → tin ngữ cảnh sản phẩm khách gửi khi bấm "Chat với nhà cung cấp" từ
+// trang sản phẩm (xem chatProductLink.js) — ChatMessageBubble tự nhận diện để hiện thẻ sản phẩm.
 const toUiMessage = (m, myUserId) => ({
   id: m.id,
   sender: m.senderId === myUserId ? 'me' : 'customer',
   text: m.content ?? '',
+  attachmentUrl: m.attachmentUrl,
   at: m.createdAt,
   status: 'sent',
 });
