@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   useSupplierPublicProfile, useSupplierStores, useSupplierPortfolio,
@@ -14,7 +14,7 @@ import SupplierReviews from '../components/suppliers/SupplierReviews.jsx';
 import SupplierWorkflow from '../components/suppliers/SupplierWorkflow.jsx';
 import SupplierQuickInfo from '../components/suppliers/SupplierQuickInfo.jsx';
 import SupplierStrengths from '../components/suppliers/SupplierStrengths.jsx';
-import { Info, Send } from '../components/suppliers/icons.jsx';
+import { Info } from '../components/suppliers/icons.jsx';
 
 /*
  * ⚠️ Bỏ hoàn toàn section "Năng lực sản xuất" (SupplierCapabilities) — supplier thật KHÔNG có
@@ -22,7 +22,6 @@ import { Info, Send } from '../components/suppliers/icons.jsx';
  */
 export default function SupplierProfile() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: supplier, isLoading, isError } = useSupplierPublicProfile(id);
   const { data: branches } = useSupplierStores(id);
@@ -32,7 +31,6 @@ export default function SupplierProfile() {
   const [fav, setFav] = useState(false);
   const openChat = useSupplierChatStore((s) => s.openFromSupplier);
 
-  const orderCustom = () => navigate(`/custom/configure/table?supplierId=${id}`);
   const contactSupplier = () => openChat({ id, name: supplier?.businessName });
   const scrollToContact = () =>
     document.getElementById('supplier-quick-info')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -68,7 +66,7 @@ export default function SupplierProfile() {
         <span className="font-medium text-base-content/80">{supplier.businessName}</span>
       </nav>
 
-      <SupplierProfileHeader supplier={supplier} reviewSummary={reviewSummary} onOrderCustom={orderCustom} onContact={contactSupplier} />
+      <SupplierProfileHeader supplier={supplier} reviewSummary={reviewSummary} onContact={contactSupplier} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="flex flex-col gap-6">
@@ -85,18 +83,8 @@ export default function SupplierProfile() {
           <SupplierWorkflow />
         </div>
 
-        <SupplierQuickInfo supplier={supplier} onOrderCustom={orderCustom} fav={fav} onToggleFav={() => setFav((v) => !v)} />
+        <SupplierQuickInfo supplier={supplier} fav={fav} onToggleFav={() => setFav((v) => !v)} />
       </div>
-
-      <section className="flex flex-col items-center justify-between gap-4 rounded-3xl border border-base-300 bg-base-200/60 p-6 text-center md:flex-row md:p-8 md:text-left">
-        <div>
-          <h2 className="font-display text-xl md:text-2xl">{t('suppliers.bottomCtaTitle')}</h2>
-          <p className="mt-1 text-base-content/65">{t('suppliers.bottomCtaDesc', { name: supplier.businessName })}</p>
-        </div>
-        <button onClick={orderCustom} className="btn btn-primary shrink-0 gap-2">
-          <Send width={16} height={16} /> {t('suppliers.bottomCtaBtn')}
-        </button>
-      </section>
     </div>
   );
 }

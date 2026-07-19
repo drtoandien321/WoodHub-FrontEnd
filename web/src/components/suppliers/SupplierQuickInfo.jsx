@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { Phone, Mail, Send, Bookmark, CheckCircle } from './icons.jsx';
+import { Phone, Mail, Bookmark, CheckCircle } from './icons.jsx';
 
 /*
  * Sidebar "Thông tin nhanh" của trang hồ sơ — sticky trên desktop.
  * Đã bỏ: giá tham khảo, thời gian phản hồi, khu vực phục vụ, hình thức làm việc, lắp đặt,
  * tag chuyên môn/gỗ hỗ trợ — KHÔNG field nào trong số này tồn tại ở SupplierPublicResponse.
- * Chỉ còn Liên hệ (contactEmail/contactPhone — có thể null nếu supplier chưa điền) + 2 CTA.
+ * Chỉ còn Liên hệ (contactEmail/contactPhone — có thể null nếu supplier chưa điền) + CTA lưu xưởng.
  */
-export default function SupplierQuickInfo({ supplier, onOrderCustom, fav = false, onToggleFav }) {
+export default function SupplierQuickInfo({ supplier, fav = false, onToggleFav }) {
   const { t } = useTranslation();
   const hasContact = supplier.contactPhone || supplier.contactEmail;
 
@@ -43,9 +43,6 @@ export default function SupplierQuickInfo({ supplier, onOrderCustom, fav = false
         <div className="border-t border-base-300" />
 
         <div className="flex flex-col gap-2">
-          <button onClick={onOrderCustom} className="btn btn-primary gap-2">
-            <Send width={16} height={16} /> {t('suppliers.orderCustom')}
-          </button>
           <button
             onClick={() => onToggleFav?.(supplier.id)}
             aria-pressed={fav}

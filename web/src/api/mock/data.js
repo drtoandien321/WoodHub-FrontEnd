@@ -281,8 +281,6 @@ const img = (p) => encodeURI(p);
 
 /*
  * WORKSHOPS — dữ liệu xưởng/nhà cung cấp.
- * - Nhóm field GỐC (rating, completedJobs, leadTimeDays, capability) GIỮ NGUYÊN: matchWorkshops()
- *   và WorkshopMatch page phụ thuộc vào chúng → không đổi để tránh ảnh hưởng trang khác.
  * - Nhóm field MỚI (slug, verified, profile...) chỉ phục vụ trang /suppliers và /suppliers/:slug.
  *   Tất cả là mock — khi có API thật chỉ cần trả về cùng shape này.
  */

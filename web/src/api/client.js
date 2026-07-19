@@ -491,23 +491,8 @@ export const api = {
   // GET /orders/:id
   getOrder: (id) => call(() => http.get(`/orders/${id}`), 'getOrder', id),
 
-  // ===== CUSTOM =====
-  // GET /custom/product-types
-  getProductTypes: () => call(() => http.get('/custom/product-types'), 'getProductTypes'),
-  // POST /custom/designs  body: { productType, dimensions, materialId, finishId }
-  saveDesign: (body) => call(() => http.post('/custom/designs', body), 'saveDesign', body),
-  // GET /custom/designs/:id
-  getDesign: (id) => call(() => http.get(`/custom/designs/${id}`), 'getDesign', id),
-  // POST /custom/match  body: { designId, location? } — matching RULE-BASED (không AI, theo scope MVP)
-  matchWorkshops: (body) => call(() => http.post('/custom/match', body), 'matchWorkshops', body),
-
   /*
    * ===== CUSTOM DESIGN (BE-6) — Custom Studio wizard (bước 5/6, mục 2 api-guide-fe.md) =====
-   * ⚠️ CÙNG path REST `/custom/designs` với saveDesign/getDesign ở trên nhưng body/response
-   * KHÁC HẲN shape (saveDesign phục vụ CustomConfigure.jsx — trình chỉnh "khối hộp" cũ,
-   * {productType,dimensions,materialId,finishId}; nhóm dưới đây đúng contract CustomDesignResponse
-   * thật — {name,modelId,configuration jsonb gộp,thumbnailUrl,status,version}). Tách riêng tên hàm
-   * để KHÔNG đụng luồng cũ (chưa gộp 2 luồng — xem CLAUDE.md mục 4.2 "sẽ hợp nhất vào luồng Meshy").
    * ✅ 2026-07-20: đã bật thật (REAL_ENDPOINTS) — domain AI 3D không còn bị chặn (xem ghi chú ở
    * getModels3d bên dưới), customDesignId dùng cho Quote (BE-8) giờ trỏ đúng bản ghi thật ở BE.
    */

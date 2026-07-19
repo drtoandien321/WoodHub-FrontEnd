@@ -179,7 +179,6 @@
     "completedJobs": "{{count}} đơn hoàn thành",
     "leadTime": "{{days}} ngày/đơn",
     "materialBadge": "Gỗ {{material}}",
-    "cta": "Đặt thiết kế custom",
     "viewProfile": "Xem hồ sơ",
     "completedLabel": "Đơn hoàn thành",
     "leadTimeLabel": "Thời gian sản xuất",
@@ -206,7 +205,6 @@
       { "id": "hcm", "label": "TP.HCM" }
     ],
     "breadcrumbHome": "Trang chủ",
-    "orderCustom": "Đặt thiết kế custom",
     "contactConsult": "Liên hệ tư vấn",
     "saveSupplier": "Lưu xưởng",
     "saved": "Đã lưu",
@@ -234,9 +232,6 @@
     "specialtyTags": "Chuyên môn",
     "woodTags": "Gỗ hỗ trợ",
     "contactTitle": "Liên hệ",
-    "bottomCtaTitle": "Sẵn sàng bắt đầu dự án nội thất custom của bạn?",
-    "bottomCtaDesc": "Gửi yêu cầu để nhận tư vấn miễn phí và báo giá chi tiết từ {{name}}.",
-    "bottomCtaBtn": "Gửi yêu cầu ngay",
     "notFoundTitle": "Không tìm thấy xưởng",
     "notFoundBack": "Quay lại danh sách xưởng",
     "workflow": [
@@ -499,7 +494,6 @@
     "selectTitle": "Bạn muốn thiết kế gì?",
     "selectDesc": "Chọn loại sản phẩm để mở bộ cấu hình 3D — chỉnh kích thước, chất liệu, màu theo ý bạn.",
     "selectBadges": ["Cấu hình 3D realtime", "Xem AR tại nhà", "Tự động ghép xưởng"],
-    "startHint": "Bắt đầu",
     "arTitle": "Xem trước bằng 3D & AR ngay tại nhà",
     "arDesc": "Tuỳ chỉnh kích thước, chất liệu và màu trên mô hình 3D thời gian thực — rồi đặt thử sản phẩm vào chính căn phòng của bạn bằng AR trước khi đặt làm.",
     "arPoints": ["Mô hình 3D cập nhật tức thì theo từng thông số", "Xoay và phóng to để xem mọi góc cạnh", "Đặt thử vào không gian thật bằng camera điện thoại"],
@@ -521,8 +515,6 @@
       "entryTitle": "Thiết kế từ mẫu 3D hoặc ảnh của bạn",
       "entryDesc": "Chọn mẫu 3D dựng sẵn hoặc tải ảnh lên để AI dựng lại — xem 3D và đặt thử bằng AR ngay trên điện thoại.",
       "entryCta": "Khám phá mẫu 3D",
-      "altEntryTitle": "Hoặc tự chỉnh số đo",
-      "altEntryDesc": "Bắt đầu từ một loại sản phẩm cơ bản và chỉnh kích thước, chất liệu, màu trên mô hình 3D real-time.",
       "galleryTitle": "Mẫu 3D & thiết kế từ ảnh",
       "gallerySubtitle": "Chọn một mẫu 3D dựng sẵn, hoặc tải ảnh lên để AI dựng lại thành mô hình 3D bạn có thể xem và đặt thử bằng AR.",
       "uploadTitle": "Tải ảnh của bạn",
@@ -562,47 +554,11 @@
       }
     },
     "dimensions": "Kích thước (cm)",
-    "dimensionWidth": "Chiều rộng",
-    "dimensionHeight": "Chiều cao",
-    "dimensionDepth": "Chiều sâu",
-    "material": "Chất liệu gỗ",
-    "finish": "Màu hoàn thiện",
-    "estimatedPrice": "Giá ước tính",
-    "estimatedPriceNote": "Giá cuối cùng do xưởng xác nhận khi báo giá.",
-    "estimatedTime": "Thời gian ước tính",
-    "estimatedTimeUnit": "{{days}} ngày",
-    "saveDesign": "Lưu & thêm vào giỏ",
-    "saveDesignShort": "Lưu thiết kế",
-    "findWorkshop": "Tìm xưởng phù hợp",
-    "requestQuote": "Gửi yêu cầu báo giá",
-    "referenceSource": "Nguồn tham khảo",
-    "uploadImage": "Tải ảnh lên",
-    "chooseExisting": "Chọn ảnh có sẵn",
-    "chooseExistingTitle": "Chọn ảnh tham khảo",
-    "removeReference": "Xóa ảnh tham khảo",
-    "toolRotate": "Xoay",
-    "toolZoom": "Phóng to",
-    "toolReset": "Reset view",
-    "savedToast": "Đã lưu thiết kế & thêm vào giỏ ✓",
-    "goToCart": "Xem giỏ",
-    "customPrefix": "Thiết kế riêng",
-    "types": {
-      "table": { "name": "Bàn", "desc": "Bàn ăn, bàn làm việc, bàn trà" },
-      "cabinet": { "name": "Tủ", "desc": "Tủ quần áo, tủ bếp, tủ trưng bày" },
-      "shelf": { "name": "Kệ", "desc": "Kệ sách, kệ trang trí, kệ treo tường" },
-      "chair": { "name": "Ghế", "desc": "Ghế ăn, ghế làm việc, băng ghế" }
-    },
     "materials": {
       "oak": "Sồi (Oak)",
       "walnut": "Óc chó (Walnut)",
       "ash": "Tần bì (Ash)",
       "pine": "Thông (Pine)"
-    },
-    "finishes": {
-      "natural": "Tự nhiên (dầu lau)",
-      "dark": "Nâu đậm",
-      "white": "Trắng sữa",
-      "black": "Đen mờ"
     },
     "studio": {
       "title": "Custom Studio",
@@ -694,18 +650,6 @@
         "notEditable": "Chưa hỗ trợ tùy chỉnh"
       }
     }
-  },
-  "workshopMatch": {
-    "title": "Xưởng phù hợp với thiết kế của bạn",
-    "subtitle": "Lọc theo năng lực sản xuất (loại sản phẩm, kích thước tối đa, vật liệu) và xếp hạng theo đánh giá, tốc độ, kinh nghiệm.",
-    "bestMatch": "Phù hợp nhất",
-    "workshopInfo": "{{district}} · ★ {{rating}} · {{jobs}} đơn hoàn thành · giao ~{{days}} ngày",
-    "requestQuote": "Yêu cầu báo giá",
-    "requestQuoteDisabledHint": "Luồng này chưa nối với hệ thống báo giá mới — dùng Custom Studio → Thiết kế của tôi để gửi yêu cầu báo giá.",
-    "emptyTitle": "Chưa tìm thấy xưởng phù hợp",
-    "emptyHint": "Thử giảm kích thước hoặc đổi chất liệu trong thiết kế.",
-    "editDesign": "Sửa thiết kế",
-    "designOther": "← Thiết kế sản phẩm khác"
   },
   "quote": {
     "requestTitle": "Yêu cầu báo giá",

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useProductTypes } from '../hooks/useProducts.js';
 
 // Icon nhỏ inline (stroke, ăn theo currentColor)
 const Icon = {
@@ -11,7 +10,6 @@ const Icon = {
 
 export default function CustomSelect() {
   const { t } = useTranslation();
-  const { data, isLoading } = useProductTypes();
 
   const badges = t('custom.selectBadges', { returnObjects: true });
   const steps = t('custom.steps', { returnObjects: true });
@@ -62,40 +60,6 @@ export default function CustomSelect() {
             <Icon.cube className="h-4 w-4" /> AR · 3D
           </span>
         </Link>
-      </section>
-
-      {/* ===== Hoặc tự chỉnh số đo: lưới loại sản phẩm (luồng parametric) ===== */}
-      <section>
-        <div className="mb-5 text-center">
-          <h2 className="font-display text-2xl">{t('custom.ai.altEntryTitle')}</h2>
-          <p className="mx-auto mt-1 max-w-xl text-sm text-base-content/60">{t('custom.ai.altEntryDesc')}</p>
-        </div>
-        {isLoading ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-48 rounded-2xl" />)}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {data?.items?.map((pt) => (
-              <Link
-                key={pt.id}
-                to={`/custom/configure/${pt.id}`}
-                className="group flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary hover:shadow-[0_16px_40px_rgba(76,52,36,0.12)]"
-              >
-                <span className="grid h-16 w-16 place-items-center rounded-2xl bg-base-200 text-4xl transition-colors group-hover:bg-primary/10">
-                  {pt.emoji}
-                </span>
-                <div className="flex-1">
-                  <h3 className="font-display text-lg">{t(`custom.types.${pt.id}.name`)}</h3>
-                  <p className="mt-1 text-xs text-base-content/60">{t(`custom.types.${pt.id}.desc`)}</p>
-                </div>
-                <span className="inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                  {t('custom.startHint')} <Icon.arrow className="h-4 w-4" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
       </section>
 
       {/* ===== 3 bước ===== */}

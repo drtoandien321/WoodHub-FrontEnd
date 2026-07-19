@@ -31,19 +31,8 @@ export const useOrders = () =>
 export const useOrder = (id) =>
   useQuery({ queryKey: ['order', id], queryFn: () => api.getOrder(id), enabled: !!id });
 
-export const useProductTypes = () =>
-  useQuery({ queryKey: ['productTypes'], queryFn: api.getProductTypes });
-
 // useMutation cho hành động ghi (POST/PATCH) — có isPending để disable nút khi đang gửi
 export const useCreateOrder = () => useMutation({ mutationFn: api.createOrder });
-export const useSaveDesign = () => useMutation({ mutationFn: api.saveDesign });
-
-export const useWorkshopMatch = (designId) =>
-  useQuery({
-    queryKey: ['workshopMatch', designId],
-    queryFn: () => api.matchWorkshops({ designId }),
-    enabled: !!designId,
-  });
 
 // (Đã chuyển sang hooks/usePublicSuppliers.js — usePublicSuppliers/useSupplierPublicProfile —
 // khớp đúng shape SupplierPublicResponse của BE thật, không dùng slug mà dùng UUID.)

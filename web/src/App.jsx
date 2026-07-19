@@ -36,12 +36,10 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
 const ChangePasswordRequired = lazy(() => import('./pages/ChangePasswordRequired.jsx'));
 const CustomSelect = lazy(() => import('./pages/CustomSelect.jsx'));
-const CustomConfigure = lazy(() => import('./pages/CustomConfigure.jsx'));
 const CustomModels = lazy(() => import('./pages/CustomModels.jsx'));
 const CustomModelViewer = lazy(() => import('./pages/CustomModelViewer.jsx'));
 const CustomStudio = lazy(() => import('./pages/CustomStudio.jsx'));
 const CustomDesigns = lazy(() => import('./pages/CustomDesigns.jsx'));
-const WorkshopMatch = lazy(() => import('./pages/WorkshopMatch.jsx'));
 const Suppliers = lazy(() => import('./pages/Suppliers.jsx'));
 const SupplierProfile = lazy(() => import('./pages/SupplierProfile.jsx'));
 const B2b = lazy(() => import('./pages/B2b.jsx'));
@@ -126,7 +124,6 @@ export default function App() {
           <Route path="/custom" element={<CustomSelect />} />
           <Route path="/custom/models" element={<CustomModels />} />
           <Route path="/custom/models/:slug" element={<CustomModelViewer />} />
-          <Route path="/custom/configure/:type" element={<CustomConfigure />} />
           <Route path="/suppliers" element={<Suppliers />} />
           {/* BE không có slug — định danh bằng UUID */}
           <Route path="/suppliers/:id" element={<SupplierProfile />} />
@@ -142,7 +139,6 @@ export default function App() {
             <Route path="/account/subscription" element={<MySubscription />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
-            <Route path="/custom/match/:designId" element={<WorkshopMatch />} />
             {/* Custom Studio (FE-2): wizard 6 bước, cần đăng nhập vì generate/lưu thiết kế tính vào hạn mức `design` */}
             <Route path="/custom/studio" element={<CustomStudio />} />
             <Route path="/custom/designs" element={<CustomDesigns />} />

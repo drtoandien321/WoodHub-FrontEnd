@@ -1,6 +1,5 @@
 import i18n from '../../i18n/index.js';
 import { PRODUCTS, WORKSHOPS, CATEGORY_NAMES, MATERIAL_NAMES, ROOMS, STYLES, ROOM_SCENES } from './data.js';
-import { PRODUCT_TYPES } from './customData.js';
 import { MODELS_3D, buildGeneratedModel } from './models3dData.js';
 import { storage } from '../../services/storage.js';
 import { useAuthStore } from '../../stores/authStore.js';
@@ -95,10 +94,9 @@ const SUPPLIER_TYPE = {
 };
 
 const ORDERS_KEY = 'woodhub:orders';
-const DESIGNS_KEY = 'woodhub:designs';
 const GEN_TASKS_KEY = 'woodhub:genTasks';
 const GEN_MODELS_KEY = 'woodhub:genModels';
-const CUSTOM_DESIGNS_KEY = 'woodhub:customDesigns'; // Custom Studio wizard (BE-6) — TÁCH khỏi memoryDb.designs (CustomConfigure cũ)
+const CUSTOM_DESIGNS_KEY = 'woodhub:customDesigns'; // Custom Studio wizard (BE-6)
 
 /*
  * "DB" cho designs/orders/AI-3D-tasks — giữ trong Map (lookup nhanh theo id) nhưng đồng bộ
@@ -114,7 +112,6 @@ const AI_CHAT_MESSAGES_KEY = 'woodhub:aiChatMessages';
 
 const memoryDb = {
   orders: new Map(storage.getItem(ORDERS_KEY, [])),
-  designs: new Map(storage.getItem(DESIGNS_KEY, [])),
   genTasks: new Map(storage.getItem(GEN_TASKS_KEY, [])),
   genModels: new Map(storage.getItem(GEN_MODELS_KEY, [])),
   customDesigns: new Map(storage.getItem(CUSTOM_DESIGNS_KEY, [])),
@@ -198,7 +195,6 @@ const resolveGenTask = async (taskId) => {
 const MY_PRODUCTS_KEY = 'woodhub:my-products-v2';
 let myProducts = storage.getItem(MY_PRODUCTS_KEY, []);
 const persistMyProducts = () => storage.setItem(MY_PRODUCTS_KEY, myProducts);
-const persistDesigns = () => storage.setItem(DESIGNS_KEY, Array.from(memoryDb.designs.entries()));
 
 /*
  * "DB" cho CHI NHÁNH (Store) + TỒN KHO (StoreInventory) của Portal Nhà cung cấp mới
@@ -1003,56 +999,6 @@ export const mockAdapter = {
     const order = memoryDb.orders.get(id);
     if (!order) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
     return order;
-  },
-
-  async getProductTypes() {
-    await delay(200);
-    return { items: PRODUCT_TYPES };
-  },
-
-  async saveDesign(body) {
-    await delay(500);
-    const id = nextId('dsg');
-    const design = { id, ...body, createdAt: new Date().toISOString() };
-    memoryDb.designs.set(id, design);
-    persistDesigns();
-    return design;
-  },
-
-  async getDesign(id) {
-    await delay(250);
-    const design = memoryDb.designs.get(id);
-    if (!design) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
-    return design;
-  },
-
-  /*
-   * Matching RULE-BASED (đúng scope MVP, không AI):
-   * 1. Lọc cứng: xưởng phải làm được loại sản phẩm + đủ kích thước + có vật liệu
-   * 2. Chấm điểm đơn giản: rating (50%) + tốc độ giao (30%) + kinh nghiệm (20%)
-   * BE port y nguyên logic này sang Spring Boot service.
-   */
-  async matchWorkshops({ designId }) {
-    await delay(700);
-    const design = memoryDb.designs.get(designId);
-    const { productType = 'table', dimensions = { width: 120 }, materialId = 'oak' } = design ?? {};
-
-    const matches = WORKSHOPS
-      .filter(
-        (w) =>
-          w.capability.types.includes(productType) &&
-          w.capability.maxWidthCm >= dimensions.width &&
-          w.capability.materials.includes(materialId)
-      )
-      .map((w) => ({
-        ...w,
-        score: Math.round(
-          (w.rating / 5) * 50 + (1 - Math.min(w.leadTimeDays, 30) / 30) * 30 + Math.min(w.completedJobs / 150, 1) * 20
-        ),
-      }))
-      .sort((a, b) => b.score - a.score);
-
-    return { designId, matches };
   },
 
   /*

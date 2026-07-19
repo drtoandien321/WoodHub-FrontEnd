@@ -179,7 +179,6 @@
     "completedJobs": "{{count}} jobs completed",
     "leadTime": "{{days}} days/order",
     "materialBadge": "{{material}} wood",
-    "cta": "Start custom design",
     "viewProfile": "View profile",
     "completedLabel": "Completed orders",
     "leadTimeLabel": "Production time",
@@ -206,7 +205,6 @@
       { "id": "hcm", "label": "HCMC" }
     ],
     "breadcrumbHome": "Home",
-    "orderCustom": "Start custom design",
     "contactConsult": "Contact for advice",
     "saveSupplier": "Save workshop",
     "saved": "Saved",
@@ -234,9 +232,6 @@
     "specialtyTags": "Specialties",
     "woodTags": "Supported wood",
     "contactTitle": "Contact",
-    "bottomCtaTitle": "Ready to start your custom furniture project?",
-    "bottomCtaDesc": "Send a request for free consultation and a detailed quote from {{name}}.",
-    "bottomCtaBtn": "Send request now",
     "notFoundTitle": "Workshop not found",
     "notFoundBack": "Back to workshop list",
     "workflow": [
@@ -499,7 +494,6 @@
     "selectTitle": "What would you like to design?",
     "selectDesc": "Pick a product type to open the 3D configurator — adjust dimensions, material and color to your liking.",
     "selectBadges": ["Real-time 3D config", "View AR at home", "Auto workshop match"],
-    "startHint": "Start",
     "arTitle": "Preview in 3D & AR right at home",
     "arDesc": "Customize size, material and color on a real-time 3D model — then place the product in your own room with AR before you order.",
     "arPoints": ["3D model updates instantly with every parameter", "Rotate and zoom to inspect every angle", "Place it in your real space with your phone camera"],
@@ -521,8 +515,6 @@
       "entryTitle": "Design from a 3D template or your photo",
       "entryDesc": "Pick a ready-made 3D template or upload a photo for AI to rebuild — view in 3D and try it with AR right on your phone.",
       "entryCta": "Explore 3D templates",
-      "altEntryTitle": "Or customize by dimensions",
-      "altEntryDesc": "Start from a basic product type and adjust size, material and color on a real-time 3D model.",
       "galleryTitle": "3D templates & design from photo",
       "gallerySubtitle": "Pick a ready-made 3D template, or upload a photo for AI to rebuild into a 3D model you can view and try with AR.",
       "uploadTitle": "Upload your photo",
@@ -562,47 +554,11 @@
       }
     },
     "dimensions": "Dimensions (cm)",
-    "dimensionWidth": "Width",
-    "dimensionHeight": "Height",
-    "dimensionDepth": "Depth",
-    "material": "Wood Material",
-    "finish": "Finish Color",
-    "estimatedPrice": "Estimated Price",
-    "estimatedPriceNote": "Final price will be confirmed by the workshop when quoting.",
-    "estimatedTime": "Estimated Time",
-    "estimatedTimeUnit": "{{days}} days",
-    "saveDesign": "Save & add to cart",
-    "saveDesignShort": "Save design",
-    "findWorkshop": "Find a workshop",
-    "requestQuote": "Request a quote",
-    "referenceSource": "Reference source",
-    "uploadImage": "Upload image",
-    "chooseExisting": "Choose existing",
-    "chooseExistingTitle": "Choose a reference image",
-    "removeReference": "Remove reference image",
-    "toolRotate": "Rotate",
-    "toolZoom": "Zoom in",
-    "toolReset": "Reset view",
-    "savedToast": "Design saved & added to cart ✓",
-    "goToCart": "View cart",
-    "customPrefix": "Custom design",
-    "types": {
-      "table": { "name": "Table", "desc": "Dining tables, desks, coffee tables" },
-      "cabinet": { "name": "Cabinet", "desc": "Wardrobes, kitchen cabinets, display cabinets" },
-      "shelf": { "name": "Shelf", "desc": "Bookshelves, decorative shelves, wall shelves" },
-      "chair": { "name": "Chair", "desc": "Dining chairs, office chairs, benches" }
-    },
     "materials": {
       "oak": "Oak",
       "walnut": "Walnut",
       "ash": "Ash",
       "pine": "Pine"
-    },
-    "finishes": {
-      "natural": "Natural (oiled)",
-      "dark": "Dark brown",
-      "white": "Milky white",
-      "black": "Matte black"
     },
     "studio": {
       "title": "Custom Studio",
@@ -694,18 +650,6 @@
         "notEditable": "Not customizable yet"
       }
     }
-  },
-  "workshopMatch": {
-    "title": "Workshops matching your design",
-    "subtitle": "Filtered by production capability (product type, max size, material) and ranked by rating, speed and experience.",
-    "bestMatch": "Best match",
-    "workshopInfo": "{{district}} · ★ {{rating}} · {{jobs}} completed jobs · ships in ~{{days}} days",
-    "requestQuote": "Request quote",
-    "requestQuoteDisabledHint": "This flow isn't connected to the new quote system yet — use Custom Studio → My designs to request a quote.",
-    "emptyTitle": "No matching workshops found",
-    "emptyHint": "Try reducing the size or changing the material in your design.",
-    "editDesign": "Edit design",
-    "designOther": "← Design another product"
   },
   "quote": {
     "requestTitle": "Request a quote",

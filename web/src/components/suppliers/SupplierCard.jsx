@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LogoBadge from './LogoBadge.jsx';
 import { Heart, Mail, Phone } from './icons.jsx';
@@ -14,7 +14,6 @@ import { Heart, Mail, Phone } from './icons.jsx';
  */
 export default function SupplierCard({ supplier, fav = false, onToggleFav }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   return (
     <article className="supplier-card group flex flex-col gap-3 rounded-[22px] border border-base-300 bg-base-100 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(76,52,36,0.12)]">
@@ -50,16 +49,10 @@ export default function SupplierCard({ supplier, fav = false, onToggleFav }) {
         </div>
       )}
 
-      <div className="mt-1 grid grid-cols-2 gap-2">
-        <Link to={`/suppliers/${supplier.id}`} className="btn btn-outline btn-sm border-base-300 hover:border-primary hover:bg-primary/10">
+      <div className="mt-1">
+        <Link to={`/suppliers/${supplier.id}`} className="btn btn-outline btn-sm w-full border-base-300 hover:border-primary hover:bg-primary/10">
           {t('suppliers.viewProfile')}
         </Link>
-        <button
-          onClick={() => navigate(`/custom/configure/table?supplierId=${supplier.id}`)}
-          className="btn btn-primary btn-sm"
-        >
-          {t('suppliers.cta')}
-        </button>
       </div>
     </article>
   );
