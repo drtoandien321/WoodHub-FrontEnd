@@ -272,3 +272,8 @@ Lỗi: 401 chưa đăng nhập · 403 không phải admin · 400 sai định d�
 
 Passthrough từ AI, FE đọc phòng thủ (field có thể thiếu): `id, name, price (số VND), category, material|null, image_url, reasons[]`, có thể thêm `colors, dimensions, seats`. Dùng `id` để link `/product/:id`.
 Cold start (Render free) có thể chậm vài chục giây hoặc 502 → FE hiện lời nhắn chờ + nút "Thử lại". Câu "Bạn cần đăng nhập…" là nội dung AI trả với HTTP 200, không phải lỗi auth.
+
+## AI Chat — xem lại lịch sử (FE đã dùng)
+
+- `GET /api/ai-chat/sessions` → `AiChatSessionResponse[]` (mới cập nhật trước). FE hiển thị ở màn "Lịch sử trò chuyện" trong khung chat; phiên chưa có `title` (chưa có tin nhắn) bị ẩn, trừ phiên đang mở.
+- `GET /api/ai-chat/sessions/{id}/messages` → chỉ chủ phiên (403 nếu không phải chủ). FE lưu `sessionOwnerId` cùng `sessionId` và tự bỏ phiên khi đổi tài khoản/đăng xuất.

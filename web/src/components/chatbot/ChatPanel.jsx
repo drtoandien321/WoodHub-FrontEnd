@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useChatStore } from '../../stores/chatStore.js';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useLocationStore } from '../../stores/locationStore.js';
-import { useAiChatMessages, useCreateAiChatSession, useSendAiChatMessage } from '../../hooks/useAiChat.js';
-import { formatVnd } from '../../utils/format.js';
+import { useAiChatMessages, useCreateAiChatSession, useMyAiChatSessions, useSendAiChatMessage } from '../../hooks/useAiChat.js';
+import { formatVnd, formatDate } from '../../utils/format.js';
 
 /* Icon inline (không thêm thư viện) */
 const SendIcon = (p) => (
@@ -18,6 +19,12 @@ const CloseIcon = (p) => (
 const BotIcon = (p) => (
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="3" y="8" width="18" height="12" rx="3" /><path d="M12 8V4M8 3h8M8.5 13h.01M15.5 13h.01" /></svg>
 );
+const HistoryIcon = (p) => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2" /></svg>
+);
+const BackIcon = (p) => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M15 18l-6-6 6-6" /></svg>
+);
 const NewChatIcon = (p) => (
   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M12 5v14M5 12h14" /></svg>
 );
@@ -27,6 +34,8 @@ const chatErrorKey = (error) => {
   const status = error?.response?.status;
   if (status === 429) return 'chatbot.errors.quota';
   if (status === 502) return 'chatbot.errors.aiDown';
+  if (!status && (error?.code === 'ECONNABORTED' || error?.code === 'ERR_NETWORK')) return 'chatbot.errors.timeout'; // không có response: quá thời gian / mất mạng
+  if (status === 401 || status === 403) return 'chatbot.errors.auth';
   return 'chatbot.errors.generic';
 };
 
@@ -73,13 +82,17 @@ export default function ChatPanel() {
   const close = useChatStore((s) => s.close);
   const sessionId = useChatStore((s) => s.sessionId);
   const setSessionId = useChatStore((s) => s.setSessionId);
+  const sessionOwnerId = useChatStore((s) => s.sessionOwnerId);
+  const queryClient = useQueryClient();
   const resetSession = useChatStore((s) => s.resetSession);
   const user = useAuthStore((s) => s.user);
   const coords = useLocationStore((s) => s.coords);
 
-  const { data: history, isLoading: historyLoading } = useAiChatMessages(sessionId);
+  const { data: history, isLoading: historyLoading, isError: historyError, refetch: refetchHistory } = useAiChatMessages(sessionId);
   const createSession = useCreateAiChatSession();
   const sendMessage = useSendAiChatMessage();
+  const [view, setView] = useState('chat'); // 'chat' | 'history' — màn hình danh sách các phiên cũ
+  const sessionsQuery = useMyAiChatSessions(isOpen && view === 'history');
 
   const [input, setInput] = useState('');
   const [slow, setSlow] = useState(false); // chờ AI quá lâu (cold start) → hiện lời nhắn trấn an
@@ -87,13 +100,28 @@ export default function ChatPanel() {
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
 
+  // Đổi tài khoản / đăng xuất → bỏ phiên của người trước + xoá cache lịch sử chat, tránh lộ/dùng nhầm phiên.
+  // Phiên cũ không có sessionOwnerId (lưu trước bản sửa này) cũng bị coi là không thuộc user hiện tại.
+  useEffect(() => {
+    if (sessionId && sessionOwnerId !== (user?.id ?? null)) {
+      resetSession();
+      sendMessage.reset();
+      setPendingText(null);
+      setInput('');
+      setView('chat');
+      queryClient.removeQueries({ queryKey: ['aiChatMessages'] });
+      queryClient.removeQueries({ queryKey: ['aiChatSessions'] });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, sessionId, sessionOwnerId]);
+
   // Đã đăng nhập mà chưa có session → tự tạo 1 phiên (lazy, giống mở tab chat lần đầu).
   // ⚠️ Component giờ LUÔN mount (FE-7: AnimatePresence cần vậy để có exit animation) — PHẢI
   // gate thêm `isOpen`, nếu không session sẽ bị tạo ngay lúc app load cho mọi user đã đăng nhập,
   // kể cả khi họ chưa từng mở khung chat.
   useEffect(() => {
     if (isOpen && user && !sessionId && !createSession.isPending) {
-      createSession.mutate(undefined, { onSuccess: (s) => setSessionId(s.id) });
+      createSession.mutate(undefined, { onSuccess: (s) => setSessionId(s.id, user.id) });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, user, sessionId]);
@@ -154,13 +182,37 @@ export default function ChatPanel() {
     }
   };
 
-  const newConversation = () => {
-    resetSession();
+  // Dọn mọi trạng thái của cuộc trò chuyện đang mở (lỗi gửi, tin chờ, ô nhập) — dùng khi đổi/tạo phiên.
+  // Trước đây "Cuộc trò chuyện mới" không reset sendMessage nên thông báo lỗi cũ còn dính sang phiên mới.
+  const clearConversationState = () => {
+    sendMessage.reset();
     setInput('');
     setPendingText(null);
+    setView('chat');
+  };
+
+  const newConversation = () => {
+    resetSession();
+    clearConversationState();
+  };
+
+  // Mở lại 1 phiên cũ: chỉ cần trỏ sessionId — lịch sử tự tải qua useAiChatMessages
+  const openSession = (id) => {
+    if (id !== sessionId) {
+      setSessionId(id, user.id);
+      clearConversationState();
+    } else {
+      setView('chat');
+    }
   };
 
   const messages = history ?? [];
+  // Sau lỗi (timeout/502) BE có thể đã lưu tin → refetch đưa tin vào lịch sử; ẩn bong bóng chờ để không bị lặp
+  const lastMsg = messages[messages.length - 1];
+  const pendingAlreadySaved = !!pendingText && lastMsg?.role === 'user' && lastMsg.content === pendingText;
+  const showHistory = view === 'history' && !!user;
+  // Phiên chưa có tin nhắn thì chưa có tiêu đề (BE tự đặt từ tin đầu) → ẩn khỏi danh sách cho đỡ rối, trừ phiên đang mở
+  const savedSessions = (sessionsQuery.data ?? []).filter((s) => s.title || s.id === sessionId);
   const busy = sendMessage.isPending || createSession.isPending;
 
   return (
@@ -185,6 +237,11 @@ export default function ChatPanel() {
           <p className="text-xs opacity-80 leading-tight">{t('chatbot.subtitle')}</p>
         </div>
         {user && (
+          <button onClick={() => setView((v) => (v === 'history' ? 'chat' : 'history'))} aria-label={t(showHistory ? 'chatbot.backToChat' : 'chatbot.history')} title={t(showHistory ? 'chatbot.backToChat' : 'chatbot.history')} className="p-1.5 rounded-lg hover:bg-primary-content/15 transition-colors">
+            {showHistory ? <BackIcon /> : <HistoryIcon />}
+          </button>
+        )}
+        {user && (
           <button onClick={newConversation} aria-label={t('chatbot.newConversation')} title={t('chatbot.newConversation')} className="p-1.5 rounded-lg hover:bg-primary-content/15 transition-colors">
             <NewChatIcon />
           </button>
@@ -194,10 +251,44 @@ export default function ChatPanel() {
         </button>
       </div>
 
-      {/* Khu vực tin nhắn */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3">
+      {/* Danh sách các cuộc trò chuyện cũ (GET /ai-chat/sessions) */}
+      {showHistory && (
+        <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
+          <p className="text-xs font-medium text-base-content/55">{t('chatbot.historyTitle')}</p>
+          {sessionsQuery.isLoading && <p className="text-sm text-base-content/50 py-6 text-center">{t('chatbot.loading')}</p>}
+          {sessionsQuery.isError && (
+            <div className="flex flex-col gap-1.5 rounded-2xl bg-error/10 px-3 py-2 text-sm text-error">
+              <span>{t('chatbot.errors.sessions')}</span>
+              <button onClick={() => sessionsQuery.refetch()} className="self-start text-xs font-medium underline">{t('chatbot.retry')}</button>
+            </div>
+          )}
+          {sessionsQuery.isSuccess && !savedSessions.length && (
+            <p className="text-sm text-base-content/50 py-6 text-center">{t('chatbot.historyEmpty')}</p>
+          )}
+          {savedSessions.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => openSession(s.id)}
+              className={`text-left rounded-xl border px-3 py-2 transition-colors hover:border-primary ${s.id === sessionId ? 'border-primary bg-primary/5' : 'border-base-300 bg-base-100'}`}
+            >
+              <p className="text-sm font-medium line-clamp-2">{s.title || t('chatbot.untitled')}</p>
+              <p className="text-xs text-base-content/50 mt-0.5">{formatDate(s.updatedAt ?? s.createdAt)}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Khu vực tin nhắn (ẩn bằng class khi đang xem danh sách — giữ nguyên vị trí cuộn của cuộc trò chuyện) */}
+      <div ref={scrollRef} className={`flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3 ${showHistory ? 'hidden' : ''}`}>
+        {historyError && (
+          <div className="self-start max-w-[90%] flex flex-col gap-1.5 rounded-2xl rounded-bl-sm bg-error/10 px-3 py-2 text-sm text-error">
+            <span>{t('chatbot.errors.history')}</span>
+            <button onClick={() => refetchHistory()} className="self-start text-xs font-medium underline">{t('chatbot.retry')}</button>
+          </div>
+        )}
+
         {/* Lời chào — hiện khi lịch sử đã tải xong và rỗng (KHÔNG phải tin nhắn thật, chỉ trang trí) */}
-        {!historyLoading && messages.length === 0 && (
+        {!historyLoading && !historyError && messages.length === 0 && (
           <div className="self-start max-w-[90%] bg-base-200 text-base-content rounded-2xl rounded-bl-sm px-3 py-2 text-sm">
             {t('chatbot.replies.greeting')}
           </div>
@@ -223,7 +314,7 @@ export default function ChatPanel() {
         )}
 
         {/* Tin nhắn user vừa gửi — hiện ngay (optimistic), chưa có trong lịch sử tới khi server trả lời xong */}
-        {pendingText && (
+        {pendingText && !pendingAlreadySaved && (
           <div className="self-end max-w-[85%] bg-primary text-primary-content rounded-2xl rounded-br-sm px-3 py-2 text-sm whitespace-pre-wrap break-words opacity-80">
             {pendingText}
           </div>

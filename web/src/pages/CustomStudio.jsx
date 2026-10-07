@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
 import { useGenerate3D, useGenTask, useRetryGenTask, useCancelGenTask, useModel3d } from '../hooks/useModels3d.js';
@@ -21,11 +21,35 @@ import Step6Save from '../components/custom-studio/Step6Save.jsx';
 export default function CustomStudio() {
   const { t } = useTranslation();
   const s = useCustomStudioStore();
+  const location = useLocation();
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
+  /*
+   * Wizard persist vào localStorage (step/taskId/selectedTemplateSlug...) để resume sau F5. Nhưng nếu
+   * mở /custom/studio từ nút "Thiết kế" thông thường mà còn tiến trình cũ, các hook resume bên dưới
+   * (useGenTask/useModel3d → setGeneratedModel ép step = 4) sẽ nhảy thẳng sang bước 4 dù user chưa làm
+   * bước 1. Vì vậy quyết định "tiếp tục hay bắt đầu mới" TRƯỚC khi cho các hook đó chạy:
+   *   - state.fresh  (nút "Thiết kế mới")        → reset ngay, bắt đầu từ bước 1
+   *   - state.keep   (chọn mẫu từ thư viện)      → giữ nguyên, đúng ý user vừa chọn
+   *   - không có cờ + có tiến trình dở           → hỏi user (hiện thẻ "Tiếp tục / Bắt đầu mới")
+   *   - không có tiến trình                      → vào bước 1 như bình thường
+   * Quyết định khởi tạo 1 lần khi mount (useState lazy) — không đổi khi store thay đổi sau đó.
+   */
+  const hasProgress = s.step > 1 || !!s.taskId || !!s.selectedTemplateSlug;
+  const [decision, setDecision] = useState(() => {
+    if (location.state?.fresh) return 'new';
+    if (location.state?.keep || !hasProgress) return 'continue';
+    return 'ask';
+  });
+  useEffect(() => {
+    if (decision === 'new') s.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const resumeAllowed = decision === 'continue';
+
   const generate = useGenerate3D();
-  const { data: task, error: taskError } = useGenTask(s.taskId);
+  const { data: task, error: taskError } = useGenTask(resumeAllowed ? s.taskId : null);
   const retry = useRetryGenTask();
   const cancel = useCancelGenTask();
   const createDesign = useCreateDesign();
@@ -33,7 +57,7 @@ export default function CustomStudio() {
 
   // Slug cần fetch model đầy đủ (có editableOptions cho bước 5): vừa generate xong HOẶC đang resume
   // sau khi rời trang/reload (task đã succeeded từ trước, hoặc đã chọn mẫu nhưng chưa kịp lưu model).
-  const resumeSlug = s.model ? null : (task?.status === 'succeeded' ? task.modelSlug : s.source === 'template' ? s.selectedTemplateSlug : null);
+  const resumeSlug = !resumeAllowed || s.model ? null : (task?.status === 'succeeded' ? task.modelSlug : s.source === 'template' ? s.selectedTemplateSlug : null);
   const { data: resumedModel } = useModel3d(resumeSlug);
 
   useEffect(() => {
@@ -99,6 +123,26 @@ export default function CustomStudio() {
    */
   const hasModelForStep = s.step < 4 || !!s.model;
   const canResume = !!s.taskId || !!s.selectedTemplateSlug;
+
+  // 'new' vừa reset xong (effect trên) → chuyển sang 'continue' để wizard chạy bình thường từ bước 1
+  useEffect(() => {
+    if (decision === 'new') setDecision('continue');
+  }, [decision]);
+
+  if (decision === 'ask') {
+    return (
+      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
+        <h1 className="font-display text-2xl">{t('custom.studio.resume.title')}</h1>
+        <p className="text-sm text-base-content/65">
+          {t('custom.studio.resume.desc', { step: s.step, label: t(`custom.studio.stepLabels.${s.step}`) })}
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <button onClick={() => setDecision('continue')} className="btn btn-primary btn-sm">{t('custom.studio.resume.continue')}</button>
+          <button onClick={() => { s.reset(); setDecision('continue'); }} className="btn btn-outline btn-sm">{t('custom.studio.resume.startNew')}</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

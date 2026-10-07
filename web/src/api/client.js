@@ -122,6 +122,9 @@ const toAuthResult = (data) => ({
 // timeout dài (60s) vì Render free-tier "ngủ" khi không có request — lần gọi đầu sau khi ngủ
 // có thể mất 30-60s để container khởi động lại. 10s cũ quá ngắn, khiến request bị coi là lỗi
 // kết nối dù BE chỉ đang khởi động (không phải bug — user vẫn phải đợi, chỉ là không báo lỗi sai).
+// Gửi tin AI: BE phải đánh thức thêm service Python AI (cũng Render free) nên có thể > 60s lúc cold start
+const AI_CHAT_TIMEOUT_MS = 150_000;
+
 export const http = axios.create({ baseURL: BASE_URL, timeout: 60_000 });
 
 /*
@@ -743,7 +746,7 @@ export const api = {
    * (CHỈ trả tin nhắn trả lời của assistant, KHÔNG trả lại tin của user — FE tự hiện optimistic
    * rồi refetch lịch sử để đồng bộ). Trừ 1 lượt `ai_chat` — hết → 429. AI lỗi/timeout → 502.
    */
-  sendAiChatMessage: ({ sessionId, ...body }) => call(() => http.post(`/ai-chat/sessions/${sessionId}/messages`, body), 'sendAiChatMessage', { sessionId, ...body }),
+  sendAiChatMessage: ({ sessionId, ...body }) => call(() => http.post(`/ai-chat/sessions/${sessionId}/messages`, body, { timeout: AI_CHAT_TIMEOUT_MS }), 'sendAiChatMessage', { sessionId, ...body }),
 
   // ===== CONTACT =====
   // POST /contact  body: { name, email, subject, message }

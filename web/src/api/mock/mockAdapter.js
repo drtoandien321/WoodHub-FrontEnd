@@ -1327,7 +1327,10 @@ export const mockAdapter = {
 
   async getAiChatMessages(sessionId) {
     await delay(200);
-    if (!memoryDb.aiChatSessions.has(sessionId)) throw Object.assign(new Error('SESSION_NOT_FOUND'), { response: { status: 404 } });
+    const session = memoryDb.aiChatSessions.get(sessionId);
+    if (!session) throw Object.assign(new Error('SESSION_NOT_FOUND'), { response: { status: 404 } });
+    // Giống BE thật: chỉ chủ phiên mới xem được lịch sử (403 nếu không phải chủ)
+    if (session.userId !== (useAuthStore.getState().user?.id ?? 'mock-user')) throw Object.assign(new Error('FORBIDDEN'), { response: { status: 403 } });
     return memoryDb.aiChatMessages.get(sessionId) ?? [];
   },
 
@@ -1335,6 +1338,7 @@ export const mockAdapter = {
     await delay(500);
     const session = memoryDb.aiChatSessions.get(sessionId);
     if (!session) throw Object.assign(new Error('SESSION_NOT_FOUND'), { response: { status: 404 } });
+    if (session.userId !== (useAuthStore.getState().user?.id ?? 'mock-user')) throw Object.assign(new Error('FORBIDDEN'), { response: { status: 403 } });
     const list = memoryDb.aiChatMessages.get(sessionId) ?? [];
 
     const userMsg = { id: nextId('chatmsg'), role: 'user', content, extractedParams: {}, suggestedProducts: [], createdAt: new Date().toISOString() };
@@ -1348,12 +1352,10 @@ export const mockAdapter = {
     persistAiChatMessages();
 
     // Tự đặt tên phiên từ tin nhắn đầu (giống hành vi thật — CreateAiChatSessionRequest.title "bỏ trống → tự đặt tên từ tin nhắn đầu tiên")
-    if (!session.title) {
-      session.title = content.slice(0, 60);
-      session.updatedAt = assistantMsg.createdAt;
-      memoryDb.aiChatSessions.set(sessionId, session);
-      persistAiChatSessions();
-    }
+    if (!session.title) session.title = content.slice(0, 60);
+    session.updatedAt = assistantMsg.createdAt; // phiên vừa có tin mới → lên đầu danh sách lịch sử
+    memoryDb.aiChatSessions.set(sessionId, session);
+    persistAiChatSessions();
     return assistantMsg;
   },
 

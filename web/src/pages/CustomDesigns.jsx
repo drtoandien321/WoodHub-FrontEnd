@@ -12,7 +12,7 @@ export default function CustomDesigns() {
           <Link to="/custom" className="text-sm text-base-content/55 hover:text-primary">← {t('nav.custom')}</Link>
           <h1 className="mt-1 font-display text-3xl">{t('custom.studio.designs.title')}</h1>
         </div>
-        <Link to="/custom/studio" className="btn btn-primary btn-sm">{t('custom.studio.step6.newDesign')}</Link>
+        <Link to="/custom/studio" state={{ fresh: true }} className="btn btn-primary btn-sm">{t('custom.studio.step6.newDesign')}</Link>
       </div>
       <MyDesignsList />
     </div>

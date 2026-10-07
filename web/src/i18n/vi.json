@@ -566,6 +566,7 @@
       "back": "Quay lại",
       "stepIndicatorLabel": "Các bước thiết kế",
       "resumeError": "Không tìm thấy dữ liệu thiết kế đang dở. Vui lòng bắt đầu lại.",
+      "resume": { "title": "Bạn có thiết kế đang làm dở", "desc": "Lần trước bạn dừng ở bước {{step}} — {{label}}. Bạn muốn tiếp tục hay bắt đầu thiết kế mới?", "continue": "Tiếp tục thiết kế dở", "startNew": "Bắt đầu thiết kế mới" },
       "stepLabels": { "1": "Nguồn", "2": "Chuẩn bị ảnh", "3": "Dựng 3D", "4": "Kết quả", "5": "Chỉnh sửa", "6": "Lưu" },
       "step1": {
         "title": "Bắt đầu từ đâu?",
@@ -741,12 +742,22 @@
     "close": "Đóng",
     "newConversation": "Cuộc trò chuyện mới",
     "coldStart": "AI đang khởi động, có thể mất vài chục giây. Bạn đợi chút nhé…",
+    "history": "Lịch sử trò chuyện",
+    "backToChat": "Quay lại cuộc trò chuyện",
+    "historyTitle": "Các cuộc trò chuyện gần đây",
+    "historyEmpty": "Bạn chưa có cuộc trò chuyện nào.",
+    "untitled": "Cuộc trò chuyện chưa đặt tên",
+    "loading": "Đang tải…",
     "loginRequired": "Đăng nhập để trò chuyện với trợ lý AI.",
     "login": "Đăng nhập",
     "retry": "Thử lại",
     "errors": {
       "quota": "Bạn đã dùng hết lượt chat AI trong tháng này. Nâng cấp gói để tiếp tục.",
       "aiDown": "Trợ lý AI đang bận hoặc không phản hồi. Vui lòng thử lại sau.",
+      "timeout": "AI phản hồi quá lâu hoặc mất kết nối. Hãy thử lại — lần đầu AI có thể cần vài chục giây để khởi động.",
+      "auth": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+      "history": "Không tải được lịch sử trò chuyện.",
+      "sessions": "Không tải được danh sách cuộc trò chuyện.",
       "generic": "Có lỗi xảy ra, vui lòng thử lại."
     },
     "replies": {

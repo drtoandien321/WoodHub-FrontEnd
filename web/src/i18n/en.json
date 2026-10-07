@@ -566,6 +566,7 @@
       "back": "Back",
       "stepIndicatorLabel": "Design steps",
       "resumeError": "Couldn't find your in-progress design. Please start over.",
+      "resume": { "title": "You have a design in progress", "desc": "You stopped at step {{step}} — {{label}}. Continue it or start a new design?", "continue": "Continue previous design", "startNew": "Start a new design" },
       "stepLabels": { "1": "Source", "2": "Prepare photo", "3": "Build 3D", "4": "Result", "5": "Edit", "6": "Save" },
       "step1": {
         "title": "Where do you want to start?",
@@ -741,12 +742,22 @@
     "close": "Close",
     "newConversation": "New conversation",
     "coldStart": "The AI is warming up, this may take up to a minute. Please wait…",
+    "history": "Chat history",
+    "backToChat": "Back to chat",
+    "historyTitle": "Recent conversations",
+    "historyEmpty": "You have no conversations yet.",
+    "untitled": "Untitled conversation",
+    "loading": "Loading…",
     "loginRequired": "Log in to chat with the AI assistant.",
     "login": "Log in",
     "retry": "Retry",
     "errors": {
       "quota": "You've used up your AI chat quota this month. Upgrade your plan to continue.",
       "aiDown": "The AI assistant is busy or not responding. Please try again later.",
+      "timeout": "The AI took too long or the connection dropped. Please retry — the first call may need a minute to warm up.",
+      "auth": "Your session has expired. Please sign in again.",
+      "history": "Could not load the chat history.",
+      "sessions": "Could not load your conversations.",
       "generic": "Something went wrong. Please try again."
     },
     "replies": {

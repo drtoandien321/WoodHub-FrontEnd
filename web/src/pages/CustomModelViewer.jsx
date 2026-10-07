@@ -22,7 +22,7 @@ export default function CustomModelViewer() {
   const [color, setColor] = useState(null); // null = giữ texture gốc (Mặc định)
   const [scale, setScale] = useState(1);
 
-  const customizeThis = () => { chooseTemplate(model); navigate('/custom/studio'); };
+  const customizeThis = () => { chooseTemplate(model); navigate('/custom/studio', { state: { keep: true } }); };
 
   if (isLoading) {
     return (

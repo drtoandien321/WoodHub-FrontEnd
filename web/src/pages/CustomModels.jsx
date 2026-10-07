@@ -68,7 +68,7 @@ export default function CustomModels() {
   // trang xem nhanh /custom/models/:slug (đó là lối vào KHÔNG cần đăng nhập, xem CustomModelViewer.jsx)
   const pickTemplate = (model) => {
     chooseTemplate(model);
-    navigate('/custom/studio');
+    navigate('/custom/studio', { state: { keep: true } }); // giữ mẫu vừa chọn, không hỏi lại
   };
 
   return (
