@@ -67,6 +67,8 @@ const REAL_ENDPOINTS = new Set([
   'getAdminSuppliers', 'getAdminSupplierDetail', 'createSupplier', 'updateSupplierStatus',
   // Module Admin — User quản trị (Portal Quản trị /admin/users)
   'getAdminUsers', 'getAdminUserDetail', 'deleteUser',
+  // Module Admin — quản lý thanh toán (Portal Quản trị /admin/payments) — API chỉ đọc
+  'getAdminPayments', 'getAdminPayment', 'getAdminPaymentStats',
   // Module GPS/Vị trí — hồ sơ supplier tự thân (biết type để gate UI)
   'getSupplierMe',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
@@ -696,6 +698,18 @@ export const api = {
   // GET /usage/me → UsageStatusResponse[] — hạn mức mọi tính năng trong THÁNG NÀY
   getMyUsage: () => call(() => http.get('/usage/me'), 'getMyUsage'),
 
+  /*
+   * ===== PAYMENTS (quản trị — Portal Quản trị /admin/payments) — CHỈ ADMIN, CHỈ ĐỌC =====
+   * from/to: ISO-8601 CÓ HẬU TỐ 'Z' (xem utils/dateRange.js) — tránh dấu '+' của offset bị query
+   * hiểu thành dấu cách → 400. Doanh thu tính theo paidAt, các *Count theo createdAt.
+   */
+  // GET /admin/payments?status=&purpose=&from=&to=&q=&page=&size=&sort= → Spring Page<AdminPaymentResponse>
+  getAdminPayments: (params) => call(() => http.get('/admin/payments', { params }), 'getAdminPayments', params),
+  // GET /admin/payments/{id} → AdminPaymentResponse (404 nếu không có)
+  getAdminPayment: (id) => call(() => http.get(`/admin/payments/${id}`), 'getAdminPayment', id),
+  // GET /admin/payments/stats?from=&to= → PaymentStatsResponse { totalRevenue, totalCount, paidCount, ..., dailyRevenue[] }
+  getAdminPaymentStats: (params) => call(() => http.get('/admin/payments/stats', { params }), 'getAdminPaymentStats', params),
+
   // ===== SUBSCRIPTION PLANS — quản trị (chỉ admin) =====
   // GET /subscription-plans/all → CẢ gói đã tắt (khác GET /subscription-plans công khai)
   getAllSubscriptionPlans: () => call(() => http.get('/subscription-plans/all'), 'getAllSubscriptionPlans'),
@@ -712,10 +726,11 @@ export const api = {
    * đã test thật qua UI (gửi "Tôi muốn tìm bàn ăn gỗ sồi"): POST trả 200 với reply + gợi ý sản
    * phẩm đúng (không còn lỗi kết nối service Python AI phía sau). UI vẫn giữ nguyên xử lý 502/429
    * (xem chatErrorKey trong ChatPanel.jsx) vì AI provider vẫn có thể timeout/bận lúc khác.
-   * suggestedProducts trong AiChatMessageResponse — đã xác nhận field THẬT (curl UI 2026-07-20):
-   * [{ id, name, description, status, price }] — KHÔNG có productId/title/priceFrom/image như FE
-   * dự phòng trước đó (ProductSuggestion trong ChatPanel.jsx vẫn giữ các fallback đó phòng khi AI
-   * trả biến thể sản phẩm khác thiếu ảnh, nhưng field chính đã biết chắc là id/name/price).
+   * suggestedProducts trong AiChatMessageResponse — BE đã migrate sang AgentResponse JSON
+   * (admin-payment-ai-chat-fe.md, B.5): passthrough field do AI trả, thường có
+   * { id, name, price (số VND), category, material|null, image_url, reasons[] }, có thể thêm
+   * colors/dimensions/seats. FE đọc PHÒNG THỦ (field có thể thiếu) — xem ProductSuggestion trong
+   * ChatPanel.jsx. Cold start (Render free) có thể chậm vài chục giây hoặc 502 → UI có "thử lại".
    */
   // POST /ai-chat/sessions  body: { title? } → AiChatSessionResponse (201)
   createAiChatSession: (body) => call(() => http.post('/ai-chat/sessions', body ?? {}), 'createAiChatSession', body),

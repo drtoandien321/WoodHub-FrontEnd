@@ -254,3 +254,21 @@ Design đã lưu. `404` nếu không có.
 2. `POST /auth/register`, `POST /auth/login` + JWT filter
 3. `POST /custom/designs`, `POST /custom/match`
 4. `POST /orders`, `GET /orders/:id`
+
+---
+
+## Admin — Quản lý thanh toán (chỉ admin, chỉ đọc)
+
+| Endpoint | Ghi chú |
+| --- | --- |
+| `GET /api/admin/payments` | Query: `status` (pending/paid/failed/expired), `purpose` (subscription/order), `from`, `to` (ISO-8601, **dùng hậu tố `Z`**, lọc theo `createdAt`), `q` (txnRef/email/tên), `page`, `size`, `sort`. Trả Spring Page **phẳng** (`content`, `totalElements`, `totalPages`, `number`, `size`…). |
+| `GET /api/admin/payments/{id}` | `AdminPaymentResponse`; 404 nếu không có. |
+| `GET /api/admin/payments/stats?from&to` | `{ totalRevenue, totalCount, paidCount, pendingCount, failedCount, expiredCount, dailyRevenue[{date,revenue,count}] }`. Doanh thu theo `paidAmount` + `paidAt`; các `*Count` theo `createdAt`. |
+
+`AdminPaymentResponse`: `id, purpose, provider, status, amount, paidAmount|null, txnRef, providerTxnId|null, expiresAt|null, paidAt|null, createdAt, userId, userEmail, userFullName, planId|null, planName|null`.
+Lỗi: 401 chưa đăng nhập · 403 không phải admin · 400 sai định dạng ngày.
+
+## AI Chat — shape `suggestedProducts` (đã đổi)
+
+Passthrough từ AI, FE đọc phòng thủ (field có thể thiếu): `id, name, price (số VND), category, material|null, image_url, reasons[]`, có thể thêm `colors, dimensions, seats`. Dùng `id` để link `/product/:id`.
+Cold start (Render free) có thể chậm vài chục giây hoặc 502 → FE hiện lời nhắn chờ + nút "Thử lại". Câu "Bạn cần đăng nhập…" là nội dung AI trả với HTTP 200, không phải lỗi auth.

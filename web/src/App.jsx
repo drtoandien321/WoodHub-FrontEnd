@@ -55,6 +55,7 @@ const AdminMaterials = lazy(() => import('./pages/admin/AdminMaterials.jsx'));
 const AdminSuppliers = lazy(() => import('./pages/admin/AdminSuppliers.jsx'));
 const AdminSupplierDetail = lazy(() => import('./pages/admin/AdminSupplierDetail.jsx'));
 const AdminSubscriptionPlans = lazy(() => import('./pages/admin/AdminSubscriptionPlans.jsx'));
+const AdminPayments = lazy(() => import('./pages/admin/AdminPayments.jsx'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers.jsx'));
 const AdminUserDetail = lazy(() => import('./pages/admin/AdminUserDetail.jsx'));
 // Portal Nhà cung cấp (manufacturer) — khu vực mới /portal/supplier/*
@@ -198,6 +199,7 @@ export default function App() {
             <Route path="suppliers" element={<AdminSuppliers />} />
             <Route path="suppliers/:id" element={<AdminSupplierDetail />} />
             <Route path="subscription-plans" element={<AdminSubscriptionPlans />} />
+            <Route path="payments" element={<AdminPayments />} />
           </Route>
         </Route>
       </Routes>

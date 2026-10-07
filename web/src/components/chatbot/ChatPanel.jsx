@@ -31,28 +31,37 @@ const chatErrorKey = (error) => {
 };
 
 /*
- * Thẻ sản phẩm gợi ý trong tin nhắn bot. `suggestedProducts` của BE thật đã xác nhận thật
- * (2026-07-20, test qua UI sau khi BE fix 502): [{id,name,description,status,price}] — không có
- * ảnh. Vẫn đọc thêm vài tên field khả dĩ (productId/title/priceFrom/image) để tương thích ngược
- * với mock (getAdvisorReply dùng {id,name,material,price,image}) và phòng AI trả biến thể khác.
+ * Thẻ sản phẩm gợi ý trong tin nhắn bot. BE đã migrate sang AgentResponse JSON (B.5 trong
+ * admin-payment-ai-chat-fe.md): field do AI trả, thường là { id, name, price (số), category,
+ * material|null, image_url, reasons[] } — passthrough nên field có thể THIẾU → đọc phòng thủ.
+ * Vẫn giữ vài tên field cũ (image/primaryImageUrl/imageUrl, productId/title/priceFrom) để tương
+ * thích tin nhắn cũ đã lưu trong lịch sử và mock.
  */
 function ProductSuggestion({ product, onNavigate }) {
   const id = product.id ?? product.productId;
   const name = product.name ?? product.title ?? '';
   const price = product.price ?? product.priceFrom ?? product.priceFromVnd;
-  const image = product.image ?? product.primaryImageUrl ?? product.imageUrl;
+  const image = product.image_url ?? product.image ?? product.primaryImageUrl ?? product.imageUrl;
+  const meta = [product.category, product.material].filter((v) => typeof v === 'string' && v).join(' · ');
+  const reasons = Array.isArray(product.reasons) ? product.reasons.filter((r) => typeof r === 'string' && r) : [];
   if (!id) return null;
 
   return (
     <Link
       to={`/product/${id}`}
       onClick={onNavigate}
-      className="flex items-center gap-3 p-2 rounded-xl border border-base-300 bg-base-100 hover:border-primary hover:shadow-sm transition-all"
+      className="flex items-start gap-3 p-2 rounded-xl border border-base-300 bg-base-100 hover:border-primary hover:shadow-sm transition-all"
     >
-      {image && <img src={image} alt={name} className="w-12 h-12 rounded-lg object-cover shrink-0" />}
+      {image && <img src={image} alt={name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium leading-snug line-clamp-2">{name}</p>
-        {price != null && <p className="text-xs text-primary font-semibold mt-0.5">{formatVnd(price)}</p>}
+        {meta && <p className="text-xs text-base-content/55 mt-0.5 truncate">{meta}</p>}
+        {typeof price === 'number' && <p className="text-xs text-primary font-semibold mt-0.5">{formatVnd(price)}</p>}
+        {reasons.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1.5">
+            {reasons.map((r) => <span key={r} className="badge badge-ghost badge-sm h-auto py-0.5 text-[11px] font-normal whitespace-normal text-left">{r}</span>)}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -73,6 +82,7 @@ export default function ChatPanel() {
   const sendMessage = useSendAiChatMessage();
 
   const [input, setInput] = useState('');
+  const [slow, setSlow] = useState(false); // chờ AI quá lâu (cold start) → hiện lời nhắn trấn an
   const [pendingText, setPendingText] = useState(null); // tin nhắn user vừa gửi — hiện optimistic trong lúc chờ assistant trả lời
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
@@ -100,6 +110,13 @@ export default function ChatPanel() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [history, pendingText, sendMessage.isPending]);
+
+  // Cold start: AI trên Render free có thể ngủ → sau ~8s vẫn chưa trả lời thì báo người dùng đợi
+  useEffect(() => {
+    if (!sendMessage.isPending) { setSlow(false); return; }
+    const id = setTimeout(() => setSlow(true), 8000);
+    return () => clearTimeout(id);
+  }, [sendMessage.isPending]);
 
   // Auto-resize ô nhập theo nội dung
   useEffect(() => {
@@ -218,6 +235,10 @@ export default function ChatPanel() {
             <span className="w-1.5 h-1.5 rounded-full bg-base-content/40 animate-bounce [animation-delay:-0.15s]" />
             <span className="w-1.5 h-1.5 rounded-full bg-base-content/40 animate-bounce" />
           </div>
+        )}
+
+        {sendMessage.isPending && slow && (
+          <p className="self-start max-w-[90%] text-xs text-base-content/55">{t('chatbot.coldStart')}</p>
         )}
 
         {sendMessage.isError && (

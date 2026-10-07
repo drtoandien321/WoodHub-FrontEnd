@@ -13,6 +13,59 @@ import { getAdvisorReply } from '../../services/chatbot/advisor.js';
 const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms)); // giả lập độ trễ mạng
 
 /*
+ * Dữ liệu thanh toán mock cho Portal Quản trị. Sinh tất định (theo chỉ số i) → lọc/phân trang ổn định.
+ * 60 giao dịch rải 45 ngày gần nhất, đúng shape AdminPaymentResponse.
+ */
+const MOCK_PAYMENTS = (() => {
+  const STATUSES = ['paid', 'paid', 'paid', 'pending', 'failed', 'expired'];
+  const USERS = [
+    ['Nguyễn Văn An', 'an.nguyen@example.com'], ['Trần Thị Bình', 'binh.tran@example.com'],
+    ['Lê Hoàng Cường', 'cuong.le@example.com'], ['Phạm Minh Dũng', 'dung.pham@example.com'],
+    ['Võ Thị Em', 'em.vo@example.com'],
+  ];
+  const PLANS = [['plan_basic', 'Gói Cơ bản', 99000], ['plan_pro', 'Gói Pro', 199000], ['plan_biz', 'Gói Doanh nghiệp', 499000]];
+  const DAY = 86_400_000;
+  const now = Date.now();
+  return Array.from({ length: 60 }, (_, i) => {
+    const status = STATUSES[i % STATUSES.length];
+    const [name, email] = USERS[i % USERS.length];
+    const [planId, planName, amount] = PLANS[i % PLANS.length];
+    const created = now - (i * 0.75 * DAY) - (i % 7) * 3_600_000;
+    const isSub = i % 4 !== 3;
+    return {
+      id: `pay-${String(i + 1).padStart(4, '0')}`,
+      purpose: isSub ? 'subscription' : 'order',
+      provider: 'sepay',
+      status,
+      amount,
+      paidAmount: status === 'paid' ? amount : null,
+      txnRef: `${isSub ? 'SUB' : 'ORD'}${(0xA1B2C3 + i * 7919).toString(16).toUpperCase().padStart(10, '0')}`,
+      providerTxnId: status === 'paid' ? `FT25${String(100000 + i * 37)}` : null,
+      expiresAt: new Date(created + 15 * 60_000).toISOString(),
+      paidAt: status === 'paid' ? new Date(created + 4 * 60_000).toISOString() : null,
+      createdAt: new Date(created).toISOString(),
+      userId: `user-${(i % USERS.length) + 1}`, userEmail: email, userFullName: name,
+      planId: isSub ? planId : null, planName: isSub ? planName : null,
+    };
+  });
+})();
+
+// Lọc theo createdAt (from/to) + status/purpose + q (txnRef/email/tên, không phân biệt hoa thường)
+const filterMockPayments = ({ status, purpose, from, to, q }) => {
+  const fromMs = from ? Date.parse(from) : -Infinity;
+  const toMs = to ? Date.parse(to) : Infinity;
+  const kw = q?.trim().toLowerCase();
+  return MOCK_PAYMENTS.filter((p) => {
+    const t = Date.parse(p.createdAt);
+    if (t < fromMs || t > toMs) return false;
+    if (status && p.status !== status) return false;
+    if (purpose && p.purpose !== purpose) return false;
+    if (kw && !`${p.txnRef} ${p.userEmail} ${p.userFullName}`.toLowerCase().includes(kw)) return false;
+    return true;
+  });
+};
+
+/*
  * ===== I18N CHO DỮ LIỆU SẢN PHẨM =====
  * BE thật sẽ trả chuỗi đã localize theo Accept-Language. Mock thì tự "dẹt" field song ngữ
  * { vi, en } về string theo ngôn ngữ đang chọn — UI chỉ nhận string, không phải xử lý gì.
@@ -1383,6 +1436,52 @@ export const mockAdapter = {
   async getNearbyStoresBySupplier() { await delay(300); return []; },
   async getNearestWorkshops() { await delay(300); return []; },
   async getWorkshopsWithinRadius() { await delay(300); return []; },
+
+  /*
+   * ===== PAYMENTS quản trị (Portal Quản trị /admin/payments) — trả đúng shape Spring Page phẳng =====
+   * Dữ liệu sinh 1 lần từ seed cố định (không random mỗi lần gọi) để lọc/phân trang ổn định.
+   */
+  async getAdminPayments({ status, purpose, from, to, q, page = 0, size = 20 } = {}) {
+    await delay(300);
+    const list = filterMockPayments({ status, purpose, from, to, q });
+    const total = list.length;
+    const content = list.slice(page * size, page * size + size);
+    const totalPages = Math.ceil(total / size);
+    return {
+      content, totalElements: total, totalPages, number: page, size,
+      first: page === 0, last: page >= totalPages - 1, numberOfElements: content.length, empty: !content.length,
+    };
+  },
+
+  async getAdminPayment(id) {
+    await delay(200);
+    const p = MOCK_PAYMENTS.find((x) => x.id === id);
+    if (!p) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    return p;
+  },
+
+  async getAdminPaymentStats({ from, to } = {}) {
+    await delay(300);
+    const list = filterMockPayments({ from, to });
+    // Doanh thu theo paidAt (đúng quy ước BE) — lọc riêng theo paidAt, không theo createdAt
+    const fromMs = from ? Date.parse(from) : -Infinity;
+    const toMs = to ? Date.parse(to) : Infinity;
+    const paid = MOCK_PAYMENTS.filter((p) => p.status === 'paid' && Date.parse(p.paidAt) >= fromMs && Date.parse(p.paidAt) <= toMs);
+    const byDay = new Map();
+    paid.forEach((p) => {
+      const d = p.paidAt.slice(0, 10);
+      const cur = byDay.get(d) ?? { date: d, revenue: 0, count: 0 };
+      cur.revenue += p.paidAmount; cur.count += 1;
+      byDay.set(d, cur);
+    });
+    const count = (s) => list.filter((p) => p.status === s).length;
+    return {
+      totalRevenue: paid.reduce((sum, p) => sum + p.paidAmount, 0),
+      totalCount: list.length,
+      paidCount: count('paid'), pendingCount: count('pending'), failedCount: count('failed'), expiredCount: count('expired'),
+      dailyRevenue: [...byDay.values()].sort((a, b) => (a.date < b.date ? -1 : 1)),
+    };
+  },
 
   // ===== USER quản trị (Portal Quản trị /admin/users) =====
   async getAdminUsers() {

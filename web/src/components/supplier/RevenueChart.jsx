@@ -8,11 +8,13 @@ const W = 700;
 const H = 260;
 const PAD = { top: 20, right: 16, bottom: 28, left: 56 };
 
-export default function RevenueChart({ data = [] }) {
+export default function RevenueChart({ data = [], ariaLabel = 'Biểu đồ doanh thu 7 ngày' }) {
   if (!data.length) return null;
 
   const max = Math.max(...data.map((d) => d.value));
-  const niceMax = Math.ceil(max / 10_000_000) * 10_000_000 || 10_000_000;
+  // Bước làm tròn theo độ lớn dữ liệu: giá trị nhỏ (vd gói 199k) vẫn có trục đọc được, không bị dồn về 0tr
+  const unit = max >= 10_000_000 ? 10_000_000 : max >= 1_000_000 ? 1_000_000 : 100_000;
+  const niceMax = Math.ceil(max / unit) * unit || unit;
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
 
@@ -25,10 +27,12 @@ export default function RevenueChart({ data = [] }) {
 
   // 4 mốc lưới ngang
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => ({ v: niceMax * t, y: y(niceMax * t) }));
-  const shortVnd = (v) => `${Math.round(v / 1_000_000)}tr`;
+  const shortVnd = (v) => (v >= 1_000_000 ? `${Number((v / 1_000_000).toFixed(1))}tr` : `${Math.round(v / 1000)}k`);
+  // Nhiều điểm (vd 30–45 ngày) thì chỉ hiện nhãn ngày thưa ra, tránh chữ đè nhau
+  const labelEvery = Math.ceil(data.length / 8);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-64 w-full" role="img" aria-label="Biểu đồ doanh thu 7 ngày">
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-64 w-full" role="img" aria-label={ariaLabel}>
       <defs>
         <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="var(--color-primary, #5A3A28)" stopOpacity="0.18" />
@@ -50,7 +54,7 @@ export default function RevenueChart({ data = [] }) {
         <g key={i}>
           <circle cx={p[0]} cy={p[1]} r="3.5" className="fill-base-100 stroke-primary" strokeWidth="2" />
           <title>{`${data[i].date}: ${formatVnd(data[i].value)}`}</title>
-          <text x={p[0]} y={H - 8} textAnchor="middle" className="fill-base-content/50" fontSize="11">{data[i].date}</text>
+          {i % labelEvery === 0 && <text x={p[0]} y={H - 8} textAnchor="middle" className="fill-base-content/50" fontSize="11">{data[i].date}</text>}
         </g>
       ))}
     </svg>

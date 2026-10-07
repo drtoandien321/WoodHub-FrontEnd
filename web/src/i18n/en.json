@@ -740,6 +740,7 @@
     "send": "Send",
     "close": "Close",
     "newConversation": "New conversation",
+    "coldStart": "The AI is warming up, this may take up to a minute. Please wait…",
     "loginRequired": "Log in to chat with the AI assistant.",
     "login": "Log in",
     "retry": "Retry",

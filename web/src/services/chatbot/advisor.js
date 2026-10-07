@@ -46,9 +46,11 @@ function parseBudget(text) {
 const toCard = (p) => ({
   id: p.id,
   name: loc(p.name),
-  material: loc(p.material),
+  category: loc(p.category) || null,
+  material: loc(p.material) || null,
   price: p.price,
-  image: p.image,
+  image_url: p.image,
+  reasons: [],
 });
 
 /*
