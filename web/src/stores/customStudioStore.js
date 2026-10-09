@@ -45,8 +45,10 @@ export const useCustomStudioStore = create(
       designId: null,
       designVersion: null,
       designName: '',
+      ownerId: null, // id user sở hữu wizard đang lưu — services/accountScope.js reset khi đổi tài khoản
 
       goToStep: (step) => set({ step }),
+      setOwner: (ownerId) => set({ ownerId }),
 
       /*
        * chooseUpload/chooseTemplate = "chọn nguồn MỚI" — luôn xoá designId/designVersion đang giữ
@@ -100,7 +102,7 @@ export const useCustomStudioStore = create(
       name: 'woodhub-custom-studio',
       partialize: (s) => ({
         step: s.step, source: s.source, taskId: s.taskId, selectedTemplateSlug: s.selectedTemplateSlug,
-        productType: s.productType, designId: s.designId, designVersion: s.designVersion, designName: s.designName,
+        productType: s.productType, ownerId: s.ownerId, designId: s.designId, designVersion: s.designVersion, designName: s.designName,
       }),
     }
   )

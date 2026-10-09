@@ -12,6 +12,33 @@ import { getAdvisorReply } from '../../services/chatbot/advisor.js';
  */
 const delay = (ms = 350) => new Promise((r) => setTimeout(r, ms)); // giả lập độ trễ mạng
 
+// Field tổng hợp của báo giá (giá mới nhất, giá chốt, thời gian dự kiến, số vòng) — mirror QuoteRequestResponse của BE.
+const withQuoteSummary = (q) => {
+  const offers = q.offers ?? [];
+  const latest = offers[offers.length - 1];
+  const accepted = offers.find((o) => o.status === 'accepted');
+  const done = q.status === 'accepted' && accepted;
+  const days = done ? accepted.leadTimeDays : latest?.leadTimeDays ?? null;
+  let date = null;
+  if (done && days) { const d = new Date(accepted.createdAt); d.setDate(d.getDate() + days); date = d.toISOString().slice(0, 10); }
+  return {
+    ...q,
+    latestOfferPrice: latest?.price ?? null, latestOfferBy: latest?.offeredBy ?? null,
+    finalPrice: done ? accepted.price : null, finalTotal: done ? accepted.price * q.quantity : null,
+    estimatedDays: days, estimatedCompletionDate: date,
+    negotiationRounds: offers.length, updatedAt: q.updatedAt ?? q.createdAt,
+  };
+};
+
+// Lấy thiết kế của CHÍNH user đang đăng nhập — của người khác (hoặc không tồn tại) đều 404, giống BE thật
+const ownedDesign = (id) => {
+  const design = memoryDb.customDesigns.get(id);
+  if (!design || design.userId !== (useAuthStore.getState().user?.id ?? null)) {
+    throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404 } });
+  }
+  return design;
+};
+
 /*
  * Dữ liệu thanh toán mock cho Portal Quản trị. Sinh tất định (theo chỉ số i) → lọc/phân trang ổn định.
  * 60 giao dịch rải 45 ngày gần nhất, đúng shape AdminPaymentResponse.
@@ -376,19 +403,22 @@ const toStoreInventoryResponse = (inv) => {
  * giống BE trả 404 ở GET /subscriptions/me), lịch sử thanh toán. Persist qua localStorage để demo
  * không mất khi F5, giống các module Admin khác ở trên.
  */
-const MOCK_SUBSCRIPTION_PLANS_KEY = 'woodhub:subscription-plans-v1';
+const MOCK_SUBSCRIPTION_PLANS_KEY = 'woodhub:subscription-plans-v2'; // v2: 3 gói giống production (bản v1 có dữ liệu cũ khác shape)
 let mockSubscriptionPlans = storage.getItem(MOCK_SUBSCRIPTION_PLANS_KEY, null) ?? [
   {
-    id: 'plan_free', name: 'free', displayName: 'Gói Free', description: 'Trải nghiệm cơ bản', price: 0,
-    featureLimits: { ai_chat: 10, design: 3, export: 0, ar_3d: 0 },
-    displayFeatures: ['Chat AI 10 lượt/tháng', 'Thiết kế 3 mẫu/tháng'],
+    id: 'plan_free', name: 'free', displayName: 'Free', description: 'Trải nghiệm cơ bản', price: 0,
+    featureLimits: { ai_chat: 20, design: 5, export: 5, ar_3d: 5 }, displayFeatures: [],
     isActive: true, sortOrder: 0, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
   },
   {
-    id: 'plan_premium', name: 'b2c_premium', displayName: 'B2C Premium AR/3D', description: 'Đầy đủ tính năng', price: 99000,
-    featureLimits: { ai_chat: -1, design: 50, export: 20, ar_3d: 20 },
-    displayFeatures: ['Chat AI không giới hạn', 'Thiết kế 50 mẫu/tháng', 'Xuất file 20 lượt/tháng', 'AR/3D 20 lượt/tháng'],
+    id: 'plan_premium', name: 'B2C Premium AR/3D', displayName: 'B2C Premium AR/3D', description: 'Chat AI không giới hạn cho người dùng cá nhân', price: 79000,
+    featureLimits: { ai_chat: -1, design: 5, export: 5, ar_3d: 5 }, displayFeatures: [],
     isActive: true, sortOrder: 1, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: 'plan_custom', name: 'Custom Design Premium / Verified', displayName: 'Custom Design Premium / Verified', description: 'Thiết kế tuỳ chỉnh không giới hạn', price: 299000,
+    featureLimits: { ai_chat: -1, design: -1, export: -1, ar_3d: -1 }, displayFeatures: [],
+    isActive: true, sortOrder: 2, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
   },
 ];
 const persistMockSubscriptionPlans = () => storage.setItem(MOCK_SUBSCRIPTION_PLANS_KEY, mockSubscriptionPlans);
@@ -1063,6 +1093,7 @@ export const mockAdapter = {
       id, name: name ?? 'Thiết kế chưa đặt tên', modelId: modelId ?? null, modelSlug: model?.slug ?? null,
       configuration: safeConfig, thumbnailUrl: thumbnailUrl ?? null,
       status: 'draft', completedAt: null, version: 1, createdAt: now, updatedAt: now,
+      userId: useAuthStore.getState().user?.id ?? null, // chủ thiết kế — BE thật cũng chỉ cho chủ/admin xem
     };
     memoryDb.customDesigns.set(id, design);
     persistCustomDesigns();
@@ -1071,15 +1102,13 @@ export const mockAdapter = {
 
   async getDesignDetail(id) {
     await delay(250);
-    const design = memoryDb.customDesigns.get(id);
-    if (!design) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404 } });
+    const design = ownedDesign(id);
     return design;
   },
 
   async updateDesign({ id, name, configuration, thumbnailUrl, status, version }) {
     await delay(400);
-    const design = memoryDb.customDesigns.get(id);
-    if (!design) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404 } });
+    const design = ownedDesign(id);
     if (version !== design.version) {
       throw Object.assign(new Error('VERSION_CONFLICT'), { response: { status: 409, data: { message: 'Thiết kế đã bị thay đổi ở nơi khác — vui lòng tải lại.' } } });
     }
@@ -1102,6 +1131,7 @@ export const mockAdapter = {
 
   async deleteDesign(id) {
     await delay(300);
+    ownedDesign(id);
     memoryDb.customDesigns.delete(id);
     persistCustomDesigns();
     return {};
@@ -1109,7 +1139,8 @@ export const mockAdapter = {
 
   async getMyDesigns(params = {}) {
     await delay(250);
-    const all = Array.from(memoryDb.customDesigns.values()).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    const myId = useAuthStore.getState().user?.id ?? null;
+    const all = Array.from(memoryDb.customDesigns.values()).filter((d) => d.userId === myId).sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     const items = all.filter((d) => !params?.status || d.status === params.status);
     return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
   },
@@ -1121,7 +1152,7 @@ export const mockAdapter = {
   async createQuote({ workshopId, customDesignId, quantity, location, note, expiresAt }) {
     await delay(400);
     const design = memoryDb.customDesigns.get(customDesignId);
-    if (!design) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404, data: { message: 'Không tìm thấy thiết kế' } } });
+    if (!design || design.userId !== (useAuthStore.getState().user?.id ?? null)) throw Object.assign(new Error('DESIGN_NOT_FOUND'), { response: { status: 404, data: { message: 'Không tìm thấy thiết kế' } } });
     const me = useAuthStore.getState().user;
     const id = nextId('quote');
     const now = new Date().toISOString();
@@ -1141,11 +1172,12 @@ export const mockAdapter = {
   },
 
   async getMyQuotes(params = {}) {
+    // (field tổng hợp: xem withQuoteSummary — mirror QuoteRequestResponse của BE)
     await delay(250);
     const me = useAuthStore.getState().user;
     let items = Array.from(memoryDb.quotes.values()).filter((q) => q.customerId === me?.id);
     if (params?.status) items = items.filter((q) => q.status === params.status);
-    items = items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((q) => ({ ...q, offers: null }));
+    items = items.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).map((q) => ({ ...withQuoteSummary(q), offers: null }));
     return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
   },
 
@@ -1791,21 +1823,6 @@ export const mockAdapter = {
     return mockMySubscription ? [mockMySubscription] : [];
   },
 
-  async renewMySubscription() {
-    await delay(300);
-    if (!mockMySubscription || mockMySubscription.status !== 'active') {
-      throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Chưa có gói active' } } });
-    }
-    if (mockMySubscription.plan.price === 0) {
-      throw Object.assign(new Error('Bad request'), { response: { status: 400, data: { message: 'Gói free không cần gia hạn' } } });
-    }
-    const base = mockMySubscription.endDate ? new Date(mockMySubscription.endDate) : new Date();
-    base.setMonth(base.getMonth() + 1);
-    mockMySubscription = { ...mockMySubscription, endDate: base.toISOString(), updatedAt: new Date().toISOString() };
-    persistMockMySubscription();
-    return mockMySubscription;
-  },
-
   async cancelMySubscription() {
     await delay(300);
     if (!mockMySubscription || mockMySubscription.status !== 'active') {
@@ -1857,7 +1874,8 @@ export const mockAdapter = {
       }
       persistMockPayments();
     }
-    return payment;
+    // Trả BẢN SAO: nếu trả đúng object đã sửa tại chỗ, React Query so sánh cũ/mới là cùng tham chiếu → coi như không đổi → UI không cập nhật
+    return { ...payment };
   },
 
   async getMyPayments() {

@@ -2,3 +2,8 @@ node_modules
 dist
 .env
 .env.local
+
+# E2E local secrets
+e2e/.env.e2e
+test-results/
+playwright-report/

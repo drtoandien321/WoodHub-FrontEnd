@@ -44,11 +44,6 @@ export const useSubscribe = () => {
   return useMutation({ mutationFn: api.subscribe, onSuccess: () => invalidateSubscription(qc) });
 };
 
-export const useRenewSubscription = () => {
-  const qc = useQueryClient();
-  return useMutation({ mutationFn: api.renewMySubscription, onSuccess: () => invalidateSubscription(qc) });
-};
-
 export const useCancelSubscription = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: api.cancelMySubscription, onSuccess: () => invalidateSubscription(qc) });

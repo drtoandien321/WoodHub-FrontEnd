@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  useMySubscription, useMyUsage, useMyPayments, useRenewSubscription, useCancelSubscription,
+  useMySubscription, useMyUsage, useMyPayments, useCancelSubscription,
 } from '../hooks/useSubscription.js';
+import PaymentQrModal from '../components/subscription/PaymentQrModal.jsx';
 import { formatVnd, formatDate } from '../utils/format.js';
 
 // Nhãn hiển thị cho enum UsageFeature (BE: design | ai_chat | export | ar_3d) — chỉ dùng ở trang này
@@ -24,21 +25,14 @@ export default function MySubscription() {
   const { data: mySub, isLoading } = useMySubscription();
   const { data: usage, isLoading: usageLoading } = useMyUsage();
   const { data: payments } = useMyPayments();
-  const renew = useRenewSubscription();
   const cancel = useCancelSubscription();
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [renewing, setRenewing] = useState(false); // mở modal thanh toán để gia hạn
   const [toast, setToast] = useState('');
 
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
-  };
-
-  const handleRenew = () => {
-    renew.mutate(undefined, {
-      onSuccess: () => showToast('Đã gia hạn thêm 1 tháng.'),
-      onError: (err) => showToast(err?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.'),
-    });
   };
 
   const handleCancel = () => {
@@ -78,9 +72,8 @@ export default function MySubscription() {
 
           {mySub.plan.price > 0 && (
             <div className="flex gap-2 mt-2">
-              <button onClick={handleRenew} disabled={renew.isPending} className="btn btn-outline btn-sm">
-                {renew.isPending ? <span className="loading loading-spinner loading-xs" /> : 'Gia hạn +1 tháng'}
-              </button>
+              {/* Gia hạn = thanh toán lại ĐÚNG gói đang dùng (BE không còn tự cộng hạn — AUD-002); webhook cộng dồn +1 tháng */}
+              <button onClick={() => setRenewing(true)} className="btn btn-outline btn-sm">Gia hạn +1 tháng</button>
               {confirmingCancel ? (
                 <>
                   <button onClick={handleCancel} disabled={cancel.isPending} className="btn btn-error btn-sm">
@@ -146,6 +139,13 @@ export default function MySubscription() {
           <div className="alert alert-info"><span>{toast}</span></div>
         </div>
       )}
+
+      <PaymentQrModal
+        open={renewing}
+        plan={mySub?.plan}
+        subscription={mySub}
+        onClose={() => setRenewing(false)}
+      />
     </div>
   );
 }

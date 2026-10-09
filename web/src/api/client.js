@@ -75,7 +75,7 @@ const REAL_ENDPOINTS = new Set([
   'getNearbyStoresBySupplier', 'getNearestWorkshops', 'getWorkshopsWithinRadius',
   // Module Subscription — gói đăng ký (trang Pricing + "Gói của tôi")
   'getSubscriptionPlans', 'subscribe', 'getMySubscription', 'getMySubscriptionHistory',
-  'renewMySubscription', 'cancelMySubscription',
+  'cancelMySubscription',
   'createSubscriptionPayment', 'getPayment', 'getMyPayments',
   'getMyUsage',
   // Module Admin — quản lý gói đăng ký (Portal Quản trị /admin/subscription-plans)
@@ -686,8 +686,8 @@ export const api = {
   getMySubscription: () => call(() => http.get('/subscriptions/me'), 'getMySubscription'),
   // GET /subscriptions/me/history → UserSubscriptionResponse[], mới nhất trước
   getMySubscriptionHistory: () => call(() => http.get('/subscriptions/me/history'), 'getMySubscriptionHistory'),
-  // POST /subscriptions/me/renew — cộng dồn +1 tháng cho gói trả phí đang active (free → 400)
-  renewMySubscription: () => call(() => http.post('/subscriptions/me/renew'), 'renewMySubscription'),
+  // (Gia hạn: KHÔNG còn POST /subscriptions/me/renew — BE trả 402 từ AUD-002. Gia hạn = tạo payment cho gói đang dùng,
+  //  xem PaymentQrModal; webhook cộng dồn +1 tháng.)
   // POST /subscriptions/me/cancel → 204
   cancelMySubscription: () => call(() => http.post('/subscriptions/me/cancel'), 'cancelMySubscription'),
 

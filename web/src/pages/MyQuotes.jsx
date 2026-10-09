@@ -5,6 +5,7 @@ import { useMyQuotes } from '../hooks/useQuotes.js';
 import { quoteMeta } from '../utils/quoteStatus.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
+import QuotePricing from '../components/quote/QuotePricing.jsx';
 
 const TABS = ['', 'pending', 'negotiating', 'accepted', 'rejected', 'expired', 'cancelled'];
 
@@ -47,9 +48,11 @@ export default function MyQuotes() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{q.workshopName}</p>
-                  <StatusBadge meta={quoteMeta(q.status)} />
+                  {/* nhãn lấy từ i18n (quoteMeta chỉ cung cấp màu — label trong đó cứng tiếng Việt) */}
+                  <StatusBadge meta={{ ...quoteMeta(q.status), label: t(`quote.status.${q.status}`) }} />
                 </div>
                 <p className="mt-0.5 text-sm text-base-content/60">{t('quote.quantity')}: {q.quantity}{q.location ? ` · ${q.location}` : ''}</p>
+                <QuotePricing quote={q} viewer="customer" />
               </div>
             </Link>
           ))}
