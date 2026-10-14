@@ -14,7 +14,7 @@ const hexToLinear = (hex) => {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, 1];
 };
 
-export default function ModelViewer({ src, poster, alt = '', color, scale = 1, iosSrc, className = '', showControls = false, onError }) {
+export default function ModelViewer({ src, poster, alt = '', color, scale = 1, scaleXYZ, iosSrc, className = '', showControls = false, onError }) {
   const ref = useRef(null);
   const wrapRef = useRef(null);
   const [ready, setReady] = useState(() => !!window.customElements?.get('model-viewer'));
@@ -42,6 +42,14 @@ export default function ModelViewer({ src, poster, alt = '', color, scale = 1, i
     el.addEventListener('load', apply);
     return () => el.removeEventListener('load', apply);
   }, [color, ready, src]);
+
+  // Phóng/thu theo từng trục (rộng/cao/sâu) bằng thuộc tính scale của model-viewer — chỉ xem trước, AR vẫn dùng kích thước gốc
+  const sx = scaleXYZ?.[0] ?? 1; const sy = scaleXYZ?.[1] ?? 1; const sz = scaleXYZ?.[2] ?? 1;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !ready) return;
+    el.scale = `${sx} ${sy} ${sz}`;
+  }, [sx, sy, sz, ready]);
 
   // Báo lỗi khi model KHÔNG tải được (src sai/GLB hỏng) — model-viewer bắn sự kiện 'error'
   useEffect(() => {

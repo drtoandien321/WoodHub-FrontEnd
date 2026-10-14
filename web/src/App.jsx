@@ -40,6 +40,7 @@ const CustomModels = lazy(() => import('./pages/CustomModels.jsx'));
 const CustomModelViewer = lazy(() => import('./pages/CustomModelViewer.jsx'));
 const CustomStudio = lazy(() => import('./pages/CustomStudio.jsx'));
 const CustomDesigns = lazy(() => import('./pages/CustomDesigns.jsx'));
+const MyModels = lazy(() => import('./pages/MyModels.jsx'));
 const Suppliers = lazy(() => import('./pages/Suppliers.jsx'));
 const SupplierProfile = lazy(() => import('./pages/SupplierProfile.jsx'));
 const B2b = lazy(() => import('./pages/B2b.jsx'));
@@ -143,6 +144,7 @@ export default function App() {
             {/* Custom Studio (FE-2): wizard 6 bước, cần đăng nhập vì generate/lưu thiết kế tính vào hạn mức `design` */}
             <Route path="/custom/studio" element={<CustomStudio />} />
             <Route path="/custom/designs" element={<CustomDesigns />} />
+            <Route path="/custom/my-models" element={<MyModels />} />
             {/* Quote & Order (FE-6, BE-8) — DÙNG CHUNG customer/workshop, allow không giới hạn role
                 (chỉ cần đăng nhập) vì QuoteDetail/CustomOrderDetail tự nhận diện vai qua customerId */}
             <Route path="/quotes" element={<MyQuotes />} />

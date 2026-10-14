@@ -590,6 +590,12 @@
       }
     },
     "dimensions": "Kích thước (cm)",
+    "colors": {
+      "default": "Màu gốc",
+      "walnut": "Óc chó",
+      "oak": "Sồi",
+      "cherry": "Anh đào"
+    },
     "materials": {
       "oak": "Sồi (Oak)",
       "walnut": "Óc chó (Walnut)",
@@ -649,6 +655,7 @@
       "step5": {
         "title": "Chỉnh sửa",
         "subtitle": "Chỉ những thuộc tính hệ thống hỗ trợ mới hiển thị ở đây.",
+        "nominalNote": "Kích thước tham khảo để xem trước và gửi xưởng; số đo thật do xưởng chốt khi báo giá.",
         "notEditable": "Mẫu này chưa hỗ trợ chỉnh sửa vật liệu/màu/kích thước.",
         "colorTitle": "Màu sắc",
         "cta": "Tiếp tục lưu thiết kế"
@@ -661,6 +668,17 @@
         "nameLabel": "Tên thiết kế",
         "namePlaceholder": "VD: Sofa phòng khách của tôi",
         "cta": "Lưu thiết kế"
+      },
+      "myModels": {
+        "title": "Model 3D của tôi",
+        "empty": "Bạn chưa có model nào. Tải ảnh lên để AI dựng 3D.",
+        "loadError": "Không tải được danh sách model.",
+        "rename": "Đổi tên",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "view": "Xem 3D / AR",
+        "link": "Model 3D của tôi",
+        "renameError": "Không đổi được tên model."
       },
       "designs": {
         "title": "Thiết kế của tôi",

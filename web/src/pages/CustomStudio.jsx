@@ -96,6 +96,11 @@ export default function CustomStudio() {
         id, name: s.designName, configuration: s.configuration, thumbnailUrl: s.model.posterUrl, status: 'completed', version,
       });
       s.setDesignMeta({ id: updated.id, version: updated.version });
+      // Model AI (từ ảnh) đã TỰ LƯU khi gen xong với tên mặc định "Model AI" — đặt tên theo thiết kế để dễ tìm trong
+      // "Model 3D của tôi". Không chặn luồng nếu lỗi (thiết kế đã lưu xong).
+      if (s.source === 'upload' && s.model?.id && s.designName.trim()) {
+        api.renameModel({ id: s.model.id, name: s.designName.trim().slice(0, 255) }).catch(() => {});
+      }
       setSaved(true);
     } catch (err) {
       // 409 (version lệch, vd đã lưu ở tab khác) — tải lại version mới nhất để user bấm Lưu lại

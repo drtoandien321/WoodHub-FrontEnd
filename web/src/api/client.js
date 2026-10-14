@@ -87,7 +87,7 @@ const REAL_ENDPOINTS = new Set([
    * shape khớp 100% những gì FE đã code). Bật thật CẢ NHÓM AI 3D + CustomDesign + Quote/Order —
    * xem chi tiết từng hàm ở nơi định nghĩa (đã cập nhật comment, không còn "CHƯA thêm vào set này").
    */
-  'getModels3d', 'getModel3d', 'getGenTask', 'retryGenTask', 'cancelGenTask', 'getMyGenTasks',
+  'getModels3d', 'getModel3d', 'getMyModels', 'renameModel', 'getGenTask', 'retryGenTask', 'cancelGenTask', 'getMyGenTasks',
   'createDesign', 'getDesignDetail', 'updateDesign', 'deleteDesign', 'getMyDesigns',
   'createQuote', 'getMyQuotes', 'getIncomingQuotes', 'getQuoteDetail', 'cancelQuote',
   'createOffer', 'acceptOffer', 'rejectOffer',
@@ -640,6 +640,10 @@ export const api = {
   getModels3d: (params) => call(() => http.get('/custom/models', { params }), 'getModels3d', params),
   // GET /custom/models/:slug → Model3dResponse (công khai; model riêng của user cần đăng nhập)
   getModel3d: (slug) => call(() => http.get(`/custom/models/${slug}`), 'getModel3d', slug),
+  // GET /custom/models/my?page=&size=&sort= → Page<Model3dResponse> — thư viện "model của tôi" (model AI tự lưu khi gen xong). Cần đăng nhập.
+  getMyModels: (params) => call(() => http.get('/custom/models/my', { params }), 'getMyModels', params),
+  // PUT /custom/models/:id  body: { name } → Model3dResponse — "Lưu mô hình" = đặt tên (chỉ chủ sở hữu; không sửa gì khác). 400 tên trống/>255.
+  renameModel: ({ id, name }) => call(() => http.put(`/custom/models/${id}`, { name }), 'renameModel', { id, name }),
   /*
    * POST /custom/ai/generate — multipart/form-data (KHÔNG qua call() vì cần FormData, giống
    * uploadProductImage). Trừ 1 lượt `design` (hết → 429, xem docs/subscription-fe.md). Trả NGAY

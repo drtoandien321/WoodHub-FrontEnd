@@ -49,3 +49,15 @@ export const useCancelGenTask = () => {
     onSuccess: (task) => queryClient.setQueryData(['genTask', task.taskId], task),
   });
 };
+
+// Thư viện model AI của tôi (GET /custom/models/my) + đổi tên (PUT /custom/models/:id)
+export const useMyModels = (params) =>
+  useQuery({ queryKey: ['myModels', params], queryFn: () => api.getMyModels(params) });
+
+export const useRenameModel = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.renameModel,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['myModels'] }),
+  });
+};

@@ -590,6 +590,12 @@
       }
     },
     "dimensions": "Dimensions (cm)",
+    "colors": {
+      "default": "Original",
+      "walnut": "Walnut",
+      "oak": "Oak",
+      "cherry": "Cherry"
+    },
     "materials": {
       "oak": "Oak",
       "walnut": "Walnut",
@@ -649,6 +655,7 @@
       "step5": {
         "title": "Edit",
         "subtitle": "Only properties the system supports show up here.",
+        "nominalNote": "Reference size for preview and the workshop; final dimensions are confirmed in the quote.",
         "notEditable": "This template doesn't support editing material/color/size yet.",
         "colorTitle": "Color",
         "cta": "Continue to save"
@@ -661,6 +668,17 @@
         "nameLabel": "Design name",
         "namePlaceholder": "e.g. My living room sofa",
         "cta": "Save design"
+      },
+      "myModels": {
+        "title": "My 3D models",
+        "empty": "You have no models yet. Upload a photo to generate one.",
+        "loadError": "Couldn't load your models.",
+        "rename": "Rename",
+        "save": "Save",
+        "cancel": "Cancel",
+        "view": "View 3D / AR",
+        "link": "My 3D models",
+        "renameError": "Couldn't rename the model."
       },
       "designs": {
         "title": "My designs",

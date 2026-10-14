@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { WOOD_MATERIALS } from '../../api/mock/customData.js';
+import { normalizeOptions, hexOfColor, scaleOf } from '../../utils/modelOptions.js';
 import ModelViewer from '../custom3d/ModelViewer.jsx';
 
 const DIM_LABELS = { width: 'dimensionWidth', height: 'dimensionHeight', depth: 'dimensionDepth' };
@@ -11,13 +12,13 @@ const DIM_LABELS = { width: 'dimensionWidth', height: 'dimensionHeight', depth: 
  */
 export default function Step5Edit({ model, configuration, onChange, onNext, onBack }) {
   const { t } = useTranslation();
-  const opt = model?.editableOptions ?? {};
-  const hasColors = Array.isArray(opt.colors) && opt.colors.length > 0;
-  const hasMaterials = Array.isArray(opt.materials) && opt.materials.length > 0;
+  const opt = normalizeOptions(model);
+  const hasColors = opt.colors.length > 0;
+  const hasMaterials = opt.materials.length > 1; // 1 lựa chọn duy nhất (vd 'wood') thì không cần hiện
   const hasDimensions = !!opt.dimensions;
   const nothingEditable = !hasColors && !hasMaterials && !hasDimensions;
 
-  const tintColor = configuration.color ?? (WOOD_MATERIALS.find((m) => m.id === configuration.material)?.hexColor ?? null);
+  const tintColor = hexOfColor(model, configuration.color) ?? (WOOD_MATERIALS.find((m) => m.id === configuration.material)?.hexColor ?? null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -28,7 +29,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
         <div className="h-[46vh] min-h-[300px] overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-b from-[#efe7d8] to-[#e0d3bc]">
-          {model && <ModelViewer key={model.slug} src={model.modelGlbUrl} poster={model.posterUrl} alt={model.name} color={tintColor} showControls />}
+          {model && <ModelViewer key={model.slug} src={model.modelGlbUrl} poster={model.posterUrl} alt={model.name} color={tintColor} scaleXYZ={scaleOf(model, configuration)} showControls />}
         </div>
 
         <aside className="flex flex-col gap-5 rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
@@ -46,7 +47,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
                   return (
                     <button
                       key={materialId}
-                      onClick={() => onChange({ material: materialId, color: null })}
+                      onClick={() => onChange({ material: materialId })}
                       className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${active ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:border-primary/50'}`}
                     >
                       {mat && <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: mat.hexColor }} />}
@@ -78,6 +79,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
           {hasDimensions && configuration.dimensions && (
             <section className="flex flex-col gap-3">
               <h3 className="font-medium">{t('custom.dimensions')}</h3>
+              {opt.nominal && <p className="-mt-2 text-xs text-base-content/50">{t('custom.studio.step5.nominalNote')}</p>}
               {(['width', 'height', 'depth']).map((axis) => {
                 const range = opt.dimensions[axis];
                 if (!range) return null;

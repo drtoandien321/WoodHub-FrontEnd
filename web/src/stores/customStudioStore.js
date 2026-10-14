@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { defaultConfiguration } from '../utils/modelOptions.js';
 
 /*
  * Store cho Custom Studio wizard (FE-2, 6 bước — xem pages/CustomStudio.jsx).
@@ -14,16 +15,6 @@ import { persist } from 'zustand/middleware';
  */
 // Cấu hình mặc định khi vừa có model — mỗi chiều lấy TRUNG ĐIỂM khoảng hợp lệ BE cho phép
 // (editableOptions.dimensions), không có key nào thì để null (bước 5 sẽ không render control đó).
-const midpoint = ([min, max]) => Math.round((min + max) / 2);
-const defaultConfigFor = (model) => {
-  const opt = model?.editableOptions ?? {};
-  const dims = opt.dimensions;
-  return {
-    material: opt.materials?.[0] ?? null,
-    color: opt.colors?.[0] ?? null,
-    dimensions: dims ? { width: midpoint(dims.width ?? [0, 0]), height: midpoint(dims.height ?? [0, 0]), depth: midpoint(dims.depth ?? [0, 0]) } : null,
-  };
-};
 
 const initialTransient = {
   step: 1,
@@ -61,7 +52,7 @@ export const useCustomStudioStore = create(
       chooseTemplate: (model) =>
         set({
           source: 'template', model, selectedTemplateSlug: model.slug, taskId: null, step: 4,
-          configuration: defaultConfigFor(model), designId: null, designVersion: null, designName: '',
+          configuration: defaultConfiguration(model), designId: null, designVersion: null, designName: '',
         }),
 
       setImageFile: (file, previewUrl) => {
@@ -82,7 +73,7 @@ export const useCustomStudioStore = create(
       startTask: (taskId) => set({ taskId, step: 3 }),
 
       // Task 'succeeded' hoặc chọn mẫu xong → có model để xem/chỉnh ở bước 4/5
-      setGeneratedModel: (model) => set({ model, step: 4, configuration: defaultConfigFor(model) }),
+      setGeneratedModel: (model) => set({ model, step: 4, configuration: defaultConfiguration(model) }),
 
       // Hủy/thử lại từ đầu ở bước 3 (KHÔNG xoá lựa chọn nguồn/ảnh — user có thể muốn thử ảnh khác)
       clearTask: () => set({ taskId: null }),
