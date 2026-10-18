@@ -13,7 +13,6 @@
   "nav": {
     "home": "Home",
     "shop": "Shop",
-    "rooms": "Rooms",
     "custom": "Custom Design",
     "suppliers": "Workshops & Suppliers",
     "b2b": "B2B Business",
@@ -52,9 +51,21 @@
   "landing": {
     "flowsTitle": "Three ways to use WoodHub",
     "flows": [
-      { "title": "Buy ready-made (B2C)", "desc": "Browse thousands of products from verified workshops, preview them in AR right in your room.", "cta": "Go to shop" },
-      { "title": "Business (B2B)", "desc": "Order in bulk, get quotes from multiple suppliers, and receive VAT invoices.", "cta": "Learn about B2B" },
-      { "title": "Custom Design", "desc": "Adjust size, material and color on a 3D model — our system matches you with the right workshop.", "cta": "Start designing" }
+      {
+        "title": "Buy ready-made (B2C)",
+        "desc": "Browse thousands of products from verified workshops, preview them in AR right in your room.",
+        "cta": "Go to shop"
+      },
+      {
+        "title": "Business (B2B)",
+        "desc": "Order in bulk, get quotes from multiple suppliers, and receive VAT invoices.",
+        "cta": "Learn about B2B"
+      },
+      {
+        "title": "Custom Design",
+        "desc": "Adjust size, material and color on a 3D model — our system matches you with the right workshop.",
+        "cta": "Start designing"
+      }
     ],
     "featuredTitle": "Featured products",
     "viewAll": "View all →"
@@ -189,27 +200,69 @@
     "noResults": "No matching workshops found",
     "noResultsHint": "Try another keyword or remove some filters.",
     "listStats": [
-      { "value": "24+", "label": "Verified workshops" },
-      { "value": "1,200+", "label": "Completed orders" },
-      { "value": "4.8/5", "label": "Average rating" },
-      { "value": "2h", "label": "Average response" }
+      {
+        "value": "24+",
+        "label": "Verified workshops"
+      },
+      {
+        "value": "1,200+",
+        "label": "Completed orders"
+      },
+      {
+        "value": "4.8/5",
+        "label": "Average rating"
+      },
+      {
+        "value": "2h",
+        "label": "Average response"
+      }
     ],
     "filters": [
-      { "id": "all", "label": "All" },
-      { "id": "near", "label": "Near me" },
-      { "id": "topRated", "label": "Top rated" },
-      { "id": "fast", "label": "Fast delivery" },
-      { "id": "chairs", "label": "Tables & chairs" },
-      { "id": "cabinets", "label": "Cabinets" },
-      { "id": "oak", "label": "Oak wood" },
-      { "id": "hcm", "label": "HCMC" }
+      {
+        "id": "all",
+        "label": "All"
+      },
+      {
+        "id": "near",
+        "label": "Near me"
+      },
+      {
+        "id": "topRated",
+        "label": "Top rated"
+      },
+      {
+        "id": "fast",
+        "label": "Fast delivery"
+      },
+      {
+        "id": "chairs",
+        "label": "Tables & chairs"
+      },
+      {
+        "id": "cabinets",
+        "label": "Cabinets"
+      },
+      {
+        "id": "oak",
+        "label": "Oak wood"
+      },
+      {
+        "id": "hcm",
+        "label": "HCMC"
+      }
     ],
     "breadcrumbHome": "Home",
     "contactConsult": "Contact for advice",
     "saveSupplier": "Save workshop",
     "saved": "Saved",
     "reviewsCount": "{{count}} reviews",
-    "headerStats": { "perOrder": "/ order", "production": "Production time", "response": "Average response", "experience": "Experience", "ordersDone": "Completed orders" },
+    "headerStats": {
+      "perOrder": "/ order",
+      "production": "Production time",
+      "response": "Average response",
+      "experience": "Experience",
+      "ordersDone": "Completed orders"
+    },
     "sectionAbout": "About",
     "strengths": {
       "naturalWood": "Premium natural wood",
@@ -222,27 +275,70 @@
     "sectionPortfolio": "Portfolio",
     "sectionReviews": "Customer reviews",
     "sectionWorkflow": "How we work",
-    "typeFilters": { "all": "All", "retailer": "Supplier", "workshop": "Workshop" },
+    "typeFilters": {
+      "all": "All",
+      "retailer": "Supplier",
+      "workshop": "Workshop"
+    },
     "noContact": "This supplier hasn't added contact info yet.",
     "viewAll": "View all",
     "viewAllReviews": "View all reviews",
-    "cap": { "specialty": "Specialty", "capacity": "Production capacity", "serviceArea": "Service area", "products": "Supported products", "wood": "Supported wood" },
+    "cap": {
+      "specialty": "Specialty",
+      "capacity": "Production capacity",
+      "serviceArea": "Service area",
+      "products": "Supported products",
+      "wood": "Supported wood"
+    },
     "quickInfo": "Quick info",
-    "qi": { "priceFrom": "Reference price from", "response": "Response time", "serviceArea": "Service area", "workType": "Work type", "installation": "Installation" },
+    "qi": {
+      "priceFrom": "Reference price from",
+      "response": "Response time",
+      "serviceArea": "Service area",
+      "workType": "Work type",
+      "installation": "Installation"
+    },
     "specialtyTags": "Specialties",
     "woodTags": "Supported wood",
     "contactTitle": "Contact",
     "notFoundTitle": "Workshop not found",
     "notFoundBack": "Back to workshop list",
     "workflow": [
-      { "title": "Receive request", "desc": "Collect information, needs and ideas from the customer." },
-      { "title": "Consult & quote", "desc": "Advise a suitable solution and send a detailed quote." },
-      { "title": "Finalize drawings", "desc": "2D/3D design and confirm materials, dimensions and timeline." },
-      { "title": "Production", "desc": "Manufacture at the workshop following approved drawings." },
-      { "title": "Delivery / installation", "desc": "Inspect, deliver and install on site, then hand over." }
+      {
+        "title": "Receive request",
+        "desc": "Collect information, needs and ideas from the customer."
+      },
+      {
+        "title": "Consult & quote",
+        "desc": "Advise a suitable solution and send a detailed quote."
+      },
+      {
+        "title": "Finalize drawings",
+        "desc": "2D/3D design and confirm materials, dimensions and timeline."
+      },
+      {
+        "title": "Production",
+        "desc": "Manufacture at the workshop following approved drawings."
+      },
+      {
+        "title": "Delivery / installation",
+        "desc": "Inspect, deliver and install on site, then hand over."
+      }
     ],
-    "types": { "table": "Table", "chair": "Chair", "cabinet": "Cabinet", "shelf": "Shelf", "bed": "Bed" },
-    "materials": { "oak": "Oak", "walnut": "Walnut", "ash": "Ash", "pine": "Pine", "rubber": "Rubberwood" }
+    "types": {
+      "table": "Table",
+      "chair": "Chair",
+      "cabinet": "Cabinet",
+      "shelf": "Shelf",
+      "bed": "Bed"
+    },
+    "materials": {
+      "oak": "Oak",
+      "walnut": "Walnut",
+      "ash": "Ash",
+      "pine": "Pine",
+      "rubber": "Rubberwood"
+    }
   },
   "b2b": {
     "heroTitle": "Furniture solutions for businesses",
@@ -250,9 +346,21 @@
     "ctaRegister": "Register a business account",
     "stepsTitle": "How it works",
     "steps": [
-      { "step": "1", "title": "Register a business account", "desc": "Provide your company information and tax code to receive quotes and VAT invoices." },
-      { "step": "2", "title": "Send a bulk request", "desc": "Pick products or describe your needs — the system sends quote requests to multiple matching suppliers." },
-      { "step": "3", "title": "Compare & order", "desc": "Receive quotes, compare price and lead time, place your order and get a full VAT invoice." }
+      {
+        "step": "1",
+        "title": "Register a business account",
+        "desc": "Provide your company information and tax code to receive quotes and VAT invoices."
+      },
+      {
+        "step": "2",
+        "title": "Send a bulk request",
+        "desc": "Pick products or describe your needs — the system sends quote requests to multiple matching suppliers."
+      },
+      {
+        "step": "3",
+        "title": "Compare & order",
+        "desc": "Receive quotes, compare price and lead time, place your order and get a full VAT invoice."
+      }
     ],
     "ctaTitle": "Ready to partner with WoodHub?",
     "ctaDesc": "Create a business account today — the WoodHub team will reach out to advise on the right plan."
@@ -268,14 +376,32 @@
     "illustrationDesc": "to a platform connecting hundreds of workshops with customers nationwide.",
     "valuesTitle": "Core values",
     "values": [
-      { "title": "Real wood, clear origin", "desc": "Every product on WoodHub comes from a workshop verified for capability and materials — no fake wood, no unclear sourcing." },
-      { "title": "Standing with Vietnamese craftsmen", "desc": "We build tools that help small workshops reach a wide customer base, instead of only doing contract work for big brands." },
-      { "title": "Technology for a real experience", "desc": "AI advice and AR/3D previews help customers picture a product in their own space before ordering." }
+      {
+        "title": "Real wood, clear origin",
+        "desc": "Every product on WoodHub comes from a workshop verified for capability and materials — no fake wood, no unclear sourcing."
+      },
+      {
+        "title": "Standing with Vietnamese craftsmen",
+        "desc": "We build tools that help small workshops reach a wide customer base, instead of only doing contract work for big brands."
+      },
+      {
+        "title": "Technology for a real experience",
+        "desc": "AI advice and AR/3D previews help customers picture a product in their own space before ordering."
+      }
     ],
     "timeline": [
-      { "year": "11/2025", "label": "WoodHub idea finalized" },
-      { "year": "06/2026", "label": "Research completed" },
-      { "year": "06/2026", "label": "MVP launch" }
+      {
+        "year": "11/2025",
+        "label": "WoodHub idea finalized"
+      },
+      {
+        "year": "06/2026",
+        "label": "Research completed"
+      },
+      {
+        "year": "06/2026",
+        "label": "MVP launch"
+      }
     ]
   },
   "pricing": {
@@ -298,7 +424,10 @@
     "noPlans": "No plans are available right now.",
     "loadError": "Could not load pricing.",
     "retry": "Retry",
-    "feature": { "design": "3D design", "ai_chat": "AI chat" }
+    "feature": {
+      "design": "3D design",
+      "ai_chat": "AI chat"
+    }
   },
   "payment": {
     "title": "Payment — {{plan}}",
@@ -331,9 +460,18 @@
     "subjectPlaceholder": "Subject",
     "messagePlaceholder": "Message",
     "submit": "Send message",
-    "support": { "label": "Customer support", "value": "0793 105 329" },
-    "emailInfo": { "label": "Email", "value": "drtoandien321@gmail.com" },
-    "address": { "label": "Address", "value": "FPT University, HCMC" },
+    "support": {
+      "label": "Customer support",
+      "value": "0793 105 329"
+    },
+    "emailInfo": {
+      "label": "Email",
+      "value": "drtoandien321@gmail.com"
+    },
+    "address": {
+      "label": "Address",
+      "value": "FPT University, HCMC"
+    },
     "success": "Thank you! WoodHub has received your message and will get back to you soon.",
     "errors": {
       "name": "Please enter your name.",
@@ -354,7 +492,6 @@
     "filterCategory": "Category",
     "filterMaterial": "Material",
     "filterMaxPrice": "Max Price",
-    "filterRoom": "Room",
     "filterStyle": "Style",
     "filterAvailable": "In stock",
     "filterHas3d": "Has 3D model",
@@ -423,9 +560,18 @@
     "chatSupplier": "Chat with supplier",
     "bestseller": "Best seller",
     "trust": {
-      "warranty": { "title": "24-month warranty", "desc": "Replace on technical faults" },
-      "install": { "title": "Installation support", "desc": "On-site within the city" },
-      "shipping": { "title": "Nationwide shipping", "desc": "Delivery in 3–7 days" }
+      "warranty": {
+        "title": "24-month warranty",
+        "desc": "Replace on technical faults"
+      },
+      "install": {
+        "title": "Installation support",
+        "desc": "On-site within the city"
+      },
+      "shipping": {
+        "title": "Nationwide shipping",
+        "desc": "Delivery in 3–7 days"
+      }
     }
   },
   "chat": {
@@ -470,7 +616,15 @@
     "productsLabel": "Products",
     "shippingTbd": "Calculated at next step",
     "total": "Total",
-    "checkout": "Proceed to checkout"
+    "checkout": "Proceed to checkout",
+    "itemsCount": "{{count}} items",
+    "freeShipLeft": "Add {{amount}} more for free shipping",
+    "freeShipDone": "Your order qualifies for free shipping 🎉",
+    "continueShopping": "Continue shopping",
+    "secure": "Secure bank transfer payment",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "each": "each"
   },
   "checkout": {
     "title": "Checkout",
@@ -504,7 +658,18 @@
     "errName": "Please enter your full name.",
     "errPhone": "Invalid phone number (e.g. 0901234567).",
     "errAddress": "Address is too short, please be more specific.",
-    "errDistrict": "Please select a district."
+    "errDistrict": "Please select a district.",
+    "stepCart": "Cart",
+    "stepCheckout": "Checkout",
+    "stepDone": "Done",
+    "editCart": "Edit cart",
+    "bankDesc": "Your order is confirmed once WoodHub receives the payment.",
+    "bankName": "Bank",
+    "bankAccount": "Account number",
+    "bankHolder": "Account holder",
+    "bankHow1": "Click \"Place order\" to create the order.",
+    "bankHow2": "Transfer the exact amount, using the order ID as the transfer note.",
+    "bankHow3": "WoodHub confirms the payment and ships your order."
   },
   "orders": {
     "title": "Your Orders",
@@ -529,10 +694,18 @@
   "custom": {
     "selectTitle": "What would you like to design?",
     "selectDesc": "Pick a product type to open the 3D configurator — adjust dimensions, material and color to your liking.",
-    "selectBadges": ["Real-time 3D config", "View AR at home", "Auto workshop match"],
+    "selectBadges": [
+      "Real-time 3D config",
+      "View AR at home",
+      "Auto workshop match"
+    ],
     "arTitle": "Preview in 3D & AR right at home",
     "arDesc": "Customize size, material and color on a real-time 3D model — then place the product in your own room with AR before you order.",
-    "arPoints": ["3D model updates instantly with every parameter", "Rotate and zoom to inspect every angle", "Place it in your real space with your phone camera"],
+    "arPoints": [
+      "3D model updates instantly with every parameter",
+      "Rotate and zoom to inspect every angle",
+      "Place it in your real space with your phone camera"
+    ],
     "arDemoBtn": "View AR demo",
     "arStartBtn": "Start designing",
     "arBadge": "AR · 3D",
@@ -542,9 +715,18 @@
     "arModalCta": "Design your product",
     "stepsTitle": "Custom design in 3 steps",
     "steps": [
-      { "title": "Pick & customize in 3D", "desc": "Choose a product type, drag the size sliders, pick wood and finish color." },
-      { "title": "Preview with AR at home", "desc": "Place the product in your real space to make sure it fits." },
-      { "title": "Send to workshop & get a quote", "desc": "We match a suitable workshop and send your quote request." }
+      {
+        "title": "Pick & customize in 3D",
+        "desc": "Choose a product type, drag the size sliders, pick wood and finish color."
+      },
+      {
+        "title": "Preview with AR at home",
+        "desc": "Place the product in your real space to make sure it fits."
+      },
+      {
+        "title": "Send to workshop & get a quote",
+        "desc": "We match a suitable workshop and send your quote request."
+      }
     ],
     "ai": {
       "badge": "AI · New",
@@ -607,8 +789,20 @@
       "back": "Back",
       "stepIndicatorLabel": "Design steps",
       "resumeError": "Couldn't find your in-progress design. Please start over.",
-      "resume": { "title": "You have a design in progress", "desc": "You stopped at step {{step}} — {{label}}. Continue it or start a new design?", "continue": "Continue previous design", "startNew": "Start a new design" },
-      "stepLabels": { "1": "Source", "2": "Prepare photo", "3": "Build 3D", "4": "Result", "5": "Edit", "6": "Save" },
+      "resume": {
+        "title": "You have a design in progress",
+        "desc": "You stopped at step {{step}} — {{label}}. Continue it or start a new design?",
+        "continue": "Continue previous design",
+        "startNew": "Start a new design"
+      },
+      "stepLabels": {
+        "1": "Source",
+        "2": "Prepare photo",
+        "3": "Build 3D",
+        "4": "Result",
+        "5": "Edit",
+        "6": "Save"
+      },
       "step1": {
         "title": "Where do you want to start?",
         "subtitle": "Upload your own photo for AI to build a 3D model, or quickly pick a ready-made template.",
@@ -636,7 +830,15 @@
         "removeBgHint": "AI will separate the product from the background before building the 3D model",
         "cta": "Start building the model"
       },
-      "productTypes": { "sofa": "Sofa", "chair": "Chair", "table": "Table", "cabinet": "Cabinet", "shelf": "Shelf", "bed": "Bed", "decor": "Decor" },
+      "productTypes": {
+        "sofa": "Sofa",
+        "chair": "Chair",
+        "table": "Table",
+        "cabinet": "Cabinet",
+        "shelf": "Shelf",
+        "bed": "Bed",
+        "decor": "Decor"
+      },
       "step3": {
         "stageQueued": "Queued for processing…",
         "stageProcessing": "AI is building the 3D model…",
@@ -783,7 +985,11 @@
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
-    "role": { "customer": "customer", "workshop": "workshop", "admin": "admin" },
+    "role": {
+      "customer": "customer",
+      "workshop": "workshop",
+      "admin": "admin"
+    },
     "actionConfirm": "Confirm order",
     "actionStart": "Start production",
     "actionComplete": "Mark completed",

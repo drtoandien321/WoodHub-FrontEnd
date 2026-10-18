@@ -13,7 +13,6 @@
   "nav": {
     "home": "Trang chủ",
     "shop": "Cửa hàng",
-    "rooms": "Không gian",
     "custom": "Thiết kế Custom",
     "suppliers": "Xưởng & Nhà cung cấp",
     "b2b": "Doanh nghiệp B2B",
@@ -52,9 +51,21 @@
   "landing": {
     "flowsTitle": "Ba cách dùng WoodHub",
     "flows": [
-      { "title": "Mua sẵn (B2C)", "desc": "Duyệt hàng nghìn sản phẩm từ các xưởng đã xác minh, xem AR ngay trong phòng bạn.", "cta": "Vào cửa hàng" },
-      { "title": "Doanh nghiệp (B2B)", "desc": "Đặt số lượng lớn, nhận báo giá từ nhiều nhà cung cấp, xuất hóa đơn VAT.", "cta": "Tìm hiểu B2B" },
-      { "title": "Thiết kế Custom", "desc": "Tự chỉnh kích thước, chất liệu, màu trên mô hình 3D — hệ thống ghép xưởng phù hợp.", "cta": "Bắt đầu thiết kế" }
+      {
+        "title": "Mua sẵn (B2C)",
+        "desc": "Duyệt hàng nghìn sản phẩm từ các xưởng đã xác minh, xem AR ngay trong phòng bạn.",
+        "cta": "Vào cửa hàng"
+      },
+      {
+        "title": "Doanh nghiệp (B2B)",
+        "desc": "Đặt số lượng lớn, nhận báo giá từ nhiều nhà cung cấp, xuất hóa đơn VAT.",
+        "cta": "Tìm hiểu B2B"
+      },
+      {
+        "title": "Thiết kế Custom",
+        "desc": "Tự chỉnh kích thước, chất liệu, màu trên mô hình 3D — hệ thống ghép xưởng phù hợp.",
+        "cta": "Bắt đầu thiết kế"
+      }
     ],
     "featuredTitle": "Sản phẩm nổi bật",
     "viewAll": "Xem tất cả →"
@@ -189,27 +200,69 @@
     "noResults": "Không tìm thấy xưởng phù hợp",
     "noResultsHint": "Thử từ khóa khác hoặc bỏ bớt bộ lọc.",
     "listStats": [
-      { "value": "24+", "label": "Xưởng xác minh" },
-      { "value": "1.200+", "label": "Đơn hoàn thành" },
-      { "value": "4.8/5", "label": "Đánh giá trung bình" },
-      { "value": "2h", "label": "Phản hồi trung bình" }
+      {
+        "value": "24+",
+        "label": "Xưởng xác minh"
+      },
+      {
+        "value": "1.200+",
+        "label": "Đơn hoàn thành"
+      },
+      {
+        "value": "4.8/5",
+        "label": "Đánh giá trung bình"
+      },
+      {
+        "value": "2h",
+        "label": "Phản hồi trung bình"
+      }
     ],
     "filters": [
-      { "id": "all", "label": "Tất cả" },
-      { "id": "near", "label": "Gần tôi" },
-      { "id": "topRated", "label": "Đánh giá cao" },
-      { "id": "fast", "label": "Giao nhanh" },
-      { "id": "chairs", "label": "Chuyên bàn ghế" },
-      { "id": "cabinets", "label": "Chuyên tủ" },
-      { "id": "oak", "label": "Gỗ sồi" },
-      { "id": "hcm", "label": "TP.HCM" }
+      {
+        "id": "all",
+        "label": "Tất cả"
+      },
+      {
+        "id": "near",
+        "label": "Gần tôi"
+      },
+      {
+        "id": "topRated",
+        "label": "Đánh giá cao"
+      },
+      {
+        "id": "fast",
+        "label": "Giao nhanh"
+      },
+      {
+        "id": "chairs",
+        "label": "Chuyên bàn ghế"
+      },
+      {
+        "id": "cabinets",
+        "label": "Chuyên tủ"
+      },
+      {
+        "id": "oak",
+        "label": "Gỗ sồi"
+      },
+      {
+        "id": "hcm",
+        "label": "TP.HCM"
+      }
     ],
     "breadcrumbHome": "Trang chủ",
     "contactConsult": "Liên hệ tư vấn",
     "saveSupplier": "Lưu xưởng",
     "saved": "Đã lưu",
     "reviewsCount": "{{count}} đánh giá",
-    "headerStats": { "perOrder": "/ đơn", "production": "Thời gian sản xuất", "response": "Phản hồi trung bình", "experience": "Kinh nghiệm", "ordersDone": "Đơn hoàn thành" },
+    "headerStats": {
+      "perOrder": "/ đơn",
+      "production": "Thời gian sản xuất",
+      "response": "Phản hồi trung bình",
+      "experience": "Kinh nghiệm",
+      "ordersDone": "Đơn hoàn thành"
+    },
     "sectionAbout": "Giới thiệu",
     "strengths": {
       "naturalWood": "Gỗ tự nhiên cao cấp",
@@ -222,27 +275,70 @@
     "sectionPortfolio": "Portfolio",
     "sectionReviews": "Đánh giá khách hàng",
     "sectionWorkflow": "Quy trình làm việc",
-    "typeFilters": { "all": "Tất cả", "retailer": "Nhà cung cấp", "workshop": "Xưởng mộc" },
+    "typeFilters": {
+      "all": "Tất cả",
+      "retailer": "Nhà cung cấp",
+      "workshop": "Xưởng mộc"
+    },
     "noContact": "Nhà cung cấp chưa cập nhật thông tin liên hệ.",
     "viewAll": "Xem tất cả",
     "viewAllReviews": "Xem tất cả đánh giá",
-    "cap": { "specialty": "Chuyên môn", "capacity": "Công suất sản xuất", "serviceArea": "Khu vực phục vụ", "products": "Sản phẩm hỗ trợ", "wood": "Gỗ hỗ trợ" },
+    "cap": {
+      "specialty": "Chuyên môn",
+      "capacity": "Công suất sản xuất",
+      "serviceArea": "Khu vực phục vụ",
+      "products": "Sản phẩm hỗ trợ",
+      "wood": "Gỗ hỗ trợ"
+    },
     "quickInfo": "Thông tin nhanh",
-    "qi": { "priceFrom": "Giá tham khảo từ", "response": "Thời gian phản hồi", "serviceArea": "Khu vực phục vụ", "workType": "Hình thức làm việc", "installation": "Lắp đặt" },
+    "qi": {
+      "priceFrom": "Giá tham khảo từ",
+      "response": "Thời gian phản hồi",
+      "serviceArea": "Khu vực phục vụ",
+      "workType": "Hình thức làm việc",
+      "installation": "Lắp đặt"
+    },
     "specialtyTags": "Chuyên môn",
     "woodTags": "Gỗ hỗ trợ",
     "contactTitle": "Liên hệ",
     "notFoundTitle": "Không tìm thấy xưởng",
     "notFoundBack": "Quay lại danh sách xưởng",
     "workflow": [
-      { "title": "Nhận yêu cầu", "desc": "Tiếp nhận thông tin, nhu cầu và ý tưởng từ khách hàng." },
-      { "title": "Tư vấn & báo giá", "desc": "Tư vấn giải pháp phù hợp và gửi báo giá chi tiết." },
-      { "title": "Chốt bản vẽ", "desc": "Thiết kế 2D/3D và chốt vật liệu, kích thước, thời gian." },
-      { "title": "Sản xuất", "desc": "Sản xuất tại xưởng theo bản vẽ đã duyệt." },
-      { "title": "Giao hàng / lắp đặt", "desc": "Kiểm tra, giao hàng và lắp đặt tận nơi, nghiệm thu." }
+      {
+        "title": "Nhận yêu cầu",
+        "desc": "Tiếp nhận thông tin, nhu cầu và ý tưởng từ khách hàng."
+      },
+      {
+        "title": "Tư vấn & báo giá",
+        "desc": "Tư vấn giải pháp phù hợp và gửi báo giá chi tiết."
+      },
+      {
+        "title": "Chốt bản vẽ",
+        "desc": "Thiết kế 2D/3D và chốt vật liệu, kích thước, thời gian."
+      },
+      {
+        "title": "Sản xuất",
+        "desc": "Sản xuất tại xưởng theo bản vẽ đã duyệt."
+      },
+      {
+        "title": "Giao hàng / lắp đặt",
+        "desc": "Kiểm tra, giao hàng và lắp đặt tận nơi, nghiệm thu."
+      }
     ],
-    "types": { "table": "Bàn", "chair": "Ghế", "cabinet": "Tủ", "shelf": "Kệ", "bed": "Giường" },
-    "materials": { "oak": "Sồi", "walnut": "Óc chó", "ash": "Tần bì", "pine": "Thông", "rubber": "Cao su" }
+    "types": {
+      "table": "Bàn",
+      "chair": "Ghế",
+      "cabinet": "Tủ",
+      "shelf": "Kệ",
+      "bed": "Giường"
+    },
+    "materials": {
+      "oak": "Sồi",
+      "walnut": "Óc chó",
+      "ash": "Tần bì",
+      "pine": "Thông",
+      "rubber": "Cao su"
+    }
   },
   "b2b": {
     "heroTitle": "Giải pháp nội thất cho doanh nghiệp",
@@ -250,9 +346,21 @@
     "ctaRegister": "Đăng ký tài khoản doanh nghiệp",
     "stepsTitle": "Quy trình hoạt động",
     "steps": [
-      { "step": "1", "title": "Đăng ký tài khoản doanh nghiệp", "desc": "Cung cấp thông tin công ty, mã số thuế để nhận báo giá và xuất hóa đơn VAT." },
-      { "step": "2", "title": "Gửi yêu cầu số lượng lớn", "desc": "Chọn sản phẩm hoặc mô tả nhu cầu — hệ thống gửi yêu cầu báo giá tới nhiều nhà cung cấp phù hợp." },
-      { "step": "3", "title": "So sánh & đặt hàng", "desc": "Nhận báo giá, so sánh giá/thời gian giao hàng, chốt đơn và xuất hóa đơn VAT đầy đủ." }
+      {
+        "step": "1",
+        "title": "Đăng ký tài khoản doanh nghiệp",
+        "desc": "Cung cấp thông tin công ty, mã số thuế để nhận báo giá và xuất hóa đơn VAT."
+      },
+      {
+        "step": "2",
+        "title": "Gửi yêu cầu số lượng lớn",
+        "desc": "Chọn sản phẩm hoặc mô tả nhu cầu — hệ thống gửi yêu cầu báo giá tới nhiều nhà cung cấp phù hợp."
+      },
+      {
+        "step": "3",
+        "title": "So sánh & đặt hàng",
+        "desc": "Nhận báo giá, so sánh giá/thời gian giao hàng, chốt đơn và xuất hóa đơn VAT đầy đủ."
+      }
     ],
     "ctaTitle": "Sẵn sàng hợp tác cùng WoodHub?",
     "ctaDesc": "Tạo tài khoản doanh nghiệp ngay hôm nay — đội ngũ WoodHub sẽ liên hệ tư vấn gói phù hợp."
@@ -268,14 +376,32 @@
     "illustrationDesc": "đến nền tảng kết nối hàng trăm xưởng mộc với khách hàng trên cả nước.",
     "valuesTitle": "Giá trị cốt lõi",
     "values": [
-      { "title": "Gỗ thật, nguồn gốc rõ ràng", "desc": "Mỗi sản phẩm trên WoodHub đều đến từ xưởng đã được xác minh năng lực và vật liệu — không hàng giả gỗ, không mập mờ xuất xứ." },
-      { "title": "Đồng hành cùng người thợ Việt", "desc": "Chúng tôi xây công cụ để xưởng mộc nhỏ tiếp cận khách hàng số đông, thay vì chỉ làm gia công cho thương hiệu lớn." },
-      { "title": "Công nghệ phục vụ trải nghiệm thật", "desc": "AI tư vấn và xem trước AR/3D giúp khách hình dung sản phẩm trong chính không gian của mình trước khi đặt hàng." }
+      {
+        "title": "Gỗ thật, nguồn gốc rõ ràng",
+        "desc": "Mỗi sản phẩm trên WoodHub đều đến từ xưởng đã được xác minh năng lực và vật liệu — không hàng giả gỗ, không mập mờ xuất xứ."
+      },
+      {
+        "title": "Đồng hành cùng người thợ Việt",
+        "desc": "Chúng tôi xây công cụ để xưởng mộc nhỏ tiếp cận khách hàng số đông, thay vì chỉ làm gia công cho thương hiệu lớn."
+      },
+      {
+        "title": "Công nghệ phục vụ trải nghiệm thật",
+        "desc": "AI tư vấn và xem trước AR/3D giúp khách hình dung sản phẩm trong chính không gian của mình trước khi đặt hàng."
+      }
     ],
     "timeline": [
-      { "year": "11/2025", "label": "Chốt ý tưởng WoodHub" },
-      { "year": "06/2026", "label": "Hoàn thành nghiên cứu" },
-      { "year": "06/2026", "label": "Ra mắt phiên bản MVP" }
+      {
+        "year": "11/2025",
+        "label": "Chốt ý tưởng WoodHub"
+      },
+      {
+        "year": "06/2026",
+        "label": "Hoàn thành nghiên cứu"
+      },
+      {
+        "year": "06/2026",
+        "label": "Ra mắt phiên bản MVP"
+      }
     ]
   },
   "pricing": {
@@ -298,7 +424,10 @@
     "noPlans": "Chưa có gói nào đang bán.",
     "loadError": "Không tải được bảng giá.",
     "retry": "Thử lại",
-    "feature": { "design": "Thiết kế 3D", "ai_chat": "Chat AI" }
+    "feature": {
+      "design": "Thiết kế 3D",
+      "ai_chat": "Chat AI"
+    }
   },
   "payment": {
     "title": "Thanh toán — {{plan}}",
@@ -331,9 +460,18 @@
     "subjectPlaceholder": "Chủ đề",
     "messagePlaceholder": "Nội dung",
     "submit": "Gửi liên hệ",
-    "support": { "label": "Hỗ trợ khách hàng", "value": "0793 105 329" },
-    "emailInfo": { "label": "Email", "value": "drtoandien321@gmail.com" },
-    "address": { "label": "Địa chỉ", "value": "FPT University, TP. HCM" },
+    "support": {
+      "label": "Hỗ trợ khách hàng",
+      "value": "0793 105 329"
+    },
+    "emailInfo": {
+      "label": "Email",
+      "value": "drtoandien321@gmail.com"
+    },
+    "address": {
+      "label": "Địa chỉ",
+      "value": "FPT University, TP. HCM"
+    },
     "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi sớm.",
     "errors": {
       "name": "Vui lòng nhập họ tên.",
@@ -354,7 +492,6 @@
     "filterCategory": "Danh mục",
     "filterMaterial": "Vật liệu",
     "filterMaxPrice": "Giá tối đa",
-    "filterRoom": "Không gian",
     "filterStyle": "Phong cách",
     "filterAvailable": "Còn hàng",
     "filterHas3d": "Có model 3D",
@@ -423,9 +560,18 @@
     "chatSupplier": "Chat với nhà cung cấp",
     "bestseller": "Bán chạy",
     "trust": {
-      "warranty": { "title": "Bảo hành 24 tháng", "desc": "Lỗi kỹ thuật đổi mới" },
-      "install": { "title": "Hỗ trợ lắp đặt", "desc": "Tận nơi nội thành" },
-      "shipping": { "title": "Giao hàng toàn quốc", "desc": "Nhận hàng 3–7 ngày" }
+      "warranty": {
+        "title": "Bảo hành 24 tháng",
+        "desc": "Lỗi kỹ thuật đổi mới"
+      },
+      "install": {
+        "title": "Hỗ trợ lắp đặt",
+        "desc": "Tận nơi nội thành"
+      },
+      "shipping": {
+        "title": "Giao hàng toàn quốc",
+        "desc": "Nhận hàng 3–7 ngày"
+      }
     }
   },
   "chat": {
@@ -470,7 +616,15 @@
     "productsLabel": "Sản phẩm",
     "shippingTbd": "Tính ở bước sau",
     "total": "Tổng",
-    "checkout": "Tiến hành thanh toán"
+    "checkout": "Tiến hành thanh toán",
+    "itemsCount": "{{count}} sản phẩm",
+    "freeShipLeft": "Mua thêm {{amount}} để được miễn phí vận chuyển",
+    "freeShipDone": "Đơn của bạn được miễn phí vận chuyển 🎉",
+    "continueShopping": "Tiếp tục mua sắm",
+    "secure": "Thanh toán chuyển khoản an toàn",
+    "decrease": "Giảm số lượng",
+    "increase": "Tăng số lượng",
+    "each": "sản phẩm"
   },
   "checkout": {
     "title": "Thanh toán",
@@ -504,7 +658,18 @@
     "errName": "Vui lòng nhập họ và tên.",
     "errPhone": "Số điện thoại không hợp lệ (VD: 0901234567).",
     "errAddress": "Địa chỉ quá ngắn, vui lòng nhập chi tiết hơn.",
-    "errDistrict": "Vui lòng chọn quận/huyện."
+    "errDistrict": "Vui lòng chọn quận/huyện.",
+    "stepCart": "Giỏ hàng",
+    "stepCheckout": "Thanh toán",
+    "stepDone": "Hoàn tất",
+    "editCart": "Sửa giỏ hàng",
+    "bankDesc": "Đơn hàng được xác nhận sau khi WoodHub nhận được tiền.",
+    "bankName": "Ngân hàng",
+    "bankAccount": "Số tài khoản",
+    "bankHolder": "Chủ tài khoản",
+    "bankHow1": "Bấm \"Đặt hàng\" để tạo đơn.",
+    "bankHow2": "Chuyển khoản đúng số tiền, nội dung ghi mã đơn hàng.",
+    "bankHow3": "WoodHub xác nhận thanh toán và tiến hành giao hàng."
   },
   "orders": {
     "title": "Đơn hàng của bạn",
@@ -529,10 +694,18 @@
   "custom": {
     "selectTitle": "Bạn muốn thiết kế gì?",
     "selectDesc": "Chọn loại sản phẩm để mở bộ cấu hình 3D — chỉnh kích thước, chất liệu, màu theo ý bạn.",
-    "selectBadges": ["Cấu hình 3D realtime", "Xem AR tại nhà", "Tự động ghép xưởng"],
+    "selectBadges": [
+      "Cấu hình 3D realtime",
+      "Xem AR tại nhà",
+      "Tự động ghép xưởng"
+    ],
     "arTitle": "Xem trước bằng 3D & AR ngay tại nhà",
     "arDesc": "Tuỳ chỉnh kích thước, chất liệu và màu trên mô hình 3D thời gian thực — rồi đặt thử sản phẩm vào chính căn phòng của bạn bằng AR trước khi đặt làm.",
-    "arPoints": ["Mô hình 3D cập nhật tức thì theo từng thông số", "Xoay và phóng to để xem mọi góc cạnh", "Đặt thử vào không gian thật bằng camera điện thoại"],
+    "arPoints": [
+      "Mô hình 3D cập nhật tức thì theo từng thông số",
+      "Xoay và phóng to để xem mọi góc cạnh",
+      "Đặt thử vào không gian thật bằng camera điện thoại"
+    ],
     "arDemoBtn": "Xem demo AR",
     "arStartBtn": "Bắt đầu thiết kế",
     "arBadge": "AR · 3D",
@@ -542,9 +715,18 @@
     "arModalCta": "Thiết kế sản phẩm của bạn",
     "stepsTitle": "Thiết kế custom trong 3 bước",
     "steps": [
-      { "title": "Chọn & tuỳ chỉnh 3D", "desc": "Chọn loại sản phẩm, kéo slider kích thước, chọn gỗ và màu hoàn thiện." },
-      { "title": "Xem trước AR tại nhà", "desc": "Đặt thử sản phẩm vào không gian thật để chắc chắn vừa ý." },
-      { "title": "Gửi xưởng & nhận báo giá", "desc": "Hệ thống ghép xưởng phù hợp và gửi yêu cầu báo giá cho bạn." }
+      {
+        "title": "Chọn & tuỳ chỉnh 3D",
+        "desc": "Chọn loại sản phẩm, kéo slider kích thước, chọn gỗ và màu hoàn thiện."
+      },
+      {
+        "title": "Xem trước AR tại nhà",
+        "desc": "Đặt thử sản phẩm vào không gian thật để chắc chắn vừa ý."
+      },
+      {
+        "title": "Gửi xưởng & nhận báo giá",
+        "desc": "Hệ thống ghép xưởng phù hợp và gửi yêu cầu báo giá cho bạn."
+      }
     ],
     "ai": {
       "badge": "AI · Mới",
@@ -607,8 +789,20 @@
       "back": "Quay lại",
       "stepIndicatorLabel": "Các bước thiết kế",
       "resumeError": "Không tìm thấy dữ liệu thiết kế đang dở. Vui lòng bắt đầu lại.",
-      "resume": { "title": "Bạn có thiết kế đang làm dở", "desc": "Lần trước bạn dừng ở bước {{step}} — {{label}}. Bạn muốn tiếp tục hay bắt đầu thiết kế mới?", "continue": "Tiếp tục thiết kế dở", "startNew": "Bắt đầu thiết kế mới" },
-      "stepLabels": { "1": "Nguồn", "2": "Chuẩn bị ảnh", "3": "Dựng 3D", "4": "Kết quả", "5": "Chỉnh sửa", "6": "Lưu" },
+      "resume": {
+        "title": "Bạn có thiết kế đang làm dở",
+        "desc": "Lần trước bạn dừng ở bước {{step}} — {{label}}. Bạn muốn tiếp tục hay bắt đầu thiết kế mới?",
+        "continue": "Tiếp tục thiết kế dở",
+        "startNew": "Bắt đầu thiết kế mới"
+      },
+      "stepLabels": {
+        "1": "Nguồn",
+        "2": "Chuẩn bị ảnh",
+        "3": "Dựng 3D",
+        "4": "Kết quả",
+        "5": "Chỉnh sửa",
+        "6": "Lưu"
+      },
       "step1": {
         "title": "Bắt đầu từ đâu?",
         "subtitle": "Tải ảnh của bạn để AI dựng thành mô hình 3D, hoặc chọn nhanh 1 mẫu có sẵn.",
@@ -636,7 +830,15 @@
         "removeBgHint": "AI sẽ tách sản phẩm khỏi hậu cảnh trước khi dựng 3D",
         "cta": "Bắt đầu dựng mô hình"
       },
-      "productTypes": { "sofa": "Sofa", "chair": "Ghế", "table": "Bàn", "cabinet": "Tủ", "shelf": "Kệ", "bed": "Giường", "decor": "Trang trí" },
+      "productTypes": {
+        "sofa": "Sofa",
+        "chair": "Ghế",
+        "table": "Bàn",
+        "cabinet": "Tủ",
+        "shelf": "Kệ",
+        "bed": "Giường",
+        "decor": "Trang trí"
+      },
       "step3": {
         "stageQueued": "Đang xếp hàng chờ xử lý…",
         "stageProcessing": "AI đang dựng mô hình 3D…",
@@ -783,7 +985,11 @@
       "completed": "Hoàn thành",
       "cancelled": "Đã hủy"
     },
-    "role": { "customer": "khách hàng", "workshop": "xưởng", "admin": "quản trị" },
+    "role": {
+      "customer": "khách hàng",
+      "workshop": "xưởng",
+      "admin": "quản trị"
+    },
     "actionConfirm": "Xác nhận đơn",
     "actionStart": "Bắt đầu sản xuất",
     "actionComplete": "Hoàn thành",

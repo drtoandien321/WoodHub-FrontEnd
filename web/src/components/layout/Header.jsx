@@ -11,7 +11,6 @@ import { SunIcon, MoonIcon, CartIcon, UserIcon, ChevronDownIcon } from '../ui/ic
 // "Giới thiệu" giờ là 1 trang gộp (Câu chuyện + Bảng giá + Liên hệ) → link thẳng /about, bỏ dropdown
 const MENU = [
   { key: 'shop', to: '/shop' },
-  { key: 'rooms', to: '/rooms' },
   { key: 'custom', to: '/custom' },
   { key: 'suppliers', to: '/suppliers' },
   { key: 'b2b', to: '/b2b' },
@@ -73,7 +72,7 @@ export default function Header() {
             <Link to="/cart" aria-label={t('nav.cart')} className="btn btn-ghost btn-sm btn-circle relative">
               <CartIcon className="w-5 h-5" />
               {itemCount > 0 && (
-                <span className="badge badge-accent badge-xs absolute -top-0.5 -right-0.5">{itemCount}</span>
+                <span className="pointer-events-none absolute -right-1 -top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-accent px-1 text-[11px] font-semibold leading-none text-accent-content tabular-nums">{itemCount > 99 ? '99+' : itemCount}</span>
               )}
             </Link>
           )}
