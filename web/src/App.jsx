@@ -17,9 +17,6 @@ import { useUiStore } from './stores/uiStore.js';
  */
 const Shop = lazy(() => import('./pages/Shop.jsx'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail.jsx'));
-const RoomsIndex = lazy(() => import('./pages/RoomsIndex.jsx'));
-const RoomScenes = lazy(() => import('./pages/RoomScenes.jsx'));
-const RoomSceneViewer = lazy(() => import('./pages/RoomSceneViewer.jsx'));
 const MyQuotes = lazy(() => import('./pages/MyQuotes.jsx'));
 const QuoteDetail = lazy(() => import('./pages/QuoteDetail.jsx'));
 const MyCustomOrders = lazy(() => import('./pages/MyCustomOrders.jsx'));
@@ -121,10 +118,6 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/:category" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          {/* Shop by Room (FE-5) — công khai, giống Shop */}
-          <Route path="/rooms" element={<RoomsIndex />} />
-          <Route path="/rooms/:roomSlug" element={<RoomScenes />} />
-          <Route path="/rooms/:roomSlug/scenes/:sceneId" element={<RoomSceneViewer />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/custom" element={<CustomSelect />} />
           <Route path="/custom/models" element={<CustomModels />} />

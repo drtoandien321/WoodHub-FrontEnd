@@ -3,7 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useProducts } from '../hooks/useProducts.js';
-import { useCategoryTree, useMaterials, useRooms, useStyles } from '../hooks/useCatalog.js';
+import { useCategoryTree, useMaterials, useStyles } from '../hooks/useCatalog.js';
 import ProductCard from '../components/ui/ProductCard.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import { formatVnd } from '../utils/format.js';
@@ -29,7 +29,6 @@ export default function Shop() {
 
   const categoryId = categoryFromPath || searchParams.get('categoryId') || '';
   const materialId = searchParams.get('materialId') ?? '';
-  const room = searchParams.get('room') ?? '';
   const style = searchParams.get('style') ?? '';
   const sort = searchParams.get('sort') ?? '';
   const maxPrice = searchParams.get('maxPrice') ?? '';
@@ -39,7 +38,6 @@ export default function Shop() {
   const params = {
     categoryId: categoryId || undefined,
     materialId: materialId || undefined,
-    room: room || undefined,
     style: style || undefined,
     sort: sort || undefined,
     maxPrice: maxPrice || undefined,
@@ -53,7 +51,6 @@ export default function Shop() {
   const { data, isLoading, isError, refetch } = useProducts(params);
   const { data: categoryTree } = useCategoryTree();
   const { data: materials } = useMaterials();
-  const { data: rooms } = useRooms();
   const { data: styles } = useStyles();
 
   const setParam = (key, value, { resetPage = true } = {}) => {
@@ -83,7 +80,7 @@ export default function Shop() {
   };
 
   const filterCount =
-    (categoryId ? 1 : 0) + (materialId ? 1 : 0) + (room ? 1 : 0) + (style ? 1 : 0) +
+    (categoryId ? 1 : 0) + (materialId ? 1 : 0) + (style ? 1 : 0) +
     (maxPrice ? 1 : 0) + activeBooleans.length;
   const hasFilters = filterCount > 0 || sort;
 
@@ -160,27 +157,6 @@ export default function Shop() {
           <span>{t('shop.priceMax')}</span>
         </div>
       </div>
-
-      {/* Phòng — chỉ hiện khi có dữ liệu (BE thật chưa seed thì tự ẩn, không hiện ô trống) */}
-      {rooms?.length > 0 && (
-        <>
-          <div className="divider my-0" />
-          <div>
-            <h3 className="font-medium mb-3">{t('shop.filterRoom')}</h3>
-            <div className="flex flex-wrap gap-2">
-              {rooms.map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => setParam('room', room === r.slug ? null : r.slug)}
-                  className={`rounded-full border px-3 py-1 text-sm transition-colors ${room === r.slug ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:border-primary/50'}`}
-                >
-                  {r.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
 
       {/* Phong cách */}
       {styles?.length > 0 && (
