@@ -69,6 +69,8 @@ const REAL_ENDPOINTS = new Set([
   'getAdminUsers', 'getAdminUserDetail', 'deleteUser',
   // Module Admin — quản lý thanh toán (Portal Quản trị /admin/payments) — API chỉ đọc
   'getAdminPayments', 'getAdminPayment', 'getAdminPaymentStats',
+  // Module Admin — Dashboard tổng quan (Portal Quản trị /admin/dashboard) — API chỉ đọc
+  'getAdminDashboardSummary', 'getAdminDashboardTimeseries', 'getAdminDashboardTop',
   // Module GPS/Vị trí — hồ sơ supplier tự thân (biết type để gate UI)
   'getSupplierMe',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
@@ -716,6 +718,14 @@ export const api = {
   getAdminPayment: (id) => call(() => http.get(`/admin/payments/${id}`), 'getAdminPayment', id),
   // GET /admin/payments/stats?from=&to= → PaymentStatsResponse { totalRevenue, totalCount, paidCount, ..., dailyRevenue[] }
   getAdminPaymentStats: (params) => call(() => http.get('/admin/payments/stats', { params }), 'getAdminPaymentStats', params),
+
+  // ===== DASHBOARD tổng quan — quản trị (chỉ admin, API chỉ đọc) =====
+  // GET /admin/dashboard/summary?from=&to= → { users, revenue, subscriptions, suppliers, products, ai }
+  getAdminDashboardSummary: (params) => call(() => http.get('/admin/dashboard/summary', { params }), 'getAdminDashboardSummary', params),
+  // GET /admin/dashboard/timeseries?from=&to= → { revenue[], newUsers[], customOrders[], aiTasks[] } (chỉ ngày CÓ dữ liệu)
+  getAdminDashboardTimeseries: (params) => call(() => http.get('/admin/dashboard/timeseries', { params }), 'getAdminDashboardTimeseries', params),
+  // GET /admin/dashboard/top?from=&to=&limit= → { topPlans[], topSuppliers[] }
+  getAdminDashboardTop: (params) => call(() => http.get('/admin/dashboard/top', { params }), 'getAdminDashboardTop', params),
 
   // ===== SUBSCRIPTION PLANS — quản trị (chỉ admin) =====
   // GET /subscription-plans/all → CẢ gói đã tắt (khác GET /subscription-plans công khai)

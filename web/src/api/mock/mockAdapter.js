@@ -1517,6 +1517,45 @@ export const mockAdapter = {
     };
   },
 
+  // ===== DASHBOARD tổng quan (Portal Quản trị /admin/dashboard) — dữ liệu giả đúng shape BE =====
+  async getAdminDashboardSummary() {
+    await delay(300);
+    return {
+      users: { total: 1280, newInPeriod: 42, byRole: { customer: 1200, supplier: 79, admin: 1 }, activeRecently: 37, emailVerifiedRate: 0.86 },
+      revenue: { totalRevenue: 15800000, totalCount: 128, paidCount: 110, pendingCount: 12, failedCount: 6, successRate: 0.859 },
+      subscriptions: {
+        activeTotal: 95,
+        byPlan: [{ planName: 'B2C Premium AR/3D', count: 60 }, { planName: 'Free', count: 35 }],
+        expiringIn7Days: 8, estimatedMrr: 11940000,
+      },
+      suppliers: { total: 79, byStatus: { pending: 5, active: 70, suspended: 4 } },
+      products: { total: 540, byStatus: { draft: 40, active: 480, hidden: 20 }, storeCount: 86 },
+      ai: { chatSessions: 320, aiMessagesInPeriod: 1500, gen3dTasks: 210, gen3dFailedRate: 0.07 },
+    };
+  },
+
+  async getAdminDashboardTimeseries({ from, to } = {}) {
+    await delay(300);
+    const end = to ? new Date(to) : new Date();
+    const start = from ? new Date(from) : new Date(end.getTime() - 13 * 86400000);
+    const days = [];
+    for (let d = new Date(start); d <= end && days.length < 90; d = new Date(d.getTime() + 86400000)) days.push(d.toISOString().slice(0, 10));
+    return {
+      revenue: days.map((date, i) => ({ date, revenue: (((i * 7) % 5) + 1) * 199000, count: ((i * 7) % 5) + 1 })),
+      newUsers: days.map((date, i) => ({ date, count: (i * 3) % 7 })).filter((d) => d.count),
+      customOrders: days.map((date, i) => ({ date, count: (i * 5) % 4 })).filter((d) => d.count),
+      aiTasks: days.map((date, i) => ({ date, count: ((i * 11) % 9) + 1, failed: i % 6 === 0 ? 1 : 0 })),
+    };
+  },
+
+  async getAdminDashboardTop() {
+    await delay(300);
+    return {
+      topPlans: [{ planName: 'B2C Premium AR/3D', sales: 60, revenue: 11940000 }, { planName: 'B2B Pro', sales: 12, revenue: 5988000 }],
+      topSuppliers: [{ supplierId: 'mock-1', name: 'Xưởng Gỗ An Phát', orderCount: 12, revenue: 36000000 }],
+    };
+  },
+
   // ===== USER quản trị (Portal Quản trị /admin/users) =====
   async getAdminUsers() {
     await delay(300);

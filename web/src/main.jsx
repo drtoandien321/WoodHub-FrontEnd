@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'motion/react';
 import App from './App.jsx';
 import { initAccountScope } from './services/accountScope.js';
+import { initAnalytics } from './services/analytics.js';
 import './i18n/index.js';
 import './index.css';
 
@@ -20,6 +21,9 @@ const queryClient = new QueryClient({
 
 // Đổi tài khoản → xoá cache + reset wizard thiết kế của người trước (xem services/accountScope.js)
 initAccountScope(queryClient);
+
+// Google Analytics 4 (no-op nếu chưa có VITE_GA_MEASUREMENT_ID)
+initAnalytics();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

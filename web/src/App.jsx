@@ -5,6 +5,7 @@ import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
+import AnalyticsTracker from './components/AnalyticsTracker.jsx';
 import ChatWidget from './components/chatbot/ChatWidget.jsx';
 import ChatDrawer from './components/chat/ChatDrawer.jsx';
 import { useUiStore } from './stores/uiStore.js';
@@ -56,6 +57,7 @@ const AdminMaterials = lazy(() => import('./pages/admin/AdminMaterials.jsx'));
 const AdminSuppliers = lazy(() => import('./pages/admin/AdminSuppliers.jsx'));
 const AdminSupplierDetail = lazy(() => import('./pages/admin/AdminSupplierDetail.jsx'));
 const AdminSubscriptionPlans = lazy(() => import('./pages/admin/AdminSubscriptionPlans.jsx'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'));
 const AdminPayments = lazy(() => import('./pages/admin/AdminPayments.jsx'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers.jsx'));
 const AdminUserDetail = lazy(() => import('./pages/admin/AdminUserDetail.jsx'));
@@ -92,6 +94,7 @@ export default function App() {
   return (
     <Suspense fallback={<PageLoader />}>
       <ScrollToTop />
+      <AnalyticsTracker />
       {/* Chatbot nổi toàn cục — tự ẩn ở trang auth (xem ChatWidget) */}
       <ChatWidget />
       {/* Khung chat với nhà cung cấp (mở từ trang sản phẩm / hồ sơ NCC) */}
@@ -193,7 +196,8 @@ export default function App() {
         {/* Portal Quản trị viên: layout riêng, chỉ role admin. */}
         <Route element={<ProtectedRoute allow={['admin']} />}>
           <Route path="/admin" element={<AdminPortalLayout />}>
-            <Route index element={<Navigate to="users" replace />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="users/:id" element={<AdminUserDetail />} />
             <Route path="categories" element={<AdminCategories />} />
