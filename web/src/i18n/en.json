@@ -772,6 +772,9 @@
       }
     },
     "dimensions": "Dimensions (cm)",
+    "dimensionWidth": "Width",
+    "dimensionHeight": "Height",
+    "dimensionDepth": "Depth",
     "colors": {
       "default": "Original",
       "walnut": "Walnut",

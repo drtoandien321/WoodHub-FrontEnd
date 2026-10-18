@@ -772,6 +772,9 @@
       }
     },
     "dimensions": "Kích thước (cm)",
+    "dimensionWidth": "Rộng",
+    "dimensionHeight": "Cao",
+    "dimensionDepth": "Sâu",
     "colors": {
       "default": "Màu gốc",
       "walnut": "Óc chó",

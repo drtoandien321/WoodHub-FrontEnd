@@ -63,15 +63,20 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
             <section>
               <h3 className="mb-2 font-medium">{t('custom.studio.step5.colorTitle')}</h3>
               <div className="flex flex-wrap gap-2">
-                {opt.colors.map((hex) => (
-                  <button
-                    key={hex}
-                    onClick={() => onChange({ color: hex, material: null })}
-                    aria-label={hex}
-                    className={`h-8 w-8 rounded-full border-2 transition ${configuration.color === hex ? 'border-primary' : 'border-base-300'}`}
-                    style={{ background: hex }}
-                  />
-                ))}
+                {/* normalizeOptions trả mỗi màu là { value, hex, label } — value để lưu/so sánh, hex để vẽ ô màu */}
+                {opt.colors.map((c) => {
+                  const name = t(`custom.colors.${c.value}`, { defaultValue: c.label });
+                  return (
+                    <button
+                      key={c.value}
+                      onClick={() => onChange({ color: c.value, material: null })}
+                      aria-label={name}
+                      title={name}
+                      className={`h-8 w-8 rounded-full border-2 transition ${configuration.color === c.value ? 'border-primary ring-2 ring-primary/30' : 'border-base-300'}`}
+                      style={{ background: c.hex }}
+                    />
+                  );
+                })}
               </div>
             </section>
           )}
