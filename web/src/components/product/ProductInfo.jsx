@@ -88,7 +88,8 @@ export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, ca
 
       <div className="flex items-center gap-3">
         <span className="text-sm text-base-content/55">{t('product.quantity')}</span>
-        <QuantitySelector value={qty} onChange={setQty} max={20} />
+        {/* Tối đa theo BE (999/lần thêm giỏ) — trước đây FE tự đặt cứng 20 */}
+        <QuantitySelector value={qty} onChange={setQty} />
       </div>
 
       {/* CTA */}

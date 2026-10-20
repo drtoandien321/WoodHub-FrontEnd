@@ -29,30 +29,47 @@ export default function SubscriptionPlanFormModal({ open, onClose, initial = nul
   const [limits, setLimits] = useState(() => {
     // Gói cũ có thể còn ar_3d trong featureLimits → bỏ đi để lần lưu tới không gửi lại key đã ngừng dùng
     const { ar_3d: _drop, ...rest } = initial?.featureLimits ?? {};
-    return { ai_chat: 0, design: 0, export: 0, ...rest };
+    // Lưu dạng CHUỖI để ô nhập xoá trắng được khi đang gõ (đổi sang số lúc submit)
+    return Object.fromEntries(Object.entries({ ai_chat: 0, design: 0, export: 0, ...rest }).map(([k, v]) => [k, String(v)]));
   });
   const [features, setFeatures] = useState(initial?.displayFeatures?.length ? initial.displayFeatures : ['']);
   const [err, setErr] = useState('');
 
   if (!open) return null;
 
-  const setLimit = (key) => (e) => setLimits((s) => ({ ...s, [key]: Number(e.target.value) }));
+  /*
+   * Giữ nguyên chuỗi người dùng gõ. Bản cũ ép Number(e.target.value) ở mỗi phím → xoá trắng thì
+   * Number('') = 0 → ô bật lại "0" ngay, không xoá được (và gõ "2" sau số 0 thành "02").
+   */
+  const setLimit = (key) => (e) => setLimits((s) => ({ ...s, [key]: e.target.value }));
   const setFeature = (i) => (e) => setFeatures((fs) => fs.map((f, idx) => (idx === i ? e.target.value : f)));
   const addFeature = () => setFeatures((fs) => [...fs, '']);
   const removeFeature = (i) => setFeatures((fs) => fs.filter((_, idx) => idx !== i));
 
   const submit = async () => {
     if (!name.trim() || !displayName.trim()) { setErr('Vui lòng nhập mã gói và tên hiển thị'); return; }
+    // Đổi chuỗi → số nguyên + kiểm tra ở ĐÂY (lúc lưu), không ép trong lúc gõ
+    const toInt = (v) => (String(v).trim() === '' ? NaN : Number(v));
+    const priceNum = toInt(price);
+    if (!Number.isInteger(priceNum) || priceNum < 0) { setErr('Giá phải là số nguyên ≥ 0'); return; }
+    const sortNum = String(sortOrder).trim() === '' ? 0 : toInt(sortOrder);
+    if (!Number.isInteger(sortNum)) { setErr('Thứ tự hiển thị phải là số nguyên'); return; }
+    const featureLimits = {};
+    for (const f of FEATURES) {
+      const n = toInt(limits[f.key]);
+      if (!Number.isInteger(n) || n < -1) { setErr(`"${f.label}": nhập số nguyên ≥ 0, hoặc -1 nếu không giới hạn`); return; }
+      featureLimits[f.key] = n;
+    }
     setErr('');
     const body = {
       name: name.trim(),
       displayName: displayName.trim(),
       description: description.trim() || undefined,
-      price: Number(price),
-      featureLimits: limits,
+      price: priceNum,
+      featureLimits,
       displayFeatures: features.map((f) => f.trim()).filter(Boolean),
       isActive,
-      sortOrder: Number(sortOrder),
+      sortOrder: sortNum,
     };
     try {
       if (isEdit) await updatePlan.mutateAsync({ id: initial.id, ...body });

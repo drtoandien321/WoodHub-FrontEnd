@@ -19,11 +19,14 @@ export const useReviews = (targetType, targetId, params = { size: 20 }) =>
     placeholderData: (prev) => prev,
   });
 
+// staleTime 5 phút: thẻ sản phẩm gọi hàng loạt (Shop/Landing) → không gọi lại mỗi lần quay về trang.
+// Viết/sửa/xoá đánh giá vẫn invalidate ['reviews'] nên số liệu cập nhật ngay sau thao tác của chính user.
 export const useReviewSummary = (targetType, targetId) =>
   useQuery({
     queryKey: [...REVIEWS_KEY, 'summary', targetType, targetId],
     queryFn: () => api.getReviewSummary({ targetType, targetId }),
     enabled: !!targetId,
+    staleTime: 5 * 60_000,
   });
 
 const useReviewMutation = (mutationFn) => {
