@@ -1237,6 +1237,10 @@
     "errInvalid": "Nội dung đánh giá không hợp lệ.",
     "errGeneric": "Không gửi được đánh giá, vui lòng thử lại.",
     "none": "Chưa có đánh giá",
-    "cardAria": "Đánh giá {{avg}}/5 từ {{count}} lượt"
+    "cardAria": "Đánh giá {{avg}}/5 từ {{count}} lượt",
+    "anonymousLabel": "Ẩn tên của tôi",
+    "anonymousHint": "Người khác chỉ thấy tên đã che (vd N*****n). Bạn vẫn sửa/xoá được đánh giá này.",
+    "anonymousBadge": "Ẩn danh",
+    "anonymousOwnerNote": "Người khác đang thấy tên bạn được ẩn."
   }
 }

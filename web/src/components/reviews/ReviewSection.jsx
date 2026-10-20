@@ -26,6 +26,8 @@ function ReviewForm({ targetType, targetId, existing, onDone }) {
   const update = useUpdateReview();
   const [rating, setRating] = useState(existing?.rating ?? 0);
   const [comment, setComment] = useState(existing?.comment ?? '');
+  // Ẩn tên: BE lưu cờ is_anonymous, trả tên đã che ("N*****n") + không trả userId cho người khác
+  const [anonymous, setAnonymous] = useState(existing?.anonymous ?? false);
   const [err, setErr] = useState('');
   const saving = create.isPending || update.isPending;
   const starLabels = [1, 2, 3, 4, 5].map((n) => t(`reviews.star${n}`));
@@ -34,7 +36,7 @@ function ReviewForm({ targetType, targetId, existing, onDone }) {
     e.preventDefault();
     if (!rating) { setErr(t('reviews.errNoRating')); return; }
     setErr('');
-    const body = { rating, comment: comment.trim() || null };
+    const body = { rating, comment: comment.trim() || null, anonymous };
     try {
       if (existing) await update.mutateAsync({ id: existing.id, ...body });
       else await create.mutateAsync({ targetType, targetId, ...body });
@@ -59,6 +61,13 @@ function ReviewForm({ targetType, targetId, existing, onDone }) {
         />
         <span className="self-end text-xs text-base-content/45">{comment.length}/{COMMENT_MAX}</span>
       </label>
+      <label className="flex cursor-pointer items-start gap-2 text-sm">
+        <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="checkbox checkbox-primary checkbox-sm mt-0.5" />
+        <span>
+          {t('reviews.anonymousLabel')}
+          <span className="block text-xs text-base-content/50">{t('reviews.anonymousHint')}</span>
+        </span>
+      </label>
       {err && <p role="alert" className="text-sm text-error">{err}</p>}
       <div className="flex justify-end gap-2">
         <button type="button" onClick={onDone} disabled={saving} className="btn btn-ghost btn-sm">{t('reviews.cancel')}</button>
@@ -74,7 +83,9 @@ function ReviewForm({ targetType, targetId, existing, onDone }) {
  * ReviewSection — khối "Đánh giá" ở trang SẢN PHẨM và trang HỒ SƠ NHÀ CUNG CẤP.
  *  - Ai cũng xem được điểm trung bình + danh sách (GET /reviews, /reviews/summary là công khai).
  *  - Khách hàng (role customer) đã đăng nhập viết được 1 đánh giá / đối tượng; có rồi thì sửa/xoá.
- *    BE không có API "đánh giá của tôi" → tìm trong trang đầu theo userId (BE vẫn chặn trùng bằng 409).
+ *    BE không có API "đánh giá của tôi" → tìm trong trang đầu theo cờ `mine` của BE (đánh giá ẩn danh
+ *    không trả userId nên không so được bằng id); dự phòng so userId cho BE bản cũ. BE vẫn chặn trùng bằng 409.
+ *  - Ẩn danh: khách tích "Ẩn tên của tôi" → người khác thấy tên đã che; chủ đánh giá vẫn sửa/xoá được.
  *  - Chưa đăng nhập: link sang /login (state.from để quay lại đúng trang).
  *  - Supplier/admin không có form: BE chặn tự đánh giá, và đánh giá là tiếng nói của người mua.
  */
@@ -91,7 +102,7 @@ export default function ReviewSection({ targetType, targetId, title }) {
 
   const reviews = data?.content ?? [];
   const total = summary?.count ?? 0;
-  const mine = user ? reviews.find((r) => r.userId === user.id) : null;
+  const mine = user ? reviews.find((r) => r.mine || (r.userId && r.userId === user.id)) : null;
   const canWrite = user?.role === 'customer';
   const distribution = ratingDistribution(reviews);
   const hasMore = reviews.length < (data?.page?.totalElements ?? data?.totalElements ?? 0);
@@ -149,7 +160,13 @@ export default function ReviewSection({ targetType, targetId, title }) {
                   <div className="flex items-center gap-2.5">
                     <LogoBadge name={r.userName} className="h-9 w-9 rounded-full text-xs" />
                     <div>
-                      <p className="text-sm font-medium">{r.userName}{isMine && <span className="ml-1.5 badge badge-primary badge-xs">{t('reviews.yours')}</span>}</p>
+                      <p className="text-sm font-medium">
+                        {r.userName}
+                        {r.anonymous && <span className="ml-1.5 badge badge-ghost badge-xs">{t('reviews.anonymousBadge')}</span>}
+                        {isMine && <span className="ml-1.5 badge badge-primary badge-xs">{t('reviews.yours')}</span>}
+                      </p>
+                      {/* Chỉ chủ đánh giá thấy dòng này → yên tâm là tên đã được ẩn với người khác */}
+                      {isMine && r.anonymous && <p className="text-xs text-base-content/50">{t('reviews.anonymousOwnerNote')}</p>}
                       <Stars value={r.rating} size={13} />
                     </div>
                   </div>

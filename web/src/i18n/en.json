@@ -1237,6 +1237,10 @@
     "errInvalid": "Invalid review content.",
     "errGeneric": "Couldn't submit your review, please try again.",
     "none": "No reviews yet",
-    "cardAria": "Rated {{avg}}/5 from {{count}} reviews"
+    "cardAria": "Rated {{avg}}/5 from {{count}} reviews",
+    "anonymousLabel": "Hide my name",
+    "anonymousHint": "Others only see a masked name (e.g. N*****n). You can still edit or delete this review.",
+    "anonymousBadge": "Anonymous",
+    "anonymousOwnerNote": "Others see your name hidden."
   }
 }
