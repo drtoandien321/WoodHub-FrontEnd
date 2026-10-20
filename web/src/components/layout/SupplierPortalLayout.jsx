@@ -1,5 +1,6 @@
 import PortalShell from './PortalShell.jsx';
-import { MANUFACTURER } from '../../api/mock/manufacturerData.js';
+import { usePortalBrand } from '../../hooks/useSupplierMe.js';
+import { useAuthStore } from '../../stores/authStore.js';
 import { Home, Store, Package, ShoppingBag, BarChart, Gear, Star, Briefcase, Tag } from '../suppliers/icons.jsx';
 
 /*
@@ -19,11 +20,14 @@ const NAV = [
 ];
 
 export default function SupplierPortalLayout() {
+  // Tên thật từ /suppliers/me (không còn lấy cứng từ file mock)
+  const userName = useAuthStore((st) => st.user?.name);
+  const brand = usePortalBrand(userName);
   return (
     <PortalShell
       nav={NAV}
-      brandName={MANUFACTURER.name}
-      brandInitials={MANUFACTURER.initials}
+      brandName={brand.name}
+      brandInitials={brand.initials}
       home="/portal/supplier/dashboard"
     />
   );

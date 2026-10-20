@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ai3dErrorKey } from '../../utils/ai3dErrors.js';
 
@@ -13,10 +14,17 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
   const { t } = useTranslation();
 
   if (taskError) {
+    // 429 = hết cả hạn mức tháng lẫn lượt đã mua → dẫn thẳng sang chỗ mua thêm lượt (credit pack).
+    // Bản cũ chỉ hiện chữ, không có nút nào → khách kẹt ở màn hình lỗi.
+    const outOfCredits = taskError?.response?.status === 429;
     return (
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-10 text-center">
         <p className="font-display text-xl text-error">{t('custom.ai.failedTitle')}</p>
         <p className="text-sm text-base-content/60">{t(ai3dErrorKey(taskError))}</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {outOfCredits && <Link to="/account/subscription" className="btn btn-primary btn-sm">{t('custom.studio.step3.buyCredits')}</Link>}
+          {onChangeImage && <button type="button" onClick={onChangeImage} className="btn btn-ghost btn-sm">{t('custom.studio.back')}</button>}
+        </div>
       </div>
     );
   }

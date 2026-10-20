@@ -632,7 +632,9 @@
     "errInactive": "This product is no longer available.",
     "errNotFound": "Item not found in your cart, please reload the page.",
     "errInvalid": "Invalid quantity (1–999).",
-    "errGeneric": "Couldn't update your cart. Please try again."
+    "errGeneric": "Couldn't update your cart. Please try again.",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "checkout": {
     "title": "Checkout",
@@ -721,7 +723,9 @@
       "completed": "Completed",
       "cancelled": "Cancelled",
       "refunded": "Refunded"
-    }
+    },
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "custom": {
     "selectTitle": "What would you like to design?",
@@ -881,7 +885,8 @@
         "stageCancelled": "Cancelled",
         "stageDone": "Done",
         "leaveHint": "You can leave this page — we'll keep tracking progress for when you come back.",
-        "changeImage": "Change photo"
+        "changeImage": "Change photo",
+        "buyCredits": "Buy more design credits"
       },
       "step4": {
         "title": "Result",
@@ -1241,6 +1246,8 @@
     "anonymousLabel": "Hide my name",
     "anonymousHint": "Others only see a masked name (e.g. N*****n). You can still edit or delete this review.",
     "anonymousBadge": "Anonymous",
-    "anonymousOwnerNote": "Others see your name hidden."
+    "anonymousOwnerNote": "Others see your name hidden.",
+    "count_one": "{{count}} review",
+    "count_other": "{{count}} reviews"
   }
 }

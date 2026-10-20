@@ -1,5 +1,6 @@
 import PortalShell from './PortalShell.jsx';
-import { WORKSHOP } from '../../api/mock/workshopPortalData.js';
+import { usePortalBrand } from '../../hooks/useSupplierMe.js';
+import { useAuthStore } from '../../stores/authStore.js';
 import { Home, Package, Tool, Briefcase, Star, BarChart, Gear } from '../suppliers/icons.jsx';
 
 /*
@@ -17,12 +18,15 @@ const NAV = [
 ];
 
 export default function WorkshopPortalLayout() {
+  // Tên thật từ /suppliers/me (không còn lấy cứng từ file mock)
+  const userName = useAuthStore((st) => st.user?.name);
+  const brand = usePortalBrand(userName);
   return (
     <PortalShell
       nav={NAV}
       title="Portal Xưởng mộc"
-      brandName={WORKSHOP.name}
-      brandInitials={WORKSHOP.initials}
+      brandName={brand.name}
+      brandInitials={brand.initials}
       home="/portal/workshop/dashboard"
     />
   );

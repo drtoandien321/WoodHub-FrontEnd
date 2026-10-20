@@ -881,7 +881,8 @@
         "stageCancelled": "Đã hủy",
         "stageDone": "Hoàn tất",
         "leaveHint": "Bạn có thể rời trang — chúng tôi sẽ tiếp tục theo dõi tiến trình khi bạn quay lại.",
-        "changeImage": "Đổi ảnh khác"
+        "changeImage": "Đổi ảnh khác",
+        "buyCredits": "Mua thêm lượt thiết kế"
       },
       "step4": {
         "title": "Kết quả",

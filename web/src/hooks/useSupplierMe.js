@@ -9,3 +9,18 @@ import { api } from '../api/client.js';
  */
 export const useSupplierMe = () =>
   useQuery({ queryKey: ['supplierMe'], queryFn: api.getSupplierMe, staleTime: 5 * 60_000 });
+
+// "Nội Thất An Phát" → "AP" (2 từ cuối) — dùng cho avatar chữ trên header portal
+const initialsOf = (name = '') =>
+  name.trim().split(/\s+/).filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase() || 'NCC';
+
+/*
+ * Tên + chữ viết tắt hiển thị trên header portal, lấy từ hồ sơ THẬT (businessName của /suppliers/me).
+ * Trước đây 2 layout portal lấy cứng từ file mock (MANUFACTURER/WORKSHOP) → NCC nào đăng nhập cũng
+ * thấy "Nội Thất An Phát". Đang tải / chưa có hồ sơ → dùng tạm tên tài khoản đăng nhập.
+ */
+export const usePortalBrand = (fallbackName) => {
+  const { data } = useSupplierMe();
+  const name = data?.businessName || fallbackName || 'Nhà cung cấp';
+  return { name, initials: initialsOf(name) };
+};
