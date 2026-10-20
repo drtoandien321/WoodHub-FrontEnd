@@ -1238,6 +1238,8 @@
     "errForbidden": "Bạn không thể đánh giá sản phẩm/cửa hàng của chính mình, hoặc không có quyền với đánh giá này.",
     "errAuth": "Phiên đăng nhập đã hết, vui lòng đăng nhập lại.",
     "errInvalid": "Nội dung đánh giá không hợp lệ.",
-    "errGeneric": "Không gửi được đánh giá, vui lòng thử lại."
+    "errGeneric": "Không gửi được đánh giá, vui lòng thử lại.",
+    "none": "Chưa có đánh giá",
+    "cardAria": "Đánh giá {{avg}}/5 từ {{count}} lượt"
   }
 }

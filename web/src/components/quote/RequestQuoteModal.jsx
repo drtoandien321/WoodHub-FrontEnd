@@ -15,7 +15,8 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
   const createQuote = useCreateQuote();
 
   const [workshopId, setWorkshopId] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  // Chuỗi để ô số lượng xoá trắng được khi gõ; đổi sang số lúc gửi (input có min=1 + required chặn rỗng/0)
+  const [quantity, setQuantity] = useState('1');
   const [location, setLocation] = useState('');
   const [note, setNote] = useState('');
 
@@ -24,7 +25,7 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     createQuote.mutate(
-      { workshopId, customDesignId: design.id, quantity, location: location || undefined, note: note || undefined },
+      { workshopId, customDesignId: design.id, quantity: Number(quantity), location: location || undefined, note: note || undefined },
       { onSuccess: (quote) => onSuccess(quote) }
     );
   };
@@ -53,7 +54,7 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
 
           <label className="flex flex-col gap-1.5">
             <span className="text-sm text-base-content/70">{t('quote.quantity')} <span className="text-error">*</span></span>
-            <input type="number" min={1} required value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="input input-bordered w-full rounded-xl" />
+            <input type="number" min={1} required value={quantity} onChange={(e) => setQuantity(e.target.value.replace(/\D/g, ''))} className="input input-bordered w-full rounded-xl" />
           </label>
 
           <label className="flex flex-col gap-1.5">

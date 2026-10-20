@@ -1238,6 +1238,8 @@
     "errForbidden": "You can't review your own product/shop, or you don't have access to this review.",
     "errAuth": "Your session expired, please log in again.",
     "errInvalid": "Invalid review content.",
-    "errGeneric": "Couldn't submit your review, please try again."
+    "errGeneric": "Couldn't submit your review, please try again.",
+    "none": "No reviews yet",
+    "cardAria": "Rated {{avg}}/5 from {{count}} reviews"
   }
 }
