@@ -27,6 +27,7 @@ const Orders = lazy(() => import('./pages/Orders.jsx'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 const MySubscription = lazy(() => import('./pages/MySubscription.jsx'));
+const MyAddresses = lazy(() => import('./pages/MyAddresses.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
 const VerifyOtp = lazy(() => import('./pages/VerifyOtp.jsx'));
@@ -56,6 +57,10 @@ const AdminSupplierDetail = lazy(() => import('./pages/admin/AdminSupplierDetail
 const AdminSubscriptionPlans = lazy(() => import('./pages/admin/AdminSubscriptionPlans.jsx'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.jsx'));
 const AdminPayments = lazy(() => import('./pages/admin/AdminPayments.jsx'));
+const AdminOrders = lazy(() => import('./pages/admin/AdminOrders.jsx'));
+const AdminPromotions = lazy(() => import('./pages/admin/AdminPromotions.jsx'));
+const AdminShippingConfig = lazy(() => import('./pages/admin/AdminShippingConfig.jsx'));
+const AdminCreditPacks = lazy(() => import('./pages/admin/AdminCreditPacks.jsx'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers.jsx'));
 const AdminUserDetail = lazy(() => import('./pages/admin/AdminUserDetail.jsx'));
 // Portal Nhà cung cấp (manufacturer) — khu vực mới /portal/supplier/*
@@ -66,6 +71,7 @@ const SupplierBranchDetail = lazy(() => import('./pages/supplier/SupplierBranchD
 const SupplierProducts = lazy(() => import('./pages/supplier/SupplierProducts.jsx'));
 const SupplierProductDetail = lazy(() => import('./pages/supplier/SupplierProductDetail.jsx'));
 const SupplierOrders = lazy(() => import('./pages/supplier/SupplierOrders.jsx'));
+const SupplierPromotions = lazy(() => import('./pages/supplier/SupplierPromotions.jsx'));
 const SupplierReviewsPage = lazy(() => import('./pages/supplier/SupplierReviews.jsx'));
 const SupplierProfilePage = lazy(() => import('./pages/supplier/SupplierProfilePage.jsx'));
 const SupplierReports = lazy(() => import('./pages/supplier/SupplierReports.jsx'));
@@ -118,7 +124,6 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/:category" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
           <Route path="/custom" element={<CustomSelect />} />
           <Route path="/custom/models" element={<CustomModels />} />
           <Route path="/custom/models/:slug" element={<CustomModelViewer />} />
@@ -132,9 +137,12 @@ export default function App() {
 
           {/* ProtectedRoute: chưa login thì đẩy về /login (xem routes/ProtectedRoute.jsx) */}
           <Route element={<ProtectedRoute />}>
+            {/* Giỏ hàng lưu ở server (/api/cart cần JWT) → phải đăng nhập mới xem được */}
+            <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/account/subscription" element={<MySubscription />} />
+            <Route path="/account/addresses" element={<MyAddresses />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
             {/* Custom Studio (FE-2): wizard 6 bước, cần đăng nhập vì generate/lưu thiết kế tính vào hạn mức `design` */}
@@ -167,6 +175,7 @@ export default function App() {
             <Route path="products" element={<SupplierProducts />} />
             <Route path="products/:productId" element={<SupplierProductDetail />} />
             <Route path="orders" element={<SupplierOrders />} />
+            <Route path="promotions" element={<SupplierPromotions />} />
             <Route path="reviews" element={<SupplierReviewsPage />} />
             <Route path="profile" element={<SupplierProfilePage />} />
             <Route path="reports" element={<SupplierReports />} />
@@ -199,6 +208,10 @@ export default function App() {
             <Route path="suppliers/:id" element={<AdminSupplierDetail />} />
             <Route path="subscription-plans" element={<AdminSubscriptionPlans />} />
             <Route path="payments" element={<AdminPayments />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="promotions" element={<AdminPromotions />} />
+            <Route path="shipping-config" element={<AdminShippingConfig />} />
+            <Route path="credit-packs" element={<AdminCreditPacks />} />
           </Route>
         </Route>
       </Routes>

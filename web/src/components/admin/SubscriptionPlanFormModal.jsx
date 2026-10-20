@@ -3,12 +3,11 @@ import ModalShell from './ModalShell.jsx';
 import { useCreateSubscriptionPlan, useUpdateSubscriptionPlan } from '../../hooks/useAdminSubscriptionPlans.js';
 import { Plus, Trash } from '../suppliers/icons.jsx';
 
-// Đúng 4 tính năng enum UsageFeature của BE (mục 6 tài liệu Subscription) — không tự thêm bớt
+// Tính năng có hạn mức của BE. ar_3d đã bỏ (AR dùng Scene Viewer free, không giới hạn — subscription-fe.md)
 const FEATURES = [
   { key: 'ai_chat', label: 'Chat AI' },
   { key: 'design', label: 'Thiết kế 3D' },
   { key: 'export', label: 'Xuất file' },
-  { key: 'ar_3d', label: 'AR / 3D' },
 ];
 
 /*
@@ -28,8 +27,9 @@ export default function SubscriptionPlanFormModal({ open, onClose, initial = nul
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0);
   const [isActive, setIsActive] = useState(initial?.isActive ?? true);
   const [limits, setLimits] = useState(() => {
-    const base = { ai_chat: 0, design: 0, export: 0, ar_3d: 0 };
-    return { ...base, ...(initial?.featureLimits ?? {}) };
+    // Gói cũ có thể còn ar_3d trong featureLimits → bỏ đi để lần lưu tới không gửi lại key đã ngừng dùng
+    const { ar_3d: _drop, ...rest } = initial?.featureLimits ?? {};
+    return { ai_chat: 0, design: 0, export: 0, ...rest };
   });
   const [features, setFeatures] = useState(initial?.displayFeatures?.length ? initial.displayFeatures : ['']);
   const [err, setErr] = useState('');

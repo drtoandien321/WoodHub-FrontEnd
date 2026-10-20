@@ -26,6 +26,8 @@ const REAL_ENDPOINTS = new Set([
   // Module Supplier (browse công khai) — đã xác nhận BE thật (curl local, sau khi pull 2 endpoint mới)
   'getPublicSuppliers', 'getSupplierPublicProfile', 'getSupplierStores', 'getSupplierPortfolio',
   'getReviews', 'getReviewSummary',
+  // Viết/sửa/xoá đánh giá (POST/PUT/DELETE /reviews) — cần đăng nhập, mỗi user 1 đánh giá / đối tượng
+  'createReview', 'updateReview', 'deleteReview',
   // Module Category/Material — đã xác nhận BE thật (curl local)
   'getCategories', 'getCategoryTree', 'getMaterials',
   /*
@@ -71,6 +73,11 @@ const REAL_ENDPOINTS = new Set([
   'getAdminPayments', 'getAdminPayment', 'getAdminPaymentStats',
   // Module Admin — Dashboard tổng quan (Portal Quản trị /admin/dashboard) — API chỉ đọc
   'getAdminDashboardSummary', 'getAdminDashboardTimeseries', 'getAdminDashboardTop',
+  // GA4 traffic (commit 9ed1b6e) — 503 khi BE chưa cấu hình GA (FE ẩn khối)
+  'getAdminDashboardTraffic',
+  // Gói lượt thiết kế mua thêm (credit pack) — khách mua + admin quản lý (commit 40ece30)
+  'getCreditPacks', 'createCreditPackPayment',
+  'getAdminCreditPacks', 'createCreditPack', 'updateCreditPack', 'deleteCreditPack',
   // Module GPS/Vị trí — hồ sơ supplier tự thân (biết type để gate UI)
   'getSupplierMe',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
@@ -94,6 +101,16 @@ const REAL_ENDPOINTS = new Set([
   'createQuote', 'getMyQuotes', 'getIncomingQuotes', 'getQuoteDetail', 'cancelQuote',
   'createOffer', 'acceptOffer', 'rejectOffer',
   'getMyCustomOrders', 'getIncomingCustomOrders', 'getCustomOrderDetail', 'updateCustomOrderStatus',
+  // Module Cart — giỏ hàng lưu ở server (docs/cart-address-fe.md của BE, commit 40ece30)
+  'getCart', 'addCartItem', 'updateCartItem', 'removeCartItem', 'clearCart',
+  // Module Sổ địa chỉ giao hàng (cùng doc cart-address-fe.md)
+  'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
+  // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
+  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'lookupPromotion',
+  // Xử lý đơn (supplier/admin) + CRUD khuyến mãi + cấu hình ship (docs/promotions-admin-fe.md)
+  'getSupplierOrders', 'updateSupplierOrderStatus', 'getAdminOrders', 'updateAdminOrderStatus',
+  'getPromotions', 'getPromotion', 'createPromotion', 'updatePromotion', 'deletePromotion',
+  'getShippingConfig', 'updateShippingConfig',
 ]);
 
 /*
@@ -489,13 +506,90 @@ export const api = {
   // (phía supplier phải dùng conversation.supplierUserId, KHÔNG phải supplierId — 2 id khác nhau).
   getPresence: (userId) => call(() => http.get(`/users/${userId}/presence`), 'getPresence', userId),
 
-  // ===== ORDERS (checkout giả lập theo roadmap C.2) =====
-  // POST /orders  body: { items: [{productId, qty}], address, paymentMethod }
-  createOrder: (body) => call(() => http.post('/orders', body), 'createOrder', body),
-  // GET /orders
-  getOrders: () => call(() => http.get('/orders'), 'getOrders'),
-  // GET /orders/:id
+  /*
+   * ===== CART — giỏ hàng server-side (/api/cart, cần đăng nhập) =====
+   * Mỗi user đúng 1 giỏ. MỌI endpoint đều trả về TOÀN BỘ CartResponse
+   * { id, items: CartItemResponse[], totalItems, totalQuantity, subtotal, updatedAt }
+   * → hook chỉ cần ghi đè cache bằng response, không phải gọi lại GET (xem hooks/useCart.js).
+   */
+  // GET /cart — tự tạo giỏ rỗng nếu chưa có
+  getCart: () => call(() => http.get('/cart'), 'getCart'),
+  // POST /cart/items  body: { variantId, quantity 1..999 } — biến thể đã có trong giỏ thì CỘNG DỒN. 404 không có biến thể, 409 SP ngừng bán
+  addCartItem: (body) => call(() => http.post('/cart/items', body), 'addCartItem', body),
+  // PUT /cart/items/:itemId  body: { quantity } — GHI ĐÈ. itemId là id DÒNG giỏ (CartItemResponse.id), KHÔNG phải variantId
+  updateCartItem: ({ itemId, quantity }) =>
+    call(() => http.put(`/cart/items/${itemId}`, { quantity }), 'updateCartItem', { itemId, quantity }),
+  // DELETE /cart/items/:itemId — xoá 1 dòng
+  removeCartItem: (itemId) => call(() => http.delete(`/cart/items/${itemId}`), 'removeCartItem', itemId),
+  // DELETE /cart — xoá sạch giỏ
+  clearCart: () => call(() => http.delete('/cart'), 'clearCart'),
+
+  /*
+   * ===== ADDRESSES — sổ địa chỉ giao hàng (/api/addresses, cần đăng nhập) =====
+   * Body tạo/sửa: { recipientName*, recipientPhone*, addressLine*, ward?, district?, city*,
+   * latitude?, longitude?, isDefault? }. Response UserAddressResponse có thêm `hasCoordinates`
+   * (true khi đủ lat+lng) — checkout BẮT BUỘC địa chỉ có toạ độ để BE tính phí ship.
+   * BE tự giữ bất biến "tối đa 1 địa chỉ mặc định" (địa chỉ đầu tiên tự thành mặc định, xoá
+   * mặc định thì tự đề bạt địa chỉ mới nhất) → FE chỉ cần refetch danh sách sau mỗi thay đổi.
+   */
+  // GET /addresses → UserAddressResponse[] (mặc định đứng đầu, rồi mới nhất trước)
+  getAddresses: () => call(() => http.get('/addresses'), 'getAddresses'),
+  // POST /addresses → 201 UserAddressResponse
+  createAddress: (body) => call(() => http.post('/addresses', body), 'createAddress', body),
+  // PUT /addresses/:id → UserAddressResponse
+  updateAddress: ({ id, ...body }) => call(() => http.put(`/addresses/${id}`, body), 'updateAddress', { id, ...body }),
+  // DELETE /addresses/:id → 204
+  deleteAddress: (id) => call(() => http.delete(`/addresses/${id}`), 'deleteAddress', id),
+  // PATCH /addresses/:id/default → UserAddressResponse (chính địa chỉ đó)
+  setDefaultAddress: (id) => call(() => http.patch(`/addresses/${id}/default`), 'setDefaultAddress', id),
+
+  /*
+   * ===== ORDERS — đặt hàng từ giỏ (docs/order-checkout-fe.md của BE) =====
+   * BE TỰ làm hết phần nghiệp vụ: tách giỏ thành N đơn theo supplier, chọn chi nhánh gần điểm giao
+   * nhất, tính phí ship theo khoảng cách, áp coupon, tạo 1 payment chung (1 QR) và xoá giỏ.
+   * FE chỉ gửi "giao ở đâu" + ghi chú + mã coupon — KHÔNG gửi giá/phí ship (never trust the client).
+   */
+  // POST /orders/checkout  body: { addressId } | { recipientName, recipientPhone, addressLine, ward?, district?, city, latitude, longitude, locationSource?, saveAddress? }
+  //   + { note?, couponCodes? } → 201 CheckoutResponse { orders: OrderResponse[], payment: PaymentResponse, grandTotal }
+  checkout: (body) => call(() => http.post('/orders/checkout', body), 'checkout', body),
+  // GET /orders?status=&page=&size=&sort= → Page<OrderResponse> (mặc định createdAt,desc)
+  getOrders: (params) => call(() => http.get('/orders', { params }), 'getOrders', params),
+  // GET /orders/:id → OrderResponse (đơn người khác → 404)
   getOrder: (id) => call(() => http.get(`/orders/${id}`), 'getOrder', id),
+  // POST /orders/:id/cancel — chỉ khi đơn đang pending_payment, sai trạng thái → 409
+  cancelOrder: (id) => call(() => http.post(`/orders/${id}/cancel`), 'cancelOrder', id),
+  // GET /promotions/lookup?code= → PromotionResponse (còn hiệu lực) · 404 không có mã · 400 hết hạn. Lượt dùng chỉ kiểm khi checkout.
+  lookupPromotion: (code) => call(() => http.get('/promotions/lookup', { params: { code } }), 'lookupPromotion', code),
+
+  /*
+   * ===== XỬ LÝ ĐƠN — supplier (đơn của mình) & admin (mọi đơn). Cùng OrderResponse với phía khách. =====
+   * Body cập nhật: { status, note? }. Chuyển trạng thái sai luật → 409; supplier sửa đơn người khác → 403.
+   * pending_payment → paid do webhook SePay tự làm, KHÔNG cập nhật tay.
+   */
+  // GET /supplier/orders?status=&page=&size= → Page<OrderResponse>
+  getSupplierOrders: (params) => call(() => http.get('/supplier/orders', { params }), 'getSupplierOrders', params),
+  updateSupplierOrderStatus: ({ id, ...body }) =>
+    call(() => http.put(`/supplier/orders/${id}/status`, body), 'updateSupplierOrderStatus', { id, ...body }),
+  // GET /admin/orders?status=&page=&size= → Page<OrderResponse>
+  getAdminOrders: (params) => call(() => http.get('/admin/orders', { params }), 'getAdminOrders', params),
+  updateAdminOrderStatus: ({ id, ...body }) =>
+    call(() => http.put(`/admin/orders/${id}/status`, body), 'updateAdminOrderStatus', { id, ...body }),
+
+  /*
+   * ===== KHUYẾN MÃI (/promotions) — admin: KM toàn sàn (product|shipping); supplier: CHỈ KM product
+   * cho sản phẩm của mình. Danh sách: admin thấy tất cả, supplier thấy KM của mình (BE tự lọc theo token).
+   * Body: { code, name, description?, type, discountType, discountValue?, maxDiscountAmount?,
+   * minOrderAmount?, startsAt?, endsAt?, isActive?, usageLimit?, usageLimitPerUser?, productIds? }
+   */
+  getPromotions: (params) => call(() => http.get('/promotions', { params }), 'getPromotions', params),
+  getPromotion: (id) => call(() => http.get(`/promotions/${id}`), 'getPromotion', id),
+  createPromotion: (body) => call(() => http.post('/promotions', body), 'createPromotion', body),
+  updatePromotion: ({ id, ...body }) => call(() => http.put(`/promotions/${id}`, body), 'updatePromotion', { id, ...body }),
+  deletePromotion: (id) => call(() => http.delete(`/promotions/${id}`), 'deletePromotion', id),
+
+  // ===== CẤU HÌNH PHÍ SHIP toàn sàn (chỉ admin) — { baseFee, perKmFee, freeRadiusKm, freeShipThreshold|null, maxFeeCap|null } =====
+  getShippingConfig: () => call(() => http.get('/admin/shipping-config'), 'getShippingConfig'),
+  updateShippingConfig: (body) => call(() => http.put('/admin/shipping-config', body), 'updateShippingConfig', body),
 
   /*
    * ===== CUSTOM DESIGN (BE-6) — Custom Studio wizard (bước 5/6, mục 2 api-guide-fe.md) =====
@@ -576,6 +670,15 @@ export const api = {
   getReviews: (params) => call(() => http.get('/reviews', { params }), 'getReviews', params),
   // GET /reviews/summary?targetType=&targetId= → { targetType, targetId, average, count }
   getReviewSummary: (params) => call(() => http.get('/reviews/summary', { params }), 'getReviewSummary', params),
+  /*
+   * POST /reviews { targetType: 'product'|'supplier', targetId, rating 1..5, comment? ≤2000 } → 201 ReviewResponse
+   * 409 = đã đánh giá đối tượng này rồi (phải sửa đánh giá cũ) · 403 = tự đánh giá SP/cửa hàng của chính mình
+   */
+  createReview: (body) => call(() => http.post('/reviews', body), 'createReview', body),
+  // PUT /reviews/:id { rating, comment? } — chỉ người viết (khác → 403)
+  updateReview: ({ id, ...body }) => call(() => http.put(`/reviews/${id}`, body), 'updateReview', { id, ...body }),
+  // DELETE /reviews/:id → 204 — chỉ người viết
+  deleteReview: (id) => call(() => http.delete(`/reviews/${id}`), 'deleteReview', id),
 
   /*
    * ===== SUPPLIER (quản trị — Portal Quản trị /admin/suppliers) — CHỈ ADMIN =====
@@ -708,6 +811,21 @@ export const api = {
   getMyUsage: () => call(() => http.get('/usage/me'), 'getMyUsage'),
 
   /*
+   * ===== CREDIT PACK — mua thêm lượt `design` (dùng đến hết, KHÔNG reset theo tháng) =====
+   * Luồng thanh toán giống subscription: tạo payment → hiện QR → poll GET /payments/{id} tới 'paid'
+   * → BE tự cộng lượt vào ví → GET /usage/me thấy purchasedRemaining tăng.
+   */
+  // GET /credit-packs → CreditPackResponse[] { id, name, displayName, feature, credits, price, isActive, sortOrder } (cần đăng nhập)
+  getCreditPacks: () => call(() => http.get('/credit-packs'), 'getCreditPacks'),
+  // POST /payments/credit-pack { packId } → 201 PaymentResponse (purpose 'credit_pack'). Gói price=0 → 400
+  createCreditPackPayment: (packId) => call(() => http.post('/payments/credit-pack', { packId }), 'createCreditPackPayment', packId),
+  // Admin — body: { name, displayName, feature? (mặc định design), credits, price, isActive?, sortOrder? }
+  getAdminCreditPacks: () => call(() => http.get('/admin/credit-packs'), 'getAdminCreditPacks'),
+  createCreditPack: (body) => call(() => http.post('/admin/credit-packs', body), 'createCreditPack', body),
+  updateCreditPack: ({ id, ...body }) => call(() => http.put(`/admin/credit-packs/${id}`, body), 'updateCreditPack', { id, ...body }),
+  deleteCreditPack: (id) => call(() => http.delete(`/admin/credit-packs/${id}`), 'deleteCreditPack', id),
+
+  /*
    * ===== PAYMENTS (quản trị — Portal Quản trị /admin/payments) — CHỈ ADMIN, CHỈ ĐỌC =====
    * from/to: ISO-8601 CÓ HẬU TỐ 'Z' (xem utils/dateRange.js) — tránh dấu '+' của offset bị query
    * hiểu thành dấu cách → 400. Doanh thu tính theo paidAt, các *Count theo createdAt.
@@ -726,6 +844,12 @@ export const api = {
   getAdminDashboardTimeseries: (params) => call(() => http.get('/admin/dashboard/timeseries', { params }), 'getAdminDashboardTimeseries', params),
   // GET /admin/dashboard/top?from=&to=&limit= → { topPlans[], topSuppliers[] }
   getAdminDashboardTop: (params) => call(() => http.get('/admin/dashboard/top', { params }), 'getAdminDashboardTop', params),
+  /*
+   * GET /admin/dashboard/traffic?from=&to=&limit= → { totals, bySource[], byDay[], topPages[], realtime|null }
+   * Nguồn GA4 (cả khách chưa đăng nhập), trễ 24–48h trừ realtime. Bỏ trống from/to = 30 ngày gần nhất.
+   * 503 = BE chưa cấu hình GA → FE ẩn khối · 502 = GA lỗi/hết quota.
+   */
+  getAdminDashboardTraffic: (params) => call(() => http.get('/admin/dashboard/traffic', { params }), 'getAdminDashboardTraffic', params),
 
   // ===== SUBSCRIPTION PLANS — quản trị (chỉ admin) =====
   // GET /subscription-plans/all → CẢ gói đã tắt (khác GET /subscription-plans công khai)

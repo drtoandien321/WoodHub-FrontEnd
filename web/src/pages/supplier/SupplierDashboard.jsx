@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { formatVnd } from '../../utils/format.js';
-import { DASHBOARD, BRANCHES, M_ORDERS } from '../../api/mock/manufacturerData.js';
-import { orderMeta } from '../../utils/supplierStatus.js';
+import { formatVnd, formatDate } from '../../utils/format.js';
+// ⚠️ KPI/doanh thu/chi nhánh vẫn là MOCK: BE chưa có endpoint thống kê cho nhà cung cấp. Chỉ "Đơn gần đây" là dữ liệu thật.
+import { DASHBOARD, BRANCHES } from '../../api/mock/manufacturerData.js';
+import { useManagedOrders } from '../../hooks/useOrderManagement.js';
+import { ORDER_STATUS_LABEL, ORDER_STATUS_BADGE } from '../../utils/orderStatus.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
-import StatusBadge from '../../components/supplier/StatusBadge.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
 import {
   Wallet, ShoppingBag, Package, Star, Store, Users, ChevronRight,
@@ -11,7 +12,12 @@ import {
 
 const ICONS = { wallet: Wallet, bag: ShoppingBag, package: Package, star: Star, store: Store, users: Users };
 
+// params ngoài component → object ổn định giữa các lần render (queryKey không đổi, không fetch lặp)
+const RECENT_PARAMS = { page: 0, size: 3 };
+
 export default function SupplierDashboard() {
+  const recentOrders = useManagedOrders('supplier', RECENT_PARAMS);
+  const recentList = recentOrders.data?.content ?? [];
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -28,7 +34,7 @@ export default function SupplierDashboard() {
 
       {/* Doanh thu + Đơn gần đây */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <section className="min-w-0 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="font-display text-lg">Doanh thu 7 ngày qua</h2>
             <select className="select select-bordered select-sm w-32" defaultValue="7d" aria-label="Khoảng thời gian">
@@ -40,28 +46,40 @@ export default function SupplierDashboard() {
           <RevenueChart data={DASHBOARD.revenue7d} />
         </section>
 
-        <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <section className="min-w-0 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-lg">Đơn hàng gần đây</h2>
             <Link to="/portal/supplier/orders" className="text-sm text-primary hover:underline">Xem tất cả</Link>
           </div>
-          <ul className="flex flex-col gap-2">
-            {M_ORDERS.slice(0, 3).map((o) => (
-              <li key={o.id}>
-                <Link to="/portal/supplier/orders" className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-base-200">
-                  <img src={o.productImage} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" loading="lazy" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">#{o.id} · {o.productName}</p>
-                    <p className="truncate text-xs text-base-content/50">{o.branch} · {o.date}</p>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <StatusBadge meta={orderMeta(o.status)} />
-                    <span className="text-sm font-semibold">{formatVnd(o.total)}</span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {/* Đơn thật từ GET /supplier/orders (3 đơn mới nhất). Badge "cần xác nhận" nhắc NCC xử lý đơn đã thanh toán. */}
+          {recentOrders.isLoading ? (
+            <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
+          ) : recentOrders.isError ? (
+            <p className="py-6 text-center text-sm text-error">Không tải được đơn hàng. <button onClick={() => recentOrders.refetch()} className="link">Thử lại</button></p>
+          ) : !recentList.length ? (
+            <p className="py-6 text-center text-sm text-base-content/50">Chưa có đơn hàng nào.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {recentList.map((o) => (
+                <li key={o.id}>
+                  <Link to="/portal/supplier/orders" className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-base-200">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        <span className="font-mono">{o.orderCode}</span> · {o.items?.[0]?.productName}{o.items?.length > 1 ? ` +${o.items.length - 1}` : ''}
+                      </p>
+                      <p className="truncate text-xs text-base-content/50">{o.recipientName} · {formatDate(o.placedAt ?? o.createdAt)}</p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ORDER_STATUS_BADGE[o.status] ?? ''}`}>
+                        {o.status === 'paid' ? 'Cần xác nhận' : ORDER_STATUS_LABEL[o.status] ?? o.status}
+                      </span>
+                      <span className="text-sm font-semibold">{formatVnd(o.totalAmount)}</span>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
 

@@ -1,102 +1,156 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useCartStore } from '../stores/cartStore.js';
+import { useCart, useUpdateCartItem, useRemoveCartItem, cartErrorKey } from '../hooks/useCart.js';
 import { formatVnd } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import { Plus, Minus, Trash, Truck, Shield } from '../components/suppliers/icons.jsx';
 
-// Cùng ngưỡng với Checkout.jsx (miễn phí ship từ 5tr) — đổi 1 nơi thì đổi cả 2
-const FREE_SHIP_FROM = 5_000_000;
+const MAX_QTY = 999; // khớp ràng buộc quantity 1..999 của BE
 
 /*
  * Giỏ hàng — bố cục 2 cột: danh sách sản phẩm (card, nút +/- số lượng) và khung tóm tắt dính (sticky).
- * Thanh tiến độ "miễn phí vận chuyển" khuyến khích mua thêm, đồng thời giải thích phí ship ở bước sau.
+ * Dữ liệu từ GET /api/cart (server-side, cần đăng nhập — route bọc ProtectedRoute trong App.jsx).
+ * Mọi thao tác sửa/xoá trả về giỏ mới → cache tự cập nhật (xem hooks/useCart.js).
+ *
+ * Bỏ thanh "mua thêm X để miễn phí ship" của bản cũ: phí ship giờ BE tính theo TỪNG đơn của từng
+ * nhà cung cấp + khoảng cách, ngưỡng miễn phí do admin cấu hình → FE không đoán đúng được ở bước giỏ.
  */
 export default function Cart() {
   const { t } = useTranslation();
-  const { items, updateQty, removeItem } = useCartStore();
-  const subtotal = useCartStore((s) => s.subtotal());
   const navigate = useNavigate();
+  const { data: cart, isLoading, isError, refetch } = useCart();
+  const updateItem = useUpdateCartItem();
+  const removeItem = useRemoveCartItem();
+  const [actionError, setActionError] = useState('');
 
+  if (isLoading) {
+    return (
+      <div className="mx-auto flex max-w-6xl flex-col gap-3">
+        <div className="skeleton h-9 w-48 rounded-lg" />
+        {[0, 1].map((i) => <div key={i} className="skeleton h-32 w-full rounded-2xl" />)}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center gap-3 py-16 text-center">
+        <p className="text-error">{t('cart.loadError')}</p>
+        <button onClick={() => refetch()} className="btn btn-outline btn-sm">{t('cart.retry')}</button>
+      </div>
+    );
+  }
+
+  const items = cart?.items ?? [];
   if (!items.length)
     return <EmptyState title={t('cart.empty')} hint={t('cart.emptyHint')} ctaLabel={t('cart.browseShop')} ctaTo="/shop" />;
 
-  const count = items.reduce((n, i) => n + i.qty, 0);
-  const remain = Math.max(0, FREE_SHIP_FROM - subtotal);
-  const progress = Math.min(100, Math.round((subtotal / FREE_SHIP_FROM) * 100));
+  // Dòng nào đang chờ BE trả về → khoá nút của dòng đó (tránh bấm +/- dồn dập gửi nhiều request lệch nhau)
+  const busyItemId =
+    (updateItem.isPending && updateItem.variables?.itemId) || (removeItem.isPending && removeItem.variables) || null;
+
+  const handleError = (err) => setActionError(t(cartErrorKey(err)));
+  const changeQty = (item, quantity) => {
+    setActionError('');
+    // Về 0 thì xoá dòng (BE không nhận quantity=0 ở PUT)
+    if (quantity <= 0) removeItem.mutate(item.id, { onError: handleError });
+    else updateItem.mutate({ itemId: item.id, quantity: Math.min(MAX_QTY, quantity) }, { onError: handleError });
+  };
+  const remove = (item) => {
+    setActionError('');
+    removeItem.mutate(item.id, { onError: handleError });
+  };
 
   return (
     <div className="mx-auto max-w-6xl">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-2">
         <h1 className="font-display text-3xl">{t('cart.title')}</h1>
-        <p className="text-sm text-base-content/60">{t('cart.itemsCount', { count })}</p>
+        <p className="text-sm text-base-content/60">{t('cart.itemsCount', { count: cart.totalQuantity })}</p>
       </header>
 
       <div className="grid items-start gap-8 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-4">
-          {/* Tiến độ miễn phí vận chuyển */}
-          <div className="rounded-2xl border border-base-300 bg-base-100 p-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Truck width={18} height={18} className="shrink-0 text-primary" />
-              <span>
-                {remain > 0 ? t('cart.freeShipLeft', { amount: formatVnd(remain) }) : t('cart.freeShipDone')}
-              </span>
-            </div>
-            <progress className="progress progress-primary mt-3 h-1.5 w-full" value={progress} max="100" />
+          <div className="flex items-center gap-2 rounded-2xl border border-base-300 bg-base-100 p-4 text-sm">
+            <Truck width={18} height={18} className="shrink-0 text-primary" />
+            <span>{t('cart.shippingNote')}</span>
           </div>
 
+          {actionError && <div role="alert" className="alert alert-error py-2 text-sm">{actionError}</div>}
+
           <ul className="flex flex-col gap-3">
-            {items.map((item) => (
-              <li key={item.productId} className="flex gap-4 rounded-2xl border border-base-300 bg-base-100 p-3 sm:p-4">
-                <Link to={`/product/${item.productId}`} className="shrink-0">
-                  <img src={item.image} alt={item.name} className="h-24 w-24 rounded-xl object-cover sm:h-28 sm:w-28" loading="lazy" />
-                </Link>
+            {items.map((item) => {
+              const busy = busyItemId === item.id;
+              const variantText = [item.color, item.dimensions].filter(Boolean).join(' · ');
+              // BE: unitPrice là giá HIỆN TẠI, priceAtAddition là giá lúc thêm → khác nhau thì báo khách
+              const priceChanged = item.priceAtAddition != null && Number(item.priceAtAddition) !== Number(item.unitPrice);
+              return (
+                <li
+                  key={item.id}
+                  className={`flex gap-4 rounded-2xl border border-base-300 bg-base-100 p-3 transition-opacity sm:p-4 ${busy ? 'opacity-60' : ''}`}
+                >
+                  <Link to={`/product/${item.productId}`} className="shrink-0">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.productName} className="h-24 w-24 rounded-xl object-cover sm:h-28 sm:w-28" loading="lazy" />
+                    ) : (
+                      <div className="h-24 w-24 rounded-xl bg-base-200 sm:h-28 sm:w-28" aria-hidden="true" />
+                    )}
+                  </Link>
 
-                <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <Link to={`/product/${item.productId}`} className="line-clamp-2 font-medium leading-snug hover:text-primary">{item.name}</Link>
-                      {item.supplierName && <p className="mt-0.5 truncate text-xs text-base-content/55">{item.supplierName}</p>}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.productId)}
-                      aria-label={`${t('cart.remove')} ${item.name}`}
-                      className="btn btn-ghost btn-sm btn-circle shrink-0 text-base-content/50 hover:text-error"
-                    >
-                      <Trash width={16} height={16} />
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    {/* Bộ chỉnh số lượng: giảm về 0 thì sản phẩm bị xóa (xem updateQty trong cartStore) */}
-                    <div className="inline-flex items-center rounded-full border border-base-300">
+                  <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <Link to={`/product/${item.productId}`} className="line-clamp-2 font-medium leading-snug hover:text-primary">{item.productName}</Link>
+                        {variantText && <p className="mt-0.5 truncate text-xs text-base-content/55">{variantText}</p>}
+                        {priceChanged && (
+                          <p className="mt-1 text-xs text-warning">
+                            {t('cart.priceChanged', { old: formatVnd(item.priceAtAddition), now: formatVnd(item.unitPrice) })}
+                          </p>
+                        )}
+                      </div>
                       <button
                         type="button"
-                        onClick={() => updateQty(item.productId, item.qty - 1)}
-                        aria-label={t('cart.decrease')}
-                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-base-200"
+                        onClick={() => remove(item)}
+                        disabled={busy}
+                        aria-label={`${t('cart.remove')} ${item.productName}`}
+                        className="btn btn-ghost btn-sm btn-circle shrink-0 text-base-content/50 hover:text-error"
                       >
-                        <Minus width={14} height={14} />
-                      </button>
-                      <span className="w-8 text-center text-sm font-medium tabular-nums">{item.qty}</span>
-                      <button
-                        type="button"
-                        onClick={() => updateQty(item.productId, item.qty + 1)}
-                        aria-label={t('cart.increase')}
-                        className="grid h-8 w-8 place-items-center rounded-full hover:bg-base-200"
-                      >
-                        <Plus width={14} height={14} />
+                        <Trash width={16} height={16} />
                       </button>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-primary">{formatVnd(item.price * item.qty)}</p>
-                      {item.qty > 1 && <p className="text-xs text-base-content/50">{formatVnd(item.price)} / {t('cart.each')}</p>}
+
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      {/* Bộ chỉnh số lượng: giảm về 0 thì xoá dòng (xem changeQty) */}
+                      <div className="inline-flex items-center rounded-full border border-base-300">
+                        <button
+                          type="button"
+                          onClick={() => changeQty(item, item.quantity - 1)}
+                          disabled={busy}
+                          aria-label={t('cart.decrease')}
+                          className="grid h-8 w-8 place-items-center rounded-full hover:bg-base-200 disabled:opacity-40"
+                        >
+                          <Minus width={14} height={14} />
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium tabular-nums">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => changeQty(item, item.quantity + 1)}
+                          disabled={busy || item.quantity >= MAX_QTY}
+                          aria-label={t('cart.increase')}
+                          className="grid h-8 w-8 place-items-center rounded-full hover:bg-base-200 disabled:opacity-40"
+                        >
+                          <Plus width={14} height={14} />
+                        </button>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-primary">{formatVnd(item.lineTotal)}</p>
+                        {item.quantity > 1 && <p className="text-xs text-base-content/50">{formatVnd(item.unitPrice)} / {t('cart.each')}</p>}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           <Link to="/shop" className="text-sm text-primary hover:underline">← {t('cart.continueShopping')}</Link>
@@ -104,14 +158,14 @@ export default function Cart() {
 
         <aside className="sticky top-24 flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <h2 className="font-display text-xl">{t('cart.summary')}</h2>
-          <div className="flex justify-between text-sm"><span>{t('cart.productsLabel')} ({count})</span><span>{formatVnd(subtotal)}</span></div>
+          <div className="flex justify-between text-sm"><span>{t('cart.productsLabel')} ({cart.totalQuantity})</span><span>{formatVnd(cart.subtotal)}</span></div>
           <div className="flex justify-between text-sm text-base-content/60"><span>{t('checkout.shippingFee')}</span><span>{t('cart.shippingTbd')}</span></div>
           <div className="divider my-0" />
           <div className="flex items-baseline justify-between">
             <span className="font-medium">{t('cart.total')}</span>
-            <span className="text-2xl font-semibold text-primary">{formatVnd(subtotal)}</span>
+            <span className="text-2xl font-semibold text-primary">{formatVnd(cart.subtotal)}</span>
           </div>
-          <button onClick={() => navigate('/checkout')} className="btn btn-primary btn-lg mt-1 w-full">{t('cart.checkout')}</button>
+          <button onClick={() => navigate('/checkout')} disabled={!!busyItemId} className="btn btn-primary btn-lg mt-1 w-full">{t('cart.checkout')}</button>
           <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-base-content/55">
             <Shield width={14} height={14} /> {t('cart.secure')}
           </p>

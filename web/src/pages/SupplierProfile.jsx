@@ -3,14 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   useSupplierPublicProfile, useSupplierStores, useSupplierPortfolio,
-  useSupplierReviews, useSupplierReviewSummary,
+  useSupplierReviewSummary,
 } from '../hooks/usePublicSuppliers.js';
 import { useSupplierChatStore } from '../stores/supplierChatStore.js';
 import SupplierProfileHeader from '../components/suppliers/SupplierProfileHeader.jsx';
 import SectionCard from '../components/suppliers/SectionCard.jsx';
 import SupplierBranches from '../components/suppliers/SupplierBranches.jsx';
 import SupplierPortfolio from '../components/suppliers/SupplierPortfolio.jsx';
-import SupplierReviews from '../components/suppliers/SupplierReviews.jsx';
+import ReviewSection from '../components/reviews/ReviewSection.jsx';
 import SupplierWorkflow from '../components/suppliers/SupplierWorkflow.jsx';
 import SupplierQuickInfo from '../components/suppliers/SupplierQuickInfo.jsx';
 import SupplierStrengths from '../components/suppliers/SupplierStrengths.jsx';
@@ -26,7 +26,6 @@ export default function SupplierProfile() {
   const { data: supplier, isLoading, isError } = useSupplierPublicProfile(id);
   const { data: branches } = useSupplierStores(id);
   const { data: portfolio } = useSupplierPortfolio(id);
-  const { data: reviews } = useSupplierReviews(id);
   const { data: reviewSummary } = useSupplierReviewSummary(id);
   const [fav, setFav] = useState(false);
   const openChat = useSupplierChatStore((s) => s.openFromSupplier);
@@ -79,7 +78,8 @@ export default function SupplierProfile() {
 
           <SupplierBranches branches={branches ?? []} />
           <SupplierPortfolio items={portfolio ?? []} supplierName={supplier.businessName} onViewAll={scrollToContact} />
-          <SupplierReviews items={reviews?.content ?? []} onViewAll={scrollToContact} />
+          {/* Đánh giá: xem + khách viết/sửa/xoá đánh giá của mình (thay khối chỉ-đọc SupplierReviews cũ) */}
+          <ReviewSection targetType="supplier" targetId={id} />
           <SupplierWorkflow />
         </div>
 

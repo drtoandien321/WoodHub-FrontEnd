@@ -16,3 +16,16 @@ export const useAdminDashboardTimeseries = (params) =>
 
 export const useAdminDashboardTop = (params) =>
   useQuery({ queryKey: ['adminDashboardTop', params], queryFn: () => api.getAdminDashboardTop(params), ...opts });
+
+/*
+ * Traffic GA4. Không retry khi 503 (BE chưa cấu hình GA — thử lại vô ích, chỉ làm khối chờ lâu hơn).
+ * BE đã cache 5–10 phút nên FE để staleTime 5 phút, tránh gọi GA thừa khi qua lại trang.
+ */
+export const useAdminDashboardTraffic = (params) =>
+  useQuery({
+    queryKey: ['adminDashboardTraffic', params],
+    queryFn: () => api.getAdminDashboardTraffic(params),
+    staleTime: 5 * 60_000,
+    retry: (count, error) => error?.response?.status !== 503 && count < 2,
+    ...opts,
+  });

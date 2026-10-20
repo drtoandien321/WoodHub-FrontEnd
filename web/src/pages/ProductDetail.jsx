@@ -1,15 +1,18 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProduct, useProducts } from '../hooks/useProducts.js';
-import { useCartStore } from '../stores/cartStore.js';
+import { useAddCartItem } from '../hooks/useCart.js';
+import { useAuthStore } from '../stores/authStore.js';
 import { useSupplierChatStore } from '../stores/supplierChatStore.js';
 import ProductGallery from '../components/product/ProductGallery.jsx';
 import ProductInfo from '../components/product/ProductInfo.jsx';
 import RelatedProducts from '../components/product/RelatedProducts.jsx';
+import ReviewSection from '../components/reviews/ReviewSection.jsx';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { data: product, isLoading, isError } = useProduct(id);
   // "Sản phẩm cùng loại": BE không trả sẵn `related` trong ProductResponse — tự lấy 1 trang cùng
@@ -17,7 +20,8 @@ export default function ProductDetail() {
   const { data: relatedPage } = useProducts({ categoryId: product?.categoryId, size: 5 }, { enabled: !!product });
   const related = (relatedPage?.content ?? []).filter((p) => p.id !== id).slice(0, 4);
 
-  const addItem = useCartStore((s) => s.addItem);
+  const token = useAuthStore((s) => s.token);
+  const addCartItem = useAddCartItem();
   const openChat = useSupplierChatStore((s) => s.openFromProduct);
 
   if (isLoading) {
@@ -42,12 +46,23 @@ export default function ProductDetail() {
       </p>
     );
 
-  // cartStore lưu 1 giá/sản phẩm theo productId (chưa tách theo variant) — dùng giá của variant
-  // ĐANG CHỌN tại thời điểm thêm vào giỏ. Đủ đúng cho sản phẩm có đúng 1 variant (đa số trường
-  // hợp thật hiện tại); sản phẩm nhiều variant giá khác nhau sẽ cần tách cart theo variantId ở
-  // 1 sprint riêng (ngoài phạm vi FE-4 — không đụng cart/checkout để tránh vỡ luồng hiện có).
-  const addToCart = (qty, variant) => addItem({ ...product, price: variant.price, image: product.images?.[0]?.url }, qty);
-  const buyNow = (qty, variant) => { addToCart(qty, variant); navigate('/cart'); };
+  /*
+   * Giỏ hàng server-side, thêm theo VARIANT (không phải productId) — mỗi biến thể là 1 dòng giỏ,
+   * giá BE tự lấy từ DB nên FE không gửi giá. Chưa đăng nhập → sang /login (hướng (a): giỏ cần
+   * tài khoản); state.from để login xong quay lại đúng trang sản phẩm này.
+   * Trả true/false để ProductInfo biết có hiện "Đã thêm" không; lỗi API thì ProductInfo tự bắt và hiển thị.
+   */
+  const addToCart = async (qty, variant) => {
+    if (!token) {
+      navigate('/login', { state: { from: location } });
+      return false;
+    }
+    await addCartItem.mutateAsync({ variantId: variant.id, quantity: qty });
+    return true;
+  };
+  const buyNow = async (qty, variant) => {
+    if (await addToCart(qty, variant)) navigate('/cart');
+  };
 
   return (
     <div className="flex flex-col gap-12">
@@ -68,10 +83,14 @@ export default function ProductDetail() {
           product={product}
           onAddToCart={addToCart}
           onBuyNow={buyNow}
+          cartPending={addCartItem.isPending}
           // openFromProduct (chat) kỳ vọng shape cũ {image, price} — chiếu từ product.images[0]/variants[0]
           onChat={() => openChat({ ...product, image: product.images?.[0]?.url, price: product.variants?.[0]?.price })}
         />
       </div>
+
+      {/* Đánh giá sản phẩm (targetType=product) — xem công khai, khách đăng nhập viết/sửa/xoá của mình */}
+      <ReviewSection targetType="product" targetId={product.id} />
 
       <RelatedProducts products={related} />
     </div>

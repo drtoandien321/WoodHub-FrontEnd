@@ -10,8 +10,9 @@ const invalidateProduct = (qc, id) => {
   if (id) qc.invalidateQueries({ queryKey: ['myProduct', id] });
 };
 
-export const useMyProducts = (params) =>
-  useQuery({ queryKey: ['myProducts', params], queryFn: () => api.getMyProducts(params) });
+// options: tuỳ chọn React Query bổ sung (vd { enabled: false } khi component dùng chung cho cả admin)
+export const useMyProducts = (params, options = {}) =>
+  useQuery({ queryKey: ['myProducts', params], queryFn: () => api.getMyProducts(params), ...options });
 
 export const useMyProductDetail = (id) =>
   useQuery({ queryKey: ['myProduct', id], queryFn: () => api.getMyProductDetail(id), enabled: !!id, retry: false });

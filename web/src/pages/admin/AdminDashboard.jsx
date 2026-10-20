@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop } from '../../hooks/useAdminDashboard.js';
+import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic } from '../../hooks/useAdminDashboard.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
 import DailyBarChart from '../../components/admin/DailyBarChart.jsx';
@@ -68,6 +68,116 @@ function ChartCard({ title, children, empty }) {
     <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <h2 className="mb-3 font-display text-lg">{title}</h2>
       {empty ? <p className="py-10 text-center text-sm text-base-content/50">Chưa có dữ liệu trong khoảng này.</p> : children}
+    </section>
+  );
+}
+
+const formatDuration = (sec = 0) => `${Math.floor(sec / 60)}p ${String(Math.round(sec % 60)).padStart(2, '0')}s`;
+const SOURCE_LABEL = { '(direct)': 'Truy cập trực tiếp', '(not set)': 'Không xác định' };
+
+/*
+ * TrafficSection — lượt truy cập web từ GA4 (GET /admin/dashboard/traffic), gồm cả khách CHƯA đăng
+ * nhập (khác các số khác trên dashboard chỉ đếm user trong DB). Mentor cần số này để đo hiệu quả
+ * khi đăng link lên Facebook/TikTok → khối "Nguồn truy cập" là phần quan trọng nhất.
+ *  - 503: BE chưa cấu hình GA → ẨN cả khối (không làm hỏng dashboard), đúng yêu cầu trong doc.
+ *  - 502: GA lỗi/hết quota → báo lỗi nhỏ ngay tại khối, các khối khác vẫn chạy.
+ *  - "Toàn bộ" (không from/to) → BE tự lấy 30 ngày gần nhất, nên ghi rõ trên tiêu đề.
+ */
+function TrafficSection({ params, fromYmd, toYmdStr }) {
+  const traffic = useAdminDashboardTraffic({ ...params, limit: 5 });
+  const t = traffic.data;
+  const daySeries = useMemo(
+    () => fillDays(t?.byDay, (r) => ({ value: r?.users ?? 0, extra: r ? `${r.pageViews} lượt xem` : '' }), fromYmd, toYmdStr),
+    [t, fromYmd, toYmdStr],
+  );
+
+  if (traffic.error?.response?.status === 503) return null;
+
+  return (
+    <section className="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="font-display text-lg">Lượt truy cập website {!params.from && <span className="text-sm font-normal text-base-content/50">(30 ngày gần nhất)</span>}</h2>
+          <p className="text-xs text-base-content/50">Nguồn Google Analytics 4 · gồm cả khách chưa đăng nhập · số liệu trễ 24–48 giờ (trừ "đang online")</p>
+        </div>
+        {t?.realtime && (
+          <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-success" aria-hidden="true" />
+            {t.realtime.activeUsers} đang online (30 phút)
+          </span>
+        )}
+      </div>
+
+      {traffic.isLoading ? (
+        <div className="skeleton h-40 rounded-xl" />
+      ) : traffic.error ? (
+        <div role="alert" className="flex items-center justify-between gap-3 rounded-xl bg-error/10 px-4 py-3 text-sm text-error">
+          <span>Không lấy được số liệu Google Analytics (dịch vụ lỗi hoặc hết hạn mức). Các số liệu khác không bị ảnh hưởng.</span>
+          <button onClick={() => traffic.refetch()} className="btn btn-ghost btn-xs">Thử lại</button>
+        </div>
+      ) : t && (
+        <>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            {[
+              ['Người truy cập', t.totals.activeUsers.toLocaleString('vi-VN')],
+              ['Người mới', t.totals.newUsers.toLocaleString('vi-VN')],
+              ['Phiên', t.totals.sessions.toLocaleString('vi-VN')],
+              ['Lượt xem trang', t.totals.pageViews.toLocaleString('vi-VN')],
+              ['Tỷ lệ tương tác', pct(t.totals.engagementRate)],
+              ['Thời gian / phiên', formatDuration(t.totals.avgSessionSeconds)],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-xl bg-base-200/50 px-3 py-2.5">
+                <p className="text-xs text-base-content/55">{label}</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
+            <div>
+              <h3 className="mb-2 text-sm font-medium">Người truy cập theo ngày</h3>
+              {daySeries.some((d) => d.value > 0)
+                ? <DailyBarChart data={daySeries} ariaLabel="Người truy cập theo ngày" unit=" người" />
+                : <p className="py-10 text-center text-sm text-base-content/50">Chưa có dữ liệu trong khoảng này.</p>}
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-medium">Nguồn truy cập</h3>
+              {!t.bySource.length ? <p className="text-sm text-base-content/50">Chưa có dữ liệu.</p> : (
+                <ul className="flex flex-col gap-2.5">
+                  {t.bySource.map((s) => (
+                    <li key={`${s.source}/${s.medium}`}>
+                      <div className="flex justify-between gap-2 text-sm">
+                        <span className="truncate">{SOURCE_LABEL[s.source] ?? s.source} <span className="text-xs text-base-content/45">/ {s.medium}</span></span>
+                        <span className="shrink-0 font-medium tabular-nums">{s.users.toLocaleString('vi-VN')}</span>
+                      </div>
+                      <progress className="progress progress-primary w-full" value={s.users} max={Math.max(t.totals.activeUsers, 1)} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-sm font-medium">Trang được xem nhiều</h3>
+            <div className="overflow-x-auto">
+              <table className="table table-sm">
+                <thead><tr className="text-base-content/55"><th>Trang</th><th className="text-right">Lượt xem</th><th className="text-right">Người xem</th></tr></thead>
+                <tbody>
+                  {!t.topPages.length && <tr><td colSpan={3} className="text-center text-base-content/50">Chưa có dữ liệu</td></tr>}
+                  {t.topPages.map((p) => (
+                    <tr key={p.path} className="hover:bg-base-200/50">
+                      <td className="font-mono text-xs">{p.path}</td>
+                      <td className="text-right tabular-nums">{p.views.toLocaleString('vi-VN')}</td>
+                      <td className="text-right tabular-nums">{p.users.toLocaleString('vi-VN')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }
@@ -196,6 +306,9 @@ export default function AdminDashboard() {
           </div>
         </>
       )}
+
+      {/* Lượt truy cập GA4 — độc lập với summary: lỗi/chưa cấu hình GA không ảnh hưởng các khối khác */}
+      <TrafficSection params={params} fromYmd={fromYmd} toYmdStr={toYmdStr} />
 
       {/* Bảng xếp hạng */}
       {top.data && (

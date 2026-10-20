@@ -5,6 +5,7 @@ import { ShoppingCart, MessageCircle } from '../suppliers/icons.jsx';
 import ProductOptions from './ProductOptions.jsx';
 import QuantitySelector from './QuantitySelector.jsx';
 import ProductTrustCards from './ProductTrustCards.jsx';
+import { cartErrorKey } from '../../hooks/useCart.js';
 
 // Nhãn hiển thị 1 variant trong bộ chọn — ghép color + dimensions, rơi vào "Mặc định" nếu cả 2 đều trống
 const variantLabel = (v, fallback) => [v.color, v.dimensions].filter(Boolean).join(' · ') || fallback;
@@ -16,21 +17,39 @@ const variantLabel = (v, fallback) => [v.color, v.dimensions].filter(Boolean).jo
  * (qty, variant đang chọn, hiệu ứng "đã thêm"); hành động ghi (giỏ hàng/mua ngay/chat) uỷ quyền
  * ra ngoài qua props để KHÔNG đụng logic cart/chat.
  */
-export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat }) {
+export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, cartPending = false }) {
   const { t } = useTranslation();
-  const variants = product.variants?.length ? product.variants : [{ id: 'default', price: 0 }];
+  // Không có variant thật thì không thêm được vào giỏ (giỏ thêm theo variantId) → khoá nút mua
+  const hasVariants = product.variants?.length > 0;
+  const variants = hasVariants ? product.variants : [{ id: 'default', price: 0 }];
   const [variantId, setVariantId] = useState(variants[0].id);
   const variant = variants.find((v) => v.id === variantId) ?? variants[0];
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [cartError, setCartError] = useState('');
 
   const labels = variants.map((v) => variantLabel(v, t('product.defaultVariant')));
   const currentLabel = variantLabel(variant, t('product.defaultVariant'));
 
-  const handleAdd = () => {
-    onAddToCart(qty, variant);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+  /*
+   * onAddToCart/onBuyNow giờ là hàm async gọi API thật: phải CHỜ kết quả rồi mới báo "Đã thêm"
+   * (trước đây giỏ local nên luôn thành công ngay). Lỗi (409 ngừng bán, 404...) hiện ngay dưới nút.
+   */
+  const runCartAction = async (action) => {
+    setCartError('');
+    try {
+      return await action(qty, variant);
+    } catch (err) {
+      setCartError(t(cartErrorKey(err)));
+      return false;
+    }
+  };
+
+  const handleAdd = async () => {
+    if (await runCartAction(onAddToCart)) {
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1500);
+    }
   };
 
   return (
@@ -75,14 +94,19 @@ export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat }) 
       {/* CTA */}
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button onClick={handleAdd} className={`btn flex-1 gap-2 ${added ? 'btn-success' : 'btn-primary'}`}>
-            <ShoppingCart width={18} height={18} />
+          <button
+            onClick={handleAdd}
+            disabled={cartPending || !hasVariants}
+            className={`btn flex-1 gap-2 ${added ? 'btn-success' : 'btn-primary'}`}
+          >
+            {cartPending ? <span className="loading loading-spinner loading-sm" /> : <ShoppingCart width={18} height={18} />}
             {added ? t('product.added') : t('product.addToCart')}
           </button>
-          <button onClick={() => onBuyNow(qty, variant)} className="btn btn-outline flex-1">
+          <button onClick={() => runCartAction(onBuyNow)} disabled={cartPending || !hasVariants} className="btn btn-outline flex-1">
             {t('product.buyNow')}
           </button>
         </div>
+        {cartError && <p role="alert" className="text-sm text-error">{cartError}</p>}
         <button onClick={onChat} className="btn btn-outline btn-primary gap-2">
           <MessageCircle width={18} height={18} /> {t('product.chatSupplier')}
         </button>

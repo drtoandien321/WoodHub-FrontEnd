@@ -69,6 +69,17 @@ export const usePayment = (id) =>
 
 export const useMyPayments = () => useQuery({ queryKey: ['myPayments'], queryFn: api.getMyPayments });
 
-// GET /usage/me — hạn mức dùng mọi tính năng trong THÁNG NÀY
+// GET /usage/me — hạn mức dùng mọi tính năng trong THÁNG NÀY (+ purchasedRemaining: lượt đã mua, không reset)
 export const useMyUsage = (options = {}) =>
   useQuery({ queryKey: ['myUsage'], queryFn: api.getMyUsage, ...options });
+
+/*
+ * Tổng lượt CÒN DÙNG ĐƯỢC của 1 dòng usage. BE trừ hạn mức tháng trước, hết mới trừ ví lượt đã mua,
+ * cả 2 cạn mới 429 → FE chỉ coi là "hết lượt" khi CẢ HAI = 0. Trả Infinity nếu không giới hạn.
+ */
+export const usableCount = (u) => (u?.unlimited ? Infinity : (u?.remaining ?? 0) + (u?.purchasedRemaining ?? 0));
+
+// ===== Credit pack — mua thêm lượt design =====
+export const useCreditPacks = (options = {}) =>
+  useQuery({ queryKey: ['creditPacks'], queryFn: api.getCreditPacks, staleTime: 5 * 60_000, ...options });
+export const useCreateCreditPackPayment = () => useMutation({ mutationFn: api.createCreditPackPayment });

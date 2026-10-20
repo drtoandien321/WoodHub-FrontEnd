@@ -12,20 +12,7 @@ const PASTEL = {
   neutral: 'bg-base-300/60 text-base-content/60',
 };
 
-export const ORDER_STATUS = {
-  processing: { label: 'Đang xử lý', cls: PASTEL.info },
-  packing: { label: 'Đang đóng gói', cls: PASTEL.warning },
-  shipping: { label: 'Đang giao hàng', cls: PASTEL.success },
-  completed: { label: 'Hoàn thành', cls: PASTEL.success },
-  cancelled: { label: 'Đã hủy', cls: PASTEL.error },
-};
-// Thứ tự stepper tiến độ đơn (custom/xưởng KHÔNG dùng ở đây)
-export const ORDER_STEPS = [
-  { key: 'processing', label: 'Đang xử lý' },
-  { key: 'packing', label: 'Đang đóng gói' },
-  { key: 'shipping', label: 'Đang giao hàng' },
-  { key: 'completed', label: 'Hoàn tất' },
-];
+// (Trạng thái ĐƠN B2C đã chuyển sang utils/orderStatus.js — luồng 7 bước thật của BE, thay luồng mock 4 bước cũ.)
 
 /*
  * Khớp đúng enum ProductStatus của BE thật: draft | active | hidden.
@@ -61,7 +48,6 @@ export const WORKSHOP_STEPS = [
   { key: 'delivering', label: 'Giao hàng' },
 ];
 
-export const orderMeta = (s) => ORDER_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
 export const productMeta = (s) => PRODUCT_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
 export const branchMeta = (s) => BRANCH_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
 export const workshopOrderMeta = (s) => WORKSHOP_ORDER_STATUS[s] ?? { label: s, cls: PASTEL.neutral };

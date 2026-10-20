@@ -1,6 +1,6 @@
-import { W_REVIEWS, W_REVIEWS_SUMMARY } from '../../api/mock/workshopPortalData.js';
 import ReviewsView from '../../components/supplier/ReviewsView.jsx';
 
+// Xưởng mộc không có catalog cố định → chỉ có đánh giá cho xưởng (targetType=supplier)
 export default function WorkshopReviews() {
-  return <ReviewsView summary={W_REVIEWS_SUMMARY} reviews={W_REVIEWS} subtitle="Theo dõi và phản hồi đánh giá của khách hàng đã đặt thiết kế custom tại xưởng." />;
+  return <ReviewsView subtitle="Theo dõi đánh giá của khách hàng đã đặt thiết kế custom tại xưởng." />;
 }

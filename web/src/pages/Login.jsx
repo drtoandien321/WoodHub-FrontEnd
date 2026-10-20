@@ -30,9 +30,12 @@ export default function Login() {
    * link quay lại portal — bug đã sửa riêng) → tự đẩy về đúng khu vực của role đó thay vì hiện
    * lại form đăng nhập như đang bị logout. KHÔNG đặt trong handleSubmit vì đây là lúc VÀO trang,
    * không phải sau khi submit.
+   * Truyền cả state.from: ngay sau setAuth() trong handleSubmit, component render lại và nhánh này
+   * chạy TRƯỚC navigate() bên dưới — thiếu from thì customer luôn bị đẩy về "/" thay vì quay lại
+   * trang đang định vào (vd /product/:id sau khi bấm "Thêm vào giỏ", /cart, /checkout).
    */
   if (token && user) {
-    return <Navigate to={user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, undefined, user.supplierType)} replace />;
+    return <Navigate to={user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, location.state?.from?.pathname, user.supplierType)} replace />;
   }
 
   const handleSubmit = async (e) => {

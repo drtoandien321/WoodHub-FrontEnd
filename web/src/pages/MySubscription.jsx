@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  useMySubscription, useMyUsage, useMyPayments, useCancelSubscription,
+  useMySubscription, useMyUsage, useMyPayments, useCancelSubscription, useCreditPacks, usableCount,
 } from '../hooks/useSubscription.js';
 import PaymentQrModal from '../components/subscription/PaymentQrModal.jsx';
+import CreditPackPaymentModal from '../components/subscription/CreditPackPaymentModal.jsx';
 import { formatVnd, formatDate } from '../utils/format.js';
 
-// Nhãn hiển thị cho enum UsageFeature (BE: design | ai_chat | export | ar_3d) — chỉ dùng ở trang này
-const FEATURE_LABELS = { ai_chat: 'Chat AI', design: 'Thiết kế 3D', export: 'Xuất file', ar_3d: 'AR / 3D' };
+// Nhãn hiển thị cho enum UsageFeature. ar_3d đã bỏ: AR dùng Scene Viewer free, BE không còn trả trong /usage/me.
+const FEATURE_LABELS = { ai_chat: 'Chat AI', design: 'Thiết kế 3D', export: 'Xuất file' };
+
+// PaymentResponse chỉ có planName cho gói đăng ký → nhãn theo purpose cho các loại khác
+const paymentLabel = (p) =>
+  p.purpose === 'credit_pack' ? 'Mua gói lượt thiết kế' : p.purpose === 'order' ? 'Thanh toán đơn hàng' : (p.planName ?? 'Gói đăng ký');
 
 const PAYMENT_STATUS_META = {
   pending: { label: 'Đang chờ', cls: 'badge-warning' },
@@ -25,6 +30,8 @@ export default function MySubscription() {
   const { data: mySub, isLoading } = useMySubscription();
   const { data: usage, isLoading: usageLoading } = useMyUsage();
   const { data: payments } = useMyPayments();
+  const { data: creditPacks = [] } = useCreditPacks();
+  const [buyingPack, setBuyingPack] = useState(null); // CreditPackResponse đang mua
   const cancel = useCancelSubscription();
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [renewing, setRenewing] = useState(false); // mở modal thanh toán để gia hạn
@@ -98,17 +105,47 @@ export default function MySubscription() {
           <div className="flex flex-col gap-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-8 rounded-lg" />)}</div>
         ) : (
           <div className="flex flex-col gap-2.5">
-            {usage?.map((u) => (
-              <div key={u.feature} className="flex items-center justify-between text-sm">
-                <span>{FEATURE_LABELS[u.feature] ?? u.feature}</span>
-                <span className={u.remaining === 0 ? 'text-error font-medium' : 'text-base-content/70'}>
-                  {u.unlimited ? 'Không giới hạn' : `${u.used}/${u.limit} (còn ${u.remaining})`}
-                </span>
-              </div>
-            ))}
+            {usage?.filter((u) => FEATURE_LABELS[u.feature]).map((u) => {
+              // Hết lượt THẬT chỉ khi cả hạn mức tháng lẫn ví lượt đã mua đều = 0 (BE trừ tháng trước, rồi tới ví)
+              const exhausted = usableCount(u) === 0;
+              return (
+                <div key={u.feature} className="flex flex-wrap items-center justify-between gap-x-3 text-sm">
+                  <span>{FEATURE_LABELS[u.feature]}</span>
+                  <span className={exhausted ? 'text-error font-medium' : 'text-base-content/70'}>
+                    {u.unlimited ? 'Không giới hạn' : `${u.used}/${u.limit} (còn ${u.remaining})`}
+                    {u.purchasedRemaining != null && u.purchasedRemaining > 0 && (
+                      <span className="ml-1 text-success">· +{u.purchasedRemaining} lượt đã mua</span>
+                    )}
+                  </span>
+                </div>
+              );
+            })}
+            <p className="mt-1 text-xs text-base-content/50">Hạn mức tháng tự làm mới đầu mỗi tháng. Lượt đã mua không hết hạn, chỉ dùng khi đã hết hạn mức tháng.</p>
           </div>
         )}
       </div>
+
+      {/* ===== Mua thêm lượt thiết kế (credit pack) ===== */}
+      {creditPacks.length > 0 && (
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-6">
+          <h2 className="font-display text-lg">Mua thêm lượt thiết kế</h2>
+          <p className="mt-1 mb-4 text-sm text-base-content/60">Hết lượt trong tháng vẫn thiết kế tiếp được, không cần nâng cấp gói.</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {creditPacks.map((pack) => (
+              <div key={pack.id} className="flex flex-col gap-2 rounded-xl border border-base-300 p-4">
+                <p className="font-medium">{pack.displayName}</p>
+                <p className="text-sm text-base-content/60">
+                  {pack.credits} lượt · {formatVnd(Math.round(pack.price / pack.credits))}/lượt
+                </p>
+                <div className="mt-auto flex items-center justify-between gap-2">
+                  <span className="font-semibold text-primary">{formatVnd(pack.price)}</span>
+                  <button onClick={() => setBuyingPack(pack)} className="btn btn-primary btn-sm">Mua</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ===== Lịch sử thanh toán ===== */}
       {payments?.length > 0 && (
@@ -120,7 +157,7 @@ export default function MySubscription() {
               return (
                 <div key={p.id} className="flex items-center justify-between text-sm border-b border-base-200 last:border-0 pb-2 last:pb-0">
                   <div>
-                    <p className="font-medium">{p.planName}</p>
+                    <p className="font-medium">{paymentLabel(p)}</p>
                     <p className="text-xs text-base-content/50">{formatDate(p.createdAt)}</p>
                   </div>
                   <div className="text-right">
@@ -146,6 +183,7 @@ export default function MySubscription() {
         subscription={mySub}
         onClose={() => setRenewing(false)}
       />
+      {buyingPack && <CreditPackPaymentModal key={buyingPack.id} pack={buyingPack} onClose={() => setBuyingPack(null)} />}
     </div>
   );
 }

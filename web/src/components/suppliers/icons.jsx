@@ -99,6 +99,9 @@ export const Shield = (p) => (
 export const Truck = (p) => (
   <svg {...base} {...p}><path d="M1 3h15v13H1z" /><path d="M16 8h4l3 3v5h-7z" /><circle cx="5.5" cy="18.5" r="1.5" /><circle cx="18.5" cy="18.5" r="1.5" /></svg>
 );
+export const Tag = (p) => (
+  <svg {...base} {...p}><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z" /><circle cx="7.5" cy="7.5" r="1.5" /></svg>
+);
 export const Tool = (p) => (
   <svg {...base} {...p}><path d="M14.7 6.3a4 4 0 0 1-5.3 5.3L3 18v3h3l6.4-6.4a4 4 0 0 1 5.3-5.3l-2.8 2.8-2-2 2.5-2.8z" /></svg>
 );

@@ -1,5 +1,5 @@
 import PortalShell from './PortalShell.jsx';
-import { Users, Briefcase, Layers, Tree, CreditCard, Wallet, BarChart } from '../suppliers/icons.jsx';
+import { Users, Briefcase, Layers, Tree, CreditCard, Wallet, BarChart, ShoppingBag, Tag, Truck, Bolt } from '../suppliers/icons.jsx';
 
 /*
  * AdminPortalLayout — Portal Quản trị viên. Tái dùng nguyên PortalShell (giống
@@ -13,6 +13,10 @@ const NAV = [
   { to: '/admin/categories', label: 'Danh mục', icon: Layers },
   { to: '/admin/materials', label: 'Vật liệu', icon: Tree },
   { to: '/admin/subscription-plans', label: 'Gói đăng ký', icon: CreditCard },
+  { to: '/admin/credit-packs', label: 'Gói lượt thiết kế', icon: Bolt },
+  { to: '/admin/orders', label: 'Đơn hàng', icon: ShoppingBag },
+  { to: '/admin/promotions', label: 'Khuyến mãi', icon: Tag },
+  { to: '/admin/shipping-config', label: 'Phí vận chuyển', icon: Truck },
   { to: '/admin/payments', label: 'Thanh toán', icon: Wallet },
 ];
 

@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useCartStore } from '../../stores/cartStore.js';
+import { useCart } from '../../hooks/useCart.js';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { useLogout } from '../../hooks/useLogout.js';
@@ -18,8 +18,10 @@ const MENU = [
 ];
 
 export default function Header() {
-  const itemCount = useCartStore((s) => s.items.reduce((n, i) => n + i.qty, 0));
   const { user } = useAuthStore();
+  // Badge = tổng số lượng trong giỏ server (totalQuantity). useCart tự tắt khi chưa đăng nhập → 0.
+  const { data: cart } = useCart();
+  const itemCount = cart?.totalQuantity ?? 0;
   const logout = useLogout();
   const { theme, toggleTheme } = useUiStore();
   const { t } = useTranslation();
@@ -97,6 +99,7 @@ export default function Header() {
                 {user.role === 'customer' && <li><Link to="/quotes">{t('nav.quotes')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/custom-orders">{t('nav.customOrders')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/account/subscription">{t('nav.subscription')}</Link></li>}
+                {user.role === 'customer' && <li><Link to="/account/addresses">{t('nav.addresses')}</Link></li>}
                 <li><Link to="/profile">{t('nav.profile')}</Link></li>
                 <li><button onClick={logout}>{t('nav.logout')}</button></li>
               </ul>

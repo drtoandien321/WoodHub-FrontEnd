@@ -28,13 +28,6 @@ export const useSupplierStores = (id) =>
 export const useSupplierPortfolio = (id) =>
   useQuery({ queryKey: ['supplier', 'portfolio', id], queryFn: () => api.getSupplierPortfolio(id), enabled: !!id });
 
-export const useSupplierReviews = (supplierId) =>
-  useQuery({
-    queryKey: ['reviews', 'supplier', supplierId],
-    queryFn: () => api.getReviews({ targetType: 'supplier', targetId: supplierId }),
-    enabled: !!supplierId,
-  });
-
 export const useSupplierReviewSummary = (supplierId) =>
   useQuery({
     queryKey: ['reviews', 'summary', 'supplier', supplierId],

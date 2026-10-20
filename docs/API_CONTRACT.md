@@ -113,31 +113,9 @@ Query params (đều optional): `category`, `material`, `minPrice`, `maxPrice`,
 ### GET /products/:id
 Product đầy đủ + `"related": [ ...product cùng category... ]`. Lỗi: `404`.
 
-## 3. Orders 🔒 (checkout giả lập — scope MVP)
+## 3. Orders 🔒
 
-### POST /orders
-```jsonc
-// Request
-{
-  "items": [ { "productId": "uuid", "name": "...", "price": 5900000, "qty": 2 } ],
-  "address": { "fullName": "...", "phone": "09xx", "street": "...", "district": "..." },
-  "paymentMethod": "vnpay"   // "vnpay" | "momo" | "bank" — MVP chỉ lưu, KHÔNG gọi cổng thật
-}
-// Response 201
-{
-  "id": "uuid",
-  "status": "pending_payment",  // enum: pending_payment | processing | shipping | completed | cancelled
-  "items": [...], "address": {...}, "paymentMethod": "vnpay",
-  "total": 11800000,            // ⚠️ BE TỰ TÍNH từ giá trong DB — không tin total/price từ client
-  "createdAt": "2026-06-11T08:30:00Z",
-  "timeline": [ { "status": "pending_payment", "at": "..." } ]
-}
-```
-> ⚠️ BE phải lấy `price` theo `productId` từ DB rồi tự tính `total`.
-> Client có thể sửa payload — nguyên tắc "never trust the client".
-
-### GET /orders/:id
-Cùng shape trên. `403` nếu đơn không thuộc user, `404` nếu không tồn tại.
+> ⚠️ Luồng `POST /orders` giả lập cũ đã **bỏ**. Xem mục **Orders & Checkout** ở cuối file (theo `woodhub-be/docs/order-checkout-fe.md`).
 
 ## 4. Custom (configurator 3D + matching)
 
@@ -244,8 +222,6 @@ Design đã lưu. `404` nếu không có.
 
 ## 6. Để dành V1 (FE chưa gọi, đừng làm vội)
 - `POST /auth/refresh` — refresh token
-- `POST /cart/merge` — gộp giỏ guest khi login
-- `GET /orders` — danh sách đơn của user
 - Quote flow: `POST /quotes` (yêu cầu báo giá từ xưởng), supplier portal CRUD
 - Webhook VNPay/MoMo khi tích hợp thanh toán thật
 
@@ -277,3 +253,88 @@ Cold start (Render free) có thể chậm vài chục giây hoặc 502 → FE hi
 
 - `GET /api/ai-chat/sessions` → `AiChatSessionResponse[]` (mới cập nhật trước). FE hiển thị ở màn "Lịch sử trò chuyện" trong khung chat; phiên chưa có `title` (chưa có tin nhắn) bị ẩn, trừ phiên đang mở.
 - `GET /api/ai-chat/sessions/{id}/messages` → chỉ chủ phiên (403 nếu không phải chủ). FE lưu `sessionOwnerId` cùng `sessionId` và tự bỏ phiên khi đổi tài khoản/đăng xuất.
+
+## Cart 🔒 — giỏ hàng server-side (FE đã dùng)
+
+Nguồn chi tiết: `woodhub-be/docs/cart-address-fe.md`. Giỏ **chỉ cho user đã đăng nhập** (FE: khách chưa login bấm "Thêm vào giỏ" → `/login`, không có giỏ guest / không merge).
+
+| Endpoint | Ghi chú |
+| --- | --- |
+| `GET /api/cart` | Tự tạo giỏ rỗng nếu chưa có |
+| `POST /api/cart/items` | `{ variantId, quantity 1..999 }` — đã có thì **cộng dồn**. 404 không có biến thể · 409 SP ngừng bán |
+| `PUT /api/cart/items/{itemId}` | `{ quantity }` — **ghi đè**. `itemId` = id dòng giỏ, **không phải** `variantId` |
+| `DELETE /api/cart/items/{itemId}` | Xoá 1 dòng |
+| `DELETE /api/cart` | Xoá sạch |
+
+Mọi endpoint trả **toàn bộ** `CartResponse { id, items[], totalItems, totalQuantity, subtotal, updatedAt }`.
+`CartItemResponse { id, variantId, productId, productName, sku, color, dimensions, imageUrl, unitPrice, quantity, lineTotal, priceAtAddition, addedAt }` — `unitPrice` là giá hiện tại, khác `priceAtAddition` thì FE báo "giá đã thay đổi".
+
+## Addresses 🔒 — sổ địa chỉ giao hàng (FE đã dùng: `/account/addresses`)
+
+| Endpoint | Ghi chú |
+| --- | --- |
+| `GET /api/addresses` | `UserAddressResponse[]` — mặc định đứng đầu, rồi mới nhất trước |
+| `POST /api/addresses` | → `201`. Địa chỉ đầu tiên tự thành mặc định |
+| `PUT /api/addresses/{id}` | ⚠️ **Ghi đè toàn bộ** — field không gửi (kể cả `latitude/longitude`) bị set `null`. FE luôn gửi đủ body |
+| `DELETE /api/addresses/{id}` | → `204`. Xoá địa chỉ mặc định → BE đề bạt địa chỉ mới nhất |
+| `PATCH /api/addresses/{id}/default` | Đặt mặc định, trả chính địa chỉ đó |
+
+Body: `{ recipientName*, recipientPhone*, addressLine*, ward?, district?, city*, latitude?, longitude?, isDefault? }`.
+Response thêm `id, isDefault, hasCoordinates, createdAt, updatedAt`. `hasCoordinates=false` → không dùng được để checkout (FE bắt khách ghim map trước).
+
+## Orders & Checkout 🔒 (FE đã dùng: /checkout, /orders, /orders/:id)
+
+| Endpoint | Ghi chú |
+| --- | --- |
+| `POST /api/orders/checkout` | Body `{ addressId, note?, couponCodes? }` (FE dùng cách này; địa chỉ phải `hasCoordinates`). Hoặc nhập tay `{ recipientName, recipientPhone, addressLine, ward?, district?, city, latitude, longitude, locationSource?, saveAddress? }`. → `201 { orders: OrderResponse[], payment: PaymentResponse, grandTotal }` |
+| `GET /api/orders?status=&page=&size=` | `Page<OrderResponse>`, mặc định `createdAt,desc` |
+| `GET /api/orders/{id}` | Chỉ chủ đơn (khác → 404) |
+| `POST /api/orders/{id}/cancel` | Chỉ khi `pending_payment`, sai → 409 |
+| `GET /api/promotions/lookup?code=` | `PromotionResponse` · 404 không có · 400 hết hiệu lực (lượt dùng chỉ kiểm khi checkout) |
+
+- BE **tự** tách đơn theo supplier, chọn chi nhánh gần nhất, tính ship (Haversine), áp coupon, tạo **1 payment chung** (1 QR) và **xoá giỏ**. FE không gửi giá/phí ship.
+- Poll `GET /api/payments/{paymentId}` tới `paid` → webhook đã tự chuyển mọi đơn `pending_payment → paid`.
+- Trạng thái: `pending_payment → paid → confirmed → processing → shipping → delivered → completed`; nhánh `cancelled`, `refunded`.
+- ⚠️ **Spring Page thật là dạng lồng** (BE bật `@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)`): `{ content, page: { size, number, totalElements, totalPages } }` — docs BE ghi dạng phẳng là chưa đúng. FE đọc `data.page ?? data`.
+
+## Xử lý đơn · Khuyến mãi · Phí ship (portal supplier/admin — FE đã dùng)
+
+Nguồn: `woodhub-be/docs/promotions-admin-fe.md`.
+
+| Endpoint | Ai dùng | FE |
+| --- | --- | --- |
+| `GET /api/supplier/orders?status=&page=` · `PUT /api/supplier/orders/{id}/status` | supplier (đơn của mình, khác chủ → 403) | `/portal/supplier/orders` |
+| `GET /api/admin/orders?status=&page=` · `PUT /api/admin/orders/{id}/status` | admin (mọi đơn) | `/admin/orders` |
+| `GET/POST /api/promotions` · `GET/PUT/DELETE /api/promotions/{id}` | admin (KM toàn sàn) + supplier (KM `product` cho SP của mình) — BE tự lọc danh sách theo vai trò | `/admin/promotions`, `/portal/supplier/promotions` |
+| `GET/PUT /api/admin/shipping-config` | admin | `/admin/shipping-config` |
+
+- Body đổi trạng thái: `{ status, note? }`. Luật chuyển (sai → 409) — FE giữ bản sao ở `web/src/utils/orderStatus.js` để chỉ hiện nút hợp lệ:
+  `pending_payment → cancelled` · `paid → confirmed|cancelled|refunded` · `confirmed → processing|cancelled|refunded` · `processing → shipping|cancelled|refunded` · `shipping → delivered|refunded` · `delivered → completed|refunded` · `completed → refunded`. `pending_payment → paid` chỉ do webhook.
+- Khuyến mãi: `free_shipping` chỉ cho `type=shipping`; `percentage` ∈ (0,100]; `fixed_amount` > 0; `type=product` bắt buộc `productIds`; trùng mã → 409.
+- Ship config: `{ baseFee, perKmFee, freeRadiusKm, freeShipThreshold|null, maxFeeCap|null }` — `null` = tắt ngưỡng/trần.
+
+## Subscription — ví lượt & credit pack (FE đã dùng: `/account/subscription`, `/admin/credit-packs`)
+
+Nguồn: `woodhub-be/docs/subscription-fe.md` (mục 4b).
+
+- `GET /api/usage/me`: **không còn `ar_3d`** (AR không giới hạn). Mỗi dòng thêm `purchasedRemaining` (lượt đã mua, không reset; `null` nếu tính năng không bán lượt). BE trừ hạn mức tháng trước, hết mới trừ ví; chỉ khi **cả hai = 0** mới 429 → FE coi "hết lượt" khi `remaining + purchasedRemaining === 0`.
+- `GET /api/credit-packs` (cần đăng nhập) → gói đang bán `{ id, name, displayName, feature, credits, price, isActive, sortOrder }`.
+- `POST /api/payments/credit-pack { packId }` → `PaymentResponse` (`purpose: 'credit_pack'`, `planName = null`) → poll `GET /api/payments/{id}` tới `paid` → lượt tự vào ví. Gói giá 0 → 400.
+- Admin: `GET/POST /api/admin/credit-packs`, `PUT/DELETE /api/admin/credit-packs/{id}` — body `{ name, displayName, feature?, credits, price, isActive?, sortOrder? }`.
+
+## Admin Dashboard — traffic GA4 (FE đã dùng: khối "Lượt truy cập website")
+
+- `GET /api/admin/dashboard/traffic?from&to&limit` → `{ totals{activeUsers,newUsers,sessions,pageViews,engagementRate,avgSessionSeconds}, bySource[], byDay[], topPages[], realtime|null }`. Bỏ trống from/to = 30 ngày gần nhất.
+- `503` = BE chưa cấu hình GA → FE **ẩn** khối · `502` = GA lỗi/hết quota → FE báo lỗi tại khối. Dữ liệu trễ 24–48h (trừ realtime).
+
+## Reviews — đánh giá sản phẩm & nhà cung cấp (FE đã dùng: `/product/:id`, `/suppliers/:id`, portal "Đánh giá")
+
+| Endpoint | Ghi chú |
+| --- | --- |
+| `GET /api/reviews?targetType=product\|supplier&targetId=&page=&size=` | Công khai. `Page<ReviewResponse>` mới nhất trước |
+| `GET /api/reviews/summary?targetType=&targetId=` | Công khai. `{ average, count }` — **không có phân bố sao** (FE tự tính từ các đánh giá đã tải) |
+| `POST /api/reviews` | `{ targetType, targetId, rating 1..5, comment? ≤2000 }` → 201. 409 đã đánh giá rồi · 403 tự đánh giá SP/cửa hàng của mình |
+| `PUT /api/reviews/{id}` · `DELETE /api/reviews/{id}` | Chỉ người viết (khác → 403) |
+
+`ReviewResponse { id, userId, userName, targetType, targetId, rating, comment, createdAt, updatedAt }`.
+FE chỉ cho role `customer` viết. BE **chưa có**: API "đánh giá của tôi" (FE tìm theo `userId` trong trang đầu) và API phản hồi đánh giá cho nhà cung cấp.

@@ -173,7 +173,7 @@ const SUPPLIER_TYPE = {
   // còn lại (supplier@, ncc@) mặc định retailer
 };
 
-const ORDERS_KEY = 'woodhub:orders';
+const ORDERS_KEY = 'woodhub:orders-v2'; // v2: shape OrderResponse mới (checkout tách đơn theo supplier) — không đọc lại dữ liệu v1 cũ
 const GEN_TASKS_KEY = 'woodhub:genTasks';
 const GEN_MODELS_KEY = 'woodhub:genModels';
 const CUSTOM_DESIGNS_KEY = 'woodhub:customDesigns'; // Custom Studio wizard (BE-6)
@@ -299,6 +299,84 @@ const findVariantWithProduct = (variantId) => {
   }
   return null;
 };
+
+/*
+ * "DB" cho GIỎ HÀNG server-side (/cart) — mỗi user 1 giỏ, khoá theo userId trong localStorage
+ * (giống BE: giỏ gắn với tài khoản, đổi tài khoản là giỏ khác). Dòng giỏ chỉ lưu
+ * { id, variantId, quantity, priceAtAddition, addedAt }; thông tin SP/giá HIỆN TẠI được "join"
+ * lại mỗi lần đọc (toCartResponse) — đúng như BE join qua variant → product.
+ */
+const CART_KEY_PREFIX = 'woodhub:cart-v2:';
+const cartKey = () => CART_KEY_PREFIX + (useAuthStore.getState().user?.id ?? 'anonymous');
+const loadCart = () => storage.getItem(cartKey(), { id: crypto.randomUUID(), items: [], updatedAt: new Date().toISOString() });
+const saveCart = (cart) => storage.setItem(cartKey(), { ...cart, updatedAt: new Date().toISOString() });
+
+// Tìm variant ở catalog công khai (PRODUCTS, variant id = `${productId}-v1`, xem toProductDetail) lẫn SP portal (myProducts)
+const findCartVariant = (variantId) => {
+  const p = PRODUCTS.find((x) => `${x.id}-v1` === variantId);
+  if (p) {
+    return {
+      productId: p.id, productName: loc(p.name), status: p.status, sku: null, color: null,
+      supplierId: p.supplierId, supplierName: p.supplierName,
+      dimensions: defaultDimensions(p), imageUrl: buildGallery(p)[0] ?? null, price: p.price,
+    };
+  }
+  const found = findVariantWithProduct(variantId);
+  if (!found) return null;
+  const { variant, product } = found;
+  return {
+    productId: product.id, productName: product.name, status: product.status, sku: variant.sku ?? null,
+    supplierId: product.supplierId ?? null, supplierName: product.supplierName ?? null,
+    color: variant.color ?? null, dimensions: variant.dimensions ?? null,
+    imageUrl: product.images?.find((i) => i.primary)?.url ?? product.images?.[0]?.url ?? null, price: variant.price,
+  };
+};
+
+const cartError = (status, message) => Object.assign(new Error(message), { response: { status, data: { status, message } } });
+
+const toCartResponse = (cart) => {
+  const items = cart.items
+    .map((it) => {
+      const v = findCartVariant(it.variantId);
+      if (!v) return null; // variant đã bị xoá → bỏ khỏi response
+      return {
+        id: it.id, variantId: it.variantId, productId: v.productId, productName: v.productName,
+        sku: v.sku, color: v.color, dimensions: v.dimensions, imageUrl: v.imageUrl,
+        unitPrice: v.price, quantity: it.quantity, lineTotal: v.price * it.quantity,
+        priceAtAddition: it.priceAtAddition, addedAt: it.addedAt,
+      };
+    })
+    .filter(Boolean);
+  return {
+    id: cart.id, items,
+    totalItems: items.length,
+    totalQuantity: items.reduce((n, i) => n + i.quantity, 0),
+    subtotal: items.reduce((s, i) => s + i.lineTotal, 0),
+    updatedAt: cart.updatedAt,
+  };
+};
+
+/*
+ * "DB" cho SỔ ĐỊA CHỈ (/addresses) — mỗi user 1 danh sách riêng (khoá theo userId), mô phỏng
+ * đúng các bất biến BE tự giữ: địa chỉ đầu tiên tự là mặc định; isDefault=true thì gỡ cờ ở địa
+ * chỉ khác; xoá địa chỉ mặc định thì đề bạt địa chỉ MỚI NHẤT còn lại.
+ */
+const ADDRESSES_KEY_PREFIX = 'woodhub:addresses-v1:';
+const addressesKey = () => ADDRESSES_KEY_PREFIX + (useAuthStore.getState().user?.id ?? 'anonymous');
+const loadAddresses = () => storage.getItem(addressesKey(), []);
+const saveAddresses = (list) => storage.setItem(addressesKey(), list);
+const toAddressResponse = (a) => ({ ...a, hasCoordinates: a.latitude != null && a.longitude != null });
+// Thứ tự giống BE: mặc định đứng đầu, sau đó mới nhất trước
+const sortAddresses = (list) =>
+  [...list].sort((a, b) => (b.isDefault - a.isDefault) || b.createdAt.localeCompare(a.createdAt));
+const findOwnAddress = (list, id) => {
+  const a = list.find((x) => x.id === id);
+  if (!a) throw Object.assign(new Error('ADDRESS_NOT_FOUND'), { response: { status: 404, data: { status: 404, message: 'Không tìm thấy địa chỉ' } } });
+  return a;
+};
+const ADDRESS_FIELDS = ['recipientName', 'recipientPhone', 'addressLine', 'ward', 'district', 'city', 'latitude', 'longitude'];
+const pickAddressFields = (body) =>
+  Object.fromEntries(ADDRESS_FIELDS.map((k) => [k, body[k] ?? null]));
 
 /*
  * "DB" cho CHAT (Conversation + Message) — chỉ để đầy đủ tầng api/client.js theo đúng quy ước
@@ -431,6 +509,198 @@ const MOCK_PAYMENTS_KEY = 'woodhub:subscription-payments-v1';
 let mockPayments = storage.getItem(MOCK_PAYMENTS_KEY, []);
 const persistMockPayments = () => storage.setItem(MOCK_PAYMENTS_KEY, mockPayments);
 
+/*
+ * ===== CREDIT PACK (mua thêm lượt design) + VÍ LƯỢT ĐÃ MUA =====
+ * Ví (purchased credits) KHÔNG reset theo tháng, tiêu sau khi hết hạn mức tháng của gói — mirror
+ * bảng user_credit_balances bên BE. Mock giữ 1 ví chung (mock chỉ có 1 khách demo).
+ */
+const CREDIT_PACKS_KEY = 'woodhub:credit-packs-v1';
+let mockCreditPacks = storage.getItem(CREDIT_PACKS_KEY, null) ?? [
+  { id: 'cp_1', name: 'design_5', displayName: 'Gói 5 lượt thiết kế', feature: 'design', credits: 5, price: 50000, isActive: true, sortOrder: 1 },
+  { id: 'cp_2', name: 'design_10', displayName: 'Gói 10 lượt thiết kế', feature: 'design', credits: 10, price: 90000, isActive: true, sortOrder: 2 },
+  { id: 'cp_3', name: 'design_30', displayName: 'Gói 30 lượt (ngừng bán)', feature: 'design', credits: 30, price: 240000, isActive: false, sortOrder: 3 },
+];
+const persistCreditPacks = () => storage.setItem(CREDIT_PACKS_KEY, mockCreditPacks);
+const CREDIT_WALLET_KEY = 'woodhub:credit-wallet-v1';
+let mockCreditWallet = storage.getItem(CREDIT_WALLET_KEY, { design: 0 });
+const persistCreditWallet = () => storage.setItem(CREDIT_WALLET_KEY, mockCreditWallet);
+
+/*
+ * Traffic GA4 giả lập — số ổn định theo ngày (không random mỗi lần gọi) để biểu đồ không nhảy khi refetch.
+ * Bật cờ localStorage 'woodhub:mock-ga-off' = '1' để giả lập BE chưa cấu hình GA (503).
+ */
+const seeded = (s) => { const x = Math.sin(s) * 10000; return x - Math.floor(x); };
+const mockTraffic = ({ from, to, limit = 5 } = {}) => {
+  const end = to ? new Date(to) : new Date();
+  const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86_400_000);
+  const byDay = [];
+  for (let d = new Date(start); d <= end && byDay.length < 366; d.setDate(d.getDate() + 1)) {
+    const key = Math.floor(d.getTime() / 86_400_000);
+    if (seeded(key) < 0.08) continue; // vài ngày không có dữ liệu → FE phải tự điền 0
+    const users = 20 + Math.round(seeded(key + 1) * 60);
+    byDay.push({ date: d.toISOString().slice(0, 10), users, sessions: Math.round(users * 1.35), pageViews: Math.round(users * 4.8) });
+  }
+  const sum = (k) => byDay.reduce((s, r) => s + r[k], 0);
+  const users = sum('users');
+  const sources = [['facebook', 'social', 0.46], ['(direct)', '(none)', 0.22], ['tiktok', 'social', 0.17], ['google', 'organic', 0.11], ['zalo', 'referral', 0.04]];
+  const pages = [['/', 0.3], ['/shop', 0.22], ['/custom', 0.14], ['/product/p1', 0.08], ['/pricing', 0.06], ['/suppliers', 0.05]];
+  return {
+    totals: { activeUsers: users, newUsers: Math.round(users * 0.71), sessions: sum('sessions'), pageViews: sum('pageViews'), engagementRate: 0.62, avgSessionSeconds: 94 },
+    bySource: sources.slice(0, limit).map(([source, medium, r]) => ({ source, medium, users: Math.round(users * r), sessions: Math.round(users * r * 1.3) })),
+    byDay,
+    topPages: pages.slice(0, limit).map(([path, r]) => ({ path, views: Math.round(sum('pageViews') * r), users: Math.round(users * r * 0.8) })),
+    realtime: { activeUsers: 3 + Math.round(seeded(Date.now() / 60_000) * 9) },
+  };
+};
+
+/*
+ * ===== Helper cho mock CHECKOUT/ORDER (mirror logic BE ở OrderServiceImpl) =====
+ */
+const orderError = (status, message) => Object.assign(new Error(message), { response: { status, data: { status, message } } });
+
+// Chi nhánh giao giả lập theo supplier (BE thật chọn chi nhánh có toạ độ GẦN điểm giao nhất)
+const MOCK_SUPPLIER_STORES = {
+  sup_01: { id: 'store_01', address: '45 Nguyễn Huệ, Quận 1', city: 'TP.HCM', phone: '02838000001', latitude: 10.7743, longitude: 106.7031 },
+  sup_02: { id: 'store_02', address: '120 Phan Văn Trị, Gò Vấp', city: 'TP.HCM', phone: '02838000002', latitude: 10.8231, longitude: 106.6870 },
+};
+const mockStoreFor = (supplierId) =>
+  MOCK_SUPPLIER_STORES[supplierId] ?? { id: 'store_x', address: '1 Võ Văn Kiệt, Quận 5', city: 'TP.HCM', phone: null, latitude: 10.7500, longitude: 106.6600 };
+
+// Khoảng cách đường chim bay giữa 2 toạ độ (Haversine, km) — cùng công thức BE dùng tính phí ship
+const haversineKm = (a, b) => {
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLng = toRad(b.longitude - a.longitude);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.latitude)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+};
+
+// Cấu hình ship mặc định của BE: 15k + 5k/km ngoài 3km, miễn khi đơn ≥ 2tr, trần 100k
+// Admin sửa được qua PUT /admin/shipping-config (lưu localStorage để F5 không mất)
+const SHIPPING_KEY = 'woodhub:shipping-config-v1';
+let MOCK_SHIPPING = storage.getItem(SHIPPING_KEY, {
+  id: 'ship_cfg_1', baseFee: 15000, perKmFee: 5000, freeRadiusKm: 3, freeShipThreshold: 2_000_000, maxFeeCap: 100_000,
+  isActive: true, updatedAt: '2026-10-01T00:00:00Z',
+});
+const shippingFeeFor = (subtotal, distanceKm) => {
+  const c = MOCK_SHIPPING;
+  if (c.freeShipThreshold != null && subtotal >= c.freeShipThreshold) return 0;
+  const fee = c.baseFee + c.perKmFee * Math.max(0, distanceKm - c.freeRadiusKm);
+  return Math.round(c.maxFeeCap != null ? Math.min(fee, c.maxFeeCap) : fee);
+};
+
+/*
+ * Coupon demo để test luồng checkout ở chế độ mock:
+ *  SALE10   — giảm 10% tiền hàng (tối đa 500k), đơn từ 1tr
+ *  GIAM50K  — giảm 50k tiền hàng, đơn từ 500k
+ *  FREESHIP — miễn phí ship
+ *  HETHAN   — đã hết hạn (để test lỗi 400)
+ */
+const PROMOTIONS_KEY = 'woodhub:promotions-v1';
+// Supplier mock đang đăng nhập (getSupplierMe trả 'mock-supplier-id') được coi là chủ luôn 'sup_01'
+// (Xưởng gỗ Thành Phát trong catalog mock) để demo được portal đơn hàng/khuyến mãi với dữ liệu sẵn có.
+const MOCK_MY_SUPPLIER_IDS = ['mock-supplier-id', 'sup_01'];
+const MOCK_MY_SUPPLIER = { id: 'sup_01', name: 'Xưởng gỗ Thành Phát' };
+const isSupplierUser = () => useAuthStore.getState().user?.role === 'supplier';
+let MOCK_PROMOTIONS = storage.getItem(PROMOTIONS_KEY, null) ?? [
+  { code: 'SALE10', name: 'Giảm 10% toàn sàn', type: 'product', discountType: 'percentage', discountValue: 10, maxDiscountAmount: 500_000, minOrderAmount: 1_000_000, endsAt: null },
+  { code: 'GIAM50K', name: 'Giảm 50.000đ', type: 'product', discountType: 'fixed_amount', discountValue: 50_000, maxDiscountAmount: null, minOrderAmount: 500_000, endsAt: null },
+  { code: 'FREESHIP', name: 'Miễn phí vận chuyển', type: 'shipping', discountType: 'free_shipping', discountValue: null, maxDiscountAmount: null, minOrderAmount: null, endsAt: null },
+  { code: 'HETHAN', name: 'Mã đã hết hạn', type: 'product', discountType: 'percentage', discountValue: 20, maxDiscountAmount: null, minOrderAmount: null, endsAt: '2026-01-01T00:00:00Z' },
+].map((p, i) => ({
+  id: `promo_${i + 1}`, description: null, supplierId: null, supplierName: null, startsAt: null, isActive: true,
+  usageLimit: null, usageLimitPerUser: null, usedCount: 0, productIds: [], createdAt: '2026-10-01T00:00:00Z', updatedAt: '2026-10-01T00:00:00Z', ...p,
+}));
+const persistPromotions = () => storage.setItem(PROMOTIONS_KEY, MOCK_PROMOTIONS);
+const findActivePromotion = (raw) => {
+  const code = String(raw ?? '').trim().toUpperCase();
+  const promo = MOCK_PROMOTIONS.find((p) => p.code === code);
+  if (!promo) throw orderError(404, `Mã ${code} không tồn tại`);
+  const now = new Date();
+  const outOfWindow = (promo.startsAt && new Date(promo.startsAt) > now) || (promo.endsAt && new Date(promo.endsAt) < now);
+  if (!promo.isActive || outOfWindow) throw orderError(400, `Mã ${code} đã hết hiệu lực`);
+  return { ...promo };
+};
+/*
+ * Số tiền 1 mã giảm được trên 1 đơn. Mã product: chỉ tính trên dòng hàng thuộc phạm vi mã
+ * (productIds rỗng = mọi sản phẩm — chỉ có ở seed demo, BE thật bắt buộc productIds) và mã của
+ * supplier chỉ áp cho đơn của chính supplier đó.
+ */
+const promotionDiscount = (promo, order) => {
+  if (promo.type === 'shipping') {
+    return promo.discountType === 'free_shipping' ? order.shippingFee : Math.min(order.shippingFee, promo.discountValue ?? 0);
+  }
+  if (promo.supplierId && promo.supplierId !== order.supplierId) return 0;
+  const base = promo.productIds?.length
+    ? order.items.filter((i) => promo.productIds.includes(findCartVariant(i.variantId)?.productId)).reduce((s, i) => s + i.lineTotal, 0)
+    : order.subtotal;
+  if (!base) return 0;
+  const raw = promo.discountType === 'percentage' ? Math.round((base * promo.discountValue) / 100) : promo.discountValue;
+  return Math.min(base, promo.maxDiscountAmount != null ? Math.min(raw, promo.maxDiscountAmount) : raw);
+};
+
+// Luật chuyển trạng thái đơn — mirror bảng trong promotions-admin-fe.md (sai → 409)
+const ORDER_TRANSITIONS = {
+  pending_payment: ['cancelled'],
+  paid: ['confirmed', 'cancelled', 'refunded'],
+  confirmed: ['processing', 'cancelled', 'refunded'],
+  processing: ['shipping', 'cancelled', 'refunded'],
+  shipping: ['delivered', 'refunded'],
+  delivered: ['completed', 'refunded'],
+  completed: ['refunded'],
+};
+const applyOrderStatus = (order, status) => {
+  // pending_payment → paid chỉ do webhook — không cho cập nhật tay (giống BE)
+  if (!(ORDER_TRANSITIONS[order.status] ?? []).includes(status)) {
+    throw orderError(409, `Không thể chuyển đơn từ "${order.status}" sang "${status}"`);
+  }
+  order.status = status;
+  order.updatedAt = new Date().toISOString();
+  persistOrders();
+  return withPaymentInfo(order);
+};
+
+// Validate body khuyến mãi giống ràng buộc BE (400 kèm errors theo field)
+const validatePromotion = (body, { asSupplier }) => {
+  const errors = {};
+  if (!body.code?.trim()) errors.code = 'Mã khuyến mãi không được để trống';
+  if (!body.name?.trim()) errors.name = 'Tên khuyến mãi không được để trống';
+  if (asSupplier && body.type !== 'product') errors.type = 'Nhà cung cấp chỉ tạo được khuyến mãi sản phẩm';
+  if (body.discountType === 'free_shipping' && body.type !== 'shipping') errors.discountType = 'free_shipping chỉ dùng cho khuyến mãi shipping';
+  if (body.discountType === 'percentage' && !(body.discountValue > 0 && body.discountValue <= 100)) errors.discountValue = 'Phần trăm phải trong (0, 100]';
+  if (body.discountType === 'fixed_amount' && !(body.discountValue > 0)) errors.discountValue = 'Số tiền giảm phải > 0';
+  if (body.type === 'product' && !body.productIds?.length) errors.productIds = 'Khuyến mãi sản phẩm phải chọn ít nhất 1 sản phẩm';
+  if (Object.keys(errors).length) {
+    throw Object.assign(new Error('VALIDATION'), { response: { status: 400, data: { status: 400, message: Object.values(errors)[0], errors } } });
+  }
+};
+const ownPromotion = (id) => {
+  const promo = MOCK_PROMOTIONS.find((p) => p.id === id);
+  if (!promo) throw orderError(404, 'Không tìm thấy khuyến mãi');
+  if (isSupplierUser() && promo.supplierId !== MOCK_MY_SUPPLIER.id) throw orderError(403, 'Không có quyền với khuyến mãi này');
+  return promo;
+};
+
+// "Join" thông tin payment chung vào OrderResponse — giống BE (paymentStatus/QrUrl/TxnRef/ExpiresAt)
+const withPaymentInfo = (order) => {
+  const p = mockPayments.find((x) => x.id === order.paymentId);
+  return {
+    ...order,
+    paymentStatus: p?.status ?? null, paymentQrUrl: p?.qrUrl ?? null,
+    paymentTxnRef: p?.txnRef ?? null, paymentExpiresAt: p?.expiresAt ?? null,
+  };
+};
+
+// Spring Page dạng VIA_DTO (BE bật @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+const toSpringPage = (all, { page = 0, size = 20 } = {}) => {
+  const number = Number(page) || 0;
+  const pageSize = Number(size) || 20;
+  return {
+    content: all.slice(number * pageSize, (number + 1) * pageSize),
+    page: { size: pageSize, number, totalElements: all.length, totalPages: Math.max(1, Math.ceil(all.length / pageSize)) },
+  };
+};
+
 let seq = 1;
 const nextId = (prefix) => `${prefix}_${Date.now()}_${seq++}`;
 
@@ -443,6 +713,55 @@ const FORCE_CHANGE_PASSWORD_ACCOUNTS = new Set(['newsupplier@woodhub.vn']);
 
 // Tra 1 workshop mock theo id (BE thật) hoặc slug (dữ liệu mock cũ) — dùng cho các hàm getSupplier*/getReview* bên dưới
 const findWorkshop = (idOrSlug) => WORKSHOPS.find((w) => w.id === idOrSlug || w.slug === idOrSlug);
+
+/*
+ * "DB" ĐÁNH GIÁ (/reviews) = đánh giá do user mock viết (sửa/xoá được, lưu localStorage)
+ * + đánh giá seed chỉ-đọc (của "người khác"): xưởng lấy từ WORKSHOPS[].reviews, cửa hàng mock của supplier
+ * đang đăng nhập + sản phẩm p1 có vài đánh giá demo để portal/trang SP không trống.
+ */
+const USER_REVIEWS_KEY = 'woodhub:reviews-v1';
+let mockUserReviews = storage.getItem(USER_REVIEWS_KEY, []);
+const persistUserReviews = () => storage.setItem(USER_REVIEWS_KEY, mockUserReviews);
+const ddmmyyyyToIso = (s) => {
+  const [d, m, y] = String(s).split('/');
+  return y ? new Date(`${y}-${m}-${d}T09:00:00Z`).toISOString() : s;
+};
+const DEMO_REVIEWS = [
+  { name: 'Anh Minh Tuấn', date: '28/09/2026', rating: 5, text: 'Sản phẩm đẹp, đúng mô tả, giao nhanh. Nhân viên tư vấn nhiệt tình.' },
+  { name: 'Chị Thu Hằng', date: '26/09/2026', rating: 4, text: 'Gỗ chắc, màu đẹp. Đóng gói kỹ nhưng giao trễ 1 ngày.' },
+  { name: 'Anh Quốc Bảo', date: '20/09/2026', rating: 5, text: 'Rất hài lòng, sẽ ủng hộ tiếp.' },
+  { name: 'Chị Mai Anh', date: '11/09/2026', rating: 3, text: 'Sản phẩm ổn, lắp ráp hơi mất thời gian.' },
+];
+const seedReviewsFor = (targetType, targetId) => {
+  let rows = [];
+  if (targetType === 'supplier' && findWorkshop(targetId)) rows = findWorkshop(targetId).reviews ?? [];
+  else if (targetType === 'supplier' && MOCK_MY_SUPPLIER_IDS.includes(targetId)) rows = DEMO_REVIEWS;
+  else if (targetType === 'product' && targetId === 'p1') rows = DEMO_REVIEWS.slice(0, 2);
+  return rows.map((r, i) => ({
+    id: `seed-${targetId}-${i}`, userId: `seed-user-${i}`, userName: r.name, targetType, targetId,
+    rating: r.rating, comment: r.text, createdAt: ddmmyyyyToIso(r.date), updatedAt: ddmmyyyyToIso(r.date),
+  }));
+};
+// 'mock-supplier-id' (getSupplierMe) và 'sup_01' (catalog) là CÙNG 1 cửa hàng mock → gộp đánh giá 2 id
+const sameTarget = (r, targetType, targetId) =>
+  r.targetType === targetType &&
+  (r.targetId === targetId || (targetType === 'supplier' && MOCK_MY_SUPPLIER_IDS.includes(targetId) && MOCK_MY_SUPPLIER_IDS.includes(r.targetId)));
+const allReviewsFor = (targetType, targetId) =>
+  [...mockUserReviews.filter((r) => sameTarget(r, targetType, targetId)), ...seedReviewsFor(targetType, targetId)]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+const reviewError = (status, message) => Object.assign(new Error(message), { response: { status, data: { status, message } } });
+const validateReviewBody = (body) => {
+  if (!Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
+    throw Object.assign(new Error('VALIDATION'), { response: { status: 400, data: { status: 400, message: 'Số sao phải từ 1 đến 5', errors: { rating: 'Số sao phải từ 1 đến 5' } } } });
+  }
+  if ((body.comment ?? '').length > 2000) throw reviewError(400, 'Nội dung đánh giá tối đa 2000 ký tự');
+};
+const ownReview = (id) => {
+  const review = mockUserReviews.find((r) => r.id === id);
+  if (!review) throw reviewError(404, 'Không tìm thấy đánh giá');
+  if (review.userId !== useAuthStore.getState().user?.id) throw reviewError(403, 'Bạn không có quyền sửa/xóa đánh giá này');
+  return review;
+};
 
 // Project 1 workshop mock (nhiều field) xuống ĐÚNG shape SupplierPublicResponse của BE thật
 const toPublicSupplier = (w) => ({
@@ -579,7 +898,7 @@ export const mockAdapter = {
       email === 'ncc@woodhub.vn' ? 'Nội Thất An Phát'
       : email === 'xuong@woodhub.vn' ? 'Xưởng Mộc Tân Phát'
       : email === 'newsupplier@woodhub.vn' ? 'NCC Mới (demo)'
-      : role === 'supplier' ? supplierStore.name
+      : role === 'supplier' ? MOCK_MY_SUPPLIER.name // (trước đây trỏ tới biến supplierStore đã bị xoá → login supplier mock bị lỗi)
       : role === 'admin' ? 'Quản trị viên'
       : body.email.split('@')[0];
     return {
@@ -1036,45 +1355,342 @@ export const mockAdapter = {
     return { variantId, totalStock, stores };
   },
 
-  async createOrder(body) {
-    await delay(600);
-    const id = nextId('ord');
-    
-    // Status ban đầu sau khi đã (giả lập) thanh toán thành công ở Checkout
-    const order = {
-      id,
-      status: 'processing',
-      items: body.items,
-      subtotal: body.subtotal || 0,
-      shippingFee: body.shippingFee || 0,
-      total: body.total || 0,
-      shippingAddress: body.shippingAddress,
-      paymentMethod: body.paymentMethod,
-      createdAt: new Date().toISOString(),
-      timeline: [
-        { key: 'processing', done: true, at: new Date().toISOString() },
-        { key: 'packing', done: false, at: null },
-        { key: 'shipping', done: false, at: null },
-        { key: 'completed', done: false, at: null },
-      ],
-    };
-    memoryDb.orders.set(id, order);
-    persistOrders();
-    return order;
+  // ===== CART — mirror /api/cart (mọi hàm trả TOÀN BỘ CartResponse, giống BE) =====
+  async getCart() {
+    await delay(200);
+    const cart = loadCart();
+    saveCart(cart); // "tự tạo giỏ rỗng nếu chưa có" — lưu lại để id giỏ cố định
+    return toCartResponse(cart);
   },
 
-  async getOrders() {
+  async addCartItem({ variantId, quantity }) {
+    await delay(250);
+    const v = findCartVariant(variantId);
+    if (!v) throw cartError(404, 'Không tìm thấy biến thể sản phẩm');
+    if (v.status !== 'active') throw cartError(409, 'Sản phẩm không còn được bán');
+    const cart = loadCart();
+    const existing = cart.items.find((i) => i.variantId === variantId);
+    if (existing) {
+      existing.quantity = Math.min(999, existing.quantity + quantity); // cộng dồn như BE
+    } else {
+      cart.items.push({ id: crypto.randomUUID(), variantId, quantity, priceAtAddition: v.price, addedAt: new Date().toISOString() });
+    }
+    saveCart(cart);
+    return toCartResponse(loadCart());
+  },
+
+  async updateCartItem({ itemId, quantity }) {
+    await delay(200);
+    const cart = loadCart();
+    const item = cart.items.find((i) => i.id === itemId);
+    if (!item) throw cartError(404, 'Không tìm thấy dòng giỏ hàng');
+    item.quantity = quantity; // ghi đè, không cộng dồn
+    saveCart(cart);
+    return toCartResponse(loadCart());
+  },
+
+  async removeCartItem(itemId) {
+    await delay(200);
+    const cart = loadCart();
+    if (!cart.items.some((i) => i.id === itemId)) throw cartError(404, 'Không tìm thấy dòng giỏ hàng');
+    saveCart({ ...cart, items: cart.items.filter((i) => i.id !== itemId) });
+    return toCartResponse(loadCart());
+  },
+
+  async clearCart() {
+    await delay(200);
+    saveCart({ ...loadCart(), items: [] });
+    return toCartResponse(loadCart());
+  },
+
+  // ===== ADDRESSES — mirror /api/addresses =====
+  async getAddresses() {
+    await delay(200);
+    return sortAddresses(loadAddresses()).map(toAddressResponse);
+  },
+
+  async createAddress(body) {
     await delay(300);
-    const orders = Array.from(memoryDb.orders.values());
-    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return { items: orders };
+    const list = loadAddresses();
+    const now = new Date().toISOString();
+    // Địa chỉ đầu tiên luôn là mặc định, kể cả khi client gửi isDefault=false
+    const isDefault = list.length === 0 || body.isDefault === true;
+    const next = isDefault ? list.map((a) => ({ ...a, isDefault: false })) : list;
+    const address = { id: crypto.randomUUID(), ...pickAddressFields(body), isDefault, createdAt: now, updatedAt: now };
+    saveAddresses([...next, address]);
+    return toAddressResponse(address);
+  },
+
+  async updateAddress({ id, ...body }) {
+    await delay(300);
+    let list = loadAddresses();
+    const current = findOwnAddress(list, id);
+    // isDefault=true → gỡ cờ ở địa chỉ khác; không gửi/false thì giữ nguyên cờ hiện tại
+    // (không cho "bỏ mặc định" để rơi vào trạng thái không có địa chỉ mặc định nào)
+    const isDefault = body.isDefault === true ? true : current.isDefault;
+    if (body.isDefault === true) list = list.map((a) => ({ ...a, isDefault: false }));
+    const updated = { ...current, ...pickAddressFields(body), isDefault, updatedAt: new Date().toISOString() };
+    saveAddresses(list.map((a) => (a.id === id ? updated : a)));
+    return toAddressResponse(updated);
+  },
+
+  async deleteAddress(id) {
+    await delay(250);
+    const list = loadAddresses();
+    const target = findOwnAddress(list, id);
+    let rest = list.filter((a) => a.id !== id);
+    if (target.isDefault && rest.length) {
+      const newest = [...rest].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+      rest = rest.map((a) => ({ ...a, isDefault: a.id === newest.id }));
+    }
+    saveAddresses(rest);
+    return null; // 204
+  },
+
+  async setDefaultAddress(id) {
+    await delay(250);
+    const list = loadAddresses();
+    findOwnAddress(list, id);
+    const next = list.map((a) => ({ ...a, isDefault: a.id === id }));
+    saveAddresses(next);
+    return toAddressResponse(next.find((a) => a.id === id));
+  },
+
+  // ===== ORDERS + CHECKOUT — mirror /api/orders (docs/order-checkout-fe.md) =====
+  async checkout(body) {
+    await delay(700);
+    const cart = loadCart();
+    const lines = toCartResponse(cart).items;
+    if (!lines.length) throw orderError(400, 'Giỏ hàng trống');
+
+    // ① Điểm giao: địa chỉ đã lưu (phải có toạ độ) HOẶC nhập tay kèm toạ độ
+    let dest;
+    if (body.addressId) {
+      const saved = loadAddresses().find((a) => a.id === body.addressId);
+      if (!saved) throw orderError(404, 'Không tìm thấy địa chỉ');
+      if (saved.latitude == null || saved.longitude == null) throw orderError(400, 'Địa chỉ chưa có toạ độ, vui lòng ghim trên bản đồ');
+      dest = { ...saved, locationSource: body.locationSource ?? 'map_pin' };
+    } else {
+      const required = ['recipientName', 'recipientPhone', 'addressLine', 'city'];
+      if (required.some((k) => !body[k]?.trim())) throw orderError(400, 'Thiếu thông tin người nhận/địa chỉ');
+      if (body.latitude == null || body.longitude == null) throw orderError(400, 'Thiếu toạ độ điểm giao');
+      dest = { ...pickAddressFields(body), locationSource: body.locationSource ?? 'map_pin' };
+      if (body.saveAddress) await mockAdapter.createAddress(body);
+    }
+
+    // ② Tách giỏ theo supplier → mỗi supplier 1 đơn, tính ship từ chi nhánh mock của supplier đó
+    const groups = new Map();
+    for (const line of lines) {
+      const v = findCartVariant(line.variantId);
+      if (v.status !== 'active') throw orderError(409, `Sản phẩm "${line.productName}" đã ngừng bán`);
+      const key = v.supplierId ?? 'unknown';
+      if (!groups.has(key)) groups.set(key, { supplierId: v.supplierId, supplierName: v.supplierName, lines: [] });
+      groups.get(key).lines.push(line);
+    }
+    const now = new Date().toISOString();
+    const orders = [...groups.values()].map((g) => {
+      const store = mockStoreFor(g.supplierId);
+      const distanceKm = Math.round(haversineKm(store, dest) * 100) / 100;
+      const subtotal = g.lines.reduce((s, l) => s + l.lineTotal, 0);
+      return {
+        id: crypto.randomUUID(), orderCode: `WH${now.slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+        status: 'pending_payment', supplierId: g.supplierId, supplierName: g.supplierName,
+        storeId: store.id, storeAddress: store.address, storeCity: store.city, storePhone: store.phone,
+        recipientName: dest.recipientName, recipientPhone: dest.recipientPhone, shippingAddress: dest.addressLine,
+        ward: dest.ward, district: dest.district, city: dest.city,
+        destLatitude: dest.latitude, destLongitude: dest.longitude, locationSource: dest.locationSource, distanceKm,
+        subtotal, productDiscount: 0, shippingFee: shippingFeeFor(subtotal, distanceKm), shippingDiscount: 0, totalAmount: 0,
+        note: body.note ?? null, placedAt: now, createdAt: now, updatedAt: now,
+        items: g.lines.map((l) => ({
+          id: crypto.randomUUID(), variantId: l.variantId, productName: l.productName, variantSku: l.sku,
+          color: l.color, dimensions: l.dimensions, unitPrice: l.unitPrice, quantity: l.quantity, lineTotal: l.lineTotal,
+        })),
+      };
+    });
+
+    // ③ Coupon: mỗi mã áp cho ĐÚNG 1 đơn có giá trị giảm cao nhất; mỗi đơn tối đa 1 mã product + 1 mã shipping
+    const usedPromoIds = [];
+    for (const raw of body.couponCodes ?? []) {
+      const promo = findActivePromotion(raw); // ném 404/400 nếu mã sai/hết hạn — giống BE
+      if (promo.usageLimit != null && promo.usedCount >= promo.usageLimit) throw orderError(409, `Mã ${promo.code} đã hết lượt sử dụng`);
+      usedPromoIds.push(promo.id);
+      const field = promo.type === 'shipping' ? 'shippingDiscount' : 'productDiscount';
+      const candidates = orders
+        .filter((o) => o[field] === 0 && (promo.minOrderAmount == null || o.subtotal >= promo.minOrderAmount))
+        .map((o) => ({ o, amount: promotionDiscount(promo, o) }))
+        .filter((c) => c.amount > 0)
+        .sort((a, b) => b.amount - a.amount);
+      if (!candidates.length) throw orderError(409, `Mã ${promo.code} không áp dụng được cho đơn hàng này`);
+      candidates[0].o[field] = candidates[0].amount;
+    }
+    orders.forEach((o) => { o.totalAmount = o.subtotal - o.productDiscount + o.shippingFee - o.shippingDiscount; });
+    MOCK_PROMOTIONS.forEach((p) => { if (usedPromoIds.includes(p.id)) p.usedCount += 1; });
+    persistPromotions();
+
+    // ④ 1 payment chung cho mọi đơn (khách quét 1 QR), rồi xoá giỏ
+    const grandTotal = orders.reduce((s, o) => s + o.totalAmount, 0);
+    const payment = {
+      id: nextId('pay'), purpose: 'order', amount: grandTotal, status: 'pending',
+      txnRef: nextId('ORD').toUpperCase(),
+      qrUrl: `https://qr.sepay.vn/img?acc=demo&bank=DEMO&amount=${grandTotal}&des=demo`,
+      expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+      paidAt: null, paidAmount: null, createdAt: now, planId: null, planName: null, _polls: 0,
+    };
+    mockPayments = [payment, ...mockPayments];
+    persistMockPayments();
+    orders.forEach((o) => { o.paymentId = payment.id; memoryDb.orders.set(o.id, o); });
+    persistOrders();
+    saveCart({ ...cart, items: [] });
+
+    return { orders: orders.map(withPaymentInfo), payment: { ...payment }, grandTotal };
+  },
+
+  async getOrders(params = {}) {
+    await delay(300);
+    const all = Array.from(memoryDb.orders.values())
+      .filter((o) => !params.status || o.status === params.status)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map(withPaymentInfo);
+    return toSpringPage(all, params);
   },
 
   async getOrder(id) {
     await delay(250);
     const order = memoryDb.orders.get(id);
-    if (!order) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
-    return order;
+    if (!order) throw orderError(404, 'Không tìm thấy đơn hàng');
+    return withPaymentInfo(order);
+  },
+
+  async cancelOrder(id) {
+    await delay(300);
+    const order = memoryDb.orders.get(id);
+    if (!order) throw orderError(404, 'Không tìm thấy đơn hàng');
+    if (order.status !== 'pending_payment') throw orderError(409, 'Chỉ hủy được đơn đang chờ thanh toán');
+    order.status = 'cancelled';
+    order.updatedAt = new Date().toISOString();
+    persistOrders();
+    return withPaymentInfo(order);
+  },
+
+  async lookupPromotion(code) {
+    await delay(250);
+    return findActivePromotion(code);
+  },
+
+  // ===== XỬ LÝ ĐƠN — supplier chỉ thấy/sửa đơn của mình, admin thấy/sửa mọi đơn =====
+  async getSupplierOrders(params = {}) {
+    await delay(300);
+    const all = Array.from(memoryDb.orders.values())
+      .filter((o) => MOCK_MY_SUPPLIER_IDS.includes(o.supplierId))
+      .filter((o) => !params.status || o.status === params.status)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map(withPaymentInfo);
+    return toSpringPage(all, params);
+  },
+
+  async updateSupplierOrderStatus({ id, status }) {
+    await delay(350);
+    const order = memoryDb.orders.get(id);
+    if (!order) throw orderError(404, 'Không tìm thấy đơn hàng');
+    if (!MOCK_MY_SUPPLIER_IDS.includes(order.supplierId)) throw orderError(403, 'Đơn này không thuộc nhà cung cấp của bạn');
+    return applyOrderStatus(order, status);
+  },
+
+  async getAdminOrders(params = {}) {
+    await delay(300);
+    const all = Array.from(memoryDb.orders.values())
+      .filter((o) => !params.status || o.status === params.status)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .map(withPaymentInfo);
+    return toSpringPage(all, params);
+  },
+
+  async updateAdminOrderStatus({ id, status }) {
+    await delay(350);
+    const order = memoryDb.orders.get(id);
+    if (!order) throw orderError(404, 'Không tìm thấy đơn hàng');
+    return applyOrderStatus(order, status);
+  },
+
+  // ===== KHUYẾN MÃI — admin: toàn bộ; supplier: chỉ KM của mình =====
+  async getPromotions(params = {}) {
+    await delay(300);
+    const list = isSupplierUser() ? MOCK_PROMOTIONS.filter((p) => p.supplierId === MOCK_MY_SUPPLIER.id) : MOCK_PROMOTIONS;
+    return toSpringPage([...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt)), params);
+  },
+
+  async getPromotion(id) {
+    await delay(200);
+    return { ...ownPromotion(id) };
+  },
+
+  async createPromotion(body) {
+    await delay(350);
+    const asSupplier = isSupplierUser();
+    validatePromotion(body, { asSupplier });
+    const code = body.code.trim().toUpperCase();
+    if (MOCK_PROMOTIONS.some((p) => p.code === code)) throw orderError(409, `Mã ${code} đã tồn tại`);
+    const now = new Date().toISOString();
+    const promo = {
+      id: crypto.randomUUID(), code, name: body.name.trim(), description: body.description ?? null,
+      type: body.type, discountType: body.discountType,
+      discountValue: body.discountType === 'free_shipping' ? null : body.discountValue,
+      maxDiscountAmount: body.maxDiscountAmount ?? null, minOrderAmount: body.minOrderAmount ?? null,
+      startsAt: body.startsAt ?? null, endsAt: body.endsAt ?? null, isActive: body.isActive ?? true,
+      usageLimit: body.usageLimit ?? null, usageLimitPerUser: body.usageLimitPerUser ?? null, usedCount: 0,
+      productIds: body.type === 'shipping' ? [] : body.productIds,
+      supplierId: asSupplier ? MOCK_MY_SUPPLIER.id : null, supplierName: asSupplier ? MOCK_MY_SUPPLIER.name : null,
+      createdAt: now, updatedAt: now,
+    };
+    MOCK_PROMOTIONS = [promo, ...MOCK_PROMOTIONS];
+    persistPromotions();
+    return { ...promo };
+  },
+
+  async updatePromotion({ id, ...body }) {
+    await delay(350);
+    const current = ownPromotion(id);
+    validatePromotion(body, { asSupplier: isSupplierUser() });
+    const code = body.code.trim().toUpperCase();
+    if (MOCK_PROMOTIONS.some((p) => p.code === code && p.id !== id)) throw orderError(409, `Mã ${code} đã tồn tại`);
+    const updated = {
+      ...current, ...body, code,
+      discountValue: body.discountType === 'free_shipping' ? null : body.discountValue,
+      productIds: body.type === 'shipping' ? [] : body.productIds,
+      updatedAt: new Date().toISOString(),
+    };
+    MOCK_PROMOTIONS = MOCK_PROMOTIONS.map((p) => (p.id === id ? updated : p));
+    persistPromotions();
+    return { ...updated };
+  },
+
+  async deletePromotion(id) {
+    await delay(250);
+    ownPromotion(id);
+    MOCK_PROMOTIONS = MOCK_PROMOTIONS.filter((p) => p.id !== id);
+    persistPromotions();
+    return null; // 204
+  },
+
+  // ===== CẤU HÌNH PHÍ SHIP =====
+  async getShippingConfig() {
+    await delay(200);
+    return { ...MOCK_SHIPPING };
+  },
+
+  async updateShippingConfig(body) {
+    await delay(300);
+    const required = ['baseFee', 'perKmFee', 'freeRadiusKm'];
+    const bad = [...required.filter((k) => body[k] == null), ...Object.keys(body).filter((k) => body[k] != null && body[k] < 0)];
+    if (bad.length) throw Object.assign(new Error('VALIDATION'), { response: { status: 400, data: { status: 400, message: 'Giá trị không hợp lệ', errors: Object.fromEntries(bad.map((k) => [k, 'Không hợp lệ'])) } } });
+    MOCK_SHIPPING = {
+      ...MOCK_SHIPPING,
+      baseFee: body.baseFee, perKmFee: body.perKmFee, freeRadiusKm: body.freeRadiusKm,
+      freeShipThreshold: body.freeShipThreshold ?? null, maxFeeCap: body.maxFeeCap ?? null,
+      updatedAt: new Date().toISOString(),
+    };
+    storage.setItem(SHIPPING_KEY, MOCK_SHIPPING);
+    return { ...MOCK_SHIPPING };
   },
 
   /*
@@ -1432,20 +2048,50 @@ export const mockAdapter = {
 
   async getReviews(params = {}) {
     await delay(250);
-    const w = findWorkshop(params.targetId);
-    const items = (w?.reviews ?? []).map((r, i) => ({
-      id: `${params.targetId}-r${i}`, userId: `u-${i}`, userName: r.name,
-      targetType: params.targetType, targetId: params.targetId, rating: r.rating, comment: r.text, createdAt: r.date,
-    }));
-    return { content: items, page: { size: items.length || 20, number: 0, totalElements: items.length, totalPages: 1 } };
+    // Mới nhất trước, giống BE (findByTargetTypeAndTargetIdOrderByCreatedAtDesc)
+    return toSpringPage(allReviewsFor(params.targetType, params.targetId), params);
   },
 
   async getReviewSummary(params = {}) {
     await delay(200);
-    const w = findWorkshop(params.targetId);
-    const reviews = w?.reviews ?? [];
+    const reviews = allReviewsFor(params.targetType, params.targetId);
     const average = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
     return { targetType: params.targetType, targetId: params.targetId, average, count: reviews.length };
+  },
+
+  async createReview(body) {
+    await delay(350);
+    const user = useAuthStore.getState().user;
+    if (!user) throw reviewError(401, 'Chưa xác thực');
+    validateReviewBody(body);
+    if (allReviewsFor(body.targetType, body.targetId).some((r) => r.userId === user.id)) {
+      throw reviewError(409, 'Bạn đã đánh giá đối tượng này rồi, hãy sửa đánh giá cũ');
+    }
+    const now = new Date().toISOString();
+    const review = {
+      id: crypto.randomUUID(), userId: user.id, userName: user.name, targetType: body.targetType, targetId: body.targetId,
+      rating: body.rating, comment: body.comment?.trim() || null, createdAt: now, updatedAt: now,
+    };
+    mockUserReviews = [review, ...mockUserReviews];
+    persistUserReviews();
+    return { ...review };
+  },
+
+  async updateReview({ id, ...body }) {
+    await delay(300);
+    const review = ownReview(id);
+    validateReviewBody(body);
+    Object.assign(review, { rating: body.rating, comment: body.comment?.trim() || null, updatedAt: new Date().toISOString() });
+    persistUserReviews();
+    return { ...review };
+  },
+
+  async deleteReview(id) {
+    await delay(250);
+    ownReview(id);
+    mockUserReviews = mockUserReviews.filter((r) => r.id !== id);
+    persistUserReviews();
+    return null;
   },
 
   // ===== SUPPLIER (hồ sơ CHÍNH supplier đang đăng nhập) =====
@@ -1898,7 +2544,23 @@ export const mockAdapter = {
     if (!payment) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Không tìm thấy giao dịch' } } });
     if (payment.status === 'pending') {
       payment._polls += 1;
-      if (payment._polls >= 3) {
+      if (payment._polls >= 3 && payment.purpose === 'order') {
+        // Webhook SePay giả lập cho đơn hàng: mọi đơn dùng chung payment này pending_payment → paid
+        payment.status = 'paid';
+        payment.paidAt = new Date().toISOString();
+        payment.paidAmount = payment.amount;
+        memoryDb.orders.forEach((o) => {
+          if (o.paymentId === payment.id && o.status === 'pending_payment') { o.status = 'paid'; o.updatedAt = payment.paidAt; }
+        });
+        persistOrders();
+      } else if (payment._polls >= 3 && payment.purpose === 'credit_pack') {
+        // Webhook giả lập: cộng lượt của gói vào ví (không đụng tới gói đăng ký)
+        payment.status = 'paid';
+        payment.paidAt = new Date().toISOString();
+        payment.paidAmount = payment.amount;
+        const pack = mockCreditPacks.find((p) => p.id === payment._packId);
+        if (pack) { mockCreditWallet[pack.feature] = (mockCreditWallet[pack.feature] ?? 0) + pack.credits; persistCreditWallet(); }
+      } else if (payment._polls >= 3) {
         payment.status = 'paid';
         payment.paidAt = new Date().toISOString();
         payment.paidAmount = payment.amount;
@@ -1927,11 +2589,78 @@ export const mockAdapter = {
     await delay(200);
     const limits = mockMySubscription?.status === 'active' ? mockMySubscription.plan.featureLimits : {};
     const period = new Date().toISOString().slice(0, 7);
-    const features = ['ai_chat', 'design', 'export', 'ar_3d'];
+    // ar_3d đã bỏ khỏi /usage/me (AR dùng Scene Viewer free, không giới hạn)
+    const features = ['ai_chat', 'design', 'export'];
     return features.map((feature) => {
       const limit = limits[feature] ?? 0;
       const unlimited = limit === -1;
-      return { feature, period, used: 0, limit: unlimited ? null : limit, remaining: unlimited ? null : limit, unlimited };
+      // purchasedRemaining: chỉ tính năng CÓ bán lượt (design) mới có số; còn lại null
+      const purchasedRemaining = feature === 'design' ? (mockCreditWallet.design ?? 0) : null;
+      return { feature, period, used: 0, limit: unlimited ? null : limit, remaining: unlimited ? null : limit, unlimited, purchasedRemaining };
     });
+  },
+
+  // ===== CREDIT PACK =====
+  async getCreditPacks() {
+    await delay(200);
+    return mockCreditPacks.filter((p) => p.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+
+  async createCreditPackPayment(packId) {
+    await delay(400);
+    const pack = mockCreditPacks.find((p) => p.id === packId && p.isActive);
+    if (!pack) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Không tìm thấy gói lượt' } } });
+    if (!(pack.price > 0)) throw Object.assign(new Error('Free'), { response: { status: 400, data: { message: 'Gói miễn phí không cần thanh toán' } } });
+    const now = new Date();
+    const payment = {
+      id: nextId('pay'), purpose: 'credit_pack', amount: pack.price, status: 'pending',
+      txnRef: nextId('CRD').toUpperCase(),
+      qrUrl: `https://qr.sepay.vn/img?acc=demo&bank=DEMO&amount=${pack.price}&des=demo`,
+      expiresAt: new Date(now.getTime() + 15 * 60_000).toISOString(),
+      paidAt: null, paidAmount: null, createdAt: now.toISOString(), planId: null, planName: null, _polls: 0, _packId: pack.id,
+    };
+    mockPayments = [payment, ...mockPayments];
+    persistMockPayments();
+    return { ...payment };
+  },
+
+  async getAdminCreditPacks() {
+    await delay(250);
+    return [...mockCreditPacks].sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+
+  async createCreditPack(body) {
+    await delay(300);
+    if (mockCreditPacks.some((p) => p.name === body.name)) throw Object.assign(new Error('Dup'), { response: { status: 409, data: { message: `Mã gói ${body.name} đã tồn tại` } } });
+    const pack = { id: crypto.randomUUID(), feature: 'design', isActive: true, sortOrder: 0, ...body };
+    mockCreditPacks = [...mockCreditPacks, pack];
+    persistCreditPacks();
+    return { ...pack };
+  },
+
+  async updateCreditPack({ id, ...body }) {
+    await delay(300);
+    const current = mockCreditPacks.find((p) => p.id === id);
+    if (!current) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { message: 'Không tìm thấy gói lượt' } } });
+    const updated = { ...current, ...body };
+    mockCreditPacks = mockCreditPacks.map((p) => (p.id === id ? updated : p));
+    persistCreditPacks();
+    return { ...updated };
+  },
+
+  async deleteCreditPack(id) {
+    await delay(250);
+    mockCreditPacks = mockCreditPacks.filter((p) => p.id !== id);
+    persistCreditPacks();
+    return null;
+  },
+
+  // ===== GA4 TRAFFIC =====
+  async getAdminDashboardTraffic(params = {}) {
+    await delay(500);
+    if (String(storage.getItem('woodhub:mock-ga-off', '')) === '1') {
+      throw Object.assign(new Error('GA not configured'), { response: { status: 503, data: { message: 'Chưa cấu hình Google Analytics' } } });
+    }
+    return mockTraffic(params);
   },
 };

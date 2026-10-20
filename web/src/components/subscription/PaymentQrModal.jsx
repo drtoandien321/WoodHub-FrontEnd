@@ -45,8 +45,17 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
     createPayment.mutate(planId, { onSuccess: (res) => setPaymentId(res.id) });
   };
 
+  /*
+   * startedRef: React StrictMode (dev) chạy effect 2 lần lúc mount → không chặn thì tạo 2 payment cho
+   * 1 lần mở (1 cái thành giao dịch "Đang chờ" rác ở BE). Đóng modal thì xoá ref để lần mở sau tạo mã mới.
+   */
+  const startedRef = useRef(null);
   useEffect(() => {
-    if (open && planId) { setShowAll(false); startPayment(); }
+    if (!open) { startedRef.current = null; return; }
+    if (!planId || startedRef.current === planId) return;
+    startedRef.current = planId;
+    setShowAll(false);
+    startPayment();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, planId]);
 

@@ -20,14 +20,7 @@ export const useProduct = (id) => {
   return useQuery({ queryKey: ['product', id, i18n.language], queryFn: () => api.getProduct(id), enabled: !!id });
 };
 
-export const useOrders = () =>
-  useQuery({ queryKey: ['orders'], queryFn: () => api.getOrders() });
-
-export const useOrder = (id) =>
-  useQuery({ queryKey: ['order', id], queryFn: () => api.getOrder(id), enabled: !!id });
-
-// useMutation cho hành động ghi (POST/PATCH) — có isPending để disable nút khi đang gửi
-export const useCreateOrder = () => useMutation({ mutationFn: api.createOrder });
+// (Hooks đơn hàng đã chuyển sang hooks/useOrders.js — luồng checkout mới POST /orders/checkout.)
 
 // (Đã chuyển sang hooks/usePublicSuppliers.js — usePublicSuppliers/useSupplierPublicProfile —
 // khớp đúng shape SupplierPublicResponse của BE thật, không dùng slug mà dùng UUID.)

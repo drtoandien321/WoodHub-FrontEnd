@@ -1,83 +1,96 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useOrders } from '../hooks/useProducts.js';
+import { useOrders, pageInfoOf, orderStatusBadge } from '../hooks/useOrders.js';
 import { formatVnd, formatDate } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 
+const PAGE_SIZE = 10;
+// Tab lọc: '' = tất cả; các trạng thái khách hay quan tâm nhất
+const FILTERS = ['', 'pending_payment', 'paid', 'shipping', 'completed', 'cancelled'];
+
+/*
+ * Đơn hàng của tôi — GET /api/orders (Page<OrderResponse>, mới nhất trước). Mỗi lần checkout có thể
+ * sinh nhiều đơn (1 đơn / nhà cung cấp) nên mỗi thẻ hiện rõ tên nhà cung cấp + mã đơn dễ đọc.
+ */
 export default function Orders() {
   const { t } = useTranslation();
-  const { data, isLoading } = useOrders();
+  const [status, setStatus] = useState('');
+  const [page, setPage] = useState(0);
+  const { data, isLoading, isError, refetch } = useOrders({ status: status || undefined, page, size: PAGE_SIZE });
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto flex flex-col gap-4">
-        <h1 className="font-display text-3xl">{t('orders.title')}</h1>
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="skeleton h-32 w-full rounded-2xl"></div>
-        ))}
-      </div>
-    );
-  }
+  const orders = data?.content ?? [];
+  const pageInfo = pageInfoOf(data);
 
-  const orders = data?.items || [];
-
-  if (orders.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <h1 className="font-display text-3xl mb-8">{t('orders.title')}</h1>
-        <EmptyState
-          title={t('orders.empty')}
-          hint={t('orders.empty')}
-          ctaLabel={t('orders.backToShop')}
-          ctaTo="/shop"
-        />
-      </div>
-    );
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'processing': return 'badge-info';
-      case 'packing': return 'badge-warning';
-      case 'shipping': return 'badge-primary';
-      case 'completed': return 'badge-success';
-      default: return 'badge-neutral';
-    }
-  };
+  const changeFilter = (s) => { setStatus(s); setPage(0); };
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <h1 className="font-display text-3xl">{t('orders.title')}</h1>
-      
-      <div className="flex flex-col gap-4">
-        {orders.map((order) => (
-          <Link
-            key={order.id}
-            to={`/orders/${order.id}`}
-            className="flex flex-col sm:flex-row gap-4 bg-base-200 rounded-2xl p-5 hover:bg-base-300 transition-colors"
+
+      <div role="tablist" className="flex flex-wrap gap-2">
+        {FILTERS.map((s) => (
+          <button
+            key={s || 'all'}
+            role="tab"
+            aria-selected={status === s}
+            onClick={() => changeFilter(s)}
+            className={`btn btn-sm rounded-full ${status === s ? 'btn-primary' : 'btn-ghost border border-base-300'}`}
           >
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="font-medium">{t('orders.id', { id: order.id })}</span>
-                <span className={`badge ${getStatusColor(order.status)}`}>
-                  {t(`orders.status.${order.status}`)}
-                </span>
-              </div>
-              <p className="text-sm text-base-content/70">
-                {t('orders.date', { date: formatDate(order.createdAt) })}
-              </p>
-              <p className="text-sm text-base-content/70 mt-1">
-                {t('orders.itemsCount', { count: order.items.length })}
-              </p>
-            </div>
-            
-            <div className="flex flex-col sm:items-end justify-center">
-              <span className="text-sm text-base-content/70">{t('orders.total', { total: '' })}</span>
-              <span className="font-semibold text-lg text-primary">{formatVnd(order.total)}</span>
-            </div>
-          </Link>
+            {s ? t(`orders.status.${s}`) : t('orders.all')}
+          </button>
         ))}
       </div>
+
+      {isLoading ? (
+        <div className="flex flex-col gap-4">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-28 w-full rounded-2xl" />)}</div>
+      ) : isError ? (
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <p className="text-error">{t('orders.loadError')}</p>
+          <button onClick={() => refetch()} className="btn btn-outline btn-sm">{t('cart.retry')}</button>
+        </div>
+      ) : !orders.length ? (
+        <EmptyState title={t('orders.empty')} hint={t('orders.emptyHint')} ctaLabel={t('orders.backToShop')} ctaTo="/shop" />
+      ) : (
+        <>
+          <ul className="flex flex-col gap-3">
+            {orders.map((o) => (
+              <li key={o.id}>
+                <Link
+                  to={`/orders/${o.id}`}
+                  className="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-5 transition-colors hover:border-primary/50 sm:flex-row sm:items-center"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-sm font-medium">{o.orderCode}</span>
+                      <span className={`badge badge-sm ${orderStatusBadge(o.status)}`}>{t(`orders.status.${o.status}`)}</span>
+                    </div>
+                    <p className="mt-1 text-sm font-medium">{o.supplierName}</p>
+                    <p className="mt-0.5 text-xs text-base-content/60">
+                      {t('orders.date', { date: formatDate(o.placedAt ?? o.createdAt) })} · {t('orders.itemsCount', { count: o.items?.length ?? 0 })}
+                    </p>
+                    {o.status === 'pending_payment' && o.paymentStatus === 'pending' && (
+                      <p className="mt-1 text-xs text-warning">{t('orders.awaitingPayment')}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-col sm:items-end">
+                    <span className="text-xs text-base-content/60">{t('checkout.orderTotal')}</span>
+                    <span className="text-lg font-semibold text-primary">{formatVnd(o.totalAmount)}</span>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {pageInfo.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 text-sm">
+              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm">«</button>
+              <span>{t('orders.pageOf', { page: pageInfo.number + 1, total: pageInfo.totalPages })}</span>
+              <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm">»</button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
