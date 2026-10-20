@@ -584,7 +584,6 @@
     "hideProduct": "Hide product",
     "productContext": "Asking about this product",
     "supplierFallback": "Supplier",
-    "more": "More",
     "close": "Close",
     "emoji": "Emoji",
     "attach": "Attach",
@@ -605,7 +604,9 @@
       "sent": "Sent",
       "seen": "Seen",
       "error": "Failed, resend"
-    }
+    },
+    "minimize": "Minimize",
+    "restore": "Reopen chat with {{name}}"
   },
   "cart": {
     "title": "Cart",

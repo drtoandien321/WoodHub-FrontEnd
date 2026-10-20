@@ -584,7 +584,6 @@
     "hideProduct": "Ẩn sản phẩm",
     "productContext": "Đang hỏi về sản phẩm",
     "supplierFallback": "Nhà cung cấp",
-    "more": "Thêm",
     "close": "Đóng",
     "emoji": "Biểu cảm",
     "attach": "Đính kèm",
@@ -605,7 +604,9 @@
       "sent": "Đã gửi",
       "seen": "Đã xem",
       "error": "Gửi lỗi, gửi lại"
-    }
+    },
+    "minimize": "Thu nhỏ",
+    "restore": "Mở lại chat với {{name}}"
   },
   "cart": {
     "title": "Giỏ hàng",
