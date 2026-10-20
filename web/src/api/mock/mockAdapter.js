@@ -749,6 +749,22 @@ const sameTarget = (r, targetType, targetId) =>
 const allReviewsFor = (targetType, targetId) =>
   [...mockUserReviews.filter((r) => sameTarget(r, targetType, targetId)), ...seedReviewsFor(targetType, targetId)]
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+/*
+ * Mirror ReviewResponse.fromEntity của BE: đánh giá ẩn danh → che tên ("N*****n"), userId = null;
+ * `mine` = của người đang xem. Dữ liệu lưu (mockUserReviews) vẫn giữ tên/id thật như DB.
+ */
+const maskReviewerName = (fullName) => {
+  const compact = [...String(fullName ?? '').replace(/\s+/g, '')];
+  if (!compact.length) return 'Ẩn danh';
+  return compact.length === 1 ? `${compact[0]}*****` : `${compact[0]}*****${compact[compact.length - 1]}`;
+};
+const toReviewResponse = (r, viewerId) => ({
+  ...r,
+  anonymous: !!r.anonymous,
+  userId: r.anonymous ? null : r.userId,
+  userName: r.anonymous ? maskReviewerName(r.userName) : r.userName,
+  mine: viewerId != null && r.userId === viewerId,
+});
 const reviewError = (status, message) => Object.assign(new Error(message), { response: { status, data: { status, message } } });
 const validateReviewBody = (body) => {
   if (!Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
@@ -2049,7 +2065,8 @@ export const mockAdapter = {
   async getReviews(params = {}) {
     await delay(250);
     // Mới nhất trước, giống BE (findByTargetTypeAndTargetIdOrderByCreatedAtDesc)
-    return toSpringPage(allReviewsFor(params.targetType, params.targetId), params);
+    const viewerId = useAuthStore.getState().user?.id ?? null;
+    return toSpringPage(allReviewsFor(params.targetType, params.targetId).map((r) => toReviewResponse(r, viewerId)), params);
   },
 
   async getReviewSummary(params = {}) {
@@ -2070,20 +2087,24 @@ export const mockAdapter = {
     const now = new Date().toISOString();
     const review = {
       id: crypto.randomUUID(), userId: user.id, userName: user.name, targetType: body.targetType, targetId: body.targetId,
-      rating: body.rating, comment: body.comment?.trim() || null, createdAt: now, updatedAt: now,
+      rating: body.rating, comment: body.comment?.trim() || null, anonymous: body.anonymous === true, createdAt: now, updatedAt: now,
     };
     mockUserReviews = [review, ...mockUserReviews];
     persistUserReviews();
-    return { ...review };
+    return toReviewResponse(review, user.id);
   },
 
   async updateReview({ id, ...body }) {
     await delay(300);
     const review = ownReview(id);
     validateReviewBody(body);
-    Object.assign(review, { rating: body.rating, comment: body.comment?.trim() || null, updatedAt: new Date().toISOString() });
+    Object.assign(review, {
+      rating: body.rating, comment: body.comment?.trim() || null, updatedAt: new Date().toISOString(),
+      // null/không gửi = giữ nguyên lựa chọn ẩn danh (giống BE)
+      ...(body.anonymous != null ? { anonymous: body.anonymous } : {}),
+    });
     persistUserReviews();
-    return { ...review };
+    return toReviewResponse(review, review.userId);
   },
 
   async deleteReview(id) {

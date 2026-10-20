@@ -333,8 +333,11 @@ Nguồn: `woodhub-be/docs/subscription-fe.md` (mục 4b).
 | --- | --- |
 | `GET /api/reviews?targetType=product\|supplier&targetId=&page=&size=` | Công khai. `Page<ReviewResponse>` mới nhất trước |
 | `GET /api/reviews/summary?targetType=&targetId=` | Công khai. `{ average, count }` — **không có phân bố sao** (FE tự tính từ các đánh giá đã tải) |
-| `POST /api/reviews` | `{ targetType, targetId, rating 1..5, comment? ≤2000 }` → 201. 409 đã đánh giá rồi · 403 tự đánh giá SP/cửa hàng của mình |
-| `PUT /api/reviews/{id}` · `DELETE /api/reviews/{id}` | Chỉ người viết (khác → 403) |
+| `POST /api/reviews` | `{ targetType, targetId, rating 1..5, comment? ≤2000, anonymous? }` → 201. 409 đã đánh giá rồi · 403 tự đánh giá SP/cửa hàng của mình |
+| `PUT /api/reviews/{id}` · `DELETE /api/reviews/{id}` | Chỉ người viết (khác → 403). PUT: `anonymous` null = giữ nguyên |
 
-`ReviewResponse { id, userId, userName, targetType, targetId, rating, comment, createdAt, updatedAt }`.
-FE chỉ cho role `customer` viết. BE **chưa có**: API "đánh giá của tôi" (FE tìm theo `userId` trong trang đầu) và API phản hồi đánh giá cho nhà cung cấp.
+`ReviewResponse { id, userId, userName, targetType, targetId, rating, comment, anonymous, mine, createdAt, updatedAt }`.
+- **Ẩn danh** (BE nhánh `feat/review-anonymous-and-rating`, cần chạy `woodhub-be/sql/review_anonymous.sql` trước khi deploy): `anonymous=true` → `userName` đã che ("N*****n"), `userId = null`. `mine` = đánh giá của người đang gọi (FE dùng để hiện Sửa/Xoá vì không còn `userId`).
+- **Danh sách sản phẩm** (`GET /api/products`, `/products/mine`): `ProductSummaryResponse` thêm `averageRating` (làm tròn 1 chữ số) + `reviewCount` — tính bằng 1 query GROUP BY cho cả trang. FE `ProductCard` dùng nếu có, chưa có thì tự gọi `/reviews/summary`.
+
+FE chỉ cho role `customer` viết. BE **chưa có**: API phản hồi đánh giá cho nhà cung cấp.

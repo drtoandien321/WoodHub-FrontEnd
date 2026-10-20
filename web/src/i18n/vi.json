@@ -1238,6 +1238,10 @@
     "errForbidden": "Bạn không thể đánh giá sản phẩm/cửa hàng của chính mình, hoặc không có quyền với đánh giá này.",
     "errAuth": "Phiên đăng nhập đã hết, vui lòng đăng nhập lại.",
     "errInvalid": "Nội dung đánh giá không hợp lệ.",
-    "errGeneric": "Không gửi được đánh giá, vui lòng thử lại."
+    "errGeneric": "Không gửi được đánh giá, vui lòng thử lại.",
+    "anonymousLabel": "Ẩn tên của tôi",
+    "anonymousHint": "Người khác chỉ thấy tên đã che (vd N*****n). Bạn vẫn sửa/xoá được đánh giá này.",
+    "anonymousBadge": "Ẩn danh",
+    "anonymousOwnerNote": "Người khác đang thấy tên bạn được ẩn."
   }
 }
