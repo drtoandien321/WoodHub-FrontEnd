@@ -149,8 +149,8 @@
       "businessSubtitle": "For businesses buying in bulk — get quotes & VAT invoices.",
       "businessSectionTitle": "Business information",
       "companyNamePlaceholder": "Company name",
-      "taxCodePlaceholder": "Tax code (optional)",
-      "companyAddressPlaceholder": "Company address (optional)"
+      "taxCodePlaceholder": "Tax code (10 digits)",
+      "companyAddressPlaceholder": "Company address"
     },
     "divider": "Or",
     "google": {

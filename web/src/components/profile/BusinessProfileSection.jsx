@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusinessProfile, useSaveBusinessProfile } from '../../hooks/useUser.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
+import { isValidTaxCode } from '../../utils/taxCode.js';
 
 const EMPTY = { companyName: '', taxCode: '', companyAddress: '' };
-// MST Việt Nam: 10 số (doanh nghiệp) hoặc 10 số + "-" + 3 số (chi nhánh / đơn vị phụ thuộc)
-const TAX_CODE_RE = /^\d{10}(-\d{3})?$/;
 
 /*
  * Hồ sơ doanh nghiệp (thông tin xuất hoá đơn VAT) — GET/POST/PUT /users/me/business-profile.
@@ -42,7 +41,7 @@ export default function BusinessProfileSection({ customerType }) {
     setError('');
     const body = { companyName: form.companyName.trim(), taxCode: form.taxCode.trim(), companyAddress: form.companyAddress.trim() };
     if (!body.companyName || !body.taxCode || !body.companyAddress) return setError(t('profile.business.required'));
-    if (!TAX_CODE_RE.test(body.taxCode)) return setError(t('profile.business.taxCodeInvalid'));
+    if (!isValidTaxCode(body.taxCode)) return setError(t('profile.business.taxCodeInvalid'));
     save.mutate(
       { exists, ...body },
       { onSuccess: () => setSavedMsg(exists ? 'profile.business.saved' : 'profile.business.created'), onError: (err) => setError(apiErrorMessage(err, t('profile.business.saveError'))) }
