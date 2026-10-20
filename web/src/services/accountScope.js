@@ -1,5 +1,8 @@
 import { useAuthStore } from '../stores/authStore.js';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
+import { useSupplierChatStore } from '../stores/supplierChatStore.js';
+import { usePortalChatStore } from '../stores/portalChatStore.js';
+import { disconnect as disconnectChatSocket } from './chatSocket.js';
 
 /*
  * accountScope — đảm bảo dữ liệu theo-tài-khoản KHÔNG bị dùng chung khi đổi tài khoản trên cùng trình duyệt.
@@ -29,11 +32,24 @@ export function initAccountScope(queryClient) {
 
   syncStudioOwner(prevUserId);
 
+  /*
+   * Store chat KHÔNG persist nhưng sống trong RAM suốt phiên SPA — đăng xuất/đăng nhập không tải lại trang
+   * nên hội thoại (kể cả bong bóng thu nhỏ) của tài khoản A vẫn hiện cho tài khoản B (lỗi QA 20/10).
+   * getInitialState() (zustand 5) trả đúng state ban đầu lúc create() → reset sạch mà không phải liệt kê field.
+   * WebSocket cũng phải ngắt: nó đã xác thực bằng token CỦA A, lần mở chat tiếp theo sẽ tự kết nối lại bằng token mới.
+   */
+  const resetChats = () => {
+    useSupplierChatStore.setState(useSupplierChatStore.getInitialState(), true);
+    usePortalChatStore.setState(usePortalChatStore.getInitialState(), true);
+    disconnectChatSocket();
+  };
+
   return useAuthStore.subscribe((state) => {
     const userId = state.user?.id ?? null;
     if (userId === prevUserId) return; // chỉ phản ứng khi ĐỔI người dùng, không phải mọi thay đổi auth (vd refresh token)
     prevUserId = userId;
     queryClient.clear();
     syncStudioOwner(userId);
+    resetChats();
   });
 }
