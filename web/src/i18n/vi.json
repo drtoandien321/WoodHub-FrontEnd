@@ -149,8 +149,8 @@
       "businessSubtitle": "Dành cho doanh nghiệp mua số lượng lớn — nhận báo giá & xuất hóa đơn VAT.",
       "businessSectionTitle": "Thông tin doanh nghiệp",
       "companyNamePlaceholder": "Tên doanh nghiệp",
-      "taxCodePlaceholder": "Mã số thuế (bắt buộc)",
-      "companyAddressPlaceholder": "Địa chỉ doanh nghiệp (bắt buộc)"
+      "taxCodePlaceholder": "Mã số thuế (10 số)",
+      "companyAddressPlaceholder": "Địa chỉ công ty"
     },
     "divider": "Hoặc",
     "google": {

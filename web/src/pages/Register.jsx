@@ -9,6 +9,7 @@ import AuthField from '../components/auth/AuthField.jsx';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
 import { UserIcon, MailIcon, PhoneIcon, LockIcon, BuildingIcon } from '../components/ui/icons.jsx';
 import { apiErrorMessage } from '../utils/apiError.js';
+import { isValidTaxCode } from '../utils/taxCode.js';
 
 /*
  * Register — CHỈ đăng ký khách hàng (customer). BE luôn tạo role=customer + yêu cầu xác thực email.
@@ -53,6 +54,15 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    // BE bắt buộc đủ 3 field doanh nghiệp (thiếu → 400) nhưng không kiểm định dạng MST → chặn sớm ở FE
+    if (isBusiness && (!form.companyName.trim() || !form.taxCode.trim() || !form.companyAddress.trim())) {
+      setError(t('profile.business.required'));
+      return;
+    }
+    if (isBusiness && !isValidTaxCode(form.taxCode)) {
+      setError(t('profile.business.taxCodeInvalid'));
+      return;
+    }
     setLoading(true);
     try {
       const body = {
@@ -122,8 +132,8 @@ export default function Register() {
           <>
             <div className="divider my-0 text-xs text-base-content/40">{t('auth.register.businessSectionTitle')}</div>
             <AuthField icon={BuildingIcon} required placeholder={t('auth.register.companyNamePlaceholder')} value={form.companyName} onChange={set('companyName')} />
-            <AuthField icon={BuildingIcon} placeholder={t('auth.register.taxCodePlaceholder')} value={form.taxCode} onChange={set('taxCode')} />
-            <AuthField icon={BuildingIcon} placeholder={t('auth.register.companyAddressPlaceholder')} value={form.companyAddress} onChange={set('companyAddress')} />
+            <AuthField icon={BuildingIcon} required inputMode="numeric" maxLength={14} placeholder={t('auth.register.taxCodePlaceholder')} value={form.taxCode} onChange={set('taxCode')} />
+            <AuthField icon={BuildingIcon} required placeholder={t('auth.register.companyAddressPlaceholder')} value={form.companyAddress} onChange={set('companyAddress')} />
           </>
         )}
 
