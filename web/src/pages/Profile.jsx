@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore.js';
 import { useMe, useUpdateUser, useChangePassword } from '../hooks/useUser.js';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * Profile — trang "Thông tin cá nhân" mở từ dropdown tài khoản trên Header.
@@ -118,7 +119,7 @@ function ChangePasswordSection({ onSubmit }) {
       setConfirmPassword('');
       setSuccess(true);
     } catch (err) {
-      setError(err?.response?.data?.message || t('profile.passwordError'));
+      setError(apiErrorMessage(err, t('profile.passwordError')));
     }
   };
 

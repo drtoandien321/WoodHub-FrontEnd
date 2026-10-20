@@ -54,8 +54,8 @@ export const useCreateSubscriptionPayment = () =>
   useMutation({ mutationFn: api.createSubscriptionPayment });
 
 /*
- * usePayment — POLL trạng thái thanh toán mỗi 4s (đúng khoảng "3-5s" tài liệu yêu cầu) tới khi
- * không còn "pending" (paid/expired/failed) thì tự dừng. Khi chuyển "paid", component gọi
+ * usePayment — POLL trạng thái thanh toán mỗi 4s (đúng khoảng "3-5s" tài liệu yêu cầu) khi "pending",
+ * thưa hơn khi "expired" (vẫn có thể trả muộn), dừng khi paid/failed. Khi chuyển "paid", component gọi
  * qc.invalidateQueries(['mySubscription']) riêng (BE tự kích hoạt gói qua webhook, FE chỉ cần
  * lấy lại gói mới) — không làm ở đây để hook này không phụ thuộc side-effect ngoài phạm vi của nó.
  */
@@ -64,7 +64,14 @@ export const usePayment = (id) =>
     queryKey: ['payment', id],
     queryFn: () => api.getPayment(id),
     enabled: !!id,
-    refetchInterval: (query) => (query.state.data?.status === 'pending' ? 4000 : false),
+    /*
+     * pending → 4s. expired vẫn poll (15s): chính sách BE AUD-005 — QR hết giờ chỉ là đồng hồ giao diện, khách quét
+     * lại QR cũ thì webhook vẫn ghi nhận paid (trả muộn) → màn hình phải tự chuyển sang "đã thanh toán". paid/failed → dừng.
+     */
+    refetchInterval: (query) => {
+      const s = query.state.data?.status;
+      return s === 'pending' ? 4000 : s === 'expired' ? 15000 : false;
+    },
   });
 
 export const useMyPayments = () => useQuery({ queryKey: ['myPayments'], queryFn: api.getMyPayments });

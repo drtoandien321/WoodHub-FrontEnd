@@ -1,49 +1,84 @@
 import { Link } from 'react-router-dom';
 import { formatVnd, formatDate } from '../../utils/format.js';
-// ⚠️ KPI/doanh thu/chi nhánh vẫn là MOCK: BE chưa có endpoint thống kê cho nhà cung cấp. Chỉ "Đơn gần đây" là dữ liệu thật.
-import { DASHBOARD, BRANCHES } from '../../api/mock/manufacturerData.js';
 import { useManagedOrders } from '../../hooks/useOrderManagement.js';
+import { pageInfoOf } from '../../hooks/useOrders.js';
+import { useMyProducts } from '../../hooks/useMyProducts.js';
+import { useReviewSummary } from '../../hooks/useReviews.js';
+import { useSupplierMe } from '../../hooks/useSupplierMe.js';
 import { ORDER_STATUS_LABEL, ORDER_STATUS_BADGE } from '../../utils/orderStatus.js';
+import { computeOrderStats, STATS_PAGE_SIZE } from '../../utils/supplierStats.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
-import {
-  Wallet, ShoppingBag, Package, Star, Store, Users, ChevronRight,
-} from '../../components/suppliers/icons.jsx';
-
-const ICONS = { wallet: Wallet, bag: ShoppingBag, package: Package, star: Star, store: Store, users: Users };
+import { Wallet, ShoppingBag, Package, Star, Clock, Truck } from '../../components/suppliers/icons.jsx';
 
 // params ngoài component → object ổn định giữa các lần render (queryKey không đổi, không fetch lặp)
-const RECENT_PARAMS = { page: 0, size: 3 };
+const STATS_PARAMS = { page: 0, size: STATS_PAGE_SIZE };
+const PRODUCT_COUNT_PARAMS = { page: 0, size: 1 }; // chỉ cần totalElements
 
+/*
+ * Dashboard NCC — MỌI số liệu đều thật (lỗi QA 20/10: KPI/doanh thu/chi nhánh trước đây lấy từ file mock).
+ * BE chưa có API thống kê cho supplier (docx BE bản 2, BE-09) nên KPI tính ở FE từ STATS_PAGE_SIZE đơn mới nhất
+ * (utils/supplierStats.js). Nếu NCC có nhiều đơn hơn, trang ghi rõ "tính trên N đơn gần nhất".
+ */
 export default function SupplierDashboard() {
-  const recentOrders = useManagedOrders('supplier', RECENT_PARAMS);
-  const recentList = recentOrders.data?.content ?? [];
+  const ordersQuery = useManagedOrders('supplier', STATS_PARAMS);
+  const orders = ordersQuery.data?.content ?? [];
+  const totalOrders = pageInfoOf(ordersQuery.data)?.totalElements ?? orders.length;
+  const stats = computeOrderStats(orders);
+  const recentList = orders.slice(0, 3);
+
+  const { data: me } = useSupplierMe();
+  const { data: rating } = useReviewSummary('supplier', me?.id);
+  const products = useMyProducts(PRODUCT_COUNT_PARAMS);
+  const productCount = pageInfoOf(products.data)?.totalElements;
+
+  const loading = ordersQuery.isLoading;
+  const truncated = totalOrders > orders.length;
+
   return (
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Tổng quan</h1>
         <p className="mt-1 text-base-content/60">Chào mừng trở lại! Đây là tổng quan hoạt động kinh doanh của bạn.</p>
+        {truncated && (
+          <p className="mt-2 text-xs text-base-content/50">Số liệu tính trên {orders.length} đơn gần nhất (tổng {totalOrders} đơn).</p>
+        )}
       </header>
+
+      {ordersQuery.isError && (
+        <p className="rounded-xl bg-error/10 p-4 text-sm text-error">
+          Không tải được đơn hàng. <button onClick={() => ordersQuery.refetch()} className="link">Thử lại</button>
+        </p>
+      )}
 
       {/* KPI hàng đầu */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {DASHBOARD.kpis.map((k) => (
-          <StatCard key={k.key} icon={ICONS[k.icon]} label={k.label} value={k.value} money={k.money} delta={k.delta} />
-        ))}
+        {loading ? (
+          [0, 1, 2, 3].map((i) => <div key={i} className="skeleton h-24 rounded-2xl" />)
+        ) : (
+          <>
+            <StatCard icon={Wallet} label="Doanh thu (đơn đã thanh toán)" value={stats.revenue} money />
+            <StatCard icon={Clock} label="Đơn cần xác nhận" value={stats.needConfirm} hint="Khách đã thanh toán" to="/portal/supplier/orders" iconWrap="bg-warning/15 text-warning" />
+            <StatCard icon={Truck} label="Đang xử lý / giao" value={stats.inProgress} to="/portal/supplier/orders" />
+            <StatCard icon={Star} label="Đánh giá cửa hàng" value={rating?.count ? `${rating.average.toFixed(1)}/5` : '—'} hint={rating ? `${rating.count} đánh giá` : undefined} to="/portal/supplier/reviews" iconWrap="bg-warning/15 text-warning" />
+          </>
+        )}
       </div>
 
       {/* Doanh thu + Đơn gần đây */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.5fr_1fr]">
         <section className="min-w-0 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 className="font-display text-lg">Doanh thu 7 ngày qua</h2>
-            <select className="select select-bordered select-sm w-32" defaultValue="7d" aria-label="Khoảng thời gian">
-              <option value="7d">7 ngày qua</option>
-              <option value="30d">30 ngày</option>
-              <option value="month">Tháng này</option>
-            </select>
+            <span className="text-sm font-semibold text-primary">{formatVnd(stats.revenueInRange)}</span>
           </div>
-          <RevenueChart data={DASHBOARD.revenue7d} />
+          {loading ? (
+            <div className="skeleton h-48 rounded-xl" />
+          ) : stats.revenueInRange === 0 ? (
+            <p className="py-12 text-center text-sm text-base-content/50">Chưa có đơn đã thanh toán trong 7 ngày qua.</p>
+          ) : (
+            <RevenueChart data={stats.revenueByDay} />
+          )}
         </section>
 
         <section className="min-w-0 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
@@ -51,11 +86,8 @@ export default function SupplierDashboard() {
             <h2 className="font-display text-lg">Đơn hàng gần đây</h2>
             <Link to="/portal/supplier/orders" className="text-sm text-primary hover:underline">Xem tất cả</Link>
           </div>
-          {/* Đơn thật từ GET /supplier/orders (3 đơn mới nhất). Badge "cần xác nhận" nhắc NCC xử lý đơn đã thanh toán. */}
-          {recentOrders.isLoading ? (
+          {loading ? (
             <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
-          ) : recentOrders.isError ? (
-            <p className="py-6 text-center text-sm text-error">Không tải được đơn hàng. <button onClick={() => recentOrders.refetch()} className="link">Thử lại</button></p>
           ) : !recentList.length ? (
             <p className="py-6 text-center text-sm text-base-content/50">Chưa có đơn hàng nào.</p>
           ) : (
@@ -84,47 +116,53 @@ export default function SupplierDashboard() {
       </div>
 
       {/* KPI phụ */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {DASHBOARD.secondary.map((s) => (
-          <StatCard key={s.key} icon={ICONS[s.icon]} label={s.label} value={s.value} hint={s.hint} to={s.to} />
-        ))}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard icon={ShoppingBag} label="Đơn đã thanh toán" value={loading ? '…' : stats.paidOrders} />
+        <StatCard icon={Clock} label="Đơn chờ khách thanh toán" value={loading ? '…' : stats.awaitingPayment} hint="Khách vẫn quét lại QR cũ được" />
+        <StatCard icon={Package} label="Sản phẩm" value={productCount ?? '…'} to="/portal/supplier/products" />
       </div>
 
-      {/* Hiệu suất chi nhánh */}
+      {/* Hiệu suất chi nhánh — gom theo storeId của đơn (chi nhánh giao hàng) */}
       <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
         <h2 className="mb-3 font-display text-lg">Hiệu suất chi nhánh</h2>
-        <div className="overflow-x-auto">
-          <table className="table">
-            <thead>
-              <tr className="text-base-content/55">
-                <th>#</th><th>Chi nhánh</th><th className="text-right">Doanh thu</th>
-                <th className="text-right">Đơn hàng</th><th>Tỷ lệ hoàn thành</th><th className="text-right">Đánh giá</th>
-              </tr>
-            </thead>
-            <tbody>
-              {BRANCHES.map((b, i) => (
-                <tr key={b.id} className="hover:bg-base-200/50">
-                  <td className="text-base-content/50">{i + 1}</td>
-                  <td>
-                    <Link to={`/portal/supplier/branches/${b.id}`} className="font-medium hover:text-primary">{b.name}</Link>
-                    <p className="text-xs text-base-content/45">{b.district}</p>
-                  </td>
-                  <td className="text-right font-medium">{formatVnd(b.monthRevenue)}</td>
-                  <td className="text-right">{b.monthOrders}</td>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <progress className="progress progress-success w-24" value={b.performance} max="100" />
-                      <span className="text-xs text-base-content/60">{b.performance}%</span>
-                    </div>
-                  </td>
-                  <td className="text-right">
-                    <span className="inline-flex items-center gap-1"><Star width={13} height={13} className="text-warning" /> {b.rating}</span>
-                  </td>
+        {loading ? (
+          <div className="skeleton h-24 rounded-xl" />
+        ) : !stats.branches.length ? (
+          <p className="py-6 text-center text-sm text-base-content/50">Chưa có đơn nào gắn chi nhánh.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table">
+              <thead>
+                <tr className="text-base-content/55">
+                  <th>#</th><th>Chi nhánh</th><th className="text-right">Doanh thu</th>
+                  <th className="text-right">Đơn hàng</th><th>Tỷ lệ hoàn thành</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {stats.branches.map((b, i) => {
+                  const rate = b.orders ? Math.round((b.completed / b.orders) * 100) : 0;
+                  return (
+                    <tr key={b.storeId} className="hover:bg-base-200/50">
+                      <td className="text-base-content/50">{i + 1}</td>
+                      <td>
+                        <Link to={`/portal/supplier/branches/${b.storeId}`} className="font-medium hover:text-primary">{b.address}</Link>
+                        <p className="text-xs text-base-content/45">{b.city}</p>
+                      </td>
+                      <td className="text-right font-medium">{formatVnd(b.revenue)}</td>
+                      <td className="text-right">{b.orders}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <progress className="progress progress-success w-24" value={rate} max="100" />
+                          <span className="text-xs text-base-content/60">{rate}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );

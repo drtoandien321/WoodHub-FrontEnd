@@ -7,6 +7,7 @@ import { requestLocationOnce } from '../services/geolocation.js';
 import { ensureFreeSubscription } from '../services/subscription.js';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import { redirectPathForRole } from '../utils/auth.js';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * VerifyOtp — màn nhập mã OTP xác thực email (luồng mới của BE).
@@ -57,7 +58,7 @@ export default function VerifyOtp() {
       if (user.role === 'customer') { requestLocationOnce(); ensureFreeSubscription(); }
       navigate(user.mustChangePassword ? '/change-password' : redirectPathForRole(user.role, undefined, user.supplierType), { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.message || t('auth.otp.error'));
+      setError(apiErrorMessage(err, t('auth.otp.error')));
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ export default function VerifyOtp() {
       setInfo(t('auth.otp.resent'));
       setCooldown(60);
     } catch (err) {
-      setError(err?.response?.data?.message || t('auth.google.error'));
+      setError(apiErrorMessage(err, t('auth.google.error')));
     }
   };
 

@@ -75,7 +75,8 @@ export default function Step2TextPrompt({ onNext, onBack, pending }) {
         </ul>
       </div>
 
-      <div className="mt-2 flex justify-between">
+      {/* pr-20: chừa chỗ cho cụm nút nổi góc phải (bong bóng chat NCC + trợ lý AI ~80px) — trước đây đè lên nút chính */}
+      <div className="mt-2 flex justify-between gap-3 pr-20">
         <button onClick={onBack} className="btn btn-ghost">{t('custom.studio.back')}</button>
         <button onClick={onNext} disabled={!canSubmit} className="btn btn-primary">
           {pending ? <span className="loading loading-spinner loading-sm" /> : t('custom.studio.step2.cta')}

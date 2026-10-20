@@ -46,10 +46,12 @@ export default function OrderPaymentPanel({ paymentId, fallback = {}, onPaid }) 
     );
   }
 
-  if (status === 'expired' || status === 'failed') {
+  // Chỉ 'failed' mới bỏ QR. 'expired' vẫn hiện QR bên dưới: BE nhận tiền trả muộn qua QR cũ (AUD-005) — bản cũ giấu QR
+  // và bảo khách huỷ đơn đặt lại, trái chính sách BE.
+  if (status === 'failed') {
     return (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-warning/40 bg-warning/5 p-6 text-center" role="alert">
-        <p className="font-medium text-warning">{t(status === 'expired' ? 'orderPayment.expired' : 'orderPayment.failed')}</p>
+        <p className="font-medium text-warning">{t('orderPayment.failed')}</p>
         <p className="text-sm text-base-content/60">{t('orderPayment.reorderHint')}</p>
       </div>
     );
@@ -69,7 +71,11 @@ export default function OrderPaymentPanel({ paymentId, fallback = {}, onPaid }) 
         </p>
       )}
       <p className="text-xs text-base-content/60">{t('payment.scan')}</p>
-      {expiresAt && <p className="text-xs text-base-content/45">{t('payment.qrExpiresAt', { time: formatDate(expiresAt) })}</p>}
+      {status === 'expired' ? (
+        <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-base-content/70">{t('orderPayment.expiredStillValid')}</p>
+      ) : (
+        expiresAt && <p className="text-xs text-base-content/45">{t('payment.qrExpiresAt', { time: formatDate(expiresAt) })}</p>
+      )}
       {isError ? (
         <p className="text-xs text-error">{t('orderPayment.pollError')}</p>
       ) : (

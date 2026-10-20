@@ -5,6 +5,7 @@ import { api } from '../api/client.js';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import { MailIcon } from '../components/ui/icons.jsx';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * ForgotPassword — bước 1 của luồng quên mật khẩu: nhập email → BE gửi OTP đặt lại mật khẩu.
@@ -25,7 +26,7 @@ export default function ForgotPassword() {
       await api.forgotPassword({ email });
       navigate('/reset-password', { state: { email } });
     } catch (err) {
-      setError(err?.response?.data?.message || t('auth.forgotPassword.error'));
+      setError(apiErrorMessage(err, t('auth.forgotPassword.error')));
     } finally {
       setLoading(false);
     }

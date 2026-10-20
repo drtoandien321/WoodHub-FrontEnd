@@ -8,6 +8,7 @@ import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import { LockIcon } from '../components/ui/icons.jsx';
 import { redirectPathForRole } from '../utils/auth.js';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * ChangePasswordRequired — chặn bắt buộc cho tài khoản supplier do admin tạo
@@ -42,7 +43,7 @@ export default function ChangePasswordRequired() {
       clearMustChangePassword();
       navigate(redirectPathForRole(user.role, undefined, user.supplierType), { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.message || t('auth.changePasswordRequired.error'));
+      setError(apiErrorMessage(err, t('auth.changePasswordRequired.error')));
     }
   };
 

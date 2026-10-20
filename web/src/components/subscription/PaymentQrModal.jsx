@@ -8,6 +8,7 @@ import { formatDay } from '../../utils/quoteSummary.js';
 import { planHighlights, planValidity } from '../../utils/planFeatures.js';
 import PlanFeatureList from './PlanFeatureList.jsx';
 import { X } from '../suppliers/icons.jsx';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 const COLLAPSED = 3; // số quyền lợi hiện khi chưa bấm "Xem tất cả"
 const FOCUSABLE = 'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])';
@@ -122,7 +123,7 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
   } else if (createPayment.isError) {
     body = (
       <div className="flex flex-col items-center gap-3 text-center" role="alert">
-        <p className="text-error">{createPayment.error?.response?.data?.message || t('payment.createError')}</p>
+        <p className="text-error">{createPayment.apiErrorMessage(error, t('payment.createError'))}</p>
         <button onClick={startPayment} className="btn btn-primary w-full">{t('payment.retry')}</button>
       </div>
     );

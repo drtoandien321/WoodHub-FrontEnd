@@ -7,6 +7,7 @@ import { formatVnd } from '../../utils/format.js';
 import { planComparison } from '../../utils/planFeatures.js';
 import PaymentQrModal from '../subscription/PaymentQrModal.jsx';
 import PlanFeatureList from '../subscription/PlanFeatureList.jsx';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 const COLLAPSED = 4; // trên mobile chỉ hiện 4 dòng đầu, còn lại bấm "Xem thêm"
 
@@ -59,7 +60,7 @@ export default function PricingSection() {
       if (hasPaidActive && !window.confirm(t('pricing.confirmDowngrade'))) return;
       subscribe.mutate(plan.id, {
         onSuccess: () => showToast(t('pricing.switchedTo', { name: plan.displayName })),
-        onError: (err) => showToast(err?.response?.data?.message || t('pricing.genericError')),
+        onError: (err) => showToast(apiErrorMessage(err, t('pricing.genericError'))),
       });
       return;
     }

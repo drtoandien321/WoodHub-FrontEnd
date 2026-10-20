@@ -108,7 +108,8 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
         </aside>
       </div>
 
-      <div className="flex justify-between">
+      {/* pr-20: chừa chỗ cho cụm nút nổi góc phải (bong bóng chat NCC + trợ lý AI ~80px) — trước đây đè lên nút chính */}
+      <div className="flex justify-between gap-3 pr-20">
         <button onClick={onBack} className="btn btn-ghost">{t('custom.studio.back')}</button>
         <button onClick={onNext} className="btn btn-primary">{t('custom.studio.step5.cta')}</button>
       </div>

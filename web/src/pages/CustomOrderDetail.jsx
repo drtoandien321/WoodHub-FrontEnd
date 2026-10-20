@@ -42,7 +42,7 @@ export default function CustomOrderDetail() {
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div>
-        <Link to={myRole === 'customer' ? '/custom-orders' : '/portal/workshop/production'} className="text-sm text-base-content/55 hover:text-primary">← {t('order.myOrdersTitle')}</Link>
+        <Link to={myRole === 'customer' ? '/custom-orders' : '/portal/workshop/production'} className="text-sm text-base-content/55 hover:text-primary">← {t(myRole === 'customer' ? 'order.myOrdersTitle' : 'order.backToProduction')}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="font-display text-3xl">{otherPartyName}</h1>
           <StatusBadge meta={customOrderMeta(order.status)} />

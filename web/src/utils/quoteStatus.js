@@ -3,7 +3,13 @@
  * Khác WORKSHOP_ORDER_STATUS/WORKSHOP_STEPS ở supplierStatus.js — đó là mô hình 5 bước
  * TỰ NGHĨ (ephemeral, không khớp BE thật); đây là ĐÚNG enum thật BE trả (xem
  * backend/docs/be-8-state-machine.md), dùng cho toàn bộ luồng Quote & Order thật.
+ *
+ * `label` trong các bảng dưới chỉ là fallback tiếng Việt; *Meta() lấy nhãn từ i18n (quote.status.*,
+ * quote.offerStatus.*, order.status.*) tại thời điểm gọi → đổi ngôn ngữ là badge đổi theo (lỗi QA 20/10:
+ * UI English nhưng badge vẫn "Đã chốt", "Chờ phản hồi").
  */
+import i18n from '../i18n/index.js';
+
 const PASTEL = {
   success: 'bg-success/15 text-success',
   warning: 'bg-warning/15 text-warning',
@@ -37,9 +43,13 @@ export const CUSTOM_ORDER_STATUS = {
   cancelled: { label: 'Đã hủy', cls: PASTEL.error },
 };
 
-export const quoteMeta = (s) => QUOTE_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
-export const offerMeta = (s) => OFFER_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
-export const customOrderMeta = (s) => CUSTOM_ORDER_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
+const metaOf = (table, i18nPrefix) => (s) => {
+  const base = table[s] ?? { label: s, cls: PASTEL.neutral };
+  return { ...base, label: i18n.t(`${i18nPrefix}.${s}`, { defaultValue: base.label }) };
+};
+export const quoteMeta = metaOf(QUOTE_STATUS, 'quote.status');
+export const offerMeta = metaOf(OFFER_STATUS, 'quote.offerStatus');
+export const customOrderMeta = metaOf(CUSTOM_ORDER_STATUS, 'order.status');
 
 // Bước kế tiếp hợp lệ cho workshop/admin (theo be-8-state-machine.md mục 3) — dùng dựng nút hành động
 export const NEXT_ORDER_STATUS = {

@@ -364,7 +364,11 @@
       }
     ],
     "ctaTitle": "Sẵn sàng hợp tác cùng WoodHub?",
-    "ctaDesc": "Tạo tài khoản doanh nghiệp ngay hôm nay — đội ngũ WoodHub sẽ liên hệ tư vấn gói phù hợp."
+    "ctaDesc": "Tạo tài khoản doanh nghiệp ngay hôm nay — đội ngũ WoodHub sẽ liên hệ tư vấn gói phù hợp.",
+    "ctaShop": "Mua sắm cho doanh nghiệp",
+    "ctaCompanyProfile": "Hồ sơ công ty",
+    "individualNote": "Bạn đang dùng tài khoản cá nhân. Liên hệ WoodHub để chuyển sang tài khoản doanh nghiệp.",
+    "ctaContact": "Liên hệ chuyển đổi"
   },
   "about": {
     "title": "Câu chuyện của WoodHub",
@@ -1032,7 +1036,14 @@
     "viewOrders": "Xem đơn hàng của tôi",
     "incomingTitle": "Yêu cầu báo giá gửi tới xưởng",
     "incomingSubtitle": "Xem yêu cầu từ khách hàng, ra giá hoặc từ chối.",
-    "emptyIncoming": "Chưa có yêu cầu báo giá nào."
+    "emptyIncoming": "Chưa có yêu cầu báo giá nào.",
+    "backToIncoming": "Yêu cầu báo giá",
+    "offerStatus": {
+      "pending": "Chờ phản hồi",
+      "accepted": "Đã chấp nhận",
+      "rejected": "Đã từ chối",
+      "superseded": "Đã bị thay thế"
+    }
   },
   "order": {
     "myOrdersTitle": "Đơn custom của tôi",
@@ -1062,7 +1073,8 @@
     "actionCancel": "Hủy đơn",
     "incomingTitle": "Đơn custom đang xử lý",
     "incomingSubtitle": "Cập nhật trạng thái đơn theo tiến độ sản xuất thật.",
-    "emptyIncoming": "Chưa có đơn custom nào."
+    "emptyIncoming": "Chưa có đơn custom nào.",
+    "backToProduction": "Đơn sản xuất"
   },
   "forbidden": {
     "title": "403 — Không có quyền truy cập",
@@ -1233,7 +1245,8 @@
     "expired": "Mã QR đã hết hạn.",
     "failed": "Thanh toán thất bại.",
     "reorderHint": "Bạn có thể hủy đơn này và đặt lại để nhận mã QR mới.",
-    "pollError": "Không kiểm tra được trạng thái thanh toán, trang sẽ tự thử lại."
+    "pollError": "Không kiểm tra được trạng thái thanh toán, trang sẽ tự thử lại.",
+    "expiredStillValid": "Đã quá giờ hiển thị của mã QR, nhưng bạn vẫn quét mã này để thanh toán được — hệ thống tự ghi nhận khi tiền vào."
   },
   "reviews": {
     "title": "Đánh giá",
@@ -1273,5 +1286,58 @@
     "anonymousHint": "Người khác chỉ thấy tên đã che (vd N*****n). Bạn vẫn sửa/xoá được đánh giá này.",
     "anonymousBadge": "Ẩn danh",
     "anonymousOwnerNote": "Người khác đang thấy tên bạn được ẩn."
+  },
+  "notFoundPage": {
+    "message": "Trang này không tồn tại hoặc đã bị gỡ.",
+    "backHome": "Về trang chủ"
+  },
+  "apiErrors": {
+    "COUPON_NOT_FOUND": "Không tìm thấy mã khuyến mãi.",
+    "COUPON_EXPIRED": "Mã khuyến mãi đã hết hạn.",
+    "OUT_OF_STOCK": "Sản phẩm đã hết hàng.",
+    "OUT_OF_CREDITS": "Bạn đã hết lượt thiết kế.",
+    "TAX_CODE_EXISTS": "Mã số thuế đã được sử dụng.",
+    "USER_LOCKED": "Tài khoản đang bị khoá."
+  },
+  "mySub": {
+    "title": "Gói của tôi",
+    "noPlan": "Bạn chưa có gói nào đang dùng.",
+    "choosePlan": "Chọn gói",
+    "free": "Miễn phí",
+    "perMonth": "{{price}} / tháng",
+    "active": "Đang dùng",
+    "validUntil": "Còn hạn tới {{date}}",
+    "noExpiry": "Không giới hạn thời gian",
+    "renew": "Gia hạn +1 tháng",
+    "confirmCancel": "Xác nhận hủy",
+    "keep": "Thôi",
+    "cancelPlan": "Hủy gói",
+    "changePlan": "Xem/đổi gói khác",
+    "cancelled": "Đã hủy gói.",
+    "genericError": "Có lỗi xảy ra, vui lòng thử lại.",
+    "usageTitle": "Hạn mức tháng này",
+    "unlimited": "Không giới hạn",
+    "usageLine": "{{used}}/{{limit}} (còn {{remaining}})",
+    "purchased": "+{{count}} lượt đã mua",
+    "usageNote": "Hạn mức tháng tự làm mới đầu mỗi tháng. Lượt đã mua không hết hạn, chỉ dùng khi đã hết hạn mức tháng.",
+    "buyCreditsTitle": "Mua thêm lượt thiết kế",
+    "buyCreditsDesc": "Hết lượt trong tháng vẫn thiết kế tiếp được, không cần nâng cấp gói.",
+    "packLine": "{{credits}} lượt · {{unit}}/lượt",
+    "buy": "Mua",
+    "historyTitle": "Lịch sử thanh toán",
+    "payCreditPack": "Mua gói lượt thiết kế",
+    "payOrder": "Thanh toán đơn hàng",
+    "paySubscription": "Gói đăng ký",
+    "features": {
+      "ai_chat": "Chat AI",
+      "design": "Thiết kế 3D",
+      "export": "Xuất file"
+    },
+    "paymentStatus": {
+      "pending": "Đang chờ",
+      "paid": "Đã thanh toán",
+      "failed": "Thất bại",
+      "expired": "Hết hạn"
+    }
   }
 }
