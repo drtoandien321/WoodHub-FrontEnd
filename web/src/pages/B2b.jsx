@@ -9,7 +9,7 @@ import { useAuthStore } from '../stores/authStore.js';
  * CTA đổi theo người đang xem (lỗi QA 20/10: tài khoản doanh nghiệp đã đăng nhập vẫn bị mời "Đăng ký"):
  *   - khách vãng lai          → đăng ký tài khoản doanh nghiệp
  *   - customer business       → mua sắm + hồ sơ công ty
- *   - customer cá nhân        → liên hệ để chuyển sang tài khoản doanh nghiệp
+ *   - customer cá nhân        → tạo hồ sơ công ty ở /profile#business (BE tự nâng tài khoản lên business khi tạo)
  *   - supplier/admin          → không hiện CTA (trang chỉ để giới thiệu)
  */
 function B2bCta({ className }) {
@@ -24,14 +24,14 @@ function B2bCta({ className }) {
     return (
       <div className={`flex flex-wrap justify-center gap-3 ${className}`}>
         <Link to="/shop" className="btn btn-primary">{t('b2b.ctaShop')}</Link>
-        <Link to="/profile" className="btn btn-outline">{t('b2b.ctaCompanyProfile')}</Link>
+        <Link to="/profile#business" className="btn btn-outline">{t('b2b.ctaCompanyProfile')}</Link>
       </div>
     );
   }
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
       <p className="text-sm text-base-content/60">{t('b2b.individualNote')}</p>
-      <Link to="/contact" className="btn btn-outline">{t('b2b.ctaContact')}</Link>
+      <Link to="/profile#business" className="btn btn-primary">{t('b2b.ctaUpgrade')}</Link>
     </div>
   );
 }

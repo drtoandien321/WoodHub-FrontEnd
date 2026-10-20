@@ -23,6 +23,7 @@ export const WS_URL = BASE_URL.replace(/\/api\/?$/, '') + '/ws';
  */
 const REAL_ENDPOINTS = new Set([
   'getMe', 'updateUser', // Module User — GET/PUT /api/users/me, /api/users/{id} (đã xác nhận BE thật)
+  'getBusinessProfile', 'createBusinessProfile', 'updateBusinessProfile', // BusinessProfileController
   // Module Supplier (browse công khai) — đã xác nhận BE thật (curl local, sau khi pull 2 endpoint mới)
   'getPublicSuppliers', 'getSupplierPublicProfile', 'getSupplierStores', 'getSupplierPortfolio',
   'getReviews', 'getReviewSummary',
@@ -172,16 +173,10 @@ http.interceptors.request.use((config) => {
  * refreshRequest: gom nhiều request 401 cùng lúc thành 1 lần gọi /auth/refresh duy nhất
  * (không phải mỗi request lỗi lại tự gọi refresh riêng, tránh cấp thừa refresh token).
  *
- * ⚠️ CŨNG bắt 403 giống 401 (khác quy ước REST thông thường) — đã test bằng browser thật + JWT
- * hết hạn: BE trả 403 (KHÔNG phải 401) cho token hết hạn/không hợp lệ, xác nhận trên nhiều
- * endpoint (getMe/getMySubscription/getMyDesigns đều 403), không phải hành vi riêng 1 API.
- * Đây là bug BE (thiếu AuthenticationEntryPoint trả 401 đúng chuẩn Spring Security — token hết
- * hạn đang bị xử lý như "không đủ quyền" thay vì "chưa xác thực") — ĐÃ báo BE, chưa có ETA fix.
- * Vá tạm ở đây để phiên đăng nhập không tự vỡ mỗi 15 phút (JWT_ACCESS_EXPIRATION_MS). Đánh đổi
- * chấp nhận được: 403 "hợp lệ" (vd thao tác không đủ quyền như tự accept offer của mình) sẽ tốn
- * thêm 1 lượt refresh+gọi lại thừa (refresh vẫn thành công vì access token cũ tuy hết hạn nhưng
- * refresh token còn hạn 7 ngày) — nhưng KHÔNG bị logout oan vì chỉ logout khi refresh THẤT BẠI,
- * không logout chỉ vì request lặp lại vẫn lỗi (có thể vẫn là 403 hợp lệ, không phải hết hạn).
+ * CHỈ bắt 401. Trước đây bắt cả 403 vì BE từng trả 403 cho token hết hạn — BE đã sửa (dd9c087 AUD-015 +
+ * 08c7b61): token hết hạn/sai/malformed bị coi là chưa đăng nhập → AuthenticationEntryPoint trả 401; endpoint
+ * permitAll (vd /products/mine) cũng tự trả 401 ở service. 403 giờ chỉ còn nghĩa "đủ token nhưng thiếu quyền"
+ * → không refresh (refresh cũng không giúp gì), trả lỗi thẳng cho màn hình xử lý.
  */
 let refreshRequest = null;
 
@@ -191,9 +186,7 @@ http.interceptors.response.use(
     const originalRequest = error.config;
     const isAuthEndpoint = originalRequest?.url?.startsWith('/auth/');
     const status = error.response?.status;
-    const isAuthFailure = status === 401 || status === 403;
-
-    if (!isAuthFailure || originalRequest._retry || isAuthEndpoint) {
+    if (status !== 401 || originalRequest._retry || isAuthEndpoint) {
       if (status === 401) useAuthStore.getState().logout();
       return Promise.reject(error);
     }
@@ -324,6 +317,14 @@ export const api = {
   // ===== USER (thông tin tài khoản đang đăng nhập — pages/Profile.jsx) =====
   // GET /api/users/me → UserResponse { id, email, fullName, phone, role, customerType, createdAt, updatedAt }
   getMe: () => call(() => http.get('/users/me'), 'getMe'),
+  /*
+   * Hồ sơ doanh nghiệp (thông tin xuất VAT) — /api/users/me/business-profile.
+   * GET: 404 khi chưa có hồ sơ (khách cá nhân). POST tạo mới VÀ BE tự nâng customerType → business;
+   * 409 nếu đã có. PUT ghi đè cả 3 field. Body: { companyName*, taxCode* (≤20), companyAddress* }.
+   */
+  getBusinessProfile: () => call(() => http.get('/users/me/business-profile'), 'getBusinessProfile'),
+  createBusinessProfile: (body) => call(() => http.post('/users/me/business-profile', body), 'createBusinessProfile', body),
+  updateBusinessProfile: (body) => call(() => http.put('/users/me/business-profile', body), 'updateBusinessProfile', body),
   // PUT /api/users/{id}  body: { fullName, phone } (BE chỉ nhận đúng 2 field này, KHÔNG đổi được email)
   // Dùng chung cho cả tự sửa hồ sơ (Profile.jsx) LẪN admin sửa hộ user khác (Portal Quản trị) — cùng 1 endpoint.
   updateUser: ({ id, ...body }) =>

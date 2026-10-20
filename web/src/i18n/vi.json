@@ -93,7 +93,25 @@
     "changePasswordSubmit": "Đổi mật khẩu",
     "passwordMismatch": "Mật khẩu nhập lại không khớp.",
     "passwordError": "Không đổi được mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.",
-    "passwordChanged": "Đổi mật khẩu thành công."
+    "passwordChanged": "Đổi mật khẩu thành công.",
+    "business": {
+      "title": "Hồ sơ doanh nghiệp",
+      "subtitle": "Thông tin dùng để xuất hoá đơn VAT cho đơn hàng của công ty.",
+      "companyName": "Tên công ty",
+      "taxCode": "Mã số thuế",
+      "companyAddress": "Địa chỉ công ty (ghi trên hoá đơn)",
+      "taxCodeHint": "10 số, hoặc 10 số + \"-\" + 3 số với chi nhánh (vd 0123456789-001).",
+      "required": "Vui lòng nhập đủ tên công ty, mã số thuế và địa chỉ.",
+      "taxCodeInvalid": "Mã số thuế không hợp lệ (10 số hoặc 10 số-3 số).",
+      "upgradeNote": "Bạn đang dùng tài khoản cá nhân. Tạo hồ sơ doanh nghiệp sẽ chuyển tài khoản sang loại Doanh nghiệp.",
+      "create": "Tạo hồ sơ doanh nghiệp",
+      "save": "Lưu thay đổi",
+      "created": "Đã tạo hồ sơ — tài khoản của bạn giờ là tài khoản doanh nghiệp.",
+      "saved": "Đã lưu hồ sơ doanh nghiệp.",
+      "saveError": "Không lưu được hồ sơ doanh nghiệp, vui lòng thử lại.",
+      "loadError": "Không tải được hồ sơ doanh nghiệp.",
+      "retry": "Thử lại"
+    }
   },
   "auth": {
     "login": {
@@ -367,8 +385,8 @@
     "ctaDesc": "Tạo tài khoản doanh nghiệp ngay hôm nay — đội ngũ WoodHub sẽ liên hệ tư vấn gói phù hợp.",
     "ctaShop": "Mua sắm cho doanh nghiệp",
     "ctaCompanyProfile": "Hồ sơ công ty",
-    "individualNote": "Bạn đang dùng tài khoản cá nhân. Liên hệ WoodHub để chuyển sang tài khoản doanh nghiệp.",
-    "ctaContact": "Liên hệ chuyển đổi"
+    "individualNote": "Bạn đang dùng tài khoản cá nhân. Tạo hồ sơ doanh nghiệp (tên công ty, mã số thuế) để dùng tài khoản doanh nghiệp.",
+    "ctaUpgrade": "Tạo hồ sơ doanh nghiệp"
   },
   "about": {
     "title": "Câu chuyện của WoodHub",
@@ -899,7 +917,11 @@
         "refineTitle": "Nâng cấp texture",
         "refineDesc": "Bản xem trước mới có hình khối. Thêm vân gỗ, màu sắc chi tiết — không tốn thêm lượt thiết kế.",
         "refineCta": "Nâng cấp texture",
-        "refinedNote": "Mô hình đã được nâng cấp texture."
+        "refinedNote": "Mô hình đã được nâng cấp texture.",
+        "nameLabel": "Đặt tên mô hình",
+        "nameSave": "Lưu tên",
+        "nameSaved": "Đã lưu tên mô hình.",
+        "defaultModelName": "Mô hình"
       },
       "step5": {
         "title": "Chỉnh sửa",
@@ -927,7 +949,8 @@
         "cancel": "Hủy",
         "view": "Xem 3D / AR",
         "link": "Model 3D của tôi",
-        "renameError": "Không đổi được tên model."
+        "renameError": "Không đổi được tên model.",
+        "createdAt": "Tạo lúc {{date}}"
       },
       "designs": {
         "title": "Thiết kế của tôi",
@@ -1043,7 +1066,10 @@
       "accepted": "Đã chấp nhận",
       "rejected": "Đã từ chối",
       "superseded": "Đã bị thay thế"
-    }
+    },
+    "locationOther": "Nhập địa chỉ khác…",
+    "locationTooShort": "Vui lòng chọn hoặc nhập địa chỉ đầy đủ (ít nhất {{min}} ký tự).",
+    "addAddress": "+ Thêm địa chỉ vào sổ địa chỉ"
   },
   "order": {
     "myOrdersTitle": "Đơn custom của tôi",

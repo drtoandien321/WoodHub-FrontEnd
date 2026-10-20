@@ -259,8 +259,8 @@ const resolveGenTask = async (taskId) => {
   const slug = `gen-${taskId}`;
   if (!memoryDb.genModels.has(slug)) {
     const built = buildGeneratedModel(taskId, task.imageName);
-    // Text-to-3D: tên mặc định theo mô tả, đánh dấu "(preview)" tới khi refine (mock — BE thật đặt "Model AI")
-    if (task.inputType === 'text') built.name = `${(task.prompt ?? 'Mô tả').slice(0, 40)} (preview)`;
+    // Giống BE thật (MeshyAi3DProvider): mọi model AI mang tên mặc định "Model AI (Meshy)" — FE gợi ý tên ở bước 4
+    built.name = 'Model AI (Meshy)';
     memoryDb.genModels.set(slug, built);
     persistGenModels();
   }
@@ -269,7 +269,7 @@ const resolveGenTask = async (taskId) => {
     task.refining = false;
     task.refined = true;
     const m = memoryDb.genModels.get(slug);
-    memoryDb.genModels.set(slug, { ...m, name: m.name.replace(' (preview)', ''), metadata: { ...m.metadata, refined: true } });
+    memoryDb.genModels.set(slug, { ...m, metadata: { ...m.metadata, refined: true } });
     persistGenModels();
     persistGenTasks();
   }
@@ -621,6 +621,7 @@ const MOCK_MY_SUPPLIER_IDS = ['mock-supplier-id', 'sup_01'];
 const MOCK_MY_SUPPLIER = { id: 'sup_01', name: 'Xưởng gỗ Thành Phát' };
 // Hồ sơ đã sửa (PUT /suppliers/me) + portfolio của supplier mock — persist để F5 vẫn còn
 const SUPPLIER_ME_KEY = 'woodhub-mock-supplier-me';
+const BUSINESS_PROFILE_KEY = 'woodhub-mock-business-profiles';
 const PORTFOLIO_KEY = 'woodhub-mock-portfolio';
 let mockPortfolio = storage.getItem(PORTFOLIO_KEY, null) ?? [];
 const isSupplierUser = () => useAuthStore.getState().user?.role === 'supplier';
@@ -885,6 +886,34 @@ export const mockAdapter = {
   },
 
   // GET /users/me demo — trả lại đúng user đang có trong authStore (đăng nhập bằng mock trước đó)
+  // ===== HỒ SƠ DOANH NGHIỆP (mock theo user đang đăng nhập, persist localStorage) =====
+  async getBusinessProfile() {
+    await delay(200);
+    const uid = useAuthStore.getState().user?.id;
+    const all = storage.getItem(BUSINESS_PROFILE_KEY, {});
+    if (!all[uid]) throw orderError(404, 'Bạn không có hồ sơ doanh nghiệp');
+    return all[uid];
+  },
+  async createBusinessProfile(body) {
+    await delay(300);
+    const uid = useAuthStore.getState().user?.id;
+    const all = storage.getItem(BUSINESS_PROFILE_KEY, {});
+    if (all[uid]) throw orderError(409, 'Bạn đã có hồ sơ doanh nghiệp');
+    const now = new Date().toISOString();
+    all[uid] = { id: `bp_${Date.now()}`, userId: uid, companyName: body.companyName.trim(), taxCode: body.taxCode.trim(), companyAddress: body.companyAddress.trim(), createdAt: now, updatedAt: now };
+    storage.setItem(BUSINESS_PROFILE_KEY, all);
+    return all[uid];
+  },
+  async updateBusinessProfile(body) {
+    await delay(300);
+    const uid = useAuthStore.getState().user?.id;
+    const all = storage.getItem(BUSINESS_PROFILE_KEY, {});
+    if (!all[uid]) throw orderError(404, 'Bạn không có hồ sơ doanh nghiệp');
+    all[uid] = { ...all[uid], companyName: body.companyName.trim(), taxCode: body.taxCode.trim(), companyAddress: body.companyAddress.trim(), updatedAt: new Date().toISOString() };
+    storage.setItem(BUSINESS_PROFILE_KEY, all);
+    return all[uid];
+  },
+
   async getMe() {
     await delay(300);
     const user = useAuthStore.getState().user;
@@ -2386,6 +2415,24 @@ export const mockAdapter = {
   },
 
   // GET /custom/models/:slug → Model3dResponse (gồm cả model do user vừa sinh từ ảnh)
+  // GET /custom/models/my — model AI đã dựng (mock: mọi model trong genModels, mới nhất trước). Trước đây THIẾU → trang
+  // "Model 3D của tôi" luôn báo lỗi ở chế độ mock (production gọi BE thật nên không bị).
+  async getMyModels(params = {}) {
+    await delay(250);
+    const all = [...memoryDb.genModels.values()].sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
+    return toSpringPage(all, params);
+  },
+  // PUT /custom/models/{id} { name } — chỉ đổi tên
+  async renameModel({ id, name }) {
+    await delay(250);
+    const entry = [...memoryDb.genModels.entries()].find(([, m]) => m.id === id);
+    if (!entry) throw orderError(404, 'Không tìm thấy model');
+    const updated = { ...entry[1], name: String(name).trim().slice(0, 255) };
+    memoryDb.genModels.set(entry[0], updated);
+    persistGenModels();
+    return updated;
+  },
+
   async getModel3d(slug) {
     await delay(200);
     const model = memoryDb.genModels.get(slug) ?? MODELS_3D.find((m) => m.slug === slug || m.id === slug);

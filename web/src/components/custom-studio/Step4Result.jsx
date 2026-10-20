@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ModelViewer from '../custom3d/ModelViewer.jsx';
+import ModelNameField from './ModelNameField.jsx';
 import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
@@ -8,7 +9,7 @@ import { apiErrorMessage } from '../../utils/apiError.js';
  * KHÔNG cần tự quản lý state đó ở đây), viewer có reset/orbit/zoom/fullscreen (showControls trên
  * ModelViewer dùng chung — xem components/custom3d/ModelViewer.jsx), báo lỗi rõ nếu model hỏng.
  */
-export default function Step4Result({ model, onNext, onBack, canRefine, refined, onRefine, refinePending, refineError }) {
+export default function Step4Result({ model, onNext, onBack, canRefine, refined, onRefine, refinePending, refineError, suggestedName, onRenamed }) {
   const { t } = useTranslation();
   const [loadError, setLoadError] = useState(false);
 
@@ -54,6 +55,11 @@ export default function Step4Result({ model, onNext, onBack, canRefine, refined,
         </div>
       )}
       {refined && <p className="text-xs text-success">{t('custom.studio.step4.refinedNote')}</p>}
+
+      {/* Chỉ model AI của khách (mẫu thư viện không đổi tên được — PUT chỉ cho chủ sở hữu) */}
+      {model.source === 'ai_generated' && (
+        <ModelNameField key={model.id} model={model} suggestedName={suggestedName} onRenamed={onRenamed} />
+      )}
 
       {/* pr-20: chừa chỗ cho cụm nút nổi góc phải (bong bóng chat NCC + trợ lý AI ~80px) — trước đây đè lên nút chính */}
       <div className="mt-1 flex justify-between gap-3 pr-20">
