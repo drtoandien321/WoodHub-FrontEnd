@@ -3,20 +3,70 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useSupplierChatStore } from '../../stores/supplierChatStore.js';
+import { useChatStore } from '../../stores/chatStore.js';
 import { useAuthStore } from '../../stores/authStore.js';
-import ChatHeader from './ChatHeader.jsx';
+import ChatHeader, { initials } from './ChatHeader.jsx';
 import ChatProductCard from './ChatProductCard.jsx';
 import ChatMessageBubble from './ChatMessageBubble.jsx';
 import QuickReplies from './QuickReplies.jsx';
 import ChatInput from './ChatInput.jsx';
-import { MessageCircle } from '../suppliers/icons.jsx';
+import { MessageCircle, X } from '../suppliers/icons.jsx';
+
+/*
+ * MinimizedChatBubble — khung chat NCC khi THU NHỎ: bong bóng nổi góc phải, ngay TRÊN nút AI chatbot.
+ * Cố tình khác nút AI (tròn, màu primary, icon chat): đây là ô bo góc vuông, nền gradient gỗ, chữ viết
+ * tắt tên NCC + chấm "đang chat" → khách phân biệt được "chat với người bán" và "trợ lý AI".
+ * Bấm = mở lại đúng cuộc trò chuyện; nút × nhỏ = đóng hẳn. Badge đỏ = số tin NCC gửi lúc đang thu nhỏ.
+ */
+function MinimizedChatBubble({ supplier, unread, onRestore, onClose }) {
+  const { t } = useTranslation();
+  const name = supplier?.name || t('chat.supplierFallback');
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.6, y: 12 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.6, y: 12 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+      // bottom = 24 (lề) + 56 (nút AI) + 12 (khoảng cách) → không đè nút AI ở vị trí mặc định
+      className="group fixed bottom-[92px] right-6 z-[70]"
+    >
+      <button
+        type="button"
+        onClick={onRestore}
+        aria-label={t('chat.restore', { name })}
+        title={t('chat.restore', { name })}
+        className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-secondary to-primary font-display text-base text-primary-content shadow-xl ring-2 ring-base-100 transition-transform hover:scale-105 active:scale-95"
+      >
+        {initials(name)}
+        {/* Chấm xanh = đang có cuộc trò chuyện mở */}
+        <span className="absolute -bottom-0.5 -left-0.5 h-3.5 w-3.5 rounded-full border-2 border-base-100 bg-success" aria-hidden="true" />
+        {unread > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-error px-1 text-[11px] font-semibold text-error-content tabular-nums">
+            {unread > 9 ? '9+' : unread}
+          </span>
+        )}
+      </button>
+      {/* Nút đóng hẳn — chỉ hiện khi rê chuột (desktop) / luôn hiện mờ trên mobile */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label={t('chat.close')}
+        className="absolute -left-2 -top-2 grid h-6 w-6 place-items-center rounded-full border border-base-300 bg-base-100 text-base-content/60 shadow transition-opacity hover:text-error sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+      >
+        <X width={12} height={12} />
+      </button>
+    </motion.div>
+  );
+}
 
 /*
  * ChatDrawer — khung chat với NHÀ CUNG CẤP, mount global (cạnh AI ChatWidget trong App.jsx).
- * Mở/đóng qua useSupplierChatStore (openFromProduct / openFromSupplier / close).
+ * Mở/đóng qua useSupplierChatStore (openFromProduct / openFromSupplier / minimize / restore / close).
  *
- * - Desktop: drawer cố định bên phải (w-[420px], full height), trang sau vẫn thấy (không overlay đặc).
- * - Mobile: full-screen + backdrop mờ (đóng khi chạm nền).
+ * - Desktop: CỬA SỔ NỔI góc phải dưới (380px × tối đa 600px, kiểu Messenger) — trước đây là drawer cao
+ *   full màn hình 420px, che mất nửa trang sản phẩm. Thu nhỏ (—) → bong bóng MinimizedChatBubble.
+ * - Mobile: full-screen + backdrop mờ (chạm nền = thu nhỏ, không mất cuộc trò chuyện).
+ * - ESC = thu nhỏ. Bấm link sản phẩm trong chat = thu nhỏ để khách xem trang rồi quay lại chat.
  * - Chưa đăng nhập: hiện trạng thái yêu cầu đăng nhập, không crash, input bị khoá.
  */
 export default function ChatDrawer() {
@@ -24,9 +74,11 @@ export default function ChatDrawer() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const {
-    isOpen, context, conversations, typing, showProductCard,
-    close, send, retry, toggleProductCard,
+    isOpen, minimized, unread, context, conversations, typing, showProductCard,
+    close, minimize, restore, send, retry, toggleProductCard,
   } = useSupplierChatStore();
+  // Panel AI chatbot đang mở → ẩn tạm bong bóng NCC (cùng góc phải dưới, tránh đè lên panel AI)
+  const aiPanelOpen = useChatStore((s) => s.isOpen);
 
   const supplier = context?.supplier;
   const product = context?.product;
@@ -40,41 +92,53 @@ export default function ChatDrawer() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, typing, isOpen]);
 
-  // ESC để đóng (accessibility).
+  // ESC = thu nhỏ (accessibility) — nhẹ tay hơn đóng hẳn, khách không mất cuộc trò chuyện đang dở.
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    const onKey = (e) => { if (e.key === 'Escape') minimize(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, close]);
+  }, [isOpen, minimize]);
 
   const goLogin = () => { close(); navigate('/login'); };
 
   return (
+    <>
+    {/* 2 AnimatePresence riêng: bong bóng và cửa sổ chat có hiệu ứng vào/ra độc lập */}
+    <AnimatePresence>
+      {minimized && !isOpen && !aiPanelOpen && supplier && (
+        <MinimizedChatBubble key="bubble" supplier={supplier} unread={unread} onRestore={restore} onClose={close} />
+      )}
+    </AnimatePresence>
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop chỉ trên mobile */}
+          {/* Backdrop chỉ trên mobile — chạm nền = thu nhỏ */}
           <motion.div
+            key="backdrop"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={close}
+            onClick={minimize}
             className="fixed inset-0 z-[60] bg-black/30 sm:hidden"
             aria-hidden="true"
           />
 
           <motion.aside
+            key="panel"
             role="dialog"
             aria-label={t('chat.subtitle')}
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.28, ease: 'easeOut' }}
-            className="fixed inset-0 z-[61] flex flex-col bg-base-200 shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:w-[420px] sm:border-l sm:border-base-300"
+            // Mobile trượt từ dưới lên; desktop "bật" ra từ góc phải dưới (origin-bottom-right)
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.96 }}
+            transition={{ type: 'tween', duration: 0.22, ease: 'easeOut' }}
+            className="fixed inset-0 z-[61] flex origin-bottom-right flex-col overflow-hidden bg-base-200 shadow-2xl
+                       sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[min(600px,calc(100dvh-3rem))] sm:w-[380px]
+                       sm:rounded-2xl sm:border sm:border-base-300"
           >
-            <ChatHeader supplier={supplier} onClose={close} />
+            <ChatHeader supplier={supplier} onClose={close} onMinimize={minimize} />
 
             {product && showProductCard && (
-              <ChatProductCard product={product} onHide={toggleProductCard} onNavigate={close} />
+              <ChatProductCard product={product} onHide={toggleProductCard} onNavigate={minimize} />
             )}
 
             {/* Vùng tin nhắn (scroll) */}
@@ -91,7 +155,7 @@ export default function ChatDrawer() {
 
               <div className="flex flex-col gap-3 py-1">
                 {messages.map((m) => (
-                  <ChatMessageBubble key={m.id} message={m} onRetry={retry} onNavigate={close} />
+                  <ChatMessageBubble key={m.id} message={m} onRetry={retry} onNavigate={minimize} />
                 ))}
 
                 {typing && (
@@ -126,5 +190,6 @@ export default function ChatDrawer() {
         </>
       )}
     </AnimatePresence>
+    </>
   );
 }

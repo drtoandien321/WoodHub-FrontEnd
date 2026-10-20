@@ -58,6 +58,13 @@ const toUiMessage = (m, myUserId) => ({
 
 export const useSupplierChatStore = create((set, get) => ({
   isOpen: false,
+  /*
+   * minimized: khung chat đang THU NHỎ thành bong bóng (isOpen=false nhưng vẫn giữ context để bấm mở lại
+   * đúng cuộc trò chuyện). unread: số tin NCC gửi tới trong lúc khung chat không mở → badge trên bong bóng.
+   * close() = đóng HẲN (bỏ bong bóng); minimize() = chỉ thu nhỏ.
+   */
+  minimized: false,
+  unread: 0,
   context: null,            // { supplier:{id,name}, product?:{id,name,image,price,supplierName} }
   showProductCard: true,    // người dùng có thể ẩn product card (nút pin/close)
   conversations: {},
@@ -70,6 +77,8 @@ export const useSupplierChatStore = create((set, get) => ({
     const supplier = { id: product.supplierId, name: product.supplierName };
     set(() => ({
       isOpen: true,
+      minimized: false,
+      unread: 0,
       showProductCard: true,
       context: { supplier, product: { id: product.id, name: product.name, image: product.image, price: product.price, supplierName: product.supplierName } },
     }));
@@ -95,7 +104,7 @@ export const useSupplierChatStore = create((set, get) => ({
   // Mở chat từ TRANG HỒ SƠ NCC (không kèm product).
   openFromSupplier: (supplier) => {
     if (!supplier?.id) return;
-    set({ isOpen: true, showProductCard: false, context: { supplier: { id: supplier.id, name: supplier.name } } });
+    set({ isOpen: true, minimized: false, unread: 0, showProductCard: false, context: { supplier: { id: supplier.id, name: supplier.name } } });
     if (USE_MOCK) {
       set((s) => ({
         conversations: s.conversations[supplier.id] ? s.conversations : { ...s.conversations, [supplier.id]: [welcome(supplier.name)] },
@@ -105,7 +114,17 @@ export const useSupplierChatStore = create((set, get) => ({
     loadRealConversation(get, set, supplier, null);
   },
 
-  close: () => set({ isOpen: false }),
+  // Đóng hẳn: bỏ luôn bong bóng thu nhỏ (lịch sử vẫn giữ trong conversations, mở lại từ SP/hồ sơ NCC).
+  close: () => set({ isOpen: false, minimized: false, unread: 0 }),
+  // Thu nhỏ thành bong bóng — giữ nguyên context để restore() mở lại đúng cuộc trò chuyện.
+  minimize: () => set({ isOpen: false, minimized: true }),
+  restore: () => {
+    set({ isOpen: true, minimized: false, unread: 0 });
+    // Chế độ thật: mở lại = khách đã đọc các tin mới → báo BE (lỗi thì bỏ qua, không chặn UI)
+    const supplierId = get().context?.supplier?.id;
+    const conversationId = supplierId && get().conversationIdBySupplier[supplierId];
+    if (!USE_MOCK && conversationId) api.markAsRead(conversationId).catch(() => {});
+  },
   toggleProductCard: () => set((s) => ({ showProductCard: !s.showProductCard })),
 
   // Gửi tin. Mock: giả lập bubble 'sending'→'sent' + NCC tự trả lời. Thật: publish qua STOMP
@@ -140,6 +159,7 @@ export const useSupplierChatStore = create((set, get) => ({
       set((s) => ({
         typing: false,
         conversations: patchMsg(pushMsg(s.conversations, supplierId, reply), supplierId, msg.id, { status: 'seen' }),
+        unread: s.isOpen ? 0 : s.unread + 1, // NCC trả lời lúc khung chat đang thu nhỏ → tăng badge
       }));
     }, 1500);
   },
@@ -197,7 +217,13 @@ function ensureSubscribed(get, set) {
     const supplierId = Object.keys(bySupplier).find((sid) => bySupplier[sid] === m.conversationId);
     if (!supplierId) return; // tin của hội thoại chưa mở ở khung chat này (vd hộp thư Portal xử lý riêng)
     const myUserId = useAuthStore.getState().user?.id;
-    set((s) => ({ conversations: pushMsgDedup(s.conversations, supplierId, toUiMessage(m, myUserId)) }));
+    set((s) => {
+      const conversations = pushMsgDedup(s.conversations, supplierId, toUiMessage(m, myUserId));
+      // Tin MỚI của NCC (không phải tin của chính mình, không trùng) tới lúc khung chat đang thu nhỏ → tăng badge
+      const isNewFromSupplier = conversations !== s.conversations && m.senderId !== myUserId;
+      const unread = isNewFromSupplier && !s.isOpen && s.minimized ? s.unread + 1 : s.unread;
+      return { conversations, unread };
+    });
   });
 }
 

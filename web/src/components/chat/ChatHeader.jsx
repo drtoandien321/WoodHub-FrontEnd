@@ -1,14 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { MoreVertical, X } from '../suppliers/icons.jsx';
+import { Minus, X } from '../suppliers/icons.jsx';
 
-// Lấy initials từ tên NCC: "Nội thất Gia Phát" → "GP" (2 từ cuối).
-const initials = (name = '') => {
+// Lấy initials từ tên NCC: "Nội thất Gia Phát" → "GP" (2 từ cuối). Dùng chung cho bong bóng thu nhỏ.
+export const initials = (name = '') => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return 'NCC';
   return parts.slice(-2).map((w) => w[0]).join('').toUpperCase();
 };
 
-export default function ChatHeader({ supplier, onClose }) {
+// onMinimize: thu nhỏ thành bong bóng (giữ cuộc trò chuyện) · onClose: đóng hẳn
+export default function ChatHeader({ supplier, onClose, onMinimize }) {
   const { t } = useTranslation();
   const name = supplier?.name || t('chat.supplierFallback');
 
@@ -24,10 +25,13 @@ export default function ChatHeader({ supplier, onClose }) {
           {t('chat.online')} · {t('chat.subtitle')}
         </p>
       </div>
-      <button type="button" aria-label={t('chat.more')} className="btn btn-ghost btn-sm btn-circle text-base-content/50">
-        <MoreVertical width={18} height={18} />
-      </button>
-      <button type="button" onClick={onClose} aria-label={t('chat.close')} className="btn btn-ghost btn-sm btn-circle">
+      {/* Bỏ nút "⋯" cũ: chưa có hành động nào phía sau. Thay bằng nút thu nhỏ. */}
+      {onMinimize && (
+        <button type="button" onClick={onMinimize} aria-label={t('chat.minimize')} title={t('chat.minimize')} className="btn btn-ghost btn-sm btn-circle">
+          <Minus width={18} height={18} />
+        </button>
+      )}
+      <button type="button" onClick={onClose} aria-label={t('chat.close')} title={t('chat.close')} className="btn btn-ghost btn-sm btn-circle">
         <X width={18} height={18} />
       </button>
     </header>
