@@ -93,7 +93,25 @@
     "changePasswordSubmit": "Change password",
     "passwordMismatch": "Passwords do not match.",
     "passwordError": "Couldn't change password. Please check your current password.",
-    "passwordChanged": "Password changed successfully."
+    "passwordChanged": "Password changed successfully.",
+    "business": {
+      "title": "Business profile",
+      "subtitle": "Used to issue VAT invoices for your company orders.",
+      "companyName": "Company name",
+      "taxCode": "Tax code",
+      "companyAddress": "Company address (printed on invoices)",
+      "taxCodeHint": "10 digits, or 10 digits + \"-\" + 3 digits for a branch (e.g. 0123456789-001).",
+      "required": "Please fill in company name, tax code and address.",
+      "taxCodeInvalid": "Invalid tax code (10 digits or 10-3 digits).",
+      "upgradeNote": "You're using a personal account. Creating a business profile switches your account to Business.",
+      "create": "Create business profile",
+      "save": "Save changes",
+      "created": "Profile created — your account is now a business account.",
+      "saved": "Business profile saved.",
+      "saveError": "Couldn't save the business profile, please try again.",
+      "loadError": "Couldn't load the business profile.",
+      "retry": "Retry"
+    }
   },
   "auth": {
     "login": {
@@ -367,8 +385,8 @@
     "ctaDesc": "Create a business account today — the WoodHub team will reach out to advise on the right plan.",
     "ctaShop": "Shop for your business",
     "ctaCompanyProfile": "Company profile",
-    "individualNote": "You're using a personal account. Contact WoodHub to switch to a business account.",
-    "ctaContact": "Contact us to switch"
+    "individualNote": "You're using a personal account. Create a business profile (company name, tax code) to switch to a business account.",
+    "ctaUpgrade": "Create a business profile"
   },
   "about": {
     "title": "The WoodHub story",
@@ -903,7 +921,11 @@
         "refineTitle": "Upgrade texture",
         "refineDesc": "The preview only has the shape. Add wood grain and detailed colour — no extra design credit.",
         "refineCta": "Upgrade texture",
-        "refinedNote": "Texture has been upgraded."
+        "refinedNote": "Texture has been upgraded.",
+        "nameLabel": "Name your model",
+        "nameSave": "Save name",
+        "nameSaved": "Model name saved.",
+        "defaultModelName": "Model"
       },
       "step5": {
         "title": "Edit",
@@ -931,7 +953,8 @@
         "cancel": "Cancel",
         "view": "View 3D / AR",
         "link": "My 3D models",
-        "renameError": "Couldn't rename the model."
+        "renameError": "Couldn't rename the model.",
+        "createdAt": "Created {{date}}"
       },
       "designs": {
         "title": "My designs",
@@ -1047,7 +1070,10 @@
       "accepted": "Accepted",
       "rejected": "Rejected",
       "superseded": "Superseded"
-    }
+    },
+    "locationOther": "Enter another address…",
+    "locationTooShort": "Please choose or enter a full address (at least {{min}} characters).",
+    "addAddress": "+ Add an address to your address book"
   },
   "order": {
     "myOrdersTitle": "My custom orders",

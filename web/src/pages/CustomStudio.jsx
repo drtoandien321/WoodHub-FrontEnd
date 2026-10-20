@@ -55,6 +55,15 @@ export default function CustomStudio() {
   const isText = s.source === 'text';
   const generate = isText ? generateText : generateImage;
   const refine = useRefineGenTask();
+
+  /*
+   * Tên gợi ý cho model AI (BE luôn đặt "Model AI (Meshy)"): text→3D lấy đầu mô tả; ảnh→3D lấy loại sản phẩm + ngày.
+   * Chỉ dùng khi model đang mang tên mặc định — khách đã đổi tên thì giữ nguyên tên của khách.
+   */
+  const isDefaultName = !s.model?.name || /^Model AI/i.test(s.model.name);
+  const suggestedModelName = !isDefaultName ? s.model?.name
+    : isText ? s.textInput.prompt.trim().slice(0, 60)
+    : `${s.productType ? t(`custom.studio.productTypes.${s.productType}`) : t('custom.studio.step4.defaultModelName')} ${new Date().toLocaleDateString('vi-VN')}`;
   const { data: task, error: taskError } = useGenTask(resumeAllowed ? s.taskId : null);
   const retry = useRetryGenTask();
   const cancel = useCancelGenTask();
@@ -219,6 +228,9 @@ export default function CustomStudio() {
               onRefine={handleRefine}
               refinePending={refine.isPending}
               refineError={refine.error}
+              suggestedName={suggestedModelName}
+              // Giữ tên mới trong store để bước 6 / lần render sau không hiện lại tên mặc định
+              onRenamed={(name) => useCustomStudioStore.setState({ model: { ...s.model, name } })}
             />
           )}
 

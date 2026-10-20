@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/authStore.js';
 import { useMe, useUpdateUser, useChangePassword } from '../hooks/useUser.js';
 import { apiErrorMessage } from '../utils/apiError.js';
+import BusinessProfileSection from '../components/profile/BusinessProfileSection.jsx';
 
 /*
  * Profile — trang "Thông tin cá nhân" mở từ dropdown tài khoản trên Header.
@@ -10,6 +11,7 @@ import { apiErrorMessage } from '../utils/apiError.js';
  * - Cho sửa fullName/phone (PUT /users/{id}) — BE KHÔNG cho đổi email qua endpoint này.
  * - Đổi mật khẩu tự nguyện (khác ChangePasswordRequired.jsx — trang đó là BẮT BUỘC, không có
  *   nút bỏ qua; ở đây chỉ là tiện ích tự chọn).
+ * - Customer: thêm khối Hồ sơ doanh nghiệp (#business) — xem BusinessProfileSection.
  */
 export default function Profile() {
   const { t } = useTranslation();
@@ -31,6 +33,8 @@ export default function Profile() {
           <ProfileForm me={me ?? authUser} onSave={updateUser} />
         )}
       </div>
+
+      {authUser.role === 'customer' && <BusinessProfileSection customerType={authUser.customerType} />}
 
       <ChangePasswordSection onSubmit={changePassword} />
     </div>

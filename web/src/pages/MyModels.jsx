@@ -59,7 +59,11 @@ export default function MyModels() {
                   </div>
                 </form>
               ) : (
-                <p className="truncate font-display text-lg">{m.name}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-display text-lg">{m.name}</p>
+                  {/* Ngày tạo giúp phân biệt các model còn mang tên mặc định trùng nhau */}
+                  {m.createdAt && <p className="text-xs text-base-content/50">{t('custom.studio.myModels.createdAt', { date: new Date(m.createdAt).toLocaleString('vi-VN') })}</p>}
+                </div>
               )}
               <div className="mt-auto flex gap-2">
                 <Link to={`/custom/models/${m.slug}`} className="btn btn-outline btn-sm flex-1 border-base-300">{t('custom.studio.myModels.view')}</Link>

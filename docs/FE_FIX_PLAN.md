@@ -3,6 +3,11 @@
 > Test thật trên woodhub.io.vn với 5 tài khoản (customer cá nhân, customer doanh nghiệp, NCC retailer,
 > xưởng workshop, admin). Phần **BE cần làm** nằm ở `docs/word/WoodHub_BE_Changes_v2.docx` (+ `BE_MISSING.md`).
 > Mục nào ghi **[chờ BE]** thì FE chỉ làm được sau khi BE có API.
+>
+> **Tiến độ (21/10):** ✅ Đợt A — đã lên production (merge `fix/qa-round2`). ✅ Đợt B (B1–B4) — nhánh `fix/qa-round3`,
+> chờ merge. B5 (video hero) chờ team gửi file. Ngoài kế hoạch đã sửa thêm: chat còn sót khi đổi tài khoản, đăng nhập
+> sau khi NCC đăng xuất bị 403, checkbox/toggle vô hình toàn site (theme thiếu biến daisyUI), màn QR hết hạn
+> bảo khách huỷ đơn (trái chính sách AUD-005), mock thiếu getMyModels/renameModel.
 
 ## Những gì đã chạy đúng (không cần sửa)
 Đăng nhập theo role, giỏ hàng, checkout + QR, huỷ đơn, mã giảm giá, chat NCC (thu nhỏ/mở lại),
@@ -12,7 +17,7 @@ báo giá/sản xuất xưởng, toàn bộ trang admin + GA4. Phí ship 51.450 
 
 ---
 
-## Đợt A — Lỗi hiển thị nhanh (≈ 1 ngày, không cần BE)
+## ✅ Đợt A — Lỗi hiển thị nhanh (≈ 1 ngày, không cần BE)
 
 | # | Vấn đề | Cách sửa | File |
 |---|---|---|---|
@@ -24,7 +29,7 @@ báo giá/sản xuất xưởng, toàn bộ trang admin + GA4. Phí ship 51.450 
 | A6 | Dashboard NCC & xưởng hiện KPI **giả** (320.500.000 ₫, 4.9/5…) không có nhãn | Thêm banner "dữ liệu minh hoạ" giống trang Báo cáo; KPI "Đơn mới / Chờ xử lý" tính tạm từ `/supplier/orders` và `/quotes/incoming` thật (đã có API) | `SupplierDashboard.jsx`, `WorkshopDashboard.jsx` |
 | A7 | Lỗi từ BE luôn tiếng Việt (vd "Không tìm thấy mã khuyến mãi") khi UI English | Map theo `errorCode` nếu BE trả (xem docx BE); trước mắt map theo HTTP status + ngữ cảnh (coupon 404 → `checkout.couponNotFound`) | `utils/apiError.js` (mới) |
 
-## Đợt B — Tính năng FE còn thiếu, BE đã có API (≈ 2–3 ngày)
+## ✅ Đợt B — Tính năng FE còn thiếu, BE đã có API (≈ 2–3 ngày)
 
 | # | Vấn đề | Cách làm |
 |---|---|---|
