@@ -97,6 +97,8 @@ const REAL_ENDPOINTS = new Set([
    * xem chi tiết từng hàm ở nơi định nghĩa (đã cập nhật comment, không còn "CHƯA thêm vào set này").
    */
   'getModels3d', 'getModel3d', 'getMyModels', 'renameModel', 'getGenTask', 'retryGenTask', 'cancelGenTask', 'getMyGenTasks',
+  // Text-to-3D + nâng cấp texture (BE commit 40ece30, docs/custom-model-3d-fe.md mục 1b/1c)
+  'generate3DFromText', 'refineGenTask',
   'createDesign', 'getDesignDetail', 'updateDesign', 'deleteDesign', 'getMyDesigns',
   'createQuote', 'getMyQuotes', 'getIncomingQuotes', 'getQuoteDetail', 'cancelQuote',
   'createOffer', 'acceptOffer', 'rejectOffer',
@@ -775,6 +777,18 @@ export const api = {
    * (queued/processing là đang chạy, PHẢI tiếp tục poll).
    */
   getGenTask: (taskId) => call(() => http.get(`/custom/ai/tasks/${taskId}`), 'getGenTask', taskId),
+  /*
+   * POST /custom/ai/generate/text { prompt ≤600, artStyle 'realistic'|'sculpture', negativePrompt? ≤600 }
+   * → 202 { taskId, status:'queued', progress:0 }. Chạy bước PREVIEW (hình khối, chưa texture) — model
+   * tự lưu khi poll thấy succeeded. Trừ chung 1 lượt `design` với luồng ảnh (hết → 429).
+   */
+  generate3DFromText: (body) => call(() => http.post('/custom/ai/generate/text', body), 'generate3DFromText', body),
+  /*
+   * POST /custom/ai/tasks/:taskId/refine — nâng cấp texture cho task text đã preview xong (canRefine=true).
+   * KHÔNG trừ thêm lượt. Task quay lại processing → poll getGenTask tiếp; xong thì model preview được
+   * cập nhật texture (cùng modelId/slug). 409 chưa xong/đã refine/không phải task text · 400 provider không hỗ trợ.
+   */
+  refineGenTask: (taskId) => call(() => http.post(`/custom/ai/tasks/${taskId}/refine`), 'refineGenTask', taskId),
   // POST /custom/ai/tasks/:taskId/retry — chỉ khi task đang 'failed', giới hạn số lần (mặc định 3, vượt → 429)
   retryGenTask: (taskId) => call(() => http.post(`/custom/ai/tasks/${taskId}/retry`), 'retryGenTask', taskId),
   // POST /custom/ai/tasks/:taskId/cancel — chỉ khi task CHƯA terminal (đã kết thúc → 409)

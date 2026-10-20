@@ -16,6 +16,25 @@ export const useModel3d = (slug) =>
 
 export const useGenerate3D = () => useMutation({ mutationFn: api.generate3D });
 
+// Text-to-3D (bước preview) — cùng shape kết quả { taskId } với generate từ ảnh
+export const useGenerate3DFromText = () => useMutation({ mutationFn: api.generate3DFromText });
+
+/*
+ * Nâng cấp texture (refine) cho task text-to-3D. BE cập nhật CHÍNH model preview (giữ nguyên slug) →
+ * phải XOÁ cache ['model3d', slug] cũ, nếu không React Query vẫn trả bản preview chưa texture khi
+ * wizard tải lại model sau khi refine xong. Ghi luôn task mới (processing) vào cache để poll tiếp ngay.
+ */
+export const useRefineGenTask = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId }) => api.refineGenTask(taskId),
+    onSuccess: (task, { modelSlug }) => {
+      queryClient.setQueryData(['genTask', task.taskId], task);
+      if (modelSlug) queryClient.removeQueries({ queryKey: ['model3d', modelSlug] });
+    },
+  });
+};
+
 /*
  * Poll GET /custom/ai/tasks/:taskId mỗi 2s (trong khoảng khuyến nghị 1.5-3s) tới khi đạt
  * TERMINAL_STATUSES thì tự dừng (refetchInterval trả false). enabled: !!taskId — không gọi

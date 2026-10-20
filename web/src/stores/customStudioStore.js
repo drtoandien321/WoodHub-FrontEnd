@@ -18,13 +18,15 @@ import { defaultConfiguration } from '../utils/modelOptions.js';
 
 const initialTransient = {
   step: 1,
-  source: null, // 'upload' | 'template'
+  source: null, // 'upload' | 'template' | 'text'
   imageFile: null,
   imagePreviewUrl: null,
   productType: null,
   removeBackground: false,
   model: null, // Model3dResponse hiện tại (từ template hoặc từ task 'succeeded') — hiển thị ở bước 4+
   configuration: { material: null, color: null, dimensions: null },
+  // Mô tả cho text-to-3D (bước 2 khi source='text') — khớp body POST /custom/ai/generate/text
+  textInput: { prompt: '', artStyle: 'realistic', negativePrompt: '' },
 };
 
 export const useCustomStudioStore = create(
@@ -47,6 +49,16 @@ export const useCustomStudioStore = create(
        * đè lên draft CŨ (gắn với model cũ) thay vì tạo thiết kế mới cho model vừa chọn lại.
        */
       chooseUpload: () => set({ source: 'upload', step: 2, designId: null, designVersion: null, designName: '' }),
+
+      // Text-to-3D: khách tự MÔ TẢ món đồ bằng chữ → bước 2 là form mô tả (thay cho chuẩn bị ảnh)
+      chooseText: () => set({ source: 'text', step: 2, taskId: null, designId: null, designVersion: null, designName: '' }),
+      setTextInput: (patch) => set((s) => ({ textInput: { ...s.textInput, ...patch } })),
+
+      /*
+       * Bấm "Nâng cấp texture" ở bước 4: task quay lại processing → về bước 3 theo dõi, bỏ model đang
+       * xem (bản preview) để khi task succeeded lần nữa wizard tải lại model ĐÃ có texture.
+       */
+      startRefine: () => set({ model: null, step: 3 }),
 
       // Chọn mẫu có sẵn từ thư viện — có model ngay, bỏ qua bước 2/3 (không cần generate)
       chooseTemplate: (model) =>
@@ -92,7 +104,7 @@ export const useCustomStudioStore = create(
     {
       name: 'woodhub-custom-studio',
       partialize: (s) => ({
-        step: s.step, source: s.source, taskId: s.taskId, selectedTemplateSlug: s.selectedTemplateSlug,
+        step: s.step, source: s.source, taskId: s.taskId, selectedTemplateSlug: s.selectedTemplateSlug, textInput: s.textInput,
         productType: s.productType, ownerId: s.ownerId, designId: s.designId, designVersion: s.designVersion, designName: s.designName,
       }),
     }

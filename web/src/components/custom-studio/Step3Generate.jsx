@@ -10,7 +10,7 @@ import { ai3dErrorKey } from '../../utils/ai3dErrors.js';
  * "Rời trang vẫn tiếp tục kiểm tra": taskId lưu ở customStudioStore (persist) — quay lại trang,
  * CustomStudio tự poll lại đúng task này, không mất tiến trình.
  */
-export default function Step3Generate({ task, taskError, onRetry, onCancel, onChangeImage, retryPending, cancelPending, imagePreviewUrl }) {
+export default function Step3Generate({ task, taskError, onRetry, onCancel, onChangeImage, retryPending, cancelPending, imagePreviewUrl, prompt }) {
   const { t } = useTranslation();
 
   if (taskError) {
@@ -38,16 +38,20 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
     : status === 'cancelled' ? t('custom.studio.step3.stageCancelled')
     : t('custom.studio.step3.stageDone');
 
+  // Nguồn text không có ảnh → nút quay lại đổi thành 'Sửa mô tả' và hiện câu mô tả thay cho ảnh preview
+  const changeLabel = prompt ? t('custom.studio.step3.changePrompt') : t('custom.studio.step3.changeImage');
+
   return (
     <div className="flex flex-col items-center gap-5 rounded-2xl border border-base-300 bg-base-100 p-10 text-center">
       {imagePreviewUrl && <img src={imagePreviewUrl} alt="" className="h-28 w-28 rounded-2xl object-cover" />}
+      {!imagePreviewUrl && prompt && <p className="max-w-md rounded-xl bg-base-200/60 px-4 py-2 text-sm italic text-base-content/70">“{prompt}”</p>}
 
       {status === 'failed' ? (
         <>
           <p className="font-display text-xl text-error">{t('custom.ai.failedTitle')}</p>
           <p className="max-w-sm text-sm text-base-content/60">{task?.errorMessage || t('custom.ai.errors.generic')}</p>
           <div className="flex gap-2">
-            <button onClick={onChangeImage} className="btn btn-ghost btn-sm">{t('custom.studio.step3.changeImage')}</button>
+            <button onClick={onChangeImage} className="btn btn-ghost btn-sm">{changeLabel}</button>
             <button onClick={onRetry} disabled={retryPending} className="btn btn-primary btn-sm">
               {retryPending ? <span className="loading loading-spinner loading-xs" /> : t('custom.ai.retry')}
             </button>
@@ -56,7 +60,7 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
       ) : status === 'cancelled' ? (
         <>
           <p className="font-display text-xl">{t('custom.ai.cancelledTitle')}</p>
-          <button onClick={onChangeImage} className="btn btn-primary btn-sm">{t('custom.studio.step3.changeImage')}</button>
+          <button onClick={onChangeImage} className="btn btn-primary btn-sm">{changeLabel}</button>
         </>
       ) : (
         <>

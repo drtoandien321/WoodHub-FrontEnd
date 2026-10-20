@@ -849,7 +849,9 @@
         "uploadTip": "A straight-on, well-lit shot with a clear background gives the best result.",
         "templateTitle": "Or pick a ready-made template",
         "templateError": "Couldn't load the template library. Please try again later.",
-        "templateEmpty": "No templates yet."
+        "templateEmpty": "No templates yet.",
+        "textTitle": "Describe in words",
+        "textTip": "No photo? Describe the piece you want and AI builds a 3D preview."
       },
       "step2": {
         "title": "Prepare your photo",
@@ -886,13 +888,18 @@
         "stageDone": "Done",
         "leaveHint": "You can leave this page — we'll keep tracking progress for when you come back.",
         "changeImage": "Change photo",
-        "buyCredits": "Buy more design credits"
+        "buyCredits": "Buy more design credits",
+        "changePrompt": "Edit description"
       },
       "step4": {
         "title": "Result",
         "subtitle": "Rotate, zoom or go fullscreen to check the model.",
         "loadError": "Couldn't load the 3D model. Please try again.",
-        "cta": "Edit design"
+        "cta": "Edit design",
+        "refineTitle": "Upgrade texture",
+        "refineDesc": "The preview only has the shape. Add wood grain and detailed colour — no extra design credit.",
+        "refineCta": "Upgrade texture",
+        "refinedNote": "Texture has been upgraded."
       },
       "step5": {
         "title": "Edit",
@@ -945,6 +952,29 @@
         "nextPage": "Next →",
         "editable": "Customizable",
         "notEditable": "Not customizable yet"
+      },
+      "text": {
+        "title": "Describe your piece",
+        "subtitle": "The more specific you are, the closer the 3D model gets.",
+        "promptLabel": "What should it look like?",
+        "promptPlaceholder": "e.g. Scandinavian oak chair with a curved backrest and tapered legs",
+        "styleLabel": "Style",
+        "styles": {
+          "realistic": "Realistic",
+          "realisticHint": "Close to a real product, good for workshop orders",
+          "sculpture": "Sculpture",
+          "sculptureHint": "More artistic, softer shapes"
+        },
+        "negativeLabel": "Avoid",
+        "optional": "optional",
+        "negativePlaceholder": "e.g. plastic, metal, fabric cushion",
+        "tipsTitle": "Tips",
+        "tip1": "Name the item + wood type + style (Scandinavian, Indochine, modern…).",
+        "tip2": "Add shape details: curved back, tapered legs, drawers…",
+        "tip3": "Each generation uses 1 design credit; upgrading texture afterwards is free."
+      },
+      "stepLabelsText": {
+        "2": "Describe"
       }
     }
   },

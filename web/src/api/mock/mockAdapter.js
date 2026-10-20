@@ -258,11 +258,29 @@ const resolveGenTask = async (taskId) => {
 
   const slug = `gen-${taskId}`;
   if (!memoryDb.genModels.has(slug)) {
-    memoryDb.genModels.set(slug, buildGeneratedModel(taskId, task.imageName));
+    const built = buildGeneratedModel(taskId, task.imageName);
+    // Text-to-3D: tên mặc định theo mô tả, đánh dấu "(preview)" tới khi refine (mock — BE thật đặt "Model AI")
+    if (task.inputType === 'text') built.name = `${(task.prompt ?? 'Mô tả').slice(0, 40)} (preview)`;
+    memoryDb.genModels.set(slug, built);
     persistGenModels();
   }
+  // Refine (chỉ text-to-3D) vừa chạy xong → cập nhật CHÍNH model preview (cùng id/slug, giống BE)
+  if (task.refining) {
+    task.refining = false;
+    task.refined = true;
+    const m = memoryDb.genModels.get(slug);
+    memoryDb.genModels.set(slug, { ...m, name: m.name.replace(' (preview)', ''), metadata: { ...m.metadata, refined: true } });
+    persistGenModels();
+    persistGenTasks();
+  }
   const model = memoryDb.genModels.get(slug);
-  return { taskId, status: 'succeeded', progress: 100, modelSlug: slug, posterUrl: model.posterUrl, modelUrl: model.modelGlbUrl, errorCode: null, errorMessage: null };
+  const isText = task.inputType === 'text';
+  return {
+    taskId, status: 'succeeded', progress: 100, modelId: model.id, modelSlug: slug, posterUrl: model.posterUrl, modelUrl: model.modelGlbUrl,
+    inputType: task.inputType ?? 'image', prompt: task.prompt ?? null,
+    refined: !!task.refined, canRefine: isText && !task.refined,
+    errorCode: null, errorMessage: null,
+  };
 };
 
 /*
@@ -2348,6 +2366,36 @@ export const mockAdapter = {
    * queued (~0.5s đầu) → processing → succeeded/failed (~7s), giống chiến lược Mock provider thật ở BE-2.
    */
   async getGenTask(taskId) { return resolveGenTask(taskId); },
+
+  // POST /custom/ai/generate/text { prompt, artStyle?, negativePrompt? } → 202 { taskId, status:'queued', progress:0 }
+  async generate3DFromText({ prompt, artStyle, negativePrompt } = {}) {
+    await delay(400);
+    if (!prompt?.trim()) throw Object.assign(new Error('PROMPT_REQUIRED'), { response: { status: 400, data: { message: 'Vui lòng nhập mô tả' } } });
+    const taskId = `task_${Date.now().toString(36)}`;
+    memoryDb.genTasks.set(taskId, {
+      taskId, startedAt: Date.now(), imageName: null, templateId: null, inputType: 'text',
+      prompt: prompt.trim(), artStyle: artStyle ?? 'realistic', negativePrompt: negativePrompt ?? null,
+      // gõ chữ "fail" trong mô tả để demo luồng lỗi (giống ảnh có tên chứa "fail")
+      simulateFail: prompt.toLowerCase().includes('fail'), explicitStatus: null, retryCount: 0, refined: false,
+    });
+    persistGenTasks();
+    return { taskId, status: 'queued', progress: 0 };
+  },
+
+  // POST /custom/ai/tasks/:taskId/refine — chỉ task text đã preview xong, chưa refine (sai → 409)
+  async refineGenTask(taskId) {
+    await delay(300);
+    const task = memoryDb.genTasks.get(taskId);
+    if (!task) throw Object.assign(new Error('TASK_NOT_FOUND'), { response: { status: 404 } });
+    const current = await resolveGenTask(taskId);
+    if (task.inputType !== 'text' || current.status !== 'succeeded' || task.refined) {
+      throw Object.assign(new Error('CANNOT_REFINE'), { response: { status: 409, data: { message: 'Task không thể nâng cấp texture' } } });
+    }
+    task.refining = true;
+    task.startedAt = Date.now(); // quay lại processing → succeeded sau ~7s
+    persistGenTasks();
+    return resolveGenTask(taskId);
+  },
 
   // POST /custom/ai/tasks/:taskId/retry — chỉ khi đang 'failed', tối đa 3 lần (vượt → 429)
   async retryGenTask(taskId) {

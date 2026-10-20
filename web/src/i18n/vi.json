@@ -845,7 +845,9 @@
         "uploadTip": "Ảnh chụp thẳng, đủ sáng, ít vật cản phía trước cho kết quả tốt nhất.",
         "templateTitle": "Hoặc chọn mẫu có sẵn",
         "templateError": "Không tải được thư viện mẫu. Vui lòng thử lại sau.",
-        "templateEmpty": "Chưa có mẫu nào."
+        "templateEmpty": "Chưa có mẫu nào.",
+        "textTitle": "Mô tả bằng chữ",
+        "textTip": "Chưa có ảnh? Mô tả món đồ bạn muốn, AI sẽ dựng bản 3D xem trước."
       },
       "step2": {
         "title": "Chuẩn bị ảnh",
@@ -882,13 +884,18 @@
         "stageDone": "Hoàn tất",
         "leaveHint": "Bạn có thể rời trang — chúng tôi sẽ tiếp tục theo dõi tiến trình khi bạn quay lại.",
         "changeImage": "Đổi ảnh khác",
-        "buyCredits": "Mua thêm lượt thiết kế"
+        "buyCredits": "Mua thêm lượt thiết kế",
+        "changePrompt": "Sửa mô tả"
       },
       "step4": {
         "title": "Kết quả",
         "subtitle": "Xoay, phóng to hoặc xem toàn màn hình để kiểm tra mô hình.",
         "loadError": "Không tải được mô hình 3D. Vui lòng thử lại.",
-        "cta": "Chỉnh sửa thiết kế"
+        "cta": "Chỉnh sửa thiết kế",
+        "refineTitle": "Nâng cấp texture",
+        "refineDesc": "Bản xem trước mới có hình khối. Thêm vân gỗ, màu sắc chi tiết — không tốn thêm lượt thiết kế.",
+        "refineCta": "Nâng cấp texture",
+        "refinedNote": "Mô hình đã được nâng cấp texture."
       },
       "step5": {
         "title": "Chỉnh sửa",
@@ -941,6 +948,29 @@
         "nextPage": "Sau →",
         "editable": "Có thể tùy chỉnh",
         "notEditable": "Chưa hỗ trợ tùy chỉnh"
+      },
+      "text": {
+        "title": "Mô tả món đồ",
+        "subtitle": "Viết càng cụ thể, mô hình 3D càng sát ý bạn.",
+        "promptLabel": "Bạn muốn món đồ như thế nào?",
+        "promptPlaceholder": "VD: Ghế gỗ sồi phong cách Bắc Âu, tựa lưng cong, chân thon",
+        "styleLabel": "Phong cách dựng",
+        "styles": {
+          "realistic": "Chân thực",
+          "realisticHint": "Giống sản phẩm thật, phù hợp để đặt xưởng làm",
+          "sculpture": "Điêu khắc",
+          "sculptureHint": "Mang tính nghệ thuật, tạo hình mềm mại"
+        },
+        "negativeLabel": "Không muốn có",
+        "optional": "tuỳ chọn",
+        "negativePlaceholder": "VD: nhựa, kim loại, đệm vải",
+        "tipsTitle": "Mẹo mô tả",
+        "tip1": "Nêu loại đồ + chất liệu gỗ + phong cách (Bắc Âu, Indochine, hiện đại…).",
+        "tip2": "Thêm chi tiết hình dáng: tựa cong, chân vát, có ngăn kéo…",
+        "tip3": "Mỗi lần dựng trừ 1 lượt thiết kế; nâng cấp texture sau đó miễn phí."
+      },
+      "stepLabelsText": {
+        "2": "Mô tả"
       }
     }
   },
