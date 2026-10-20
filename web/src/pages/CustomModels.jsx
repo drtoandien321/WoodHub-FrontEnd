@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useModels3d } from '../hooks/useModels3d.js';
 import { AI_PRODUCT_TYPES } from '../api/mock/customData.js';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
+import { useAuthStore } from '../stores/authStore.js';
 import ModelCard from '../components/custom3d/ModelCard.jsx';
 
 const PAGE_SIZE = 12;
@@ -23,6 +24,7 @@ export default function CustomModels() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const chooseTemplate = useCustomStudioStore((s) => s.chooseTemplate);
+  const token = useAuthStore((s) => s.token);
 
   const keywordParam = searchParams.get('keyword') ?? '';
   const productType = searchParams.get('productType') ?? '';
@@ -66,7 +68,10 @@ export default function CustomModels() {
 
   // Bấm 1 mẫu trong thư viện → mở luôn Custom Studio ở bước 4 (kết quả) với mẫu này, thay vì
   // trang xem nhanh /custom/models/:slug (đó là lối vào KHÔNG cần đăng nhập, xem CustomModelViewer.jsx)
+  // CHƯA đăng nhập → trang xem 3D/AR công khai (Studio cần đăng nhập, bản cũ đẩy khách thẳng sang
+  // /login nên khách vãng lai không xem thử được mẫu nào). Trang xem có nút "Tuỳ chỉnh" dẫn vào Studio.
   const pickTemplate = (model) => {
+    if (!token) { navigate(`/custom/models/${model.slug}`); return; }
     chooseTemplate(model);
     navigate('/custom/studio', { state: { keep: true } }); // giữ mẫu vừa chọn, không hỏi lại
   };

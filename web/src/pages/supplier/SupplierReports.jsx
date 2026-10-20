@@ -18,6 +18,11 @@ export default function SupplierReports() {
         <p className="mt-1 text-base-content/60">Theo dõi doanh thu, đơn hàng, sản phẩm và hiệu suất chi nhánh.</p>
       </header>
 
+      {/* Toàn bộ số liệu trang này còn là MOCK — BE chưa có API thống kê (xem docs/BE_MISSING.md) */}
+      <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-2.5 text-sm text-base-content/75">
+        Số liệu bên dưới đang là <b>dữ liệu minh hoạ</b> — báo cáo thật sẽ có khi hệ thống hoàn thiện API thống kê.
+      </p>
+
       {/* Filter bar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm lg:flex-row lg:items-center">
         <select className="select select-bordered" defaultValue="7d" aria-label="Khoảng thời gian">
@@ -28,7 +33,7 @@ export default function SupplierReports() {
           <option value="all">Tất cả chi nhánh</option>
           {BRANCHES.map((b) => <option key={b.id}>{b.name}</option>)}
         </select>
-        <button className="btn btn-primary gap-2 lg:ml-auto"><Download width={16} height={16} /> Xuất báo cáo</button>
+        <button disabled title="Sắp có — chờ API thống kê từ BE" className="btn btn-primary gap-2 lg:ml-auto"><Download width={16} height={16} /> Xuất báo cáo</button>
       </div>
 
       {/* KPI */}

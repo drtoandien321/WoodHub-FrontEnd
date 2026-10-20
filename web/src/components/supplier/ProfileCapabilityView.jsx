@@ -1,72 +1,44 @@
-import { CheckCircle, Pencil, Award, Layers } from '../suppliers/icons.jsx';
+import { Link } from 'react-router-dom';
+import { Pencil } from '../suppliers/icons.jsx';
+import { useSupplierMe, usePortalBrand } from '../../hooks/useSupplierMe.js';
+import { useAuthStore } from '../../stores/authStore.js';
+import PortfolioManager from './PortfolioManager.jsx';
 
 /*
- * ProfileCapabilityView — trang "Hồ sơ & Năng lực" dùng chung (manufacturer & workshop).
- * Props: name, description, profile {cover,strengths[],capabilities[{label,value}],portfolio[],certs[]}, subtitle.
+ * ProfileCapabilityView — trang "Hồ sơ & Portfolio" dùng chung (NCC & xưởng), dữ liệu THẬT:
+ *   - Tên + mô tả: GET /suppliers/me (sửa ở trang Cài đặt — nút "Chỉnh sửa" dẫn sang đó).
+ *   - Portfolio: CRUD /suppliers/me/portfolio (PortfolioManager).
+ * Bản cũ lấy cứng từ file mock cả ảnh bìa, "điểm mạnh", "năng lực", "chứng nhận" và 2 nút không chạy.
+ * BE chưa có các trường đó → bỏ khỏi UI (đã ghi vào docs/BE_MISSING.md).
  */
-export default function ProfileCapabilityView({ name, description, profile, subtitle }) {
+export default function ProfileCapabilityView({ subtitle, settingsPath, allowProducts }) {
+  const { data, isLoading } = useSupplierMe();
+  const brand = usePortalBrand(useAuthStore((s) => s.user?.name));
+
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <h1 className="font-display text-3xl">Hồ sơ &amp; Năng lực</h1>
+        <h1 className="font-display text-3xl">Hồ sơ &amp; Portfolio</h1>
         <p className="mt-1 text-base-content/60">{subtitle}</p>
       </header>
 
-      {/* Hero */}
-      <section className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-        <img src={profile.cover} alt="" className="h-40 w-full object-cover md:h-52" />
-        <div className="p-5 md:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-2xl">{name}</h2>
-            <button className="btn btn-outline btn-sm gap-2"><Pencil width={15} height={15} /> Chỉnh sửa</button>
-          </div>
-          <p className="mt-2 max-w-3xl leading-relaxed text-base-content/75">{description}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {profile.strengths.map((s) => (
-              <span key={s} className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3 py-1.5 text-xs font-medium text-base-content/80">
-                <CheckCircle width={13} height={13} className="text-primary" /> {s}
-              </span>
-            ))}
-          </div>
+      <section className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm md:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-2xl">{brand.name}</h2>
+          <Link to={settingsPath} className="btn btn-outline btn-sm gap-2"><Pencil width={15} height={15} /> Chỉnh sửa</Link>
         </div>
+        {isLoading ? (
+          <div className="skeleton mt-3 h-12 w-full max-w-3xl" />
+        ) : data?.description ? (
+          <p className="mt-2 max-w-3xl whitespace-pre-line leading-relaxed text-base-content/75">{data.description}</p>
+        ) : (
+          <p className="mt-2 text-sm text-base-content/50">
+            Chưa có phần giới thiệu. <Link to={settingsPath} className="text-primary hover:underline">Thêm mô tả</Link> để khách hiểu hơn về bạn.
+          </p>
+        )}
       </section>
 
-      {/* Năng lực + Chứng nhận */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-          <h2 className="mb-4 flex items-center gap-2 font-display text-lg"><Layers width={18} height={18} className="text-primary" /> Năng lực</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {profile.capabilities.map((c) => (
-              <div key={c.label} className="rounded-2xl border border-base-300 bg-base-200/40 p-4">
-                <p className="text-sm text-base-content/55">{c.label}</p>
-                <p className="mt-0.5 font-medium">{c.value}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-          <h2 className="mb-4 flex items-center gap-2 font-display text-lg"><Award width={18} height={18} className="text-primary" /> Chứng nhận</h2>
-          <ul className="flex flex-col gap-2.5">
-            {profile.certs.map((c) => (
-              <li key={c} className="flex items-center gap-2 text-sm"><CheckCircle width={16} height={16} className="text-success" /> {c}</li>
-            ))}
-          </ul>
-        </section>
-      </div>
-
-      {/* Portfolio */}
-      <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg">Portfolio</h2>
-          <button className="btn btn-outline btn-sm gap-2"><Pencil width={15} height={15} /> Quản lý ảnh</button>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {profile.portfolio.map((src, i) => (
-            <img key={i} src={src} alt="" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover transition-transform duration-300 hover:scale-[1.03]" />
-          ))}
-        </div>
-      </section>
+      <PortfolioManager allowProducts={allowProducts} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useSupplierChatStore } from '../../stores/supplierChatStore.js';
@@ -11,6 +11,9 @@ import ChatMessageBubble from './ChatMessageBubble.jsx';
 import QuickReplies from './QuickReplies.jsx';
 import ChatInput from './ChatInput.jsx';
 import { MessageCircle, X } from '../suppliers/icons.jsx';
+
+// Các trang xác thực — không hiện khung/bong bóng chat (cùng danh sách ẩn với nút AI ở ChatWidget)
+const AUTH_PATHS = ['/login', '/register', '/verify-otp', '/forgot-password', '/reset-password', '/change-password'];
 
 /*
  * MinimizedChatBubble — khung chat NCC khi THU NHỎ: bong bóng nổi góc phải, ngay TRÊN nút AI chatbot.
@@ -72,6 +75,7 @@ function MinimizedChatBubble({ supplier, unread, onRestore, onClose }) {
 export default function ChatDrawer() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthStore();
   const {
     isOpen, minimized, unread, context, conversations, typing, showProductCard,
@@ -100,7 +104,13 @@ export default function ChatDrawer() {
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, minimize]);
 
-  const goLogin = () => { close(); navigate('/login'); };
+  // Đăng nhập từ khung chat: THU NHỎ (không đóng) + nhớ trang hiện tại → login xong quay lại đúng
+  // trang sản phẩm và bấm bong bóng là chat tiếp được. Bản cũ close() + navigate('/login') nên về trang chủ.
+  const goLogin = () => { minimize(); navigate('/login', { state: { from: location } }); };
+
+  // Trang đăng nhập/đăng ký/OTP: KHÔNG render khung chat (bản cũ để khung chat nổi đè lên form đăng nhập
+  // khi khách bị chuyển sang /login từ nút "Thêm vào giỏ"). State vẫn giữ, rời trang là hiện lại.
+  if (AUTH_PATHS.some((p) => location.pathname.startsWith(p))) return null;
 
   return (
     <>

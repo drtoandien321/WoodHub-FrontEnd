@@ -3,6 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { useModels3d } from '../../hooks/useModels3d.js';
 import { useCustomStudioStore } from '../../stores/customStudioStore.js';
 
+function SourceCard({ onClick, title, tip, icon }) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-base-300 bg-base-200/40 p-8 text-center transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          {icon}
+        </svg>
+      </span>
+      <p className="font-display text-lg">{title}</p>
+      <p className="max-w-md text-xs text-base-content/55">{tip}</p>
+    </button>
+  );
+}
+
 const QUICK_PICK_SIZE = 8; // Lưới nhanh ở đây — thư viện đầy đủ (tìm kiếm/lọc) ở /custom/models (FE-3)
 
 /*
@@ -15,6 +32,7 @@ export default function Step1Source() {
   const { data, isLoading, isError } = useModels3d({ size: QUICK_PICK_SIZE });
   const chooseUpload = useCustomStudioStore((s) => s.chooseUpload);
   const chooseTemplate = useCustomStudioStore((s) => s.chooseTemplate);
+  const chooseText = useCustomStudioStore((s) => s.chooseText);
 
   return (
     <div className="flex flex-col gap-8">
@@ -23,20 +41,20 @@ export default function Step1Source() {
         <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.step1.subtitle')}</p>
       </div>
 
-      {/* Ô upload */}
-      <div>
-        <button
+      {/* 2 nguồn AI: upload ảnh (image-to-3D) hoặc mô tả bằng chữ (text-to-3D) — dùng chung 1 lượt 'design' */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SourceCard
           onClick={chooseUpload}
-          className="group flex w-full flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-base-300 bg-base-200/40 p-8 text-center transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-        >
-          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-            </svg>
-          </span>
-          <p className="font-display text-lg">{t('custom.studio.step1.uploadTitle')}</p>
-          <p className="max-w-md text-xs text-base-content/55">{t('custom.studio.step1.uploadTip')}</p>
-        </button>
+          title={t('custom.studio.step1.uploadTitle')}
+          tip={t('custom.studio.step1.uploadTip')}
+          icon={<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />}
+        />
+        <SourceCard
+          onClick={chooseText}
+          title={t('custom.studio.step1.textTitle')}
+          tip={t('custom.studio.step1.textTip')}
+          icon={<path d="M4 7V4h16v3M9 20h6M12 4v16" />}
+        />
       </div>
 
       {/* Chọn mẫu có sẵn */}

@@ -17,11 +17,16 @@ export default function WorkshopReports() {
         <p className="mt-1 text-base-content/60">Theo dõi doanh thu, đơn custom và hiệu suất sản xuất của xưởng.</p>
       </header>
 
+      {/* Toàn bộ số liệu trang này còn là MOCK — BE chưa có API thống kê (xem docs/BE_MISSING.md) */}
+      <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-2.5 text-sm text-base-content/75">
+        Số liệu bên dưới đang là <b>dữ liệu minh hoạ</b> — báo cáo thật sẽ có khi hệ thống hoàn thiện API thống kê.
+      </p>
+
       <div className="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm lg:flex-row lg:items-center">
         <select className="select select-bordered" defaultValue="7d" aria-label="Khoảng thời gian">
           <option value="today">Hôm nay</option><option value="7d">7 ngày qua</option><option value="30d">30 ngày qua</option><option value="month">Tháng này</option>
         </select>
-        <button className="btn btn-primary gap-2 lg:ml-auto"><Download width={16} height={16} /> Xuất báo cáo</button>
+        <button disabled title="Sắp có — chờ API thống kê từ BE" className="btn btn-primary gap-2 lg:ml-auto"><Download width={16} height={16} /> Xuất báo cáo</button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

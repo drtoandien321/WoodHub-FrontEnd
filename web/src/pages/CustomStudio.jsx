@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
-import { useGenerate3D, useGenTask, useRetryGenTask, useCancelGenTask, useModel3d } from '../hooks/useModels3d.js';
+import { useGenerate3D, useGenerate3DFromText, useRefineGenTask, useGenTask, useRetryGenTask, useCancelGenTask, useModel3d } from '../hooks/useModels3d.js';
 import { useCreateDesign, useUpdateDesign } from '../hooks/useCustomDesigns.js';
 import { api } from '../api/client.js';
 import StepIndicator from '../components/custom-studio/StepIndicator.jsx';
 import Step1Source from '../components/custom-studio/Step1Source.jsx';
 import Step2Prepare from '../components/custom-studio/Step2Prepare.jsx';
+import Step2TextPrompt from '../components/custom-studio/Step2TextPrompt.jsx';
 import Step3Generate from '../components/custom-studio/Step3Generate.jsx';
 import Step4Result from '../components/custom-studio/Step4Result.jsx';
 import Step5Edit from '../components/custom-studio/Step5Edit.jsx';
@@ -48,7 +49,12 @@ export default function CustomStudio() {
   }, []);
   const resumeAllowed = decision === 'continue';
 
-  const generate = useGenerate3D();
+  const generateImage = useGenerate3D();
+  const generateText = useGenerate3DFromText();
+  // Nguồn 'text' gọi endpoint khác nhưng cùng kết quả { taskId } → các bước sau dùng chung 1 biến generate
+  const isText = s.source === 'text';
+  const generate = isText ? generateText : generateImage;
+  const refine = useRefineGenTask();
   const { data: task, error: taskError } = useGenTask(resumeAllowed ? s.taskId : null);
   const retry = useRetryGenTask();
   const cancel = useCancelGenTask();
@@ -69,15 +75,28 @@ export default function CustomStudio() {
   // isPending + đã có taskId thì không tạo thêm (tránh sinh nhiều task cho cùng 1 lần bấm).
   const handleStartGenerate = () => {
     if (generate.isPending || s.taskId) return;
-    generate.mutate(
-      { image: s.imageFile, removeBackground: s.removeBackground },
-      { onSuccess: (res) => s.startTask(res.taskId) }
-    );
+    const body = isText
+      ? {
+          prompt: s.textInput.prompt.trim(),
+          artStyle: s.textInput.artStyle,
+          // negativePrompt tuỳ chọn — gửi undefined thay vì chuỗi rỗng để BE không lưu ''
+          negativePrompt: s.textInput.negativePrompt.trim() || undefined,
+        }
+      : { image: s.imageFile, removeBackground: s.removeBackground };
+    // onError → sang bước 3 để hiện màn lỗi (vd 429 hết lượt có nút mua thêm); ở lại bước 2 thì lỗi bị nuốt im lặng
+    generate.mutate(body, { onSuccess: (res) => s.startTask(res.taskId), onError: () => s.goToStep(3) });
   };
 
   const handleRetry = () => retry.mutate(s.taskId);
   const handleCancel = () => cancel.mutate(s.taskId);
-  const handleChangeImage = () => { s.clearTask(); s.goToStep(2); };
+  const handleChangeImage = () => { s.clearTask(); generate.reset(); s.goToStep(2); };
+
+  // Refine: hook đã ghi task 'processing' vào cache + xoá cache model cũ → startRefine về bước 3 poll tiếp;
+  // succeeded lần 2 thì resumeSlug (cùng slug) tải lại model ĐÃ có texture và tự sang bước 4.
+  const handleRefine = () => {
+    if (refine.isPending || !s.taskId) return;
+    refine.mutate({ taskId: s.taskId, modelSlug: s.model?.slug }, { onSuccess: () => s.startRefine() });
+  };
 
   const handleSave = async () => {
     setSaveError(null);
@@ -98,7 +117,7 @@ export default function CustomStudio() {
       s.setDesignMeta({ id: updated.id, version: updated.version });
       // Model AI (từ ảnh) đã TỰ LƯU khi gen xong với tên mặc định "Model AI" — đặt tên theo thiết kế để dễ tìm trong
       // "Model 3D của tôi". Không chặn luồng nếu lỗi (thiết kế đã lưu xong).
-      if (s.source === 'upload' && s.model?.id && s.designName.trim()) {
+      if ((s.source === 'upload' || isText) && s.model?.id && s.designName.trim()) {
         api.renameModel({ id: s.model.id, name: s.designName.trim().slice(0, 255) }).catch(() => {});
       }
       setSaved(true);
@@ -172,7 +191,9 @@ export default function CustomStudio() {
         <>
           {s.step === 1 && <Step1Source />}
 
-          {s.step === 2 && <Step2Prepare onNext={handleStartGenerate} onBack={() => s.goToStep(1)} pending={generate.isPending} />}
+          {s.step === 2 && (isText
+            ? <Step2TextPrompt onNext={handleStartGenerate} onBack={() => s.goToStep(1)} pending={generate.isPending} />
+            : <Step2Prepare onNext={handleStartGenerate} onBack={() => s.goToStep(1)} pending={generate.isPending} />)}
 
           {s.step === 3 && (
             <Step3Generate
@@ -184,10 +205,22 @@ export default function CustomStudio() {
               retryPending={retry.isPending}
               cancelPending={cancel.isPending}
               imagePreviewUrl={s.imagePreviewUrl}
+              prompt={isText ? (task?.prompt || s.textInput.prompt) : null}
             />
           )}
 
-          {s.step === 4 && <Step4Result model={s.model} onNext={() => s.goToStep(5)} onBack={() => s.goToStep(1)} />}
+          {s.step === 4 && (
+            <Step4Result
+              model={s.model}
+              onNext={() => s.goToStep(5)}
+              onBack={() => s.goToStep(1)}
+              canRefine={isText && !!task?.canRefine}
+              refined={isText && !!task?.refined}
+              onRefine={handleRefine}
+              refinePending={refine.isPending}
+              refineError={refine.error}
+            />
+          )}
 
           {s.step === 5 && (
             <Step5Edit

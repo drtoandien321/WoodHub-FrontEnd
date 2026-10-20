@@ -7,7 +7,7 @@ import ModelViewer from '../custom3d/ModelViewer.jsx';
  * KHÔNG cần tự quản lý state đó ở đây), viewer có reset/orbit/zoom/fullscreen (showControls trên
  * ModelViewer dùng chung — xem components/custom3d/ModelViewer.jsx), báo lỗi rõ nếu model hỏng.
  */
-export default function Step4Result({ model, onNext, onBack }) {
+export default function Step4Result({ model, onNext, onBack, canRefine, refined, onRefine, refinePending, refineError }) {
   const { t } = useTranslation();
   const [loadError, setLoadError] = useState(false);
 
@@ -28,7 +28,7 @@ export default function Step4Result({ model, onNext, onBack }) {
           </div>
         ) : (
           <ModelViewer
-            key={model.slug}
+            key={`${model.slug}:${model.modelGlbUrl}`} // refine giữ slug nhưng đổi file GLB → remount viewer
             src={model.modelGlbUrl}
             poster={model.posterUrl}
             alt={model.name}
@@ -38,6 +38,21 @@ export default function Step4Result({ model, onNext, onBack }) {
           />
         )}
       </div>
+
+      {/* Text-to-3D: bản preview chỉ có hình khối → mời nâng cấp texture (refine, KHÔNG trừ thêm lượt — BE 1c) */}
+      {canRefine && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium">{t('custom.studio.step4.refineTitle')}</p>
+            <p className="text-xs text-base-content/60">{t('custom.studio.step4.refineDesc')}</p>
+            {refineError && <p className="mt-1 text-xs text-error" role="alert">{refineError?.response?.data?.message || t('custom.ai.errors.generic')}</p>}
+          </div>
+          <button onClick={onRefine} disabled={refinePending} className="btn btn-primary btn-sm shrink-0">
+            {refinePending ? <span className="loading loading-spinner loading-xs" /> : t('custom.studio.step4.refineCta')}
+          </button>
+        </div>
+      )}
+      {refined && <p className="text-xs text-success">{t('custom.studio.step4.refinedNote')}</p>}
 
       <div className="mt-1 flex justify-between">
         <button onClick={onBack} className="btn btn-ghost">{t('custom.studio.back')}</button>

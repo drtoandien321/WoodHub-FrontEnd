@@ -5,7 +5,7 @@ import { useLogout } from '../../hooks/useLogout.js';
 import PortalChatButton from '../portal/PortalChatButton.jsx';
 import PortalChatDrawer from '../portal/PortalChatDrawer.jsx';
 import { MenuIcon } from '../ui/icons.jsx';
-import { LogOut, Bell, X } from '../suppliers/icons.jsx';
+import { LogOut, X } from '../suppliers/icons.jsx';
 
 /*
  * PortalShell — khung dùng chung cho Portal Nhà cung cấp & Xưởng mộc.
@@ -76,10 +76,7 @@ export default function PortalShell({ nav, brandName, brandInitials, home, title
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             {showChat && <PortalChatButton />}
-            <button type="button" aria-label="Thông báo" className="btn btn-ghost btn-sm btn-circle relative">
-              <Bell width={18} height={18} />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error" />
-            </button>
+            {/* Chuông thông báo đã gỡ: chấm đỏ cố định + không mở gì (BE chưa có API notifications) */}
             <div className="flex items-center gap-2 rounded-full border border-base-300 py-1 pl-3 pr-1.5">
               <span className="hidden text-sm font-medium sm:inline">{brandName}</span>
               <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-display text-primary-content">{brandInitials}</span>

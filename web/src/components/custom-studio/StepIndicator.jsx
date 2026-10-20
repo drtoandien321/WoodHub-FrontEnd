@@ -23,7 +23,8 @@ export default function StepIndicator({ step, source }) {
               {n}
             </span>
             <span className={`hidden text-xs sm:inline ${active ? 'text-base-content' : 'text-base-content/45'}`}>
-              {t(`custom.studio.stepLabels.${n}`)}
+              {/* Nguồn text: bước 2 là "Mô tả" thay vì "Chuẩn bị ảnh" */}
+              {source === 'text' && n === 2 ? t('custom.studio.stepLabelsText.2') : t(`custom.studio.stepLabels.${n}`)}
             </span>
             {idx < arr.length - 1 && <span className="mx-1.5 h-px w-4 bg-base-300" aria-hidden="true" />}
           </li>
