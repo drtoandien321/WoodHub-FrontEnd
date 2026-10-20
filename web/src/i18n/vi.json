@@ -37,7 +37,11 @@
   },
   "megaMenu": {
     "viewDetail": "Xem chi tiết",
-    "viewAllNamed": "Xem tất cả {{name}}"
+    "viewAllNamed": "Xem tất cả {{name}}",
+    "byCategory": "Theo danh mục",
+    "byMaterial": "Theo chất liệu",
+    "newArrivals": "Hàng mới về",
+    "viewShop": "Xem cửa hàng"
   },
   "hero": {
     "badge": "Thiết kế 3D · Xem AR tại nhà",

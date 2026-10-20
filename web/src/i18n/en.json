@@ -37,7 +37,11 @@
   },
   "megaMenu": {
     "viewDetail": "View details",
-    "viewAllNamed": "View all {{name}}"
+    "viewAllNamed": "View all {{name}}",
+    "byCategory": "By category",
+    "byMaterial": "By material",
+    "newArrivals": "New arrivals",
+    "viewShop": "Browse the shop"
   },
   "hero": {
     "badge": "3D Design · View AR at home",

@@ -30,7 +30,7 @@ export default function About() {
 
         {/* Khối ảnh xưởng mộc thật + panel kính timeline đè lên */}
         <div className="relative border border-base-300 rounded-3xl min-h-[340px] md:min-h-[420px] p-6 flex items-end overflow-hidden">
-          <img src="/about/about-1.png" alt="Xưởng mộc WoodHub" className="absolute inset-0 w-full h-full object-cover" />
+          <img src="/about/about-1.webp" alt="Xưởng mộc WoodHub" className="absolute inset-0 w-full h-full object-cover" />
           {/* Lớp tối nhẹ ở đáy giúp panel timeline nổi rõ trên ảnh */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
           <div className="relative w-full rounded-2xl bg-base-100/80 backdrop-blur-md border border-white/40 p-5 flex items-center gap-2">
@@ -70,7 +70,7 @@ export default function About() {
           w-screen + ml-[calc(50%-50vw)] "phá" giới hạn max-w-7xl của SiteLayout để tràn 2 mép.
           Nội dung (thẻ giá) vẫn gói trong max-w-7xl để canh thẳng với các section khác. */}
       <section className="relative w-screen ml-[calc(50%-50vw)] overflow-hidden border-y border-base-300">
-        <img src="/about/about-2.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/about/about-2.webp" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-base-100/10" />
         <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
           <PricingSection />

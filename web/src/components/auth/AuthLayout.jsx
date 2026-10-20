@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 // Ảnh nền nội thất gỗ cho trang auth (tái dùng ảnh interior có sẵn).
 // Muốn đổi ảnh riêng: bỏ file vào public/ rồi sửa đường dẫn dưới đây.
-const AUTH_BG = '/about/about-2.png';
+const AUTH_BG = '/about/about-2.webp';
 
 /*
  * AuthLayout — layout RIÊNG cho /login, /register, /verify-otp:

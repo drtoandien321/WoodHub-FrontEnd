@@ -28,25 +28,25 @@ export const MODELS_3D = [
   {
     id: 'm1', slug: 'sofa-nhung', source: 'template', name: 'Sofa nhung 2 chỗ', description: null, productType: 'sofa',
     modelGlbUrl: `${GLB}/GlamVelvetSofa/glTF-Binary/GlamVelvetSofa.glb`, modelUsdzUrl: null,
-    posterUrl: img('/mockdataimage/Bàn trà gỗ tràm mặt kính.jpg'),
+    posterUrl: img('/mockdataimage/ban-tra-go-tram-mat-kinh.webp'),
     metadata: {}, editableOptions: DEFAULT_EDITABLE, isPublic: true, createdAt: '2026-06-01T00:00:00Z',
   },
   {
     id: 'm2', slug: 'ghe-boc-nem', source: 'template', name: 'Ghế bọc nệm', description: null, productType: 'chair',
     modelGlbUrl: `${GLB}/SheenChair/glTF-Binary/SheenChair.glb`, modelUsdzUrl: null,
-    posterUrl: img('/mockdataimage/Ghế ăn gỗ cao su.jpg'),
+    posterUrl: img('/mockdataimage/ghe-an-go-cao-su.webp'),
     metadata: {}, editableOptions: DEFAULT_EDITABLE, isPublic: true, createdAt: '2026-06-01T00:00:00Z',
   },
   {
     id: 'm3', slug: 'sofa-go-boc-da', source: 'template', name: 'Sofa gỗ bọc da', description: null, productType: 'sofa',
     modelGlbUrl: `${GLB}/SheenWoodLeatherSofa/glTF-Binary/SheenWoodLeatherSofa.glb`, modelUsdzUrl: null,
-    posterUrl: img('/image/lamviec1.png'),
+    posterUrl: img('/image/lamviec1.webp'),
     metadata: {}, editableOptions: DEFAULT_EDITABLE, isPublic: true, createdAt: '2026-06-01T00:00:00Z',
   },
   {
     id: 'm4', slug: 'den-trang-tri', source: 'template', name: 'Đèn trang trí', description: null, productType: 'decor',
     modelGlbUrl: `${GLB}/Lantern/glTF-Binary/Lantern.glb`, modelUsdzUrl: null,
-    posterUrl: img('/mockdataimage/Kệ tivi gỗ óc chó 1m8.jpg'),
+    posterUrl: img('/mockdataimage/ke-tivi-go-oc-cho-1m8.webp'),
     // Décor: không cho đổi vật liệu gỗ (khác sofa/ghế) — demo trường hợp editableOptions rỗng
     metadata: {}, editableOptions: { colors: [], materials: [] }, isPublic: true, createdAt: '2026-06-01T00:00:00Z',
   },

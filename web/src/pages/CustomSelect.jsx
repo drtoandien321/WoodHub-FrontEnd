@@ -50,7 +50,7 @@ export default function CustomSelect() {
           className="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-base-300 bg-gradient-to-br from-[#e7dcc6] to-[#bfa988]"
         >
           <img
-            src="/hero/living-room-3d.png"
+            src="/hero/living-room-3d.webp"
             alt={t('custom.ai.entryTitle')}
             loading="lazy"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
