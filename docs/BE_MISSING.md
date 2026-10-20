@@ -6,6 +6,10 @@
 >
 > Mức ưu tiên: **P0** = đang lộ ra với khách/đối tác, ảnh hưởng demo · **P1** = tính năng có UI
 > nhưng chạy mock · **P2** = nâng cấp / tối ưu.
+>
+> ⚠️ **Bản đầy đủ, đã đính chính (21/10): `docs/word/WoodHub_BE_Changes_v2.docx`.** Bản 20/10 có mục sai
+> (tạo lại QR / tự huỷ đơn chờ thanh toán, meshy-6 cho refine) do chỉ dò controller bằng grep; bản 2 đã đối
+> chiếu lại toàn bộ 199 endpoint + service/scheduler.
 
 ---
 
@@ -88,19 +92,20 @@ FE đã gỡ, ghi lại để làm sau:
 - **Cần:** `PUT /api/users/{id}/status` body `{ status: active|locked, reason? }`; login trả 403 rõ
   ràng khi bị khoá.
 
-### 10. Tạo lại mã QR thanh toán đơn hàng
-- **Hiện trạng:** QR của đơn hàng chỉ sinh lúc `POST /api/orders/checkout`. Khách đóng popup hoặc QR
-  hết hạn thì không có cách lấy lại, chỉ còn cách huỷ đơn.
-- **Cần:** `POST /api/orders/{id}/payment` (chỉ khi đơn `pending_payment`) → trả `PaymentResponse`
-  (QR mới hoặc QR cũ nếu còn hạn).
+### ~~10. Tạo lại mã QR thanh toán đơn hàng~~ — ĐÃ RÚT (21/10)
+- Sai: BE cố ý giữ đơn `pending_payment` theo chính sách AUD-005 (PaymentServiceImpl): QR hết hạn chỉ là
+  đồng hồ giao diện, khách quét lại **QR cũ** (vẫn hiện ở chi tiết đơn) và tiền vào muộn vẫn ghi nhận `paid`.
+  `PaymentExpiryScheduler` chỉ đổi payment sang `expired`; checkout không giữ tồn kho. Không cần API mới.
 
 ---
 
 ## P2 — Nâng cấp / tối ưu
 
 ### 11. Meshy: chọn model AI
-- `MeshyAi3DProvider` chưa gửi `ai_model` nên dùng model mặc định. Đề xuất cho phép cấu hình
-  `meshy.ai-model=meshy-6-lite` (nhanh, rẻ) qua env, và cân nhắc `meshy-6` cho bước refine.
+- `MeshyAi3DProvider` chưa gửi `ai_model` nên dùng model mặc định. Theo tài liệu team
+  `docs/word/WoodHub_Huong_Dan_Meshy_AI_3D.docx`: dùng **`meshy-6-lite` cho mọi bước** (preview, refine,
+  image→3D, retexture), cấu hình `app.ai3d.meshy.ai-model=${MESHY_AI_MODEL:meshy-6-lite}`. Không gửi
+  `remove_lighting` / `image_enhancement` (meshy-6-lite báo lỗi) — BE hiện đã không gửi.
 
 ### 12. Text → Image → 3D (tuỳ chọn)
 - Text-to-3D (đã có, FE đã làm xong) ra hình khối khá thô với đồ nội thất. Một hướng chất lượng hơn:
