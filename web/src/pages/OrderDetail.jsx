@@ -5,6 +5,7 @@ import { useOrder, useCancelOrder, ORDER_STATUS_FLOW, orderStatusBadge } from '.
 import { formatVnd, formatDate } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import OrderPaymentPanel from '../components/checkout/OrderPaymentPanel.jsx';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * Chi tiết đơn — GET /api/orders/{id} (OrderResponse). Đơn còn 'pending_payment' thì hiện lại QR để
@@ -36,7 +37,7 @@ export default function OrderDetail() {
     setCancelErr('');
     cancelOrder.mutate(order.id, {
       onSuccess: () => setConfirmCancel(false),
-      onError: (err) => { setConfirmCancel(false); setCancelErr(err?.response?.data?.message || t('orders.cancelFailed')); },
+      onError: (err) => { setConfirmCancel(false); setCancelErr(apiErrorMessage(err, t('orders.cancelFailed'))); },
     });
   };
 

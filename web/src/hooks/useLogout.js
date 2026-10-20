@@ -24,5 +24,14 @@ export function useLogout() {
     }
     disconnectChatSocket();
     clearAuth();
+    /*
+     * Tải lại trang về trang chủ thay vì navigate() trong SPA (lỗi QA 20/10):
+     *  - navigate() của React Router chạy theo transition (trang chủ lại là lazy route) nên ProtectedRoute kịp
+     *    render trước với location cũ → đẩy sang /login?from=/portal/... → customer đăng nhập kế tiếp bị đưa vào
+     *    portal → 403.
+     *  - Tải lại cũng xoá sạch state trong RAM của tài khoản cũ (chat NCC, cache, socket) — không sót gì.
+     * Đánh đổi: 1 lần tải lại trang khi đăng xuất (chấp nhận được, nhiều sàn TMĐT cũng làm vậy).
+     */
+    window.location.replace('/');
   };
 }

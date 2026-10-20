@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ModelViewer from '../custom3d/ModelViewer.jsx';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
  * Bước 4 — Kết quả: poster hiện trước (model-viewer tự giữ poster tới khi bắn sự kiện 'load',
@@ -41,11 +42,11 @@ export default function Step4Result({ model, onNext, onBack, canRefine, refined,
 
       {/* Text-to-3D: bản preview chỉ có hình khối → mời nâng cấp texture (refine, KHÔNG trừ thêm lượt — BE 1c) */}
       {canRefine && (
-        <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 sm:mr-20 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-medium">{t('custom.studio.step4.refineTitle')}</p>
             <p className="text-xs text-base-content/60">{t('custom.studio.step4.refineDesc')}</p>
-            {refineError && <p className="mt-1 text-xs text-error" role="alert">{refineError?.response?.data?.message || t('custom.ai.errors.generic')}</p>}
+            {refineError && <p className="mt-1 text-xs text-error" role="alert">{apiErrorMessage(refineError, t('custom.ai.errors.generic'))}</p>}
           </div>
           <button onClick={onRefine} disabled={refinePending} className="btn btn-primary btn-sm shrink-0">
             {refinePending ? <span className="loading loading-spinner loading-xs" /> : t('custom.studio.step4.refineCta')}
@@ -54,7 +55,8 @@ export default function Step4Result({ model, onNext, onBack, canRefine, refined,
       )}
       {refined && <p className="text-xs text-success">{t('custom.studio.step4.refinedNote')}</p>}
 
-      <div className="mt-1 flex justify-between">
+      {/* pr-20: chừa chỗ cho cụm nút nổi góc phải (bong bóng chat NCC + trợ lý AI ~80px) — trước đây đè lên nút chính */}
+      <div className="mt-1 flex justify-between gap-3 pr-20">
         <button onClick={onBack} className="btn btn-ghost">{t('custom.studio.back')}</button>
         <button onClick={onNext} disabled={loadError} className="btn btn-primary">{t('custom.studio.step4.cta')}</button>
       </div>

@@ -61,12 +61,14 @@ function ReviewForm({ targetType, targetId, existing, onDone }) {
         />
         <span className="self-end text-xs text-base-content/45">{comment.length}/{COMMENT_MAX}</span>
       </label>
-      <label className="flex cursor-pointer items-start gap-2 text-sm">
-        <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="checkbox checkbox-primary checkbox-sm mt-0.5" />
+      {/* Checkbox cũ (viền base-content/20) gần như tàng hình trên nền be của form → đổi sang hàng có viền + toggle,
+          bật thì cả hàng đổi màu để khách thấy rõ đang ẩn tên */}
+      <label className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 text-sm transition-colors ${anonymous ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-100'}`}>
         <span>
-          {t('reviews.anonymousLabel')}
-          <span className="block text-xs text-base-content/50">{t('reviews.anonymousHint')}</span>
+          <span className="font-medium">{t('reviews.anonymousLabel')}</span>
+          <span className="block text-xs text-base-content/60">{t('reviews.anonymousHint')}</span>
         </span>
+        <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="toggle toggle-primary shrink-0" />
       </label>
       {err && <p role="alert" className="text-sm text-error">{err}</p>}
       <div className="flex justify-end gap-2">

@@ -1,10 +1,40 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../stores/authStore.js';
 
 /*
  * Trang giới thiệu B2B — chưa có flow đặt hàng số lượng lớn thật (ngoài scope MVP).
  * Mục tiêu: cho khách doanh nghiệp hiểu giá trị + dẫn về /register để tạo tài khoản trước.
+ *
+ * CTA đổi theo người đang xem (lỗi QA 20/10: tài khoản doanh nghiệp đã đăng nhập vẫn bị mời "Đăng ký"):
+ *   - khách vãng lai          → đăng ký tài khoản doanh nghiệp
+ *   - customer business       → mua sắm + hồ sơ công ty
+ *   - customer cá nhân        → liên hệ để chuyển sang tài khoản doanh nghiệp
+ *   - supplier/admin          → không hiện CTA (trang chỉ để giới thiệu)
  */
+function B2bCta({ className }) {
+  const { t } = useTranslation();
+  const user = useAuthStore((s) => s.user);
+
+  if (!user) {
+    return <Link to="/register?type=business" className={`btn btn-primary self-center ${className}`}>{t('b2b.ctaRegister')}</Link>;
+  }
+  if (user.role !== 'customer') return null;
+  if (user.customerType === 'business') {
+    return (
+      <div className={`flex flex-wrap justify-center gap-3 ${className}`}>
+        <Link to="/shop" className="btn btn-primary">{t('b2b.ctaShop')}</Link>
+        <Link to="/profile" className="btn btn-outline">{t('b2b.ctaCompanyProfile')}</Link>
+      </div>
+    );
+  }
+  return (
+    <div className={`flex flex-col items-center gap-2 ${className}`}>
+      <p className="text-sm text-base-content/60">{t('b2b.individualNote')}</p>
+      <Link to="/contact" className="btn btn-outline">{t('b2b.ctaContact')}</Link>
+    </div>
+  );
+}
 export default function B2b() {
   const { t } = useTranslation();
   const steps = t('b2b.steps', { returnObjects: true });
@@ -15,7 +45,7 @@ export default function B2b() {
       <section className="card bg-base-200 border border-base-300 p-8 md:p-12 text-center gap-4">
         <h1 className="font-display text-3xl md:text-4xl">{t('b2b.heroTitle')}</h1>
         <p className="text-base-content/70 max-w-2xl mx-auto">{t('b2b.heroDesc')}</p>
-        <Link to="/register?type=business" className="btn btn-primary self-center mt-2">{t('b2b.ctaRegister')}</Link>
+        <B2bCta className="mt-2" />
       </section>
 
       {/* 3 bước hoạt động */}
@@ -38,7 +68,7 @@ export default function B2b() {
       <section className="card bg-base-200 border border-base-300 p-8 text-center gap-3">
         <h2 className="font-display text-2xl">{t('b2b.ctaTitle')}</h2>
         <p className="text-base-content/70">{t('b2b.ctaDesc')}</p>
-        <Link to="/register?type=business" className="btn btn-primary self-center mt-1">{t('b2b.ctaRegister')}</Link>
+        <B2bCta className="mt-1" />
       </section>
     </div>
   );

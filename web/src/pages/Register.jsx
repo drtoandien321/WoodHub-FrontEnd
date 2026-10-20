@@ -8,6 +8,7 @@ import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
 import { UserIcon, MailIcon, PhoneIcon, LockIcon, BuildingIcon } from '../components/ui/icons.jsx';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * Register — CHỈ đăng ký khách hàng (customer). BE luôn tạo role=customer + yêu cầu xác thực email.
@@ -70,7 +71,7 @@ export default function Register() {
       // register KHÔNG còn trả token — sang màn nhập OTP, mang theo email
       navigate('/verify-otp', { state: { email: form.email } });
     } catch (err) {
-      setError(err?.response?.data?.message || t('auth.login.error'));
+      setError(apiErrorMessage(err, t('auth.login.error')));
     } finally {
       setLoading(false);
     }

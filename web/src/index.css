@@ -49,6 +49,14 @@
   --radius-selector: 1rem;
   --radius-field: 0.75rem;
   --radius-box: 1.5rem;
+
+  /* BẮT BUỘC với theme tự định nghĩa của daisyUI v5 (themes:false không có theme gốc để kế thừa).
+     Thiếu --border → checkbox/radio/input viền 0px (gần như vô hình); thiếu --size-selector → toggle co còn 6px. */
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }
 
 /* Theme tối — vẫn nâu gỗ ấm, không dùng đen thuần để giữ tinh thần "wood" */
@@ -91,6 +99,14 @@
   --radius-selector: 1rem;
   --radius-field: 0.75rem;
   --radius-box: 1.5rem;
+
+  /* BẮT BUỘC với theme tự định nghĩa của daisyUI v5 (themes:false không có theme gốc để kế thừa).
+     Thiếu --border → checkbox/radio/input viền 0px (gần như vô hình); thiếu --size-selector → toggle co còn 6px. */
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
 }
 
 /* Token tùy biến dùng chung (ngoài daisyUI) */
@@ -110,6 +126,19 @@
 
 :root {
   font-family: var(--font-sans);
+}
+
+/*
+ * Checkbox/toggle CHƯA bật: viền mặc định của daisyUI (~20% base-content) gần như tàng hình trên nền be
+ * (base-200/base-300) → khách không nhận ra là ô bấm được (lỗi QA "Ẩn tên của tôi" bị mờ). Tăng tương phản
+ * ở 1 chỗ cho mọi nơi; trạng thái đã bật giữ nguyên màu primary của daisyUI.
+ */
+.checkbox:not(:checked):not(:indeterminate),
+.toggle:not(:checked) {
+  border-color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
+}
+.checkbox:not(:checked):not(:indeterminate) {
+  background-color: var(--color-base-100);
 }
 
 /* Ngăn tràn ngang (horizontal overflow) trên mọi thiết bị, đặc biệt mobile */

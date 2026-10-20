@@ -364,7 +364,11 @@
       }
     ],
     "ctaTitle": "Ready to partner with WoodHub?",
-    "ctaDesc": "Create a business account today — the WoodHub team will reach out to advise on the right plan."
+    "ctaDesc": "Create a business account today — the WoodHub team will reach out to advise on the right plan.",
+    "ctaShop": "Shop for your business",
+    "ctaCompanyProfile": "Company profile",
+    "individualNote": "You're using a personal account. Contact WoodHub to switch to a business account.",
+    "ctaContact": "Contact us to switch"
   },
   "about": {
     "title": "The WoodHub story",
@@ -1036,7 +1040,14 @@
     "viewOrders": "View my orders",
     "incomingTitle": "Quote requests from customers",
     "incomingSubtitle": "Review a customer's request, make an offer, or decline.",
-    "emptyIncoming": "No quote requests yet."
+    "emptyIncoming": "No quote requests yet.",
+    "backToIncoming": "Quote requests",
+    "offerStatus": {
+      "pending": "Awaiting response",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "superseded": "Superseded"
+    }
   },
   "order": {
     "myOrdersTitle": "My custom orders",
@@ -1066,7 +1077,8 @@
     "actionCancel": "Cancel order",
     "incomingTitle": "Custom orders in progress",
     "incomingSubtitle": "Update order status as production progresses.",
-    "emptyIncoming": "No custom orders yet."
+    "emptyIncoming": "No custom orders yet.",
+    "backToProduction": "Production orders"
   },
   "forbidden": {
     "title": "403 — Access denied",
@@ -1237,7 +1249,8 @@
     "expired": "The QR code has expired.",
     "failed": "Payment failed.",
     "reorderHint": "You can cancel this order and order again to get a new QR code.",
-    "pollError": "Couldn't check the payment status, retrying automatically."
+    "pollError": "Couldn't check the payment status, retrying automatically.",
+    "expiredStillValid": "The QR display time has passed, but you can still scan this code to pay — we'll record it as soon as the money arrives."
   },
   "reviews": {
     "title": "Reviews",
@@ -1279,5 +1292,58 @@
     "anonymousOwnerNote": "Others see your name hidden.",
     "count_one": "{{count}} review",
     "count_other": "{{count}} reviews"
+  },
+  "notFoundPage": {
+    "message": "This page doesn't exist or has been removed.",
+    "backHome": "Back to home"
+  },
+  "apiErrors": {
+    "COUPON_NOT_FOUND": "Promo code not found.",
+    "COUPON_EXPIRED": "This promo code has expired.",
+    "OUT_OF_STOCK": "This product is out of stock.",
+    "OUT_OF_CREDITS": "You're out of design credits.",
+    "TAX_CODE_EXISTS": "This tax code is already in use.",
+    "USER_LOCKED": "This account is locked."
+  },
+  "mySub": {
+    "title": "My plan",
+    "noPlan": "You don't have an active plan.",
+    "choosePlan": "Choose a plan",
+    "free": "Free",
+    "perMonth": "{{price}} / month",
+    "active": "Active",
+    "validUntil": "Valid until {{date}}",
+    "noExpiry": "No expiry",
+    "renew": "Renew +1 month",
+    "confirmCancel": "Confirm cancel",
+    "keep": "Keep plan",
+    "cancelPlan": "Cancel plan",
+    "changePlan": "View/change plan",
+    "cancelled": "Plan cancelled.",
+    "genericError": "Something went wrong, please try again.",
+    "usageTitle": "This month's quota",
+    "unlimited": "Unlimited",
+    "usageLine": "{{used}}/{{limit}} ({{remaining}} left)",
+    "purchased": "+{{count}} purchased credits",
+    "usageNote": "Monthly quota resets at the start of each month. Purchased credits never expire and are used after the monthly quota.",
+    "buyCreditsTitle": "Buy more design credits",
+    "buyCreditsDesc": "Keep designing after you run out this month — no plan upgrade needed.",
+    "packLine": "{{credits}} credits · {{unit}}/credit",
+    "buy": "Buy",
+    "historyTitle": "Payment history",
+    "payCreditPack": "Design credit pack",
+    "payOrder": "Order payment",
+    "paySubscription": "Subscription",
+    "features": {
+      "ai_chat": "AI chat",
+      "design": "3D design",
+      "export": "File export"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed",
+      "expired": "Expired"
+    }
   }
 }

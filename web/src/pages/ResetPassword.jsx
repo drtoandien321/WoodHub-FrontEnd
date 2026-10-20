@@ -5,6 +5,7 @@ import { api } from '../api/client.js';
 import AuthLayout from '../components/auth/AuthLayout.jsx';
 import AuthField from '../components/auth/AuthField.jsx';
 import { LockIcon } from '../components/ui/icons.jsx';
+import { apiErrorMessage } from '../utils/apiError.js';
 
 /*
  * ResetPassword — bước 2 của luồng quên mật khẩu: nhập OTP + mật khẩu mới.
@@ -47,7 +48,7 @@ export default function ResetPassword() {
       await api.resetPassword({ email, code, newPassword });
       navigate('/login', { state: { resetSuccess: true } });
     } catch (err) {
-      setError(err?.response?.data?.message || t('auth.resetPassword.error'));
+      setError(apiErrorMessage(err, t('auth.resetPassword.error')));
     } finally {
       setLoading(false);
     }

@@ -66,7 +66,7 @@ export default function QuoteDetail() {
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div>
-        <Link to={myRole === 'customer' ? '/quotes' : '/portal/workshop/orders'} className="text-sm text-base-content/55 hover:text-primary">← {t('quote.myQuotesTitle')}</Link>
+        <Link to={myRole === 'customer' ? '/quotes' : '/portal/workshop/orders'} className="text-sm text-base-content/55 hover:text-primary">← {t(myRole === 'customer' ? 'quote.myQuotesTitle' : 'quote.backToIncoming')}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="font-display text-3xl">{otherPartyName}</h1>
           <StatusBadge meta={quoteMeta(quote.status)} />

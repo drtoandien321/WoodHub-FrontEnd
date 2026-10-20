@@ -9,6 +9,8 @@ import EmptyState from '../components/ui/EmptyState.jsx';
 import AddressFormModal from '../components/address/AddressFormModal.jsx';
 import OrderPaymentPanel from '../components/checkout/OrderPaymentPanel.jsx';
 import { Check, Wallet, Shield, Plus, X } from '../components/suppliers/icons.jsx';
+// Lỗi BE: dùng message tiếng Việt khi UI là VI, còn lại dùng câu đã dịch (xem utils/apiError.js)
+import { apiErrorMessage } from '../utils/apiError.js';
 
 const NOTE_MAX = 500;
 
@@ -55,8 +57,6 @@ function Section({ no, title, action, children }) {
   );
 }
 
-// Lấy thông báo lỗi BE (chuẩn Spring { message } hoặc validation { errors }) — coupon sai trả message nêu rõ mã nào
-const beMessage = (err) => err?.response?.data?.message || (err?.response?.data?.errors && Object.values(err.response.data.errors)[0]);
 
 /*
  * Checkout — đặt hàng từ giỏ theo POST /api/orders/checkout.
@@ -158,7 +158,7 @@ export default function Checkout() {
     setCouponErr('');
     lookupPromotion.mutate(code, {
       onSuccess: (promo) => { setCoupons((list) => [...list, promo]); setCouponInput(''); },
-      onError: (err) => setCouponErr(beMessage(err) || t(err?.response?.status === 404 ? 'checkout.couponNotFound' : 'checkout.couponInvalid')),
+      onError: (err) => setCouponErr(apiErrorMessage(err, t(err?.response?.status === 404 ? 'checkout.couponNotFound' : 'checkout.couponInvalid'))),
     });
   };
 
@@ -174,7 +174,7 @@ export default function Checkout() {
       {
         onSuccess: (res) => { setResult(res); window.scrollTo({ top: 0 }); },
         // 400 (giỏ trống / thiếu toạ độ / coupon sai) · 409 (SP ngừng bán / supplier chưa có chi nhánh / mã hết lượt)
-        onError: (err) => setSubmitErr(beMessage(err) || t('checkout.submitFailed')),
+        onError: (err) => setSubmitErr(apiErrorMessage(err, t('checkout.submitFailed'))),
       }
     );
   };
