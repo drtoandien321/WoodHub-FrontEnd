@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import ModalShell from '../admin/ModalShell.jsx';
 import StoreMapPicker from '../supplier/StoreMapPicker.jsx';
 import { geocodeAddress } from '../../services/goong.js';
-import { useLocationStore } from '../../stores/locationStore.js';
 import { useCreateAddress, useUpdateAddress } from '../../hooks/useAddresses.js';
 
 // SĐT VN: bắt đầu bằng 0, đủ 10 số — cùng quy tắc với Checkout.jsx
@@ -13,11 +12,11 @@ const PHONE_RE = /^0\d{9}$/;
  * AddressFormModal — Thêm/Sửa 1 địa chỉ giao hàng (POST/PUT /api/addresses).
  *
  * Toạ độ (lat/lng) là phần QUAN TRỌNG NHẤT: BE dùng nó tính khoảng cách → phí ship ở checkout.
- * Có 3 cách lấy, khách chọn cách nào tiện:
- *  1. "Dùng vị trí hiện tại" — định vị trình duyệt (chính xác nhất nếu khách đang ở nhà).
- *  2. "Định vị từ địa chỉ" — Goong geocode từ chữ đã gõ (gần đúng, nên kéo ghim chỉnh lại).
- *  3. Bấm/kéo ghim trực tiếp trên bản đồ.
- * Lat/lng KHÔNG có ô gõ tay (tránh nhập sai số), chỉ đến từ 3 cách trên.
+ * Luồng duy nhất (chốt 2026-10-20): khách NHẬP địa chỉ → bấm "Định vị từ địa chỉ" (Goong geocode)
+ * → ghim nhảy tới vị trí tìm được; khách có thể kéo/bấm ghim trên bản đồ để chỉnh lại cho đúng nhà
+ * (geocode theo chữ chỉ gần đúng). Đã bỏ "Dùng vị trí hiện tại": vị trí GPS là nơi khách ĐANG ĐỨNG,
+ * không chắc là địa chỉ nhận hàng, và tách rời khỏi phần địa chỉ chữ khách đã nhập.
+ * Lat/lng KHÔNG có ô gõ tay (tránh nhập sai số).
  *
  * BE cho lưu địa chỉ CHƯA có toạ độ (khách ghim sau) → modal cho lưu nhưng cảnh báo. Riêng khi
  * mở từ checkout (requireCoordinates=true) thì BẮT BUỘC ghim, vì không có toạ độ thì không đặt được hàng.
@@ -30,7 +29,6 @@ export default function AddressFormModal({ initial = null, onClose, onSaved, req
   const isEdit = !!initial;
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
-  const setSharedCoords = useLocationStore((s) => s.setCoords);
 
   const [form, setForm] = useState(() => ({
     recipientName: initial?.recipientName ?? '',
@@ -45,7 +43,7 @@ export default function AddressFormModal({ initial = null, onClose, onSaved, req
     initial?.latitude != null && initial?.longitude != null ? { latitude: initial.latitude, longitude: initial.longitude } : null
   );
   const [touched, setTouched] = useState({});
-  const [locating, setLocating] = useState(null); // 'gps' | 'geocode' | null
+  const [locating, setLocating] = useState(false); // đang gọi Goong geocode
   const [locateErr, setLocateErr] = useState('');
   const [submitErr, setSubmitErr] = useState('');
 
@@ -63,34 +61,14 @@ export default function AddressFormModal({ initial = null, onClose, onSaved, req
   const isValid = Object.values(errors).every((e) => !e);
   const showErr = (k) => touched[k] && errors[k];
 
-  // Cách 1: định vị trình duyệt. Cập nhật luôn locationStore để các trang khác (gợi ý gần) dùng chung.
-  const pickCurrentLocation = () => {
-    if (!navigator.geolocation) { setLocateErr(t('address.gpsUnsupported')); return; }
-    setLocating('gps');
-    setLocateErr('');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const next = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-        setCoords(next);
-        setSharedCoords(next.latitude, next.longitude);
-        setLocating(null);
-      },
-      (error) => {
-        setLocateErr(error.code === error.PERMISSION_DENIED ? t('address.gpsDenied') : t('address.gpsFailed'));
-        setLocating(null);
-      },
-      { timeout: 10_000, enableHighAccuracy: true }
-    );
-  };
-
   /*
-   * Cách 2: geocode từ địa chỉ chữ. Ghép đủ các cấp đã gõ cho Goong tìm chính xác hơn. Kết quả
+   * Geocode từ địa chỉ chữ. Ghép đủ các cấp đã gõ cho Goong tìm chính xác hơn. Kết quả
    * Phường/Quận/Tỉnh chỉ điền vào ô ĐANG TRỐNG — không ghi đè thứ khách đã tự gõ.
    */
   const locateFromAddress = async () => {
     const query = [form.addressLine, form.ward, form.district, form.city].map((s) => s.trim()).filter(Boolean).join(', ');
     if (!form.addressLine.trim()) { setLocateErr(t('address.errAddressFirst')); return; }
-    setLocating('geocode');
+    setLocating(true);
     setLocateErr('');
     try {
       const result = await geocodeAddress(query);
@@ -105,7 +83,7 @@ export default function AddressFormModal({ initial = null, onClose, onSaved, req
     } catch {
       setLocateErr(t('address.geocodeFailed'));
     } finally {
-      setLocating(null);
+      setLocating(false);
     }
   };
 
@@ -186,14 +164,9 @@ export default function AddressFormModal({ initial = null, onClose, onSaved, req
             <span className="text-sm text-base-content/70">
               {t('address.mapLabel')}{requireCoordinates && <span className="text-error"> *</span>}
             </span>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={pickCurrentLocation} disabled={!!locating} className="btn btn-outline btn-xs gap-1.5">
-                {locating === 'gps' ? <span className="loading loading-spinner loading-xs" /> : '🎯'} {t('address.useCurrentLocation')}
-              </button>
-              <button type="button" onClick={locateFromAddress} disabled={!!locating} className="btn btn-outline btn-xs gap-1.5">
-                {locating === 'geocode' ? <span className="loading loading-spinner loading-xs" /> : '📍'} {t('address.locateFromAddress')}
-              </button>
-            </div>
+            <button type="button" onClick={locateFromAddress} disabled={locating} className="btn btn-outline btn-xs gap-1.5">
+              {locating ? <span className="loading loading-spinner loading-xs" /> : '📍'} {t('address.locateFromAddress')}
+            </button>
           </div>
           <StoreMapPicker
             latitude={coords?.latitude ?? null}
