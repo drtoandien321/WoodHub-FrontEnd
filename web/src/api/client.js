@@ -80,6 +80,8 @@ const REAL_ENDPOINTS = new Set([
   'getAdminCreditPacks', 'createCreditPack', 'updateCreditPack', 'deleteCreditPack',
   // Module GPS/Vị trí — hồ sơ supplier tự thân (biết type để gate UI)
   'getSupplierMe',
+  // Hồ sơ + portfolio của chính supplier (SupplierController PUT /me, SupplierPortfolioController)
+  'updateSupplierMe', 'getMyPortfolio', 'addPortfolioItem', 'updatePortfolioItem', 'deletePortfolioItem',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
   'getNearbyStoresBySupplier', 'getNearestWorkshops', 'getWorkshopsWithinRadius',
   // Module Subscription — gói đăng ký (trang Pricing + "Gói của tôi")
@@ -709,6 +711,15 @@ export const api = {
    * cần các field khác của hồ sơ supplier (status, commissionRate, taxCode...) mà AuthResponse không có.
    */
   getSupplierMe: () => call(() => http.get('/suppliers/me'), 'getSupplierMe'),
+  // PUT /suppliers/me — GHI ĐÈ toàn bộ (BE set mọi field theo body, kể cả null) → FE phải gửi đủ
+  // { businessName*, taxCode, legalDocumentUrl, contactEmail, contactPhone, description }; 409 nếu trùng MST.
+  updateSupplierMe: (body) => call(() => http.put('/suppliers/me', body), 'updateSupplierMe', body),
+  // Portfolio của tôi: PortfolioResponse[] { id, productId, productName, imageUrl, title, description, sortOrder }.
+  // Gắn productId mà bỏ trống imageUrl → BE tự lấy ảnh của sản phẩm.
+  getMyPortfolio: () => call(() => http.get('/suppliers/me/portfolio'), 'getMyPortfolio'),
+  addPortfolioItem: (body) => call(() => http.post('/suppliers/me/portfolio', body), 'addPortfolioItem', body),
+  updatePortfolioItem: ({ id, ...body }) => call(() => http.put(`/suppliers/me/portfolio/${id}`, body), 'updatePortfolioItem', { id, ...body }),
+  deletePortfolioItem: (id) => call(() => http.delete(`/suppliers/me/portfolio/${id}`), 'deletePortfolioItem', id),
 
   /*
    * ===== GỢI Ý VỊ TRÍ (GPS) — 3 API, đọc trực tiếp StoreController.java, KHÔNG suy đoán path =====

@@ -14,7 +14,7 @@ const NAV = [
   { to: '/portal/supplier/orders', label: 'Đơn hàng', icon: ShoppingBag },
   { to: '/portal/supplier/promotions', label: 'Khuyến mãi', icon: Tag },
   { to: '/portal/supplier/reviews', label: 'Đánh giá', icon: Star },
-  { to: '/portal/supplier/profile', label: 'Hồ sơ & Năng lực', icon: Briefcase },
+  { to: '/portal/supplier/profile', label: 'Hồ sơ & Portfolio', icon: Briefcase },
   { to: '/portal/supplier/reports', label: 'Báo cáo', icon: BarChart },
   { to: '/portal/supplier/settings', label: 'Cài đặt', icon: Gear },
 ];

@@ -11,7 +11,7 @@ const NAV = [
   { to: '/portal/workshop/dashboard', label: 'Tổng quan', icon: Home },
   { to: '/portal/workshop/orders', label: 'Đơn custom & Báo giá', icon: Package },
   { to: '/portal/workshop/production', label: 'Tiến độ sản xuất', icon: Tool },
-  { to: '/portal/workshop/portfolio', label: 'Hồ sơ & Năng lực', icon: Briefcase },
+  { to: '/portal/workshop/portfolio', label: 'Hồ sơ & Portfolio', icon: Briefcase },
   { to: '/portal/workshop/reviews', label: 'Đánh giá', icon: Star },
   { to: '/portal/workshop/reports', label: 'Báo cáo', icon: BarChart },
   { to: '/portal/workshop/settings', label: 'Cài đặt', icon: Gear },

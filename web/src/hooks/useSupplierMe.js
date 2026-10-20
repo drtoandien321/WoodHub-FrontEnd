@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client.js';
 
 /*
@@ -23,4 +23,16 @@ export const usePortalBrand = (fallbackName) => {
   const { data } = useSupplierMe();
   const name = data?.businessName || fallbackName || 'Nhà cung cấp';
   return { name, initials: initialsOf(name) };
+};
+
+/*
+ * PUT /suppliers/me — BE trả SupplierResponse mới → ghi thẳng vào cache ['supplierMe'] (header portal,
+ * thẻ tổng quan, trang hồ sơ đều đọc cache này nên đổi tên là cập nhật ngay, không cần refetch).
+ */
+export const useUpdateSupplierMe = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.updateSupplierMe,
+    onSuccess: (data) => queryClient.setQueryData(['supplierMe'], data),
+  });
 };

@@ -619,6 +619,10 @@ const PROMOTIONS_KEY = 'woodhub:promotions-v1';
 // (Xưởng gỗ Thành Phát trong catalog mock) để demo được portal đơn hàng/khuyến mãi với dữ liệu sẵn có.
 const MOCK_MY_SUPPLIER_IDS = ['mock-supplier-id', 'sup_01'];
 const MOCK_MY_SUPPLIER = { id: 'sup_01', name: 'Xưởng gỗ Thành Phát' };
+// Hồ sơ đã sửa (PUT /suppliers/me) + portfolio của supplier mock — persist để F5 vẫn còn
+const SUPPLIER_ME_KEY = 'woodhub-mock-supplier-me';
+const PORTFOLIO_KEY = 'woodhub-mock-portfolio';
+let mockPortfolio = storage.getItem(PORTFOLIO_KEY, null) ?? [];
 const isSupplierUser = () => useAuthStore.getState().user?.role === 'supplier';
 let MOCK_PROMOTIONS = storage.getItem(PROMOTIONS_KEY, null) ?? [
   { code: 'SALE10', name: 'Giảm 10% toàn sàn', type: 'product', discountType: 'percentage', discountValue: 10, maxDiscountAmount: 500_000, minOrderAmount: 1_000_000, endsAt: null },
@@ -2142,8 +2146,57 @@ export const mockAdapter = {
       businessName: user?.name ?? 'Cửa hàng của bạn (demo)',
       taxCode: null, legalDocumentUrl: null, contactEmail: null, contactPhone: null, description: null,
       type: user?.supplierType ?? 'retailer', status: 'active', commissionRate: 0,
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      createdAt: '2026-09-01T00:00:00Z', updatedAt: new Date().toISOString(),
+      ...storage.getItem(SUPPLIER_ME_KEY, {}),
     };
+  },
+
+  async updateSupplierMe(body) {
+    await delay(300);
+    if (!body?.businessName?.trim()) throw orderError(400, 'Tên doanh nghiệp không được để trống');
+    const norm = (v) => (v == null || String(v).trim() === '' ? null : String(v).trim());
+    storage.setItem(SUPPLIER_ME_KEY, {
+      businessName: body.businessName.trim(), taxCode: norm(body.taxCode), legalDocumentUrl: norm(body.legalDocumentUrl),
+      contactEmail: norm(body.contactEmail), contactPhone: norm(body.contactPhone), description: norm(body.description),
+    });
+    return this.getSupplierMe();
+  },
+
+  async getMyPortfolio() {
+    await delay(200);
+    return [...mockPortfolio].sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+  async addPortfolioItem(body) {
+    await delay(300);
+    const product = body.productId ? myProducts.find((p) => p.id === body.productId) : null;
+    const imageUrl = body.imageUrl?.trim() || product?.images?.[0]?.url || product?.thumbnailUrl || null;
+    if (!imageUrl) throw orderError(400, 'Cần ảnh hoặc sản phẩm có ảnh');
+    const item = {
+      id: `pf_${Date.now()}`, supplierId: 'mock-supplier-id', productId: product?.id ?? null, productName: product?.name ?? null,
+      imageUrl, title: body.title?.trim() || null, description: body.description?.trim() || null,
+      sortOrder: body.sortOrder ?? mockPortfolio.length, createdAt: new Date().toISOString(),
+    };
+    mockPortfolio = [...mockPortfolio, item];
+    storage.setItem(PORTFOLIO_KEY, mockPortfolio);
+    return item;
+  },
+  async updatePortfolioItem({ id, ...body }) {
+    await delay(300);
+    const cur = mockPortfolio.find((p) => p.id === id);
+    if (!cur) throw orderError(404, 'Không tìm thấy mục portfolio');
+    const next = {
+      ...cur, title: body.title?.trim() || null, description: body.description?.trim() || null,
+      imageUrl: body.imageUrl?.trim() || cur.imageUrl, sortOrder: body.sortOrder ?? cur.sortOrder,
+    };
+    mockPortfolio = mockPortfolio.map((p) => (p.id === id ? next : p));
+    storage.setItem(PORTFOLIO_KEY, mockPortfolio);
+    return next;
+  },
+  async deletePortfolioItem(id) {
+    await delay(250);
+    mockPortfolio = mockPortfolio.filter((p) => p.id !== id);
+    storage.setItem(PORTFOLIO_KEY, mockPortfolio);
+    return null;
   },
 
   /*
