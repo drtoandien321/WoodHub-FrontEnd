@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../api/client.js';
@@ -10,6 +10,7 @@ import AuthField from '../components/auth/AuthField.jsx';
 import GoogleAuthButton from '../components/auth/GoogleAuthButton.jsx';
 import { MailIcon, LockIcon } from '../components/ui/icons.jsx';
 import { redirectPathForRole } from '../utils/auth.js';
+import { isUserLocked, readAccountLockedNotice, clearAccountLockedNotice } from '../utils/accountLock.js';
 
 // Chế độ mock: hiện gợi ý 2 tài khoản test (supplier/admin) để demo khi chưa chạy BE.
 // BE thật xác định role từ tài khoản → không cần chọn role ở FE.
@@ -24,6 +25,10 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  // Bị đá ra vì tài khoản bị khoá giữa phiên (interceptor api/client.js lưu lại lý do trước khi tải lại trang)
+  const [lockedNotice] = useState(readAccountLockedNotice);
+  useEffect(() => { clearAccountLockedNotice(); }, []);
+  const lockedMessage = (reason) => (reason ? t('auth.login.lockedWithReason', { reason }) : t('auth.login.locked'));
 
   /*
    * Đã đăng nhập sẵn mà vào /login (gõ tay URL, bấm back, hoặc trang chủ HeroNavbar không có
@@ -55,7 +60,12 @@ export default function Login() {
         { replace: true }
       );
     } catch (err) {
-      // BE trả 403 khi email chưa xác thực → đưa sang màn nhập OTP
+      // Tài khoản bị admin khoá: BE trả 403 USER_LOCKED kèm params.reason — KHÔNG được coi là "chưa xác thực"
+      if (isUserLocked(err)) {
+        setError(lockedMessage(err.response.data?.params?.reason));
+        return;
+      }
+      // 403 còn lại = email chưa xác thực (AUTH_EMAIL_NOT_VERIFIED) → đưa sang màn nhập OTP
       if (err?.response?.status === 403) {
         navigate('/verify-otp', { state: { email: form.email } });
         return;
@@ -91,7 +101,8 @@ export default function Login() {
             </Link>
           </div>
         </div>
-        {error && <p className="text-error text-sm">{error}</p>}
+        {!error && lockedNotice && <p className="text-error text-sm" role="alert">{lockedMessage(lockedNotice.reason)}</p>}
+        {error && <p className="text-error text-sm" role="alert">{error}</p>}
         <button
           className="h-14 rounded-2xl bg-primary text-primary-content font-medium transition hover:brightness-95 hover:-translate-y-px disabled:opacity-60"
           disabled={loading}
