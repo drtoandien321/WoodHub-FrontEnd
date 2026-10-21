@@ -12,9 +12,13 @@ const PRICE_MIN = 1000000;
 const PRICE_MAX = 20000000;
 const PAGE_SIZE = 12;
 
-// Nhóm filter dạng checkbox đơn giản (available/has3d/customizable) — đều là param thật của BE-7
+/*
+ * Nhóm filter dạng checkbox đơn giản (has3d/customizable) — param thật của BE-7.
+ * BỎ "Chỉ hiện hàng có sẵn" (available) theo docs BE no-inventory-order-confirm-fe.md: lọc này dựa trên
+ * store_inventory chưa trừ kho → món đã hết vẫn hiện, còn món NCC chưa nhập kho lại bị ẩn mất. Sàn vận hành theo
+ * quy trình NCC xác nhận còn hàng trong 24h sau khi khách thanh toán, nên không hiển thị/lọc theo tồn kho.
+ */
 const BOOLEAN_FILTERS = [
-  { key: 'available', labelKey: 'shop.filterAvailable' },
   { key: 'has3d', labelKey: 'shop.filterHas3d' },
   { key: 'customizable', labelKey: 'shop.filterCustomizable' },
 ];
@@ -41,7 +45,6 @@ export default function Shop() {
     style: style || undefined,
     sort: sort || undefined,
     maxPrice: maxPrice || undefined,
-    available: searchParams.get('available') === 'true' || undefined,
     has3d: searchParams.get('has3d') === 'true' || undefined,
     customizable: searchParams.get('customizable') === 'true' || undefined,
     page,

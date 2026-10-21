@@ -15,6 +15,10 @@ const MAX_QTY = 999; // khớp ràng buộc quantity 1..999 của BE
  *
  * Bỏ thanh "mua thêm X để miễn phí ship" của bản cũ: phí ship giờ BE tính theo TỪNG đơn của từng
  * nhà cung cấp + khoảng cách, ngưỡng miễn phí do admin cấu hình → FE không đoán đúng được ở bước giỏ.
+ *
+ * Món ngừng bán (NCC ẩn SP / NCC bị đình chỉ — docs BE cart-unavailable-items-fe.md): BE vẫn giữ trong giỏ với
+ * `available: false` và KHÔNG cộng vào subtotal/totalQuantity; đổi số lượng → 409. Nên dòng đó chỉ còn nút Xoá,
+ * và khoá nút Thanh toán tới khi khách xoá hết (checkout sẽ trả 409 PRODUCT_UNAVAILABLE).
  */
 export default function Cart() {
   const { t } = useTranslation();
@@ -23,6 +27,7 @@ export default function Cart() {
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
   const [actionError, setActionError] = useState('');
+  const [clearingUnavailable, setClearingUnavailable] = useState(false);
 
   if (isLoading) {
     return (
@@ -62,6 +67,27 @@ export default function Cart() {
     removeItem.mutate(item.id, { onError: handleError });
   };
 
+  // `available` thiếu (BE cũ / mock) = coi như còn bán
+  const unavailableItems = items.filter((i) => i.available === false);
+  const unavailableCount = cart.unavailableCount ?? unavailableItems.length;
+  const unavailableLabel = (item) =>
+    t(`cart.unavailableReason.${item.unavailableReason}`, { defaultValue: t('cart.unavailableFallback') });
+  // BE không có API xoá hàng loạt → xoá TUẦN TỰ từng dòng (song song dễ trả về giỏ lệch nhau)
+  const removeAllUnavailable = async () => {
+    setActionError('');
+    setClearingUnavailable(true);
+    try {
+      for (const item of unavailableItems) {
+        // eslint-disable-next-line no-await-in-loop -- cố ý tuần tự
+        await removeItem.mutateAsync(item.id);
+      }
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setClearingUnavailable(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-6xl">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-2">
@@ -78,18 +104,29 @@ export default function Cart() {
 
           {actionError && <div role="alert" className="alert alert-error py-2 text-sm">{actionError}</div>}
 
+          {unavailableCount > 0 && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 text-sm">
+              <span>{t('cart.unavailableBanner', { count: unavailableCount })}</span>
+              <button type="button" onClick={removeAllUnavailable} disabled={clearingUnavailable} className="btn btn-warning btn-sm">
+                {clearingUnavailable ? <span className="loading loading-spinner loading-xs" /> : t('cart.removeUnavailable')}
+              </button>
+            </div>
+          )}
+
           <ul className="flex flex-col gap-3">
             {items.map((item) => {
               const busy = busyItemId === item.id;
+              const unavailable = item.available === false;
               const variantText = [item.color, item.dimensions].filter(Boolean).join(' · ');
               // BE: unitPrice là giá HIỆN TẠI, priceAtAddition là giá lúc thêm → khác nhau thì báo khách
               const priceChanged = item.priceAtAddition != null && Number(item.priceAtAddition) !== Number(item.unitPrice);
               return (
                 <li
                   key={item.id}
-                  className={`flex gap-4 rounded-2xl border border-base-300 bg-base-100 p-3 transition-opacity sm:p-4 ${busy ? 'opacity-60' : ''}`}
+                  className={`flex gap-4 rounded-2xl border bg-base-100 p-3 transition-opacity sm:p-4 ${
+                    unavailable ? 'border-dashed border-warning/50 bg-base-200/40' : 'border-base-300'} ${busy ? 'opacity-60' : ''}`}
                 >
-                  <Link to={`/product/${item.productId}`} className="shrink-0">
+                  <Link to={`/product/${item.productId}`} className={`shrink-0 ${unavailable ? 'opacity-40 grayscale' : ''}`}>
                     {item.imageUrl ? (
                       <img src={item.imageUrl} alt={item.productName} className="h-24 w-24 rounded-xl object-cover sm:h-28 sm:w-28" loading="lazy" />
                     ) : (
@@ -102,7 +139,8 @@ export default function Cart() {
                       <div className="min-w-0">
                         <Link to={`/product/${item.productId}`} className="line-clamp-2 font-medium leading-snug hover:text-primary">{item.productName}</Link>
                         {variantText && <p className="mt-0.5 truncate text-xs text-base-content/55">{variantText}</p>}
-                        {priceChanged && (
+                        {unavailable && <span className="badge badge-warning badge-sm mt-1.5">{unavailableLabel(item)}</span>}
+                        {!unavailable && priceChanged && (
                           <p className="mt-1 text-xs text-warning">
                             {t('cart.priceChanged', { old: formatVnd(item.priceAtAddition), now: formatVnd(item.unitPrice) })}
                           </p>
@@ -119,6 +157,13 @@ export default function Cart() {
                       </button>
                     </div>
 
+                    {unavailable ? (
+                      // Ngừng bán: BE chặn đổi số lượng (409) → ẩn bộ +/-, gạch giá (không tính vào tạm tính)
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <span className="text-base-content/50">× {item.quantity}</span>
+                        <span className="text-base-content/40 line-through">{formatVnd(item.lineTotal)}</span>
+                      </div>
+                    ) : (
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       {/* Bộ chỉnh số lượng: giảm về 0 thì xoá dòng (xem changeQty) */}
                       <div className="inline-flex items-center rounded-full border border-base-300">
@@ -147,6 +192,7 @@ export default function Cart() {
                         {item.quantity > 1 && <p className="text-xs text-base-content/50">{formatVnd(item.unitPrice)} / {t('cart.each')}</p>}
                       </div>
                     </div>
+                    )}
                   </div>
                 </li>
               );
@@ -165,7 +211,8 @@ export default function Cart() {
             <span className="font-medium">{t('cart.total')}</span>
             <span className="text-2xl font-semibold text-primary">{formatVnd(cart.subtotal)}</span>
           </div>
-          <button onClick={() => navigate('/checkout')} disabled={!!busyItemId} className="btn btn-primary btn-lg mt-1 w-full">{t('cart.checkout')}</button>
+          <button onClick={() => navigate('/checkout')} disabled={!!busyItemId || unavailableCount > 0 || !cart.totalQuantity} className="btn btn-primary btn-lg mt-1 w-full">{t('cart.checkout')}</button>
+          {unavailableCount > 0 && <p className="text-xs text-warning">{t('cart.unavailableBanner', { count: unavailableCount })}</p>}
           <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-base-content/55">
             <Shield width={14} height={14} /> {t('cart.secure')}
           </p>

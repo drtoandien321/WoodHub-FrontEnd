@@ -114,7 +114,7 @@ const REAL_ENDPOINTS = new Set([
   // Module Sổ địa chỉ giao hàng (cùng doc cart-address-fe.md)
   'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
   // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
-  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'getAvailableVouchers',
+  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'getAvailableVouchers', 'submitContact',
   // Xử lý đơn (supplier/admin) + CRUD khuyến mãi + cấu hình ship (docs/promotions-admin-fe.md)
   'getSupplierOrders', 'updateSupplierOrderStatus', 'getAdminOrders', 'updateAdminOrderStatus',
   'getPromotions', 'getPromotion', 'createPromotion', 'updatePromotion', 'deletePromotion',
@@ -159,8 +159,54 @@ export const http = axios.create({ baseURL: BASE_URL, timeout: 60_000 });
  * Ở đây dùng để tự đính JWT vào header Authorization — viết 1 lần, mọi request đều có,
  * thay vì lặp lại ở từng chỗ gọi API.
  */
-http.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+/*
+ * Refresh access token — dùng chung cho 2 chỗ: (1) chủ động trước request khi token sắp hết hạn, (2) dự phòng khi
+ * request bị 401. refreshRequest gom mọi lời gọi cùng lúc thành 1 lần /auth/refresh duy nhất (không cấp thừa
+ * refresh token khi nhiều request song song cùng cần refresh).
+ */
+let refreshRequest = null;
+function refreshAccessToken() {
+  const refreshToken = useAuthStore.getState().refreshToken;
+  if (!refreshToken) return Promise.reject(new Error('NO_REFRESH_TOKEN'));
+  refreshRequest ??= http.post('/auth/refresh', { refreshToken })
+    .then(({ data }) => {
+      const result = toAuthResult(data);
+      useAuthStore.getState().setAuth(result);
+      return result.token;
+    })
+    .finally(() => { refreshRequest = null; });
+  return refreshRequest;
+}
+
+// Thời điểm hết hạn (ms) đọc từ claim `exp` của JWT; token không phải JWT (mock) / hỏng → null
+function tokenExpiresAt(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+// Refresh sớm hơn hạn một chút: bù lệch đồng hồ máy khách + thời gian request đi tới BE (Render có thể chậm)
+const EXPIRY_SKEW_MS = 30_000;
+
+/*
+ * Request interceptor: đính JWT vào header. Token sắp/đã hết hạn (access token sống 15 phút) → refresh TRƯỚC rồi
+ * mới gửi. Trước đây gửi luôn token hết hạn → mọi request đầu tiên sau 15 phút đều 401 (2 dòng đỏ trong console
+ * ở Checkout: /cart + /addresses) rồi mới refresh và gửi lại → chậm thêm 1 vòng request. Refresh chủ động lỗi thì
+ * vẫn gửi request với token cũ, để response interceptor bên dưới xử lý 401 như trước (dự phòng).
+ */
+http.interceptors.request.use(async (config) => {
+  let { token } = useAuthStore.getState();
+  const isAuthEndpoint = config.url?.startsWith('/auth/');
+  const expiresAt = token && !isAuthEndpoint ? tokenExpiresAt(token) : null;
+  if (expiresAt && expiresAt - Date.now() < EXPIRY_SKEW_MS && useAuthStore.getState().refreshToken) {
+    try {
+      token = await refreshAccessToken();
+    } catch {
+      // bỏ qua — response interceptor sẽ thử lại / đăng xuất khi BE trả 401
+    }
+  }
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -173,16 +219,14 @@ http.interceptors.request.use((config) => {
  *
  * originalRequest._retry: cờ đánh dấu "đã thử refresh cho request này rồi" để KHÔNG retry vô hạn
  * nếu refresh xong mà request vẫn 401 (token thật sự không hợp lệ).
- * refreshRequest: gom nhiều request 401 cùng lúc thành 1 lần gọi /auth/refresh duy nhất
- * (không phải mỗi request lỗi lại tự gọi refresh riêng, tránh cấp thừa refresh token).
+ * (Từ 21/10 request interceptor đã refresh chủ động khi token sắp hết hạn — nhánh 401 này còn lại làm dự phòng,
+ * vd đồng hồ máy khách lệch nhiều hoặc BE thu hồi token sớm.)
  *
  * CHỈ bắt 401. Trước đây bắt cả 403 vì BE từng trả 403 cho token hết hạn — BE đã sửa (dd9c087 AUD-015 +
  * 08c7b61): token hết hạn/sai/malformed bị coi là chưa đăng nhập → AuthenticationEntryPoint trả 401; endpoint
  * permitAll (vd /products/mine) cũng tự trả 401 ở service. 403 giờ chỉ còn nghĩa "đủ token nhưng thiếu quyền"
  * → không refresh (refresh cũng không giúp gì), trả lỗi thẳng cho màn hình xử lý.
  */
-let refreshRequest = null;
-
 /*
  * Tài khoản bị admin khoá (BE-11): token còn hạn vẫn bị chặn ở MỌI API → 403 errorCode USER_LOCKED, refresh token
  * cũng bị thu hồi. Không đăng xuất thì user kẹt ở trang lỗi liên tục → xoá phiên, lưu lý do, tải lại về /login
@@ -209,18 +253,14 @@ http.interceptors.response.use(
     }
 
     originalRequest._retry = true;
-    const refreshToken = useAuthStore.getState().refreshToken;
-    if (!refreshToken) {
+    if (!useAuthStore.getState().refreshToken) {
       useAuthStore.getState().logout();
       return Promise.reject(error);
     }
 
     try {
-      refreshRequest ??= http.post('/auth/refresh', { refreshToken }).finally(() => { refreshRequest = null; });
-      const { data } = await refreshRequest;
-      const result = toAuthResult(data);
-      useAuthStore.getState().setAuth(result);
-      originalRequest.headers.Authorization = `Bearer ${result.token}`;
+      const newToken = await refreshAccessToken();
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
       return http(originalRequest);
     } catch (refreshError) {
       useAuthStore.getState().logout();
@@ -968,6 +1008,7 @@ export const api = {
   sendAiChatMessage: ({ sessionId, ...body }) => call(() => http.post(`/ai-chat/sessions/${sessionId}/messages`, body, { timeout: AI_CHAT_TIMEOUT_MS }), 'sendAiChatMessage', { sessionId, ...body }),
 
   // ===== CONTACT =====
-  // POST /contact  body: { name, email, subject, message }
+  // POST /contact (BE-06, không cần đăng nhập) body: { name*, email*, phone?, subject*, message* } → 201 ContactResponse
+  // 400 lỗi theo field · 429 quá 5 lần/giờ từ cùng mạng
   submitContact: (body) => call(() => http.post('/contact', body), 'submitContact', body),
 };

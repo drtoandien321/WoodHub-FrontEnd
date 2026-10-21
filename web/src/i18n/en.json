@@ -501,13 +501,16 @@
       "label": "Address",
       "value": "FPT University, HCMC"
     },
-    "success": "Thank you! WoodHub has received your message and will get back to you soon.",
+    "success": "Thank you! WoodHub has received your message and will reply by email within 24 hours.",
     "errors": {
       "name": "Please enter your name.",
       "email": "Invalid email address.",
       "subject": "Please enter a subject.",
-      "message": "Please enter a message."
-    }
+      "message": "Please enter a message.",
+      "phone": "Phone may only contain digits, spaces, + - ( ) . (max 20 characters)."
+    },
+    "phonePlaceholder": "Phone number (optional)",
+    "sendFailed": "Could not send your message, please try again."
   },
   "shop": {
     "all": "All",
@@ -662,7 +665,14 @@
     "errInvalid": "Invalid quantity (1–999).",
     "errGeneric": "Couldn't update your cart. Please try again.",
     "itemsCount_one": "{{count}} item",
-    "itemsCount_other": "{{count}} items"
+    "itemsCount_other": "{{count}} items",
+    "unavailableReason": {
+      "PRODUCT_NOT_ACTIVE": "No longer sold",
+      "SUPPLIER_NOT_ACTIVE": "Seller is temporarily not selling"
+    },
+    "unavailableFallback": "Currently unavailable",
+    "unavailableBanner": "{{count}} item(s) are no longer sold. Please remove them to place your order.",
+    "removeUnavailable": "Remove all unavailable items"
   },
   "checkout": {
     "title": "Checkout",
@@ -720,7 +730,10 @@
     "discountEstimated": "Discount (estimated)",
     "voucherChanged": "A voucher you picked is no longer valid and the list has been refreshed. Please pick again and place the order.",
     "showMoreVouchers": "Show {{count}} more",
-    "showLessVouchers": "Show less"
+    "showLessVouchers": "Show less",
+    "unavailableBlock": "Your cart has {{count}} item(s) that are no longer sold. Go back to the cart and remove them to place your order.",
+    "backToCart": "Back to cart",
+    "confirmNotice": "After you pay, the seller confirms stock within 24 hours. If an item is out of stock, the order is cancelled and you are refunded within 48 hours."
   },
   "orders": {
     "title": "Your orders",
@@ -1357,7 +1370,8 @@
     "COUPON_MIN_ORDER_NOT_MET": "Minimum order {{minOrderAmount}} ({{missingAmount}} to go).",
     "COUPON_NOT_APPLICABLE_TO_ITEMS": "Not applicable to items in your cart.",
     "COUPON_ALREADY_FREE_SHIPPING": "This order already ships free.",
-    "CART_EMPTY": "Your cart is empty."
+    "CART_EMPTY": "Your cart is empty.",
+    "PRODUCT_UNAVAILABLE": "\"{{productName}}\" is no longer sold. Your cart has been updated."
   },
   "mySub": {
     "title": "My plan",

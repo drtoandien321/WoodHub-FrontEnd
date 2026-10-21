@@ -501,13 +501,16 @@
       "label": "Địa chỉ",
       "value": "FPT University, TP. HCM"
     },
-    "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi sớm.",
+    "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi qua email trong 24 giờ.",
     "errors": {
       "name": "Vui lòng nhập họ tên.",
       "email": "Email không hợp lệ.",
       "subject": "Vui lòng nhập chủ đề.",
-      "message": "Vui lòng nhập nội dung."
-    }
+      "message": "Vui lòng nhập nội dung.",
+      "phone": "Số điện thoại chỉ gồm số, khoảng trắng, + - ( ) . (tối đa 20 ký tự)."
+    },
+    "phonePlaceholder": "Số điện thoại (không bắt buộc)",
+    "sendFailed": "Gửi liên hệ chưa được, vui lòng thử lại."
   },
   "shop": {
     "all": "Tất cả",
@@ -660,7 +663,14 @@
     "errInactive": "Sản phẩm này đã ngừng bán.",
     "errNotFound": "Không tìm thấy sản phẩm trong giỏ, vui lòng tải lại trang.",
     "errInvalid": "Số lượng không hợp lệ (1–999).",
-    "errGeneric": "Không cập nhật được giỏ hàng. Vui lòng thử lại."
+    "errGeneric": "Không cập nhật được giỏ hàng. Vui lòng thử lại.",
+    "unavailableReason": {
+      "PRODUCT_NOT_ACTIVE": "Sản phẩm đã ngừng bán",
+      "SUPPLIER_NOT_ACTIVE": "Nhà cung cấp tạm ngừng bán hàng"
+    },
+    "unavailableFallback": "Sản phẩm hiện không bán",
+    "unavailableBanner": "Có {{count}} sản phẩm đã ngừng bán, vui lòng xoá để đặt hàng.",
+    "removeUnavailable": "Xoá tất cả sản phẩm ngừng bán"
   },
   "checkout": {
     "title": "Thanh toán",
@@ -718,7 +728,10 @@
     "discountEstimated": "Giảm giá (dự kiến)",
     "voucherChanged": "Voucher bạn chọn không còn dùng được, danh sách đã được cập nhật. Vui lòng chọn lại rồi đặt hàng.",
     "showMoreVouchers": "Xem thêm {{count}} voucher",
-    "showLessVouchers": "Thu gọn"
+    "showLessVouchers": "Thu gọn",
+    "unavailableBlock": "Giỏ có {{count}} sản phẩm đã ngừng bán. Quay lại giỏ hàng để xoá rồi mới đặt hàng được.",
+    "backToCart": "Về giỏ hàng",
+    "confirmNotice": "Sau khi bạn thanh toán, nhà cung cấp sẽ xác nhận còn hàng trong vòng 24 giờ. Nếu sản phẩm hết hàng, đơn sẽ được huỷ và tiền được hoàn lại cho bạn trong vòng 48 giờ."
   },
   "orders": {
     "title": "Đơn hàng của bạn",
@@ -1351,7 +1364,8 @@
     "COUPON_MIN_ORDER_NOT_MET": "Đơn tối thiểu {{minOrderAmount}} (còn thiếu {{missingAmount}}).",
     "COUPON_NOT_APPLICABLE_TO_ITEMS": "Không áp dụng cho sản phẩm trong giỏ.",
     "COUPON_ALREADY_FREE_SHIPPING": "Đơn đã được miễn phí vận chuyển.",
-    "CART_EMPTY": "Giỏ hàng trống."
+    "CART_EMPTY": "Giỏ hàng trống.",
+    "PRODUCT_UNAVAILABLE": "Sản phẩm \"{{productName}}\" hiện không còn được bán. Giỏ hàng đã được cập nhật."
   },
   "mySub": {
     "title": "Gói của tôi",
