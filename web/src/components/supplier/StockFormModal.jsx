@@ -11,7 +11,7 @@ import { X } from '../suppliers/icons.jsx';
  * (BE trả 409 nếu addStock lại biến thể đã tồn tại — xem client.js).
  */
 export default function StockFormModal({ open, onClose, storeId, existingVariantIds }) {
-  const { data: productsPage } = useMyProducts();
+  const { data: productsPage } = useMyProducts({ size: 500 }); // BE mặc định 20 SP/trang → chỉ định rõ để chọn được mọi SP
   const [productId, setProductId] = useState('');
   const { data: variants } = useVariants(productId);
   const [variantId, setVariantId] = useState('');

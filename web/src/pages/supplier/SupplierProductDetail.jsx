@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { formatVnd } from '../../utils/format.js';
-import { useMyProductDetail, useUpdateProductStatus, useDeleteProduct } from '../../hooks/useMyProducts.js';
-import { productMeta } from '../../utils/supplierStatus.js';
+import { useMyProductDetail, useDeleteProduct } from '../../hooks/useMyProducts.js';
 import ProductGallery from '../../components/product/ProductGallery.jsx';
 import ProductFormModal from '../../components/supplier/ProductFormModal.jsx';
-import StatusBadge from '../../components/supplier/StatusBadge.jsx';
-import { ChevronLeft, Pencil, EyeOff, Eye, Trash, Tree, Info } from '../../components/suppliers/icons.jsx';
+import ProductStatusSelect from '../../components/supplier/ProductStatusSelect.jsx';
+import { ChevronLeft, Pencil, Trash, Tree, Info } from '../../components/suppliers/icons.jsx';
 
 export default function SupplierProductDetail() {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { data: p, isLoading, isError } = useMyProductDetail(productId);
-  const updateStatus = useUpdateProductStatus();
   const deleteProduct = useDeleteProduct();
   const [modal, setModal] = useState(false);
 
@@ -38,7 +36,6 @@ export default function SupplierProductDetail() {
   const priceTo = p.variants?.length ? Math.max(...p.variants.map((v) => v.price)) : null;
   const gallery = p.images?.map((i) => i.url) ?? [];
 
-  const toggleHidden = () => updateStatus.mutate({ id: p.id, status: p.status === 'hidden' ? 'active' : 'hidden' });
   const handleDelete = () => {
     if (window.confirm(`Xoá "${p.name}"? Hành động này không thể hoàn tác.`)) {
       deleteProduct.mutate(p.id, { onSuccess: () => navigate('/portal/supplier/products') });
@@ -56,7 +53,7 @@ export default function SupplierProductDetail() {
       </div>
       <header>
         <h1 className="font-display text-3xl">Chi tiết sản phẩm</h1>
-        <p className="mt-1 text-base-content/60">Xem và quản lý biến thể, hình ảnh của sản phẩm.</p>
+        <p className="mt-1 text-base-content/60">Xem, sửa thông tin và đổi trạng thái bán của sản phẩm.</p>
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -67,9 +64,6 @@ export default function SupplierProductDetail() {
         </section>
 
         <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-          <div className="mb-2 flex items-center justify-between">
-            <StatusBadge meta={productMeta(p.status)} />
-          </div>
           <h2 className="font-display text-2xl">{p.name}</h2>
           <p className="mt-1 text-2xl font-semibold text-primary">
             {priceFrom == null ? '—' : priceFrom === priceTo ? formatVnd(priceFrom) : `${formatVnd(priceFrom)} – ${formatVnd(priceTo)}`}
@@ -89,11 +83,13 @@ export default function SupplierProductDetail() {
 
           {p.description && <p className="mt-4 text-sm leading-relaxed text-base-content/75">{p.description}</p>}
 
+          <div className="mt-5 flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-base-content/70">Trạng thái bán</span>
+            <ProductStatusSelect product={p} size="md" />
+          </div>
+
           <div className="mt-5 flex flex-wrap gap-2">
             <button onClick={() => setModal(true)} className="btn btn-outline gap-2"><Pencil width={16} height={16} /> Chỉnh sửa</button>
-            <button onClick={toggleHidden} disabled={updateStatus.isPending} className="btn btn-outline gap-2">
-              {p.status === 'hidden' ? <><Eye width={16} height={16} /> Bỏ ẩn</> : <><EyeOff width={16} height={16} /> Ẩn sản phẩm</>}
-            </button>
             <button onClick={handleDelete} disabled={deleteProduct.isPending} className="btn btn-outline btn-error gap-2"><Trash width={16} height={16} /> Xóa sản phẩm</button>
           </div>
         </section>

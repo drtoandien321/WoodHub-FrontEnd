@@ -5,6 +5,8 @@ import {
   useCreateVariant, useUpdateVariant, useDeleteVariant,
   useUploadProductImage, useSetPrimaryImage, useDeleteProductImage,
 } from '../../hooks/useMyProducts.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
+import { PRODUCT_STATUS } from '../../utils/supplierStatus.js';
 import { X, Plus, Minus, Trash, Star } from '../suppliers/icons.jsx';
 
 /*
@@ -53,6 +55,8 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
   const [images, setImages] = useState(initial?.images ?? []);
   const [err, setErr] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   if (!open) return null;
   const set = (k) => (e) => setForm((s) => ({ ...s, [k]: e.target.value }));
@@ -97,8 +101,26 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
     return Object.keys(e).length === 0;
   };
 
+  /*
+   * Bọc try/catch: trước đây lỗi BE (vd 400 "Cần ít nhất 1 biến thể để đăng bán", 409 trùng SKU) bị nuốt, nút Lưu
+   * không phản hồi gì. Sửa gồm nhiều request nối tiếp (PUT → PATCH status → biến thể) — lỗi giữa chừng thì phần
+   * trước đã lưu, nên báo rõ để NCC sửa và bấm Lưu lại (request lặp lại an toàn vì PUT ghi đè).
+   */
   const submit = async () => {
     if (!validate()) return;
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      await save();
+      onClose();
+    } catch (e) {
+      setSubmitError(apiErrorMessage(e, 'Không lưu được sản phẩm, vui lòng kiểm tra lại và thử lại.'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const save = async () => {
     const body = {
       name: form.name, description: form.description, categoryId: form.categoryId,
       materialId: form.materialId || undefined,
@@ -106,15 +128,22 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
 
     if (isEdit) {
       await updateProduct.mutateAsync({ id: initial.id, ...body });
-      if (form.status !== initial.status) await updateStatus.mutateAsync({ id: initial.id, status: form.status });
-      // Diff variant: xoá → cập nhật → thêm mới
-      for (const id of removedVariantIds) await deleteVariant.mutateAsync(id);
-      for (const v of variants) {
+      // Diff variant: xoá → cập nhật → thêm mới. Mỗi bước xong thì ghi lại vào state (bỏ id đã xoá, gắn id cho dòng
+      // vừa tạo) → nếu lỗi giữa chừng và NCC bấm Lưu lại thì không xoá trùng (404) / tạo trùng biến thể.
+      for (const id of removedVariantIds) {
+        await deleteVariant.mutateAsync(id);
+        setRemovedVariantIds((ids) => ids.filter((x) => x !== id));
+      }
+      for (const [i, v] of variants.entries()) {
         const payload = { sku: v.sku, color: v.color, dimensions: v.dimensions, price: Number(v.price) };
         if (v.id) await updateVariant.mutateAsync({ variantId: v.id, ...payload });
-        else await createVariant.mutateAsync({ productId: initial.id, ...payload });
+        else {
+          const created = await createVariant.mutateAsync({ productId: initial.id, ...payload });
+          setVariants((list) => list.map((row, idx) => (idx === i ? { ...row, id: created.id } : row)));
+        }
       }
-      onClose();
+      // Đổi trạng thái SAU CÙNG: BE chặn "Đang bán" khi SP chưa có biến thể → phải tạo biến thể trước
+      if (form.status !== initial.status) await updateStatus.mutateAsync({ id: initial.id, status: form.status });
       return;
     }
 
@@ -133,10 +162,9 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
     } finally {
       setUploading(false);
     }
-    onClose();
   };
 
-  const saving = createProduct.isPending || updateProduct.isPending || uploading;
+  const saving = submitting || uploading;
 
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4" onClick={onClose}>
@@ -169,10 +197,9 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
             </Field>
             <Field label="Trạng thái hiển thị">
               <select value={form.status} onChange={set('status')} className="select select-bordered w-full">
-                <option value="draft">Nháp</option>
-                <option value="active">Đang bán</option>
-                <option value="hidden">Đang ẩn</option>
+                {Object.entries(PRODUCT_STATUS).map(([v, m]) => <option key={v} value={v}>{m.option}</option>)}
               </select>
+              <span className="text-xs text-base-content/50">{PRODUCT_STATUS[form.status]?.hint}</span>
             </Field>
           </Section>
 
@@ -249,7 +276,8 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
           </fieldset>
         </div>
 
-        <footer className="flex justify-end gap-3 border-t border-base-300 px-5 py-4">
+        <footer className="flex flex-wrap items-center justify-end gap-3 border-t border-base-300 px-5 py-4">
+          {submitError && <p className="mr-auto max-w-md text-sm text-error" role="alert">{submitError}</p>}
           <button onClick={onClose} className="btn btn-ghost" disabled={saving}>Hủy</button>
           <button onClick={submit} className="btn btn-primary" disabled={saving}>
             {saving ? <span className="loading loading-spinner loading-sm" /> : 'Lưu sản phẩm'}

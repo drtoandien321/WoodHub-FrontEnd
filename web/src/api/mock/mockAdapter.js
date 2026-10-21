@@ -2323,6 +2323,37 @@ export const mockAdapter = {
     };
   },
 
+  // ===== THỐNG KÊ NCC / XƯỞNG (BE-09) — số minh hoạ cố định, chỉ để chạy UI khi VITE_USE_MOCK =====
+  async getSupplierStatsSummary() {
+    await delay(250);
+    return {
+      orderCount: 6, grossSales: 18_400_000, shopDiscount: 400_000, platformDiscount: 200_000, revenue: 18_000_000,
+      commissionRate: 10, commission: 1_800_000, netRevenue: 16_200_000, avgOrderValue: 3_000_000, shippingFee: 450_000,
+      pendingOrders: 2, rating: 4.5, reviewCount: 8, newReviews: 2, unrepliedReviews: 1, workshop: null,
+    };
+  },
+
+  async getSupplierStatsTimeseries({ from, to, granularity = 'day' } = {}) {
+    await delay(250);
+    const end = to ? new Date(to) : new Date();
+    const start = from ? new Date(from) : new Date(end.getTime() - 30 * 86400000);
+    const points = [];
+    for (let d = new Date(start), i = 0; d < end && points.length < 400; d = new Date(d.getTime() + 86400000), i += 1) {
+      points.push({ date: d.toISOString().slice(0, 10), orders: i % 3 === 0 ? 1 : 0, revenue: i % 3 === 0 ? 3_000_000 : 0, customRevenue: 0 });
+    }
+    return { granularity, points };
+  },
+
+  async getSupplierStatsTopProducts() {
+    await delay(250);
+    return PRODUCTS.slice(0, 3).map((p, i) => ({ productId: p.id, name: p.name?.vi ?? p.name, sold: 3 - i, revenue: (3 - i) * 3_000_000 }));
+  },
+
+  async exportSupplierStats() {
+    await delay(200);
+    return new Blob(['﻿Ngày thanh toán,Mã đơn,Doanh thu\n'], { type: 'text/csv' });
+  },
+
   // ===== USER quản trị (Portal Quản trị /admin/users) =====
   async getAdminUsers() {
     await delay(300);
