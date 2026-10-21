@@ -84,7 +84,8 @@ export default function StatsReport({ basePath, showStores = false, linkProducts
         {showStores && (
           <select value={storeId} onChange={(e) => setStoreId(e.target.value)} className="select select-bordered" aria-label="Chi nhánh">
             <option value="">Tất cả chi nhánh</option>
-            {(stores.data ?? []).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            {/* StoreResponse không có tên chi nhánh → hiện địa chỉ + quận */}
+            {(stores.data ?? []).map((b) => <option key={b.id} value={b.id}>{[b.address, b.district].filter(Boolean).join(', ')}</option>)}
           </select>
         )}
         <button onClick={handleExport} disabled={exporting} className="btn btn-primary gap-2 lg:ml-auto">
