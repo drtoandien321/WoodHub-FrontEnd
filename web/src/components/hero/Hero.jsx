@@ -19,7 +19,7 @@ import BottomRightCorner from './BottomRightCorner.jsx';
  */
 
 const HERO_VIDEO_URL = ''; // TODO: điền URL video .mp4 cảnh gỗ/xưởng của team
-const HERO_IMAGE_URL = '/hero/living-room-3d.png';
+const HERO_IMAGE_URL = '/hero/living-room-3d.webp';
 
 export default function Hero() {
   const { t } = useTranslation();

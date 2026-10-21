@@ -94,7 +94,7 @@ export default function ContactSection() {
           </div>
         ))}
         <div className="rounded-2xl border border-base-300 flex-1 min-h-36 overflow-hidden">
-          <img src="/about/about-3.png" alt="" className="w-full h-full object-cover" />
+          <img src="/about/about-3.webp" alt="" className="w-full h-full object-cover" />
         </div>
       </div>
     </section>
