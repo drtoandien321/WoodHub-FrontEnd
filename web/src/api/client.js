@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore.js';
 import { mockAdapter } from './mock/mockAdapter.js';
+import { isUserLocked, markAccountLocked } from '../utils/accountLock.js';
 
 /*
  * ===== API CLIENT — ĐIỂM CHUYỂN GIAO DUY NHẤT GIỮA FE VÀ BE =====
@@ -113,7 +114,7 @@ const REAL_ENDPOINTS = new Set([
   // Module Sổ địa chỉ giao hàng (cùng doc cart-address-fe.md)
   'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
   // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
-  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'lookupPromotion',
+  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'getAvailableVouchers',
   // Xử lý đơn (supplier/admin) + CRUD khuyến mãi + cấu hình ship (docs/promotions-admin-fe.md)
   'getSupplierOrders', 'updateSupplierOrderStatus', 'getAdminOrders', 'updateAdminOrderStatus',
   'getPromotions', 'getPromotion', 'createPromotion', 'updatePromotion', 'deletePromotion',
@@ -182,12 +183,26 @@ http.interceptors.request.use((config) => {
  */
 let refreshRequest = null;
 
+/*
+ * Tài khoản bị admin khoá (BE-11): token còn hạn vẫn bị chặn ở MỌI API → 403 errorCode USER_LOCKED, refresh token
+ * cũng bị thu hồi. Không đăng xuất thì user kẹt ở trang lỗi liên tục → xoá phiên, lưu lý do, tải lại về /login
+ * (tải lại thay vì navigate: cùng lý do useLogout — xoá sạch cache/chat/socket của tài khoản).
+ * Bỏ qua khi đang ở /login: lỗi khoá lúc đăng nhập do chính trang Login hiển thị (có params.reason).
+ */
+function handleUserLocked(error) {
+  if (!isUserLocked(error) || window.location.pathname === '/login') return;
+  markAccountLocked(error.response.data?.params?.reason);
+  useAuthStore.getState().logout();
+  window.location.replace('/login');
+}
+
 http.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
     const isAuthEndpoint = originalRequest?.url?.startsWith('/auth/');
     const status = error.response?.status;
+    handleUserLocked(error);
     if (status !== 401 || originalRequest._retry || isAuthEndpoint) {
       if (status === 401) useAuthStore.getState().logout();
       return Promise.reject(error);
@@ -554,10 +569,10 @@ export const api = {
    * ===== ORDERS — đặt hàng từ giỏ (docs/order-checkout-fe.md của BE) =====
    * BE TỰ làm hết phần nghiệp vụ: tách giỏ thành N đơn theo supplier, chọn chi nhánh gần điểm giao
    * nhất, tính phí ship theo khoảng cách, áp coupon, tạo 1 payment chung (1 QR) và xoá giỏ.
-   * FE chỉ gửi "giao ở đâu" + ghi chú + mã coupon — KHÔNG gửi giá/phí ship (never trust the client).
+   * FE chỉ gửi "giao ở đâu" + ghi chú + voucher đã chọn (promotionIds) — KHÔNG gửi giá/phí ship (never trust the client).
    */
   // POST /orders/checkout  body: { addressId } | { recipientName, recipientPhone, addressLine, ward?, district?, city, latitude, longitude, locationSource?, saveAddress? }
-  //   + { note?, couponCodes? } → 201 CheckoutResponse { orders: OrderResponse[], payment: PaymentResponse, grandTotal }
+  //   + { note?, promotionIds? } → 201 CheckoutResponse { orders: OrderResponse[], payment: PaymentResponse, grandTotal }
   checkout: (body) => call(() => http.post('/orders/checkout', body), 'checkout', body),
   // GET /orders?status=&page=&size=&sort= → Page<OrderResponse> (mặc định createdAt,desc)
   getOrders: (params) => call(() => http.get('/orders', { params }), 'getOrders', params),
@@ -565,8 +580,15 @@ export const api = {
   getOrder: (id) => call(() => http.get(`/orders/${id}`), 'getOrder', id),
   // POST /orders/:id/cancel — chỉ khi đơn đang pending_payment, sai trạng thái → 409
   cancelOrder: (id) => call(() => http.post(`/orders/${id}/cancel`), 'cancelOrder', id),
-  // GET /promotions/lookup?code= → PromotionResponse (còn hiệu lực) · 404 không có mã · 400 hết hạn. Lượt dùng chỉ kiểm khi checkout.
-  lookupPromotion: (code) => call(() => http.get('/promotions/lookup', { params: { code } }), 'lookupPromotion', code),
+  /*
+   * GET /vouchers/available?addressId= → VoucherResponse[] (docs BE vouchers-fe.md) — thay cho nhập mã tay
+   * (/promotions/lookup đã bị BE xoá, gửi couponCodes khi checkout → 400 COUPON_CODE_UNSUPPORTED).
+   * Tính trên GIỎ HIỆN TẠI; có addressId thì BE ước tính được cả voucher vận chuyển. Mỗi voucher:
+   * { id, code, name, scope: platform|shop, supplierId, supplierName, type: product|shipping, discountType, discountValue,
+   *   maxDiscountAmount, minOrderAmount, endsAt, remainingUses, eligible, reason, reasonCode, reasonParams,
+   *   estimatedDiscount (khi dùng RIÊNG voucher đó), recommended (BE gợi ý chọn sẵn) }
+   */
+  getAvailableVouchers: (params) => call(() => http.get('/vouchers/available', { params }), 'getAvailableVouchers', params),
 
   /*
    * ===== XỬ LÝ ĐƠN — supplier (đơn của mình) & admin (mọi đơn). Cùng OrderResponse với phía khách. =====

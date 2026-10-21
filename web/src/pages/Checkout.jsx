@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../hooks/useCart.js';
 import { useAddresses, formatAddressLine } from '../hooks/useAddresses.js';
-import { useCheckout, useLookupPromotion } from '../hooks/useOrders.js';
+import { useCheckout, useAvailableVouchers } from '../hooks/useOrders.js';
 import { formatVnd } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import AddressFormModal from '../components/address/AddressFormModal.jsx';
 import OrderPaymentPanel from '../components/checkout/OrderPaymentPanel.jsx';
-import { Check, Wallet, Shield, Plus, X } from '../components/suppliers/icons.jsx';
+import VoucherPicker from '../components/checkout/VoucherPicker.jsx';
+import { Check, Wallet, Shield, Plus } from '../components/suppliers/icons.jsx';
 // Lỗi BE: dùng message tiếng Việt khi UI là VI, còn lại dùng câu đã dịch (xem utils/apiError.js)
 import { apiErrorMessage } from '../utils/apiError.js';
 
@@ -61,9 +62,9 @@ function Section({ no, title, action, children }) {
 /*
  * Checkout — đặt hàng từ giỏ theo POST /api/orders/checkout.
  *
- * FE chỉ gửi: địa chỉ giao (addressId từ sổ địa chỉ — bắt buộc có toạ độ), ghi chú, mã coupon.
- * BE tự làm phần còn lại: tách đơn theo nhà cung cấp, chọn chi nhánh gần nhất, tính phí ship theo
- * khoảng cách, áp coupon, tạo 1 QR chung và xoá giỏ. Vì vậy phí ship/giảm giá CHỈ biết được sau khi đặt
+ * FE chỉ gửi: địa chỉ giao (addressId từ sổ địa chỉ — bắt buộc có toạ độ), ghi chú, voucher đã chọn (promotionIds).
+ * Voucher chọn từ danh sách GET /vouchers/available (BE đã bỏ nhập mã tay). BE tự làm phần còn lại: tách đơn theo
+ * nhà cung cấp, chọn chi nhánh gần nhất, tính phí ship theo khoảng cách, áp voucher, tạo 1 QR chung và xoá giỏ. Vì vậy phí ship/giảm giá CHỈ biết được sau khi đặt
  * — trước đó tóm tắt chỉ hiện tạm tính tiền hàng (không tự đoán phí ship để tránh lệch với BE).
  *
  * Sau khi đặt: chuyển sang màn "Thanh toán" (QR chung + danh sách đơn), poll tới khi paid.
@@ -73,17 +74,37 @@ export default function Checkout() {
   const { data: cart, isLoading: cartLoading } = useCart();
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
   const checkout = useCheckout();
-  const lookupPromotion = useLookupPromotion();
 
   const [selectedId, setSelectedId] = useState(null);
   const [addressModal, setAddressModal] = useState(null); // null | 'new' | UserAddressResponse (sửa để ghim)
   const [note, setNote] = useState('');
-  const [couponInput, setCouponInput] = useState('');
-  const [coupons, setCoupons] = useState([]); // PromotionResponse[] đã tra cứu hợp lệ
-  const [couponErr, setCouponErr] = useState('');
+  const [voucherIds, setVoucherIds] = useState([]);
+  // Khách đã tự tick/bỏ tick chưa — chưa thì luôn bám theo gợi ý (recommended) mới nhất của BE
+  const [voucherTouched, setVoucherTouched] = useState(false);
   const [submitErr, setSubmitErr] = useState('');
   const [result, setResult] = useState(null); // CheckoutResponse sau khi đặt thành công
   const [paid, setPaid] = useState(false);
+
+  const selectedAddress = addresses.find((a) => a.id === selectedId);
+  // Chữ ký giỏ: đổi số lượng / món → tải lại voucher (eligible + số tiền giảm tính theo giỏ)
+  const cartKey = (cart?.items ?? []).map((i) => `${i.variantId ?? i.id}x${i.quantity}`).join(',');
+  const vouchersQuery = useAvailableVouchers({
+    addressId: selectedAddress?.hasCoordinates ? selectedAddress.id : undefined,
+    cartKey,
+    enabled: !!cart?.items?.length && !result,
+  });
+  const vouchers = useMemo(() => vouchersQuery.data ?? [], [vouchersQuery.data]);
+
+  /*
+   * Mỗi lần có danh sách mới: chưa đụng tay → chọn đúng các voucher BE gợi ý; đã đụng tay → giữ lựa chọn của khách
+   * nhưng bỏ những voucher không còn dùng được (giỏ/địa chỉ đổi làm voucher hết điều kiện).
+   */
+  useEffect(() => {
+    if (!vouchersQuery.data) return;
+    setVoucherIds((ids) => (voucherTouched
+      ? ids.filter((id) => vouchers.some((v) => v.id === id && v.eligible))
+      : vouchers.filter((v) => v.recommended && v.eligible).map((v) => v.id)));
+  }, [vouchersQuery.data, vouchers, voucherTouched]);
 
   // Tự chọn sẵn: địa chỉ mặc định nếu đã có toạ độ, không thì địa chỉ đầu tiên có toạ độ
   useEffect(() => {
@@ -148,19 +169,12 @@ export default function Checkout() {
     return <EmptyState title={t('checkout.emptyCart')} hint={t('checkout.emptyCartHint')} ctaLabel={t('checkout.backToShop')} ctaTo="/shop" />;
   }
 
-  const selected = addresses.find((a) => a.id === selectedId);
+  const selected = selectedAddress;
   const canSubmit = !!selected?.hasCoordinates && !checkout.isPending;
-
-  const applyCoupon = () => {
-    const code = couponInput.trim().toUpperCase();
-    if (!code) return;
-    if (coupons.some((c) => c.code.toUpperCase() === code)) { setCouponErr(t('checkout.couponDuplicate')); return; }
-    setCouponErr('');
-    lookupPromotion.mutate(code, {
-      onSuccess: (promo) => { setCoupons((list) => [...list, promo]); setCouponInput(''); },
-      onError: (err) => setCouponErr(apiErrorMessage(err, t(err?.response?.status === 404 ? 'checkout.couponNotFound' : 'checkout.couponInvalid'))),
-    });
-  };
+  // Tổng giảm DỰ KIẾN = cộng estimatedDiscount từng voucher (BE tính khi dùng riêng) — số thật do checkout quyết định
+  const estimatedDiscount = vouchers
+    .filter((v) => voucherIds.includes(v.id))
+    .reduce((sum, v) => sum + (Number(v.estimatedDiscount) || 0), 0);
 
   const handleSubmit = () => {
     if (!selected?.hasCoordinates) return;
@@ -169,12 +183,20 @@ export default function Checkout() {
       {
         addressId: selected.id,
         note: note.trim() || undefined,
-        couponCodes: coupons.length ? coupons.map((c) => c.code) : undefined,
+        promotionIds: voucherIds.length ? voucherIds : undefined,
       },
       {
         onSuccess: (res) => { setResult(res); window.scrollTo({ top: 0 }); },
-        // 400 (giỏ trống / thiếu toạ độ / coupon sai) · 409 (SP ngừng bán / supplier chưa có chi nhánh / mã hết lượt)
-        onError: (err) => setSubmitErr(apiErrorMessage(err, t('checkout.submitFailed'))),
+        // 400 (giỏ trống / thiếu toạ độ / voucher không áp được) · 409 (SP ngừng bán / NCC chưa có chi nhánh / voucher hết lượt)
+        onError: (err) => {
+          // Lỗi do voucher (vừa hết lượt, hết hạn...) → đơn CHƯA được tạo; tải lại danh sách để khách chọn lại
+          if (String(err?.response?.data?.errorCode ?? '').startsWith('COUPON_')) {
+            vouchersQuery.refetch();
+            setSubmitErr(`${apiErrorMessage(err, t('checkout.submitFailed'))} ${t('checkout.voucherChanged')}`);
+            return;
+          }
+          setSubmitErr(apiErrorMessage(err, t('checkout.submitFailed')));
+        },
       }
     );
   };
@@ -244,41 +266,26 @@ export default function Checkout() {
             )}
           </Section>
 
-          {/* 2. Mã giảm giá — tra trước bằng /promotions/lookup; lượt dùng chỉ kiểm khi đặt hàng */}
-          <Section no="2" title={t('checkout.coupon')}>
-            <div className="flex gap-2">
-              <input
-                value={couponInput}
-                onChange={(e) => { setCouponInput(e.target.value); setCouponErr(''); }}
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyCoupon(); } }}
-                placeholder={t('checkout.couponPlaceholder')}
-                className={`input input-bordered flex-1 uppercase ${couponErr ? 'input-error' : ''}`}
-                aria-label={t('checkout.coupon')}
+          {/* 2. Voucher — chọn từ danh sách BE tính sẵn cho giỏ (thay ô nhập mã đã ngừng hỗ trợ) */}
+          <Section no="2" title={t('checkout.voucher')}>
+            {vouchersQuery.isLoading ? (
+              <div className="flex flex-col gap-2">{[0, 1].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
+            ) : vouchersQuery.isError ? (
+              <p className="text-sm text-error">
+                {t('checkout.vouchersError')}{' '}
+                <button type="button" onClick={() => vouchersQuery.refetch()} className="link link-primary">{t('checkout.vouchersRetry')}</button>
+              </p>
+            ) : !vouchers.length ? (
+              <p className="text-sm text-base-content/60">{t('checkout.vouchersEmpty')}</p>
+            ) : (
+              <VoucherPicker
+                vouchers={vouchers}
+                selectedIds={voucherIds}
+                onChange={(ids) => { setVoucherTouched(true); setVoucherIds(ids); }}
+                hasAddress={!!selected?.hasCoordinates}
               />
-              <button type="button" onClick={applyCoupon} disabled={!couponInput.trim() || lookupPromotion.isPending} className="btn btn-outline">
-                {lookupPromotion.isPending ? <span className="loading loading-spinner loading-sm" /> : t('checkout.applyCoupon')}
-              </button>
-            </div>
-            {couponErr && <p className="mt-2 text-xs text-error">{couponErr}</p>}
-            {coupons.length > 0 && (
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {coupons.map((c) => (
-                  <li key={c.code} className="flex items-center gap-1.5 rounded-full border border-success/40 bg-success/10 py-1 pl-3 pr-1 text-xs">
-                    <span className="font-mono font-semibold">{c.code}</span>
-                    <span className="text-base-content/65">· {c.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => setCoupons((list) => list.filter((x) => x.code !== c.code))}
-                      className="btn btn-ghost btn-xs btn-circle"
-                      aria-label={`${t('checkout.removeCoupon')} ${c.code}`}
-                    >
-                      <X width={12} height={12} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
             )}
-            <p className="mt-2 text-xs text-base-content/50">{t('checkout.couponHint')}</p>
+            <p className="mt-2 text-xs text-base-content/50">{t('checkout.voucherHint')}</p>
           </Section>
 
           {/* 3. Ghi chú + phương thức thanh toán */}
@@ -325,8 +332,11 @@ export default function Checkout() {
           <div className="divider my-0" />
           <div className="flex justify-between text-sm"><span>{t('checkout.subtotal')}</span><span>{formatVnd(cart.subtotal)}</span></div>
           <div className="flex justify-between text-sm text-base-content/60"><span>{t('checkout.shippingFee')}</span><span>{t('checkout.calculatedOnOrder')}</span></div>
-          {coupons.length > 0 && (
-            <div className="flex justify-between text-sm text-base-content/60"><span>{t('checkout.discount')}</span><span>{t('checkout.calculatedOnOrder')}</span></div>
+          {voucherIds.length > 0 && (
+            <div className="flex justify-between text-sm text-success">
+              <span>{t('checkout.discountEstimated')}</span>
+              <span>{estimatedDiscount > 0 ? `−${formatVnd(estimatedDiscount)}` : t('checkout.calculatedOnOrder')}</span>
+            </div>
           )}
           <p className="text-xs text-base-content/50">{t('checkout.summaryHint')}</p>
           <div className="divider my-0" />

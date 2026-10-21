@@ -1577,8 +1577,12 @@ export const mockAdapter = {
 
     // ③ Coupon: mỗi mã áp cho ĐÚNG 1 đơn có giá trị giảm cao nhất; mỗi đơn tối đa 1 mã product + 1 mã shipping
     const usedPromoIds = [];
-    for (const raw of body.couponCodes ?? []) {
-      const promo = findActivePromotion(raw); // ném 404/400 nếu mã sai/hết hạn — giống BE
+    // BE đã bỏ nhập mã tay: gửi couponCodes → 400 COUPON_CODE_UNSUPPORTED; chỉ nhận promotionIds (chọn từ danh sách voucher)
+    if (body.couponCodes?.some((c) => c?.trim())) throw orderError(400, 'Nhập mã đã ngừng hỗ trợ, hãy chọn voucher trong danh sách');
+    for (const id of body.promotionIds ?? []) {
+      const found = MOCK_PROMOTIONS.find((p) => p.id === id);
+      if (!found) throw orderError(400, 'Voucher không tồn tại');
+      const promo = findActivePromotion(found.code); // ném 400 nếu hết hạn — giống BE
       if (promo.usageLimit != null && promo.usedCount >= promo.usageLimit) throw orderError(409, `Mã ${promo.code} đã hết lượt sử dụng`);
       usedPromoIds.push(promo.id);
       const field = promo.type === 'shipping' ? 'shippingDiscount' : 'productDiscount';
@@ -1639,9 +1643,38 @@ export const mockAdapter = {
     return withPaymentInfo(order);
   },
 
-  async lookupPromotion(code) {
+  /*
+   * GET /vouchers/available — mô phỏng gọn: tính trên tạm tính giỏ (mock không biết phí ship trước khi đặt → voucher
+   * vận chuyển có estimatedDiscount = null). Gợi ý: voucher sản phẩm giảm nhiều nhất + 1 voucher ship.
+   */
+  async getAvailableVouchers() {
     await delay(250);
-    return findActivePromotion(code);
+    const subtotal = toCartResponse(loadCart()).subtotal ?? 0;
+    const now = new Date();
+    const list = MOCK_PROMOTIONS
+      .filter((p) => p.isActive && !(p.endsAt && new Date(p.endsAt) < now) && !(p.startsAt && new Date(p.startsAt) > now))
+      .map((p) => {
+        const missing = p.minOrderAmount != null ? p.minOrderAmount - subtotal : 0;
+        const eligible = subtotal > 0 && missing <= 0;
+        const estimated = !eligible || p.type === 'shipping' ? null
+          : Math.min(subtotal, p.discountType === 'percentage' ? Math.min(Math.round((subtotal * p.discountValue) / 100), p.maxDiscountAmount ?? Infinity) : p.discountValue);
+        return {
+          id: p.id, code: p.code, name: p.name, description: p.description, scope: p.supplierId ? 'shop' : 'platform',
+          supplierId: p.supplierId, supplierName: p.supplierName, type: p.type, discountType: p.discountType,
+          discountValue: p.discountValue, maxDiscountAmount: p.maxDiscountAmount, minOrderAmount: p.minOrderAmount, endsAt: p.endsAt,
+          remainingUses: p.usageLimit != null ? p.usageLimit - p.usedCount : null, eligible,
+          reason: subtotal <= 0 ? 'Giỏ hàng trống' : eligible ? null : `Đơn tối thiểu ${p.minOrderAmount.toLocaleString('vi-VN')} ₫ (còn thiếu ${missing.toLocaleString('vi-VN')} ₫)`,
+          reasonCode: subtotal <= 0 ? 'CART_EMPTY' : eligible ? null : 'COUPON_MIN_ORDER_NOT_MET',
+          reasonParams: eligible || subtotal <= 0 ? {} : { minOrderAmount: p.minOrderAmount, missingAmount: missing },
+          estimatedDiscount: estimated, recommended: false,
+        };
+      });
+    const best = list.filter((v) => v.eligible && v.type === 'product').sort((a, b) => b.estimatedDiscount - a.estimatedDiscount)[0];
+    if (best) best.recommended = true;
+    const ship = list.find((v) => v.eligible && v.type === 'shipping');
+    if (ship) ship.recommended = true;
+    const rank = (v) => (v.recommended ? 0 : v.eligible ? 1 : 2);
+    return list.sort((a, b) => rank(a) - rank(b) || (b.estimatedDiscount ?? 0) - (a.estimatedDiscount ?? 0));
   },
 
   // ===== XỬ LÝ ĐƠN — supplier chỉ thấy/sửa đơn của mình, admin thấy/sửa mọi đơn =====

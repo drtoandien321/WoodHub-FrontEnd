@@ -36,6 +36,7 @@ export const useCheckout = () => {
       qc.invalidateQueries({ queryKey: CART_QUERY_KEY });
       qc.invalidateQueries({ queryKey: ADDRESSES_QUERY_KEY });
       qc.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+      qc.invalidateQueries({ queryKey: VOUCHERS_QUERY_KEY }); // lượt dùng voucher đã thay đổi
     },
   });
 };
@@ -51,8 +52,19 @@ export const useCancelOrder = () => {
   });
 };
 
-// Tra cứu coupon trước khi checkout — mutation (không phải query) vì chỉ chạy khi khách bấm "Áp dụng"
-export const useLookupPromotion = () => useMutation({ mutationFn: api.lookupPromotion });
+/*
+ * Voucher dùng được cho giỏ hiện tại (GET /vouchers/available) — thay cho tra mã tay (BE đã bỏ).
+ * cartKey = chữ ký giỏ (biến thể × số lượng): giỏ đổi → queryKey đổi → tự tải lại, vì eligible/estimatedDiscount
+ * tính theo giỏ. addressId đổi cũng tải lại (BE cần địa chỉ để ước tính voucher vận chuyển).
+ */
+export const VOUCHERS_QUERY_KEY = ['vouchers'];
+export const useAvailableVouchers = ({ addressId, cartKey, enabled = true }) =>
+  useQuery({
+    queryKey: [...VOUCHERS_QUERY_KEY, addressId ?? null, cartKey],
+    queryFn: () => api.getAvailableVouchers(addressId ? { addressId } : undefined),
+    enabled,
+    staleTime: 30_000,
+  });
 
 /*
  * Trạng thái đơn → class badge daisyUI. Luồng chính:
