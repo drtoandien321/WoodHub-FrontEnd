@@ -6,6 +6,7 @@ import { formatVnd, formatDate } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import OrderPaymentPanel from '../components/checkout/OrderPaymentPanel.jsx';
 import { apiErrorMessage } from '../utils/apiError.js';
+import OrderDeadlineNote from '../components/orders/OrderDeadlineNote.jsx';
 
 /*
  * Chi tiết đơn — GET /api/orders/{id} (OrderResponse). Đơn còn 'pending_payment' thì hiện lại QR để
@@ -51,6 +52,9 @@ export default function OrderDetail() {
         <span className="font-mono text-sm text-base-content/70">{order.orderCode}</span>
         <span className={`badge ${orderStatusBadge(order.status)}`}>{t(`orders.status.${order.status}`)}</span>
       </div>
+
+      {/* Hạn NCC xác nhận 24h / thông báo hoàn tiền 48h khi đơn đã trả tiền bị huỷ */}
+      <OrderDeadlineNote order={order} />
 
       {/* Tiến trình — đơn hủy/hoàn tiền thì thay bằng thông báo (không nằm trên luồng chính) */}
       {isClosed ? (

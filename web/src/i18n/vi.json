@@ -773,7 +773,15 @@
       "completed": "Hoàn tất",
       "cancelled": "Đã hủy",
       "refunded": "Đã hoàn tiền"
-    }
+    },
+    "waitingConfirm": "Chờ nhà cung cấp xác nhận trước {{time}}",
+    "confirmOverdue": "Nhà cung cấp đang xác nhận chậm. Bạn có thể nhắn tin cho nhà cung cấp hoặc liên hệ WoodHub để được hỗ trợ.",
+    "contactSupport": "Liên hệ hỗ trợ",
+    "refundNotice": "Đơn hàng #{{orderCode}} đã bị huỷ. Số tiền {{totalAmount}} sẽ được hoàn lại vào tài khoản của bạn trong vòng 48 giờ. Nếu quá thời hạn chưa nhận được, vui lòng liên hệ WoodHub qua mục Liên hệ.",
+    "refundBy": "Hạn hoàn tiền: trước {{time}}.",
+    "refunded": "Đã hoàn {{amount}} vào {{date}} (mã giao dịch {{reference}}).",
+    "refundPendingShort": "Sẽ hoàn tiền trong 48 giờ",
+    "refundedShort": "Đã hoàn tiền"
   },
   "custom": {
     "selectTitle": "Bạn muốn thiết kế gì?",

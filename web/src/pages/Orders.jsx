@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useOrders, pageInfoOf, orderStatusBadge } from '../hooks/useOrders.js';
 import { formatVnd, formatDate } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
+import OrderDeadlineNote from '../components/orders/OrderDeadlineNote.jsx';
 
 const PAGE_SIZE = 10;
 // Tab lọc: '' = tất cả; các trạng thái khách hay quan tâm nhất
@@ -72,6 +73,7 @@ export default function Orders() {
                     {o.status === 'pending_payment' && o.paymentStatus === 'pending' && (
                       <p className="mt-1 text-xs text-warning">{t('orders.awaitingPayment')}</p>
                     )}
+                    <OrderDeadlineNote order={o} compact />
                   </div>
                   <div className="flex flex-col sm:items-end">
                     <span className="text-xs text-base-content/60">{t('checkout.orderTotal')}</span>

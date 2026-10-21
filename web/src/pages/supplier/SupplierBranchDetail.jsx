@@ -121,6 +121,10 @@ export default function SupplierBranchDetail() {
           <h2 className="flex items-center gap-2 font-display text-lg"><Package width={18} height={18} /> Tồn kho ({inventory?.length ?? 0})</h2>
           <button onClick={() => setStockModalOpen(true)} className="btn btn-primary btn-sm gap-1.5"><Plus width={14} height={14} /> Thêm biến thể</button>
         </div>
+        {/* Sàn chưa trừ kho tự động (no-inventory-order-confirm-fe.md §4.4) — tránh NCC tưởng số này luôn đúng */}
+        <p className="mx-2 mb-3 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-base-content/75 md:mx-0">
+          Số tồn kho chỉ để bạn tự theo dõi, hệ thống chưa tự trừ khi bán. Vui lòng kiểm hàng trước khi xác nhận đơn.
+        </p>
         <div className="overflow-x-auto">
           <table className="table">
             <thead>

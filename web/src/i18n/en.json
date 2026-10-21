@@ -777,7 +777,15 @@
       "refunded": "Refunded"
     },
     "itemsCount_one": "{{count}} item",
-    "itemsCount_other": "{{count}} items"
+    "itemsCount_other": "{{count}} items",
+    "waitingConfirm": "Waiting for the seller to confirm before {{time}}",
+    "confirmOverdue": "The seller is late confirming. You can message the seller or contact WoodHub for help.",
+    "contactSupport": "Contact support",
+    "refundNotice": "Order #{{orderCode}} was cancelled. {{totalAmount}} will be refunded to your account within 48 hours. If you have not received it by then, please contact WoodHub via the Contact page.",
+    "refundBy": "Refund due before {{time}}.",
+    "refunded": "Refunded {{amount}} on {{date}} (transaction {{reference}}).",
+    "refundPendingShort": "Refund within 48 hours",
+    "refundedShort": "Refunded"
   },
   "custom": {
     "selectTitle": "What would you like to design?",
