@@ -501,13 +501,16 @@
       "label": "Địa chỉ",
       "value": "FPT University, TP. HCM"
     },
-    "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi sớm.",
+    "success": "Cảm ơn bạn! WoodHub đã nhận được tin nhắn và sẽ phản hồi qua email trong 24 giờ.",
     "errors": {
       "name": "Vui lòng nhập họ tên.",
       "email": "Email không hợp lệ.",
       "subject": "Vui lòng nhập chủ đề.",
-      "message": "Vui lòng nhập nội dung."
-    }
+      "message": "Vui lòng nhập nội dung.",
+      "phone": "Số điện thoại chỉ gồm số, khoảng trắng, + - ( ) . (tối đa 20 ký tự)."
+    },
+    "phonePlaceholder": "Số điện thoại (không bắt buộc)",
+    "sendFailed": "Gửi liên hệ chưa được, vui lòng thử lại."
   },
   "shop": {
     "all": "Tất cả",
@@ -660,7 +663,14 @@
     "errInactive": "Sản phẩm này đã ngừng bán.",
     "errNotFound": "Không tìm thấy sản phẩm trong giỏ, vui lòng tải lại trang.",
     "errInvalid": "Số lượng không hợp lệ (1–999).",
-    "errGeneric": "Không cập nhật được giỏ hàng. Vui lòng thử lại."
+    "errGeneric": "Không cập nhật được giỏ hàng. Vui lòng thử lại.",
+    "unavailableReason": {
+      "PRODUCT_NOT_ACTIVE": "Sản phẩm đã ngừng bán",
+      "SUPPLIER_NOT_ACTIVE": "Nhà cung cấp tạm ngừng bán hàng"
+    },
+    "unavailableFallback": "Sản phẩm hiện không bán",
+    "unavailableBanner": "Có {{count}} sản phẩm đã ngừng bán, vui lòng xoá để đặt hàng.",
+    "removeUnavailable": "Xoá tất cả sản phẩm ngừng bán"
   },
   "checkout": {
     "title": "Thanh toán",
@@ -718,7 +728,10 @@
     "discountEstimated": "Giảm giá (dự kiến)",
     "voucherChanged": "Voucher bạn chọn không còn dùng được, danh sách đã được cập nhật. Vui lòng chọn lại rồi đặt hàng.",
     "showMoreVouchers": "Xem thêm {{count}} voucher",
-    "showLessVouchers": "Thu gọn"
+    "showLessVouchers": "Thu gọn",
+    "unavailableBlock": "Giỏ có {{count}} sản phẩm đã ngừng bán. Quay lại giỏ hàng để xoá rồi mới đặt hàng được.",
+    "backToCart": "Về giỏ hàng",
+    "confirmNotice": "Sau khi bạn thanh toán, nhà cung cấp sẽ xác nhận còn hàng trong vòng 24 giờ. Nếu sản phẩm hết hàng, đơn sẽ được huỷ và tiền được hoàn lại cho bạn trong vòng 48 giờ."
   },
   "orders": {
     "title": "Đơn hàng của bạn",
@@ -760,7 +773,15 @@
       "completed": "Hoàn tất",
       "cancelled": "Đã hủy",
       "refunded": "Đã hoàn tiền"
-    }
+    },
+    "waitingConfirm": "Chờ nhà cung cấp xác nhận trước {{time}}",
+    "confirmOverdue": "Nhà cung cấp đang xác nhận chậm. Bạn có thể nhắn tin cho nhà cung cấp hoặc liên hệ WoodHub để được hỗ trợ.",
+    "contactSupport": "Liên hệ hỗ trợ",
+    "refundNotice": "Đơn hàng #{{orderCode}} đã bị huỷ. Số tiền {{totalAmount}} sẽ được hoàn lại vào tài khoản của bạn trong vòng 48 giờ. Nếu quá thời hạn chưa nhận được, vui lòng liên hệ WoodHub qua mục Liên hệ.",
+    "refundBy": "Hạn hoàn tiền: trước {{time}}.",
+    "refunded": "Đã hoàn {{amount}} vào {{date}} (mã giao dịch {{reference}}).",
+    "refundPendingShort": "Sẽ hoàn tiền trong 48 giờ",
+    "refundedShort": "Đã hoàn tiền"
   },
   "custom": {
     "selectTitle": "Bạn muốn thiết kế gì?",
@@ -1103,12 +1124,19 @@
       "confirmed": "Đã xác nhận",
       "in_production": "Đang sản xuất",
       "completed": "Hoàn thành",
-      "cancelled": "Đã hủy"
+      "cancelled": "Đã hủy",
+      "awaiting_deposit": "Chờ đặt cọc",
+      "deposit_paid": "Đã đặt cọc",
+      "awaiting_final_payment": "Chờ thanh toán phần còn lại",
+      "paid": "Đã thanh toán đủ",
+      "shipping": "Đang giao",
+      "delivered": "Đã giao"
     },
     "role": {
       "customer": "khách hàng",
       "workshop": "xưởng",
-      "admin": "quản trị"
+      "admin": "quản trị",
+      "system": "hệ thống"
     },
     "actionConfirm": "Xác nhận đơn",
     "actionStart": "Bắt đầu sản xuất",
@@ -1117,7 +1145,58 @@
     "incomingTitle": "Đơn custom đang xử lý",
     "incomingSubtitle": "Cập nhật trạng thái đơn theo tiến độ sản xuất thật.",
     "emptyIncoming": "Chưa có đơn custom nào.",
-    "backToProduction": "Đơn sản xuất"
+    "backToProduction": "Đơn sản xuất",
+    "action": {
+      "in_production": "Bắt đầu sản xuất",
+      "awaiting_final_payment": "Hoàn thiện — yêu cầu khách thanh toán",
+      "shipping": "Giao hàng",
+      "delivered": "Đã giao hàng",
+      "completed": "Đã nhận hàng",
+      "cancelled": "Hủy đơn"
+    },
+    "money": {
+      "title": "Thanh toán",
+      "total": "Tổng tiền sản phẩm",
+      "deposit": "Tiền cọc (30%)",
+      "shippingFee": "Phí vận chuyển",
+      "shippingPending": "Chọn địa chỉ để tính",
+      "paid": "Đã thanh toán",
+      "remaining": "Còn phải trả",
+      "remainingNoShip": "Còn phải trả (chưa gồm phí ship)"
+    },
+    "pay": {
+      "deposit": "Đặt cọc {{amount}}",
+      "final": "Thanh toán phần còn lại {{amount}}",
+      "depositHint": "Đặt cọc để xưởng bắt đầu sản xuất. Phần còn lại và phí ship trả khi xưởng hoàn thiện.",
+      "finalHint": "Xưởng đã hoàn thiện sản phẩm. Thanh toán phần còn lại cùng phí ship để xưởng giao hàng.",
+      "needAddress": "Chọn địa chỉ giao trước khi thanh toán phần còn lại.",
+      "paidReload": "Đã nhận tiền, đang cập nhật đơn…",
+      "close": "Đóng QR",
+      "cancelWarning": "Nếu bạn đã chuyển khoản tiền cọc, đừng huỷ — vui lòng chờ hệ thống xác nhận."
+    },
+    "address": {
+      "title": "Địa chỉ giao hàng",
+      "none": "Chưa chọn địa chỉ giao.",
+      "choose": "Chọn địa chỉ",
+      "change": "Đổi địa chỉ",
+      "save": "Lưu địa chỉ",
+      "needPin": "Địa chỉ chưa ghim vị trí — vào Hồ sơ để ghim trước khi chọn.",
+      "empty": "Sổ địa chỉ trống.",
+      "manage": "Quản lý sổ địa chỉ",
+      "locked": "Đơn đã thanh toán đủ nên không đổi được địa chỉ.",
+      "cancel": "Hủy"
+    },
+    "workshop": {
+      "refundWarning": "Khách đã trả {{amount}}. Huỷ đơn lúc này cần hoàn tiền thủ công cho khách. Bạn chắc chắn muốn huỷ?",
+      "waitingDeposit": "Đang chờ khách đặt cọc. Hệ thống tự chuyển sang \"Đã đặt cọc\" khi nhận tiền.",
+      "waitingFinal": "Đang chờ khách thanh toán phần còn lại. Hệ thống tự chuyển sang \"Đã thanh toán đủ\" khi nhận tiền."
+    },
+    "payments": {
+      "title": "Lịch sử thanh toán",
+      "custom_deposit": "Tiền cọc",
+      "custom_final": "Phần còn lại"
+    },
+    "genericError": "Thao tác chưa thành công, vui lòng thử lại."
   },
   "forbidden": {
     "title": "403 — Không có quyền truy cập",
@@ -1351,7 +1430,8 @@
     "COUPON_MIN_ORDER_NOT_MET": "Đơn tối thiểu {{minOrderAmount}} (còn thiếu {{missingAmount}}).",
     "COUPON_NOT_APPLICABLE_TO_ITEMS": "Không áp dụng cho sản phẩm trong giỏ.",
     "COUPON_ALREADY_FREE_SHIPPING": "Đơn đã được miễn phí vận chuyển.",
-    "CART_EMPTY": "Giỏ hàng trống."
+    "CART_EMPTY": "Giỏ hàng trống.",
+    "PRODUCT_UNAVAILABLE": "Sản phẩm \"{{productName}}\" hiện không còn được bán. Giỏ hàng đã được cập nhật."
   },
   "mySub": {
     "title": "Gói của tôi",

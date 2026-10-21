@@ -3,10 +3,20 @@ import { useManagedOrders, useUpdateOrderStatus } from '../../hooks/useOrderMana
 import { pageInfoOf } from '../../hooks/useOrders.js';
 import { ORDER_STATUS_LABEL, ORDER_STATUS_BADGE as BADGE, ORDER_ACTION_LABEL, nextActions } from '../../utils/orderStatus.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
+import { confirmInfo, refundInfo, formatRemaining, useNow } from '../../utils/orderDeadline.js';
 import ModalShell from '../admin/ModalShell.jsx';
-import { Calendar, Phone } from '../suppliers/icons.jsx';
+import { Calendar, Phone, Clock } from '../suppliers/icons.jsx';
 
 const PAGE_SIZE = 10;
+// Tab "Cần xác nhận": tải nhiều hơn để sắp theo hạn trên cả trang (BE trả mới nhất trước)
+const CONFIRM_PAGE_SIZE = 50;
+// Lý do huỷ gợi ý khi NCC huỷ đơn đã thanh toán (bắt buộc có lý do — docs no-inventory §4.2)
+const CANCEL_REASONS = ['Hết hàng', 'Hết màu/kích thước này', 'Không giao được tới địa chỉ này'];
+const CONFIRM_LEVEL_CLS = {
+  ok: 'bg-base-200 text-base-content/70',
+  soon: 'bg-warning/15 text-warning',
+  overdue: 'bg-error/15 text-error',
+};
 const TABS = [
   ['', 'Tất cả'], ['paid', 'Cần xác nhận'], ['confirmed', 'Đã xác nhận'], ['processing', 'Đang chuẩn bị'],
   ['shipping', 'Đang giao'], ['delivered', 'Đã giao'], ['completed', 'Hoàn tất'], ['pending_payment', 'Chờ thanh toán'], ['cancelled', 'Đã hủy'],
@@ -20,23 +30,44 @@ const TABS = [
  * Nút hành động lấy từ utils/orderStatus.js (chỉ hiện bước hợp lệ). Mọi thay đổi đều qua modal xác
  * nhận có ô ghi chú (BE lưu vào lịch sử trạng thái) — vì đổi trạng thái đơn là việc khách nhìn thấy
  * ngay và không tự hoàn tác được. Lỗi 409 (đơn vừa bị đổi ở nơi khác) hiện ngay trong modal.
+ *
+ * Xác nhận 24 giờ (docs BE no-inventory-order-confirm-fe.md §4): sàn không quản lý tồn kho, NCC phải xác nhận còn
+ * hàng trước `confirmDeadline`. Portal NCC mở sẵn tab "Cần xác nhận" (status=paid), sắp theo hạn tăng dần, đếm ngược
+ * (vàng ≤ 6 giờ, đỏ khi quá hạn). Huỷ đơn đã thanh toán bắt buộc có lý do và báo trước khách được hoàn tiền 48 giờ.
  */
 export default function OrderManagement({ scope, title, subtitle }) {
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState(scope === 'supplier' ? 'paid' : '');
   const [page, setPage] = useState(0);
   const [expanded, setExpanded] = useState(null);
   const [pending, setPending] = useState(null); // { order, to } — đang mở modal xác nhận
   const [note, setNote] = useState('');
   const [modalErr, setModalErr] = useState('');
+  const now = useNow();
 
-  const { data, isLoading, isError, refetch, isFetching } = useManagedOrders(scope, { status: status || undefined, page, size: PAGE_SIZE });
+  const confirmTab = status === 'paid';
+  const { data, isLoading, isError, refetch, isFetching } = useManagedOrders(scope, {
+    status: status || undefined, page, size: confirmTab ? CONFIRM_PAGE_SIZE : PAGE_SIZE,
+  });
   const updateStatus = useUpdateOrderStatus(scope);
-  const orders = data?.content ?? [];
+  const rawOrders = data?.content ?? [];
+  // Tab "Cần xác nhận": đơn sắp hết hạn lên đầu
+  const orders = confirmTab
+    ? [...rawOrders].sort((a, b) => new Date(a.confirmDeadline ?? 8.64e15) - new Date(b.confirmDeadline ?? 8.64e15))
+    : rawOrders;
   const pageInfo = pageInfoOf(data);
+
+  // Huỷ đơn KHÁCH ĐÃ TRẢ TIỀN → admin phải hoàn tiền 48h → bắt buộc ghi lý do
+  const isPaidCancel = (p) => p?.to === 'cancelled' && !!p.order.paidAt;
+  const actionLabel = (from, to) => {
+    if (scope === 'supplier' && from === 'paid' && to === 'confirmed') return 'Xác nhận còn hàng';
+    if (scope === 'supplier' && from === 'paid' && to === 'cancelled') return 'Hết hàng – huỷ';
+    return ORDER_ACTION_LABEL[to];
+  };
 
   const openAction = (order, to) => { setPending({ order, to }); setNote(''); setModalErr(''); };
   const closeModal = () => { if (!updateStatus.isPending) setPending(null); };
   const confirm = () => {
+    if (isPaidCancel(pending) && !note.trim()) { setModalErr('Vui lòng chọn hoặc nhập lý do huỷ để báo cho khách.'); return; }
     updateStatus.mutate(
       { id: pending.order.id, status: pending.to, note: note.trim() || undefined },
       {
@@ -85,6 +116,8 @@ export default function OrderManagement({ scope, title, subtitle }) {
           {orders.map((o) => {
             const { forward, negative } = nextActions(o.status);
             const open = expanded === o.id;
+            const cInfo = confirmInfo(o, now);
+            const rInfo = refundInfo(o, now);
             return (
               <article key={o.id} className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm md:p-5">
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
@@ -109,6 +142,23 @@ export default function OrderManagement({ scope, title, subtitle }) {
                     <span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE[o.status] ?? ''}`}>{ORDER_STATUS_LABEL[o.status] ?? o.status}</span>
                   </div>
                 </div>
+
+                {/* Đếm ngược hạn xác nhận 24h / trạng thái hoàn tiền của đơn đã trả tiền bị huỷ */}
+                {cInfo && (
+                  <p className={`mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ${CONFIRM_LEVEL_CLS[cInfo.level]}`}>
+                    <Clock width={13} height={13} />
+                    {cInfo.level === 'overdue'
+                      ? `Quá hạn xác nhận${cInfo.remainingMs < 0 ? ` ${formatRemaining(cInfo.remainingMs)}` : ''} (hạn ${formatDate(cInfo.deadline)})`
+                      : `Còn ${formatRemaining(cInfo.remainingMs)} để xác nhận (trước ${formatDate(cInfo.deadline)})`}
+                  </p>
+                )}
+                {rInfo && (
+                  <p className={`mt-3 rounded-lg px-3 py-1.5 text-xs ${rInfo.done ? 'bg-success/10 text-success' : rInfo.overdue ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'}`}>
+                    {rInfo.done
+                      ? `Đã hoàn ${formatVnd(rInfo.refund.amount)} lúc ${formatDate(rInfo.refund.refundedAt)} · mã GD ${rInfo.refund.reference}`
+                      : `Khách đã thanh toán — chờ admin hoàn tiền${rInfo.deadline ? ` trước ${formatDate(rInfo.deadline)}` : ' trong 48 giờ'}${rInfo.overdue ? ' (đã quá hạn)' : ''}`}
+                  </p>
+                )}
 
                 {open && (
                   <div className="mt-4 grid gap-4 rounded-xl bg-base-200/50 p-4 text-sm md:grid-cols-2">
@@ -142,10 +192,10 @@ export default function OrderManagement({ scope, title, subtitle }) {
                   <div className="flex flex-wrap items-center gap-2">
                     {o.status === 'pending_payment' && <span className="text-xs text-base-content/50">Đơn tự chuyển "Đã thanh toán" khi khách chuyển khoản</span>}
                     {negative.map((s) => (
-                      <button key={s} onClick={() => openAction(o, s)} className="btn btn-outline btn-error btn-sm">{ORDER_ACTION_LABEL[s]}</button>
+                      <button key={s} onClick={() => openAction(o, s)} className="btn btn-outline btn-error btn-sm">{actionLabel(o.status, s)}</button>
                     ))}
                     {forward.map((s) => (
-                      <button key={s} onClick={() => openAction(o, s)} className="btn btn-primary btn-sm">{ORDER_ACTION_LABEL[s]}</button>
+                      <button key={s} onClick={() => openAction(o, s)} className="btn btn-primary btn-sm">{actionLabel(o.status, s)}</button>
                     ))}
                   </div>
                 </div>
@@ -168,7 +218,7 @@ export default function OrderManagement({ scope, title, subtitle }) {
       <ModalShell
         open={!!pending}
         onClose={closeModal}
-        title={pending ? ORDER_ACTION_LABEL[pending.to] : ''}
+        title={pending ? actionLabel(pending.order.status, pending.to) : ''}
         footer={
           <>
             <button onClick={closeModal} className="btn btn-ghost" disabled={updateStatus.isPending}>Quay lại</button>
@@ -188,11 +238,22 @@ export default function OrderManagement({ scope, title, subtitle }) {
               Đơn <span className="font-mono font-semibold">{pending.order.orderCode}</span>:{' '}
               <span className="font-medium">{ORDER_STATUS_LABEL[pending.order.status]}</span> → <span className="font-medium">{ORDER_STATUS_LABEL[pending.to]}</span>
             </p>
-            {(pending.to === 'cancelled' || pending.to === 'refunded') && (
+            {isPaidCancel(pending) ? (
+              <p className="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">
+                Huỷ đơn đã thanh toán. Khách sẽ được hoàn {formatVnd(pending.order.totalAmount)} trong vòng 48 giờ. Thao tác này không hoàn tác được.
+              </p>
+            ) : (pending.to === 'cancelled' || pending.to === 'refunded') && (
               <p className="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">Thao tác này không hoàn tác được. Nên ghi rõ lý do để khách và quản trị viên nắm.</p>
             )}
+            {isPaidCancel(pending) && (
+              <div className="flex flex-wrap gap-1.5">
+                {CANCEL_REASONS.map((r) => (
+                  <button key={r} type="button" onClick={() => { setNote(r); setModalErr(''); }} className={`btn btn-xs ${note === r ? 'btn-primary' : 'btn-outline'}`}>{r}</button>
+                ))}
+              </div>
+            )}
             <label className="flex flex-col gap-1.5">
-              <span className="text-base-content/70">Ghi chú (tuỳ chọn)</span>
+              <span className="text-base-content/70">{isPaidCancel(pending) ? 'Lý do huỷ (bắt buộc, khách sẽ thấy)' : 'Ghi chú (tuỳ chọn)'}</span>
               <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} className="textarea textarea-bordered w-full" placeholder="VD: Đã xác nhận, chuẩn bị hàng trong 2 ngày" />
             </label>
             {modalErr && <div role="alert" className="alert alert-error py-2 text-sm">{modalErr}</div>}

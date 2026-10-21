@@ -71,7 +71,7 @@ function Section({ no, title, action, children }) {
  */
 export default function Checkout() {
   const { t } = useTranslation();
-  const { data: cart, isLoading: cartLoading } = useCart();
+  const { data: cart, isLoading: cartLoading, refetch: refetchCart } = useCart();
   const { data: addresses = [], isLoading: addressesLoading } = useAddresses();
   const checkout = useCheckout();
 
@@ -122,6 +122,8 @@ export default function Checkout() {
           <div className="flex flex-col gap-4">
             <h1 className="font-display text-3xl">{paid ? t('checkout.doneTitle') : t('checkout.payTitle')}</h1>
             {result.orders.length > 1 && <p className="text-sm text-base-content/65">{t('checkout.splitNote', { count: result.orders.length })}</p>}
+            {/* Sàn không quản lý tồn kho: NCC xác nhận trong 24h, hết hàng thì huỷ + hoàn tiền 48h (no-inventory-order-confirm-fe.md) */}
+            {!paid && <p className="rounded-xl border border-info/30 bg-info/5 p-3 text-sm text-base-content/75">{t('checkout.confirmNotice')}</p>}
             <ul className="flex flex-col gap-3">
               {result.orders.map((o) => (
                 <li key={o.id} className="rounded-2xl border border-base-300 bg-base-100 p-4 text-sm">
@@ -170,7 +172,9 @@ export default function Checkout() {
   }
 
   const selected = selectedAddress;
-  const canSubmit = !!selected?.hasCoordinates && !checkout.isPending;
+  // Món ngừng bán (available=false) không đặt được — BE trả 409 → khoá nút, bảo khách về giỏ xoá trước
+  const unavailableCount = cart.unavailableCount ?? items.filter((i) => i.available === false).length;
+  const canSubmit = !!selected?.hasCoordinates && !checkout.isPending && unavailableCount === 0;
   // Tổng giảm DỰ KIẾN = cộng estimatedDiscount từng voucher (BE tính khi dùng riêng) — số thật do checkout quyết định
   const estimatedDiscount = vouchers
     .filter((v) => voucherIds.includes(v.id))
@@ -190,6 +194,8 @@ export default function Checkout() {
         // 400 (giỏ trống / thiếu toạ độ / voucher không áp được) · 409 (SP ngừng bán / NCC chưa có chi nhánh / voucher hết lượt)
         onError: (err) => {
           // Lỗi do voucher (vừa hết lượt, hết hạn...) → đơn CHƯA được tạo; tải lại danh sách để khách chọn lại
+          // NCC vừa ẩn SP đúng lúc khách đang thanh toán → tải lại giỏ để dòng đó hiện "ngừng bán"
+          if (err?.response?.data?.errorCode === 'PRODUCT_UNAVAILABLE') refetchCart();
           if (String(err?.response?.data?.errorCode ?? '').startsWith('COUPON_')) {
             vouchersQuery.refetch();
             setSubmitErr(`${apiErrorMessage(err, t('checkout.submitFailed'))} ${t('checkout.voucherChanged')}`);
@@ -318,7 +324,7 @@ export default function Checkout() {
           </div>
           <ul className="flex max-h-64 flex-col gap-3 overflow-y-auto px-1 pb-1 pt-2">
             {items.map((i) => (
-              <li key={i.id} className="flex gap-3 text-sm">
+              <li key={i.id} className={`flex gap-3 text-sm ${i.available === false ? 'opacity-45 line-through' : ''}`}>
                 <div className="relative shrink-0">
                   {i.imageUrl ? <img src={i.imageUrl} alt={i.productName} className="h-14 w-14 rounded-lg object-cover" /> : <div className="h-14 w-14 rounded-lg bg-base-200" aria-hidden="true" />}
                   <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-base-content px-1 text-[11px] font-medium text-base-100">{i.quantity}</span>
@@ -344,6 +350,12 @@ export default function Checkout() {
           <button onClick={handleSubmit} disabled={!canSubmit} className="btn btn-primary btn-lg w-full">
             {checkout.isPending ? <span className="loading loading-spinner loading-sm" /> : t('checkout.placeOrder')}
           </button>
+          {unavailableCount > 0 && (
+            <div role="alert" className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs">
+              {t('checkout.unavailableBlock', { count: unavailableCount })}{' '}
+              <Link to="/cart" className="link link-primary font-medium">{t('checkout.backToCart')}</Link>
+            </div>
+          )}
           {!selected?.hasCoordinates && <p className="text-xs text-base-content/55">{t('checkout.selectAddressHint')}</p>}
           {submitErr && <div role="alert" className="alert alert-error py-2 text-sm">{submitErr}</div>}
           <p className="flex items-center justify-center gap-1.5 text-xs text-base-content/55"><Shield width={14} height={14} /> {t('cart.secure')}</p>

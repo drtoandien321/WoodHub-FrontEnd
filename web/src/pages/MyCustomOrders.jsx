@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMyCustomOrders } from '../hooks/useQuotes.js';
-import { customOrderMeta } from '../utils/quoteStatus.js';
+import { customOrderMeta, CUSTOM_ORDER_TABS } from '../utils/quoteStatus.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import { formatVnd } from '../utils/format.js';
 
-const TABS = ['', 'pending', 'confirmed', 'in_production', 'completed', 'cancelled'];
+// Tab theo luồng BE-01 (cọc → sản xuất → thanh toán → giao) — xem utils/quoteStatus.js
+const TABS = CUSTOM_ORDER_TABS;
 
 // "Đơn custom của tôi" — GET /custom-orders/my (customer).
 export default function MyCustomOrders() {

@@ -50,6 +50,17 @@ export const useMyCustomOrders = (params) => useQuery({ queryKey: ['myCustomOrde
 export const useIncomingCustomOrders = (params) => useQuery({ queryKey: ['incomingCustomOrders', params], queryFn: () => api.getIncomingCustomOrders(params) });
 export const useCustomOrderDetail = (id) => useQuery({ queryKey: ['customOrder', id], queryFn: () => api.getCustomOrderDetail(id), enabled: !!id });
 
+// BE-01: lấy QR cọc / phần còn lại. Không đụng cache đơn — đơn chỉ đổi trạng thái khi tiền về (poll payment).
+export const useCreateCustomOrderPayment = () => useMutation({ mutationFn: api.createCustomOrderPayment });
+
+export const useSetCustomOrderAddress = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.setCustomOrderAddress,
+    onSuccess: (order) => qc.setQueryData(['customOrder', order.id], order),
+  });
+};
+
 export const useUpdateCustomOrderStatus = () => {
   const qc = useQueryClient();
   return useMutation({

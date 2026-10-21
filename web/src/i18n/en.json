@@ -501,13 +501,16 @@
       "label": "Address",
       "value": "FPT University, HCMC"
     },
-    "success": "Thank you! WoodHub has received your message and will get back to you soon.",
+    "success": "Thank you! WoodHub has received your message and will reply by email within 24 hours.",
     "errors": {
       "name": "Please enter your name.",
       "email": "Invalid email address.",
       "subject": "Please enter a subject.",
-      "message": "Please enter a message."
-    }
+      "message": "Please enter a message.",
+      "phone": "Phone may only contain digits, spaces, + - ( ) . (max 20 characters)."
+    },
+    "phonePlaceholder": "Phone number (optional)",
+    "sendFailed": "Could not send your message, please try again."
   },
   "shop": {
     "all": "All",
@@ -662,7 +665,14 @@
     "errInvalid": "Invalid quantity (1–999).",
     "errGeneric": "Couldn't update your cart. Please try again.",
     "itemsCount_one": "{{count}} item",
-    "itemsCount_other": "{{count}} items"
+    "itemsCount_other": "{{count}} items",
+    "unavailableReason": {
+      "PRODUCT_NOT_ACTIVE": "No longer sold",
+      "SUPPLIER_NOT_ACTIVE": "Seller is temporarily not selling"
+    },
+    "unavailableFallback": "Currently unavailable",
+    "unavailableBanner": "{{count}} item(s) are no longer sold. Please remove them to place your order.",
+    "removeUnavailable": "Remove all unavailable items"
   },
   "checkout": {
     "title": "Checkout",
@@ -720,7 +730,10 @@
     "discountEstimated": "Discount (estimated)",
     "voucherChanged": "A voucher you picked is no longer valid and the list has been refreshed. Please pick again and place the order.",
     "showMoreVouchers": "Show {{count}} more",
-    "showLessVouchers": "Show less"
+    "showLessVouchers": "Show less",
+    "unavailableBlock": "Your cart has {{count}} item(s) that are no longer sold. Go back to the cart and remove them to place your order.",
+    "backToCart": "Back to cart",
+    "confirmNotice": "After you pay, the seller confirms stock within 24 hours. If an item is out of stock, the order is cancelled and you are refunded within 48 hours."
   },
   "orders": {
     "title": "Your orders",
@@ -764,7 +777,15 @@
       "refunded": "Refunded"
     },
     "itemsCount_one": "{{count}} item",
-    "itemsCount_other": "{{count}} items"
+    "itemsCount_other": "{{count}} items",
+    "waitingConfirm": "Waiting for the seller to confirm before {{time}}",
+    "confirmOverdue": "The seller is late confirming. You can message the seller or contact WoodHub for help.",
+    "contactSupport": "Contact support",
+    "refundNotice": "Order #{{orderCode}} was cancelled. {{totalAmount}} will be refunded to your account within 48 hours. If you have not received it by then, please contact WoodHub via the Contact page.",
+    "refundBy": "Refund due before {{time}}.",
+    "refunded": "Refunded {{amount}} on {{date}} (transaction {{reference}}).",
+    "refundPendingShort": "Refund within 48 hours",
+    "refundedShort": "Refunded"
   },
   "custom": {
     "selectTitle": "What would you like to design?",
@@ -1103,16 +1124,23 @@
     "notePlaceholder": "Note for this status change (optional)",
     "historyTitle": "Status history",
     "status": {
-      "pending": "Awaiting workshop confirmation",
+      "pending": "Awaiting workshop",
       "confirmed": "Confirmed",
       "in_production": "In production",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "awaiting_deposit": "Awaiting deposit",
+      "deposit_paid": "Deposit paid",
+      "awaiting_final_payment": "Awaiting final payment",
+      "paid": "Fully paid",
+      "shipping": "Shipping",
+      "delivered": "Delivered"
     },
     "role": {
       "customer": "customer",
       "workshop": "workshop",
-      "admin": "admin"
+      "admin": "admin",
+      "system": "system"
     },
     "actionConfirm": "Confirm order",
     "actionStart": "Start production",
@@ -1121,7 +1149,58 @@
     "incomingTitle": "Custom orders in progress",
     "incomingSubtitle": "Update order status as production progresses.",
     "emptyIncoming": "No custom orders yet.",
-    "backToProduction": "Production orders"
+    "backToProduction": "Production orders",
+    "action": {
+      "in_production": "Start production",
+      "awaiting_final_payment": "Finish — request final payment",
+      "shipping": "Ship order",
+      "delivered": "Mark delivered",
+      "completed": "I received it",
+      "cancelled": "Cancel order"
+    },
+    "money": {
+      "title": "Payment",
+      "total": "Product total",
+      "deposit": "Deposit (30%)",
+      "shippingFee": "Shipping fee",
+      "shippingPending": "Pick an address to calculate",
+      "paid": "Paid",
+      "remaining": "Amount due",
+      "remainingNoShip": "Amount due (excl. shipping)"
+    },
+    "pay": {
+      "deposit": "Pay deposit {{amount}}",
+      "final": "Pay the rest {{amount}}",
+      "depositHint": "Pay the deposit so the workshop can start production. The rest plus shipping is paid when the item is finished.",
+      "finalHint": "The workshop has finished your item. Pay the rest plus shipping so it can be delivered.",
+      "needAddress": "Pick a delivery address before paying the rest.",
+      "paidReload": "Payment received, updating the order…",
+      "close": "Hide QR",
+      "cancelWarning": "If you have already transferred the deposit, do not cancel — please wait for the system to confirm it."
+    },
+    "address": {
+      "title": "Delivery address",
+      "none": "No delivery address yet.",
+      "choose": "Choose address",
+      "change": "Change address",
+      "save": "Save address",
+      "needPin": "This address is not pinned — pin it in your Profile first.",
+      "empty": "Your address book is empty.",
+      "manage": "Manage addresses",
+      "locked": "The order is fully paid, so the address can no longer be changed.",
+      "cancel": "Cancel"
+    },
+    "workshop": {
+      "refundWarning": "The customer has paid {{amount}}. Cancelling now requires a manual refund. Cancel anyway?",
+      "waitingDeposit": "Waiting for the customer’s deposit. The order moves to \"Deposit paid\" automatically when it arrives.",
+      "waitingFinal": "Waiting for the customer’s final payment. The order moves to \"Fully paid\" automatically when it arrives."
+    },
+    "payments": {
+      "title": "Payment history",
+      "custom_deposit": "Deposit",
+      "custom_final": "Final payment"
+    },
+    "genericError": "Something went wrong, please try again."
   },
   "forbidden": {
     "title": "403 — Access denied",
@@ -1357,7 +1436,8 @@
     "COUPON_MIN_ORDER_NOT_MET": "Minimum order {{minOrderAmount}} ({{missingAmount}} to go).",
     "COUPON_NOT_APPLICABLE_TO_ITEMS": "Not applicable to items in your cart.",
     "COUPON_ALREADY_FREE_SHIPPING": "This order already ships free.",
-    "CART_EMPTY": "Your cart is empty."
+    "CART_EMPTY": "Your cart is empty.",
+    "PRODUCT_UNAVAILABLE": "\"{{productName}}\" is no longer sold. Your cart has been updated."
   },
   "mySub": {
     "title": "My plan",

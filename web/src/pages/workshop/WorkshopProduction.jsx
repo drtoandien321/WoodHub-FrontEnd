@@ -2,18 +2,19 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useIncomingCustomOrders } from '../../hooks/useQuotes.js';
-import { customOrderMeta } from '../../utils/quoteStatus.js';
+import { customOrderMeta, CUSTOM_ORDER_TABS } from '../../utils/quoteStatus.js';
 import StatusBadge from '../../components/supplier/StatusBadge.jsx';
 import { formatVnd } from '../../utils/format.js';
 
-const TABS = ['', 'pending', 'confirmed', 'in_production', 'completed', 'cancelled'];
+// Tab theo luồng BE-01 (cọc → sản xuất → thanh toán → giao) — xem utils/quoteStatus.js
+const TABS = CUSTOM_ORDER_TABS;
 
 /*
  * Đơn custom xưởng đang xử lý — GET /custom-orders/incoming (BE-8, FE-6). Bấm vào → chi tiết
  * chung /custom-orders/:id (CustomOrderDetail.jsx tự nhận diện vai workshop, hiện đúng nút
- * xác nhận/bắt đầu sản xuất/hoàn thành/hủy theo be-8-state-machine.md).
+ * bắt đầu sản xuất / hoàn thiện / giao hàng / hủy theo luồng BE-01 custom-order-payment-fe.md).
  * ⚠️ Thay thế trang cũ (5 bước tự nghĩ received→designing→producing→finishing→delivering,
- * KHÔNG khớp state machine thật của BE — chỉ có pending/confirmed/in_production/completed/cancelled).
+ * KHÔNG khớp state machine thật của BE).
  */
 export default function WorkshopProduction() {
   const { t } = useTranslation();
