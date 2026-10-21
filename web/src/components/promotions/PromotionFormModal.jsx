@@ -26,11 +26,19 @@ const numOrNull = (v) => (v === '' || v == null ? null : Number(v));
  *  - admin: tìm trong catalog công khai (GET /products?keyword=) — KM toàn sàn áp được mọi SP.
  * Lưu theo productId; tên chỉ để hiển thị (PromotionResponse chỉ trả productIds nên khi sửa, SP chưa
  * có trong danh sách đang tải sẽ hiện dạng "SP #xxxx").
+ *
+ * "Chọn tất cả": BE bắt buộc liệt kê productIds (không có kiểu "áp mọi SP") → nút này tick toàn bộ SP đang hiện trong
+ * danh sách (đang tìm thì chỉ các kết quả tìm). SP đăng SAU khi tạo mã sẽ không tự được áp — phải sửa mã để thêm.
+ * Trước đây admin chỉ tải 20 SP/lần nên không thể chọn hết; giờ tải tối đa PICKER_LIMIT.
  */
+const PICKER_LIMIT = 500;
+const CHIP_PREVIEW = 8;
+
 function ProductPicker({ scope, value, onChange }) {
   const [keyword, setKeyword] = useState('');
-  const mine = useMyProducts({ size: 100 }, { enabled: scope === 'supplier' });
-  const catalog = useProducts({ keyword: keyword.trim() || undefined, size: 20 }, { enabled: scope === 'admin' });
+  const [showAllChips, setShowAllChips] = useState(false);
+  const mine = useMyProducts({ size: PICKER_LIMIT }, { enabled: scope === 'supplier' });
+  const catalog = useProducts({ keyword: keyword.trim() || undefined, size: PICKER_LIMIT }, { enabled: scope === 'admin' });
   const source = scope === 'supplier' ? mine : catalog;
   const all = source.data?.content ?? [];
   const list = scope === 'supplier' && keyword.trim()
@@ -39,19 +47,46 @@ function ProductPicker({ scope, value, onChange }) {
   const nameOf = (id) => all.find((p) => p.id === id)?.name ?? `SP #${String(id).slice(0, 6)}`;
   const toggle = (id) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id]);
 
+  const listIds = list.map((p) => p.id);
+  const allListSelected = listIds.length > 0 && listIds.every((id) => value.includes(id));
+  // Gộp (không thay thế) → chọn tất cả kết quả tìm "bàn" rồi tìm "ghế" chọn tiếp vẫn giữ các bàn đã chọn
+  const selectAll = () => onChange([...new Set([...value, ...listIds])]);
+  const clearList = () => onChange(value.filter((id) => !listIds.includes(id)));
+  const chips = showAllChips ? value : value.slice(0, CHIP_PREVIEW);
+
   return (
     <div className="flex flex-col gap-2">
       {value.length > 0 && (
         <ul className="flex flex-wrap gap-1.5">
-          {value.map((id) => (
+          {chips.map((id) => (
             <li key={id} className="flex items-center gap-1 rounded-full bg-primary/10 py-0.5 pl-2.5 pr-1 text-xs">
               <span className="max-w-[160px] truncate">{nameOf(id)}</span>
               <button type="button" onClick={() => toggle(id)} className="btn btn-ghost btn-xs btn-circle" aria-label={`Bỏ ${nameOf(id)}`}>×</button>
             </li>
           ))}
+          {value.length > CHIP_PREVIEW && (
+            <li>
+              <button type="button" onClick={() => setShowAllChips((x) => !x)} className="btn btn-ghost btn-xs">
+                {showAllChips ? 'Thu gọn' : `+${value.length - CHIP_PREVIEW} sản phẩm khác`}
+              </button>
+            </li>
+          )}
         </ul>
       )}
       <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm sản phẩm theo tên…" className="input input-bordered input-sm w-full" />
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span className="text-base-content/60">Đã chọn <b className="text-base-content">{value.length}</b> sản phẩm</span>
+        <span className="flex gap-1">
+          <button type="button" onClick={selectAll} disabled={!listIds.length || allListSelected} className="btn btn-outline btn-primary btn-xs">
+            {keyword.trim() ? `Chọn tất cả kết quả (${listIds.length})` : `Chọn tất cả (${listIds.length})`}
+          </button>
+          {value.length > 0 && (
+            <button type="button" onClick={keyword.trim() ? clearList : () => onChange([])} className="btn btn-ghost btn-xs">
+              {keyword.trim() ? 'Bỏ chọn kết quả' : 'Bỏ chọn tất cả'}
+            </button>
+          )}
+        </span>
+      </div>
       <div className="max-h-44 overflow-y-auto rounded-xl border border-base-300">
         {source.isLoading ? (
           <p className="p-3 text-center text-xs text-base-content/50">Đang tải…</p>
@@ -246,7 +281,15 @@ export default function PromotionFormModal({ scope, initial = null, onClose }) {
         {(scope === 'supplier' || form.type === 'product') && (
           <div className="flex flex-col gap-1.5">
             {label(scope === 'supplier' ? 'Sản phẩm của bạn được áp mã' : 'Sản phẩm được áp mã', true)}
-            <ProductPicker scope={scope} value={form.productIds} onChange={(productIds) => setForm((s) => ({ ...s, productIds }))} />
+            <ProductPicker
+              scope={scope}
+              value={form.productIds}
+              onChange={(productIds) => {
+                setForm((s) => ({ ...s, productIds }));
+                // Lỗi cũ: chọn SP rồi vẫn kẹt dòng "Chọn ít nhất 1 sản phẩm" tới khi bấm Lưu lại
+                if (productIds.length) setErrors(({ productIds: _drop, ...rest }) => rest);
+              }}
+            />
             {err('productIds')}
           </div>
         )}
