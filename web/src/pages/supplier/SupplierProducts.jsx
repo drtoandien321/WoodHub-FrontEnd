@@ -107,7 +107,9 @@ export default function SupplierProducts() {
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <Link to={`/portal/supplier/products/${p.id}`} className="btn btn-ghost btn-xs btn-square" aria-label="Xem"><Eye width={15} height={15} /></Link>
-                      <button onClick={() => setModalMode(p.id)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa"><Pencil width={15} height={15} /></button>
+                      <button onClick={() => setModalMode(p.id)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa">
+                        {modalMode === p.id && editingDetail.isLoading ? <span className="loading loading-spinner loading-xs" /> : <Pencil width={15} height={15} />}
+                      </button>
                       <button onClick={() => handleDelete(p)} className="btn btn-ghost btn-xs btn-square text-error" aria-label="Xóa"><Trash width={15} height={15} /></button>
                     </div>
                   </td>
@@ -122,7 +124,12 @@ export default function SupplierProducts() {
         )}
       </section>
 
-      {categories && (
+      {/*
+        CHỈ mount modal khi đã có dữ liệu (modalOpen). Lỗi cũ: modal mount ngay lúc bấm Sửa, khi chi tiết SP còn đang
+        tải → useState(initial) chỉ chạy 1 lần với initial = undefined → form sửa hiện TRỐNG (tên rỗng, trạng thái Nháp),
+        dữ liệu tải về sau cũng không đổ vào form.
+      */}
+      {categories && modalOpen && (
         <ProductFormModal
           key={modalMode === 'create' ? 'create' : modalMode} // remount mỗi lần mở sửa SP khác — reset state form sạch
           open={modalOpen}
