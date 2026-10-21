@@ -109,6 +109,7 @@ const REAL_ENDPOINTS = new Set([
   'createQuote', 'getMyQuotes', 'getIncomingQuotes', 'getQuoteDetail', 'cancelQuote',
   'createOffer', 'acceptOffer', 'rejectOffer',
   'getMyCustomOrders', 'getIncomingCustomOrders', 'getCustomOrderDetail', 'updateCustomOrderStatus',
+  'createCustomOrderPayment', 'setCustomOrderAddress', // BE-01 đặt cọc / thanh toán / địa chỉ đơn custom
   // Module Cart — giỏ hàng lưu ở server (docs/cart-address-fe.md của BE, commit 40ece30)
   'getCart', 'addCartItem', 'updateCartItem', 'removeCartItem', 'clearCart',
   // Module Sổ địa chỉ giao hàng (cùng doc cart-address-fe.md)
@@ -716,10 +717,19 @@ export const api = {
   getCustomOrderDetail: (id) => call(() => http.get(`/custom-orders/${id}`), 'getCustomOrderDetail', id),
   /*
    * PATCH /custom-orders/:id/status  body: { status, note? } → CustomOrderResponse (kèm history mới)
-   * Chuyển hợp lệ (sai → 409): pending→confirmed/cancelled, confirmed→in_production/cancelled,
-   * in_production→completed/cancelled. Customer CHỈ được cancel khi còn 'pending'.
+   * Luồng BE-01 (custom-order-payment-fe.md §2, sai → 409): awaiting_deposit→cancelled · deposit_paid→in_production ·
+   * in_production→awaiting_final_payment ("Hoàn thiện") · paid→shipping→delivered (xưởng) · delivered→completed (khách).
+   * deposit_paid / paid chỉ hệ thống chuyển khi nhận tiền.
    */
   updateCustomOrderStatus: ({ id, ...body }) => call(() => http.patch(`/custom-orders/${id}/status`, body), 'updateCustomOrderStatus', { id, ...body }),
+  /*
+   * POST /custom-orders/:id/payment (chỉ khách) → PaymentResponse (purpose custom_deposit | custom_final, txnRef "CUS...").
+   * Gọi lại nhiều lần an toàn: QR còn hạn → trả đúng QR đó; hết hạn / đổi số tiền → gia hạn cùng payment.
+   * 409: không ở bước cần trả · chưa có địa chỉ (khoản cuối) · xưởng chưa khai báo địa điểm.
+   */
+  createCustomOrderPayment: (id) => call(() => http.post('/custom-orders/' + id + '/payment'), 'createCustomOrderPayment', id),
+  // PUT /custom-orders/:id/address { addressId } (chỉ khách, địa chỉ phải có toạ độ) → CustomOrderResponse có shippingFee mới
+  setCustomOrderAddress: ({ id, addressId }) => call(() => http.put('/custom-orders/' + id + '/address', { addressId }), 'setCustomOrderAddress', { id, addressId }),
 
   /*
    * ===== SUPPLIER (browse công khai — trang /suppliers, /suppliers/:id) =====

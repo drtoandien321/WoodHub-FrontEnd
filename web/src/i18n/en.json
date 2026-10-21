@@ -1116,16 +1116,23 @@
     "notePlaceholder": "Note for this status change (optional)",
     "historyTitle": "Status history",
     "status": {
-      "pending": "Awaiting workshop confirmation",
+      "pending": "Awaiting workshop",
       "confirmed": "Confirmed",
       "in_production": "In production",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "awaiting_deposit": "Awaiting deposit",
+      "deposit_paid": "Deposit paid",
+      "awaiting_final_payment": "Awaiting final payment",
+      "paid": "Fully paid",
+      "shipping": "Shipping",
+      "delivered": "Delivered"
     },
     "role": {
       "customer": "customer",
       "workshop": "workshop",
-      "admin": "admin"
+      "admin": "admin",
+      "system": "system"
     },
     "actionConfirm": "Confirm order",
     "actionStart": "Start production",
@@ -1134,7 +1141,58 @@
     "incomingTitle": "Custom orders in progress",
     "incomingSubtitle": "Update order status as production progresses.",
     "emptyIncoming": "No custom orders yet.",
-    "backToProduction": "Production orders"
+    "backToProduction": "Production orders",
+    "action": {
+      "in_production": "Start production",
+      "awaiting_final_payment": "Finish — request final payment",
+      "shipping": "Ship order",
+      "delivered": "Mark delivered",
+      "completed": "I received it",
+      "cancelled": "Cancel order"
+    },
+    "money": {
+      "title": "Payment",
+      "total": "Product total",
+      "deposit": "Deposit (30%)",
+      "shippingFee": "Shipping fee",
+      "shippingPending": "Pick an address to calculate",
+      "paid": "Paid",
+      "remaining": "Amount due",
+      "remainingNoShip": "Amount due (excl. shipping)"
+    },
+    "pay": {
+      "deposit": "Pay deposit {{amount}}",
+      "final": "Pay the rest {{amount}}",
+      "depositHint": "Pay the deposit so the workshop can start production. The rest plus shipping is paid when the item is finished.",
+      "finalHint": "The workshop has finished your item. Pay the rest plus shipping so it can be delivered.",
+      "needAddress": "Pick a delivery address before paying the rest.",
+      "paidReload": "Payment received, updating the order…",
+      "close": "Hide QR",
+      "cancelWarning": "If you have already transferred the deposit, do not cancel — please wait for the system to confirm it."
+    },
+    "address": {
+      "title": "Delivery address",
+      "none": "No delivery address yet.",
+      "choose": "Choose address",
+      "change": "Change address",
+      "save": "Save address",
+      "needPin": "This address is not pinned — pin it in your Profile first.",
+      "empty": "Your address book is empty.",
+      "manage": "Manage addresses",
+      "locked": "The order is fully paid, so the address can no longer be changed.",
+      "cancel": "Cancel"
+    },
+    "workshop": {
+      "refundWarning": "The customer has paid {{amount}}. Cancelling now requires a manual refund. Cancel anyway?",
+      "waitingDeposit": "Waiting for the customer’s deposit. The order moves to \"Deposit paid\" automatically when it arrives.",
+      "waitingFinal": "Waiting for the customer’s final payment. The order moves to \"Fully paid\" automatically when it arrives."
+    },
+    "payments": {
+      "title": "Payment history",
+      "custom_deposit": "Deposit",
+      "custom_final": "Final payment"
+    },
+    "genericError": "Something went wrong, please try again."
   },
   "forbidden": {
     "title": "403 — Access denied",

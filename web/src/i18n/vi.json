@@ -1116,12 +1116,19 @@
       "confirmed": "Đã xác nhận",
       "in_production": "Đang sản xuất",
       "completed": "Hoàn thành",
-      "cancelled": "Đã hủy"
+      "cancelled": "Đã hủy",
+      "awaiting_deposit": "Chờ đặt cọc",
+      "deposit_paid": "Đã đặt cọc",
+      "awaiting_final_payment": "Chờ thanh toán phần còn lại",
+      "paid": "Đã thanh toán đủ",
+      "shipping": "Đang giao",
+      "delivered": "Đã giao"
     },
     "role": {
       "customer": "khách hàng",
       "workshop": "xưởng",
-      "admin": "quản trị"
+      "admin": "quản trị",
+      "system": "hệ thống"
     },
     "actionConfirm": "Xác nhận đơn",
     "actionStart": "Bắt đầu sản xuất",
@@ -1130,7 +1137,58 @@
     "incomingTitle": "Đơn custom đang xử lý",
     "incomingSubtitle": "Cập nhật trạng thái đơn theo tiến độ sản xuất thật.",
     "emptyIncoming": "Chưa có đơn custom nào.",
-    "backToProduction": "Đơn sản xuất"
+    "backToProduction": "Đơn sản xuất",
+    "action": {
+      "in_production": "Bắt đầu sản xuất",
+      "awaiting_final_payment": "Hoàn thiện — yêu cầu khách thanh toán",
+      "shipping": "Giao hàng",
+      "delivered": "Đã giao hàng",
+      "completed": "Đã nhận hàng",
+      "cancelled": "Hủy đơn"
+    },
+    "money": {
+      "title": "Thanh toán",
+      "total": "Tổng tiền sản phẩm",
+      "deposit": "Tiền cọc (30%)",
+      "shippingFee": "Phí vận chuyển",
+      "shippingPending": "Chọn địa chỉ để tính",
+      "paid": "Đã thanh toán",
+      "remaining": "Còn phải trả",
+      "remainingNoShip": "Còn phải trả (chưa gồm phí ship)"
+    },
+    "pay": {
+      "deposit": "Đặt cọc {{amount}}",
+      "final": "Thanh toán phần còn lại {{amount}}",
+      "depositHint": "Đặt cọc để xưởng bắt đầu sản xuất. Phần còn lại và phí ship trả khi xưởng hoàn thiện.",
+      "finalHint": "Xưởng đã hoàn thiện sản phẩm. Thanh toán phần còn lại cùng phí ship để xưởng giao hàng.",
+      "needAddress": "Chọn địa chỉ giao trước khi thanh toán phần còn lại.",
+      "paidReload": "Đã nhận tiền, đang cập nhật đơn…",
+      "close": "Đóng QR",
+      "cancelWarning": "Nếu bạn đã chuyển khoản tiền cọc, đừng huỷ — vui lòng chờ hệ thống xác nhận."
+    },
+    "address": {
+      "title": "Địa chỉ giao hàng",
+      "none": "Chưa chọn địa chỉ giao.",
+      "choose": "Chọn địa chỉ",
+      "change": "Đổi địa chỉ",
+      "save": "Lưu địa chỉ",
+      "needPin": "Địa chỉ chưa ghim vị trí — vào Hồ sơ để ghim trước khi chọn.",
+      "empty": "Sổ địa chỉ trống.",
+      "manage": "Quản lý sổ địa chỉ",
+      "locked": "Đơn đã thanh toán đủ nên không đổi được địa chỉ.",
+      "cancel": "Hủy"
+    },
+    "workshop": {
+      "refundWarning": "Khách đã trả {{amount}}. Huỷ đơn lúc này cần hoàn tiền thủ công cho khách. Bạn chắc chắn muốn huỷ?",
+      "waitingDeposit": "Đang chờ khách đặt cọc. Hệ thống tự chuyển sang \"Đã đặt cọc\" khi nhận tiền.",
+      "waitingFinal": "Đang chờ khách thanh toán phần còn lại. Hệ thống tự chuyển sang \"Đã thanh toán đủ\" khi nhận tiền."
+    },
+    "payments": {
+      "title": "Lịch sử thanh toán",
+      "custom_deposit": "Tiền cọc",
+      "custom_final": "Phần còn lại"
+    },
+    "genericError": "Thao tác chưa thành công, vui lòng thử lại."
   },
   "forbidden": {
     "title": "403 — Không có quyền truy cập",

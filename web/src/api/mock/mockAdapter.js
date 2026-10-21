@@ -1971,8 +1971,11 @@ export const mockAdapter = {
       workshopId: quote.workshopId, workshopName: quote.workshopName,
       customDesignId: quote.customDesignId, designSnapshot: quote.designSnapshot,
       unitPrice: offer.price, quantity: quote.quantity, totalAmount: offer.price * quote.quantity, leadTimeDays: offer.leadTimeDays,
-      location: quote.location, note: quote.note, status: 'pending', createdAt: now, updatedAt: now,
-      history: [{ id: nextId('coh'), fromStatus: null, toStatus: 'pending', changedById: useAuthStore.getState().user?.id ?? 'mock-user', changedByRole: myRole, note: null, createdAt: now }],
+      location: quote.location, note: quote.note, status: 'awaiting_deposit', createdAt: now, updatedAt: now,
+      // BE-01: cọc 30% làm tròn lên nghìn đồng; ship chỉ tính khi khách chọn địa chỉ
+      depositAmount: Math.ceil((offer.price * quote.quantity * 0.3) / 1000) * 1000, paidAmount: 0, shippingFee: null,
+      remainingAmount: offer.price * quote.quantity, addressId: null, shippingAddress: null, payments: [],
+      history: [{ id: nextId('coh'), fromStatus: null, toStatus: 'awaiting_deposit', changedById: useAuthStore.getState().user?.id ?? 'mock-user', changedByRole: myRole, note: null, createdAt: now }],
     };
     memoryDb.customOrders.set(orderId, order);
     persistCustomOrders();
@@ -2020,16 +2023,61 @@ export const mockAdapter = {
     return order;
   },
 
-  // Chuyển hợp lệ + ai được phép — đúng bảng ở docs/be-8-state-machine.md mục 3
+  /*
+   * POST /custom-orders/{id}/payment — QR cọc (awaiting_deposit) hoặc phần còn lại (awaiting_final_payment).
+   * Mock: poll 3 lần thì coi như đã trả (xem getPayment) → đơn tự sang deposit_paid / paid.
+   */
+  async createCustomOrderPayment(id) {
+    await delay(300);
+    const order = memoryDb.customOrders.get(id);
+    if (!order) throw Object.assign(new Error('ORDER_NOT_FOUND'), { response: { status: 404 } });
+    const final = order.status === 'awaiting_final_payment';
+    if (!final && order.status !== 'awaiting_deposit') throw Object.assign(new Error('NOT_PAYABLE'), { response: { status: 409, data: { message: 'Đơn không ở bước cần thanh toán' } } });
+    if (final && !order.addressId) throw Object.assign(new Error('NO_ADDRESS'), { response: { status: 409, data: { message: 'Vui lòng chọn địa chỉ giao trước khi thanh toán' } } });
+    const amount = final ? Number(order.totalAmount) + Number(order.shippingFee ?? 0) - Number(order.paidAmount ?? 0) : order.depositAmount;
+    const now = new Date().toISOString();
+    const payment = {
+      id: nextId('pay'), purpose: final ? 'custom_final' : 'custom_deposit', amount, status: 'pending', txnRef: nextId('CUS').toUpperCase(),
+      qrUrl: 'https://qr.sepay.vn/img?acc=demo&bank=DEMO&amount=' + amount + '&des=demo', expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+      paidAt: null, paidAmount: null, createdAt: now, planId: null, planName: null, _polls: 0, _customOrderId: id,
+    };
+    mockPayments = [payment, ...mockPayments];
+    persistMockPayments();
+    return { ...payment };
+  },
+
+  // PUT /custom-orders/{id}/address — mock tính ship cố định 50.000đ (BE thật tính theo khoảng cách từ xưởng)
+  async setCustomOrderAddress({ id, addressId }) {
+    await delay(300);
+    const order = memoryDb.customOrders.get(id);
+    if (!order) throw Object.assign(new Error('ORDER_NOT_FOUND'), { response: { status: 404 } });
+    const addr = (await this.getAddresses()).find((a) => a.id === addressId);
+    if (!addr) throw Object.assign(new Error('ADDRESS_NOT_FOUND'), { response: { status: 404 } });
+    if (!addr.hasCoordinates) throw Object.assign(new Error('NO_COORDS'), { response: { status: 400, data: { message: 'Địa chỉ chưa có toạ độ' } } });
+    order.addressId = addressId;
+    order.shippingAddress = addr.recipientName + ' (' + addr.recipientPhone + '), ' + (addr.addressLine ?? '');
+    order.shippingFee = 50_000;
+    order.remainingAmount = Math.max(0, Number(order.totalAmount) + order.shippingFee - Number(order.paidAmount ?? 0));
+    memoryDb.customOrders.set(id, order);
+    persistCustomOrders();
+    return order;
+  },
+
+  // Chuyển hợp lệ + ai được phép — bảng §2 custom-order-payment-fe.md
   async updateCustomOrderStatus({ id, status, note }) {
     await delay(350);
     const order = memoryDb.customOrders.get(id);
     if (!order) throw Object.assign(new Error('ORDER_NOT_FOUND'), { response: { status: 404 } });
     const myRole = actorRole(order);
+    // Bảng §2 custom-order-payment-fe.md (BE-01). deposit_paid/paid chỉ hệ thống chuyển (khi nhận tiền).
     const ALLOWED = {
-      pending: { confirmed: ['workshop', 'admin'], cancelled: ['customer', 'workshop', 'admin'] },
-      confirmed: { in_production: ['workshop', 'admin'], cancelled: ['workshop', 'admin'] },
-      in_production: { completed: ['workshop', 'admin'], cancelled: ['workshop', 'admin'] },
+      awaiting_deposit: { cancelled: ['customer', 'workshop', 'admin'] },
+      deposit_paid: { in_production: ['workshop', 'admin'], cancelled: ['workshop', 'admin'] },
+      in_production: { awaiting_final_payment: ['workshop', 'admin'], cancelled: ['workshop', 'admin'] },
+      awaiting_final_payment: { cancelled: ['workshop', 'admin'] },
+      paid: { shipping: ['workshop', 'admin'] },
+      shipping: { delivered: ['workshop', 'admin'] },
+      delivered: { completed: ['customer', 'admin'] },
     };
     const allowedRoles = ALLOWED[order.status]?.[status];
     if (!allowedRoles) throw Object.assign(new Error('INVALID_TRANSITION'), { response: { status: 409, data: { message: `Không thể chuyển từ ${order.status} sang ${status}.` } } });
@@ -2793,6 +2841,22 @@ export const mockAdapter = {
         payment.paidAmount = payment.amount;
         const pack = mockCreditPacks.find((p) => p.id === payment._packId);
         if (pack) { mockCreditWallet[pack.feature] = (mockCreditWallet[pack.feature] ?? 0) + pack.credits; persistCreditWallet(); }
+      } else if (payment._polls >= 3 && payment._customOrderId) {
+        // Webhook giả lập đơn custom: cộng tiền đã trả, hệ thống tự chuyển deposit_paid / paid
+        payment.status = 'paid';
+        payment.paidAt = new Date().toISOString();
+        payment.paidAmount = payment.amount;
+        const order = memoryDb.customOrders.get(payment._customOrderId);
+        if (order) {
+          const to = payment.purpose === 'custom_final' ? 'paid' : 'deposit_paid';
+          order.paidAmount = Number(order.paidAmount ?? 0) + payment.amount;
+          order.remainingAmount = Math.max(0, Number(order.totalAmount) + Number(order.shippingFee ?? 0) - order.paidAmount);
+          order.history.push({ id: nextId('coh'), fromStatus: order.status, toStatus: to, changedById: null, changedByRole: 'system', note: null, createdAt: payment.paidAt });
+          order.status = to;
+          order.payments = [...(order.payments ?? []), { id: payment.id, purpose: payment.purpose, amount: payment.amount, status: 'paid', paidAt: payment.paidAt }];
+          memoryDb.customOrders.set(order.id, order);
+          persistCustomOrders();
+        }
       } else if (payment._polls >= 3) {
         payment.status = 'paid';
         payment.paidAt = new Date().toISOString();
