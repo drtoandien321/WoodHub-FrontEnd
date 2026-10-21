@@ -1,21 +1,36 @@
-import { useState } from 'react';
-import { Briefcase, Shield } from '../suppliers/icons.jsx';
+import { useSearchParams } from 'react-router-dom';
+import { Briefcase, Shield, Wallet, Bell, Tool } from '../suppliers/icons.jsx';
+import { useAuthStore } from '../../stores/authStore.js';
 import SupplierProfileForm from './SupplierProfileForm.jsx';
 import ChangePasswordCard from './ChangePasswordCard.jsx';
 import SupplierOverviewCard from './SupplierOverviewCard.jsx';
+import PayoutSettingsCard from './PayoutSettingsCard.jsx';
+import CapabilitySettingsCard from './CapabilitySettingsCard.jsx';
+import NotificationSettingsCard from '../settings/NotificationSettingsCard.jsx';
 
 /*
- * Trang Cài đặt dùng chung cho portal NCC & xưởng. Chỉ giữ những gì BE đã có API:
- *   - Hồ sơ: PUT /suppliers/me · Bảo mật: đổi mật khẩu (PUT /users/{id}/password).
- * Bản mock cũ còn tab Vận hành / Thanh toán / Thông báo / Năng lực + 2FA, thiết bị đăng nhập — toàn
- * nút không làm gì (BE chưa có bảng/endpoint) → gỡ khỏi UI, liệt kê trong docs/BE_MISSING.md để BE làm.
+ * Trang Cài đặt dùng chung cho portal NCC & xưởng:
+ *   - Hồ sơ: PATCH /suppliers/me + logo / ảnh bìa (BE-10)
+ *   - Nhận tiền: /suppliers/me/payout (BE-14 §1)
+ *   - Thông báo: bật/tắt email theo loại (BE-14 §2)
+ *   - Năng lực gia công: chỉ xưởng (BE-10 §3)
+ *   - Bảo mật: đổi mật khẩu
+ * Tab đọc từ ?tab= để link "tắt email" trong email (/settings/notifications) mở thẳng đúng tab.
+ * Tab Vận hành và 2FA / thiết bị đăng nhập BE chưa làm → chưa hiện.
  */
 export default function PortalSettings({ subtitle, profileTabLabel, nameLabel, descriptionLabel, overviewTitle }) {
-  const [tab, setTab] = useState('profile');
+  const isWorkshop = useAuthStore((s) => s.user?.supplierType) === 'workshop';
+  const [searchParams, setSearchParams] = useSearchParams();
   const tabs = [
     { key: 'profile', label: profileTabLabel, icon: Briefcase },
+    ...(isWorkshop ? [{ key: 'capability', label: 'Năng lực gia công', icon: Tool }] : []),
+    { key: 'payout', label: 'Nhận tiền', icon: Wallet },
+    { key: 'notifications', label: 'Thông báo', icon: Bell },
     { key: 'security', label: 'Bảo mật', icon: Shield },
   ];
+  const requested = searchParams.get('tab');
+  const tab = tabs.some((x) => x.key === requested) ? requested : 'profile';
+  const setTab = (key) => setSearchParams(key === 'profile' ? {} : { tab: key }, { replace: true });
 
   return (
     <div className="flex flex-col gap-6">
@@ -40,6 +55,9 @@ export default function PortalSettings({ subtitle, profileTabLabel, nameLabel, d
 
         <div className="flex min-w-0 flex-col gap-6">
           {tab === 'profile' && <SupplierProfileForm nameLabel={nameLabel} descriptionLabel={descriptionLabel} />}
+          {tab === 'capability' && <CapabilitySettingsCard />}
+          {tab === 'payout' && <PayoutSettingsCard />}
+          {tab === 'notifications' && <NotificationSettingsCard />}
           {tab === 'security' && <ChangePasswordCard />}
         </div>
 

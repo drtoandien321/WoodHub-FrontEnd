@@ -3,14 +3,16 @@ import ModalShell from '../admin/ModalShell.jsx';
 import { Pencil } from '../suppliers/icons.jsx';
 import { useMyPortfolio, useAddPortfolioItem, useUpdatePortfolioItem, useDeletePortfolioItem } from '../../hooks/usePortfolio.js';
 import { useMyProducts } from '../../hooks/useMyProducts.js';
+import ImageUploadField from './ImageUploadField.jsx';
 
 /*
  * Quản lý portfolio (ảnh công trình/sản phẩm tiêu biểu) — GET/POST/PUT/DELETE /suppliers/me/portfolio.
  * Hiện ra ở hồ sơ công khai /suppliers/:slug (GET /suppliers/{id}/portfolio).
  *
- * Nguồn ảnh: BE chỉ nhận `imageUrl` (chuỗi) — CHƯA có API upload ảnh portfolio. Nên cho 2 cách:
+ * Nguồn ảnh (BE nhận `imageUrl` dạng chuỗi), 3 cách:
+ *   - Tải ảnh từ máy: POST /uploads/image?purpose=portfolio (BE-10) → điền url trả về vào imageUrl.
  *   - NCC có catalog (allowProducts): gắn 1 sản phẩm của mình → bỏ trống URL thì BE tự lấy ảnh SP.
- *   - Dán link ảnh (vd ảnh đã up lên Drive/Supabase). Upload trực tiếp ghi vào docs BE còn thiếu.
+ *   - Dán link ảnh có sẵn.
  */
 export default function PortfolioManager({ allowProducts = false }) {
   const { data: items = [], isLoading, isError } = useMyPortfolio();
@@ -115,10 +117,16 @@ function PortfolioItemModal({ item, allowProducts, nextOrder, onClose }) {
       }
     >
       <div className="flex flex-col gap-4">
+        <ImageUploadField
+          label="Ảnh"
+          purpose="portfolio"
+          shape="wide"
+          value={/^https?:\/\//i.test(previewUrl) ? previewUrl : ''}
+          onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+        />
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm text-base-content/70">Link ảnh</span>
+          <span className="text-sm text-base-content/70">Hoặc dán link ảnh</span>
           <input value={form.imageUrl} onChange={set('imageUrl')} placeholder="https://…" className="input input-bordered w-full" />
-          {previewUrl && /^https?:\/\//i.test(previewUrl) && <img src={previewUrl} alt="" className="mt-1 max-h-40 rounded-xl object-cover" />}
         </label>
 
         {allowProducts && (

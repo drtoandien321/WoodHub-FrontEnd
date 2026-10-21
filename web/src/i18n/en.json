@@ -363,6 +363,13 @@
       "ash": "Ash",
       "pine": "Pine",
       "rubber": "Rubberwood"
+    },
+    "capability": {
+      "types": "Makes",
+      "materials": "Materials",
+      "maxSize": "Max size",
+      "experience": "Experience",
+      "years": "{{count}} years"
     }
   },
   "b2b": {
@@ -1413,7 +1420,8 @@
     "anonymousBadge": "Anonymous",
     "anonymousOwnerNote": "Others see your name hidden.",
     "count_one": "{{count}} review",
-    "count_other": "{{count}} reviews"
+    "count_other": "{{count}} reviews",
+    "sellerReply": "Seller reply"
   },
   "notFoundPage": {
     "message": "This page doesn't exist or has been removed.",
@@ -1478,6 +1486,88 @@
       "paid": "Paid",
       "failed": "Failed",
       "expired": "Expired"
+    }
+  },
+  "notifSettings": {
+    "title": "Email notifications",
+    "subtitle": "In-app notifications (bell) are always on. Choose which ones are also sent by email.",
+    "loadError": "Could not load notification settings.",
+    "retry": "Retry",
+    "saveError": "Could not save, please try again.",
+    "orderPaidTip": "Recommended so you never miss the 24-hour confirmation window.",
+    "types": {
+      "ORDER_PAID": {
+        "label": "New paid order",
+        "desc": "A customer just paid — confirm stock."
+      },
+      "QUOTE_NEW": {
+        "label": "New quote request",
+        "desc": "A customer sent a custom request."
+      },
+      "QUOTE_OFFER_ACCEPTED": {
+        "label": "Offer accepted",
+        "desc": "An offer was accepted and became an order."
+      },
+      "CUSTOM_ORDER_DEPOSIT_PAID": {
+        "label": "Deposit received",
+        "desc": "You can start production."
+      },
+      "CUSTOM_ORDER_FINAL_PAID": {
+        "label": "Final payment received",
+        "desc": "You can ship the order."
+      },
+      "CUSTOM_ORDER_PAYMENT_REQUESTED": {
+        "label": "Payment requested",
+        "desc": "Your custom item is finished and awaits the final payment."
+      },
+      "ORDER_STATUS_CHANGED": {
+        "label": "Order updates",
+        "desc": "Your order was confirmed, shipped, cancelled…"
+      },
+      "QUOTE_OFFER": {
+        "label": "New offer",
+        "desc": "The other party sent an offer."
+      },
+      "QUOTE_OFFER_REJECTED": {
+        "label": "Offer rejected",
+        "desc": ""
+      },
+      "CUSTOM_ORDER_STATUS_CHANGED": {
+        "label": "Custom order updates",
+        "desc": "A custom order changed status."
+      },
+      "REVIEW_NEW": {
+        "label": "New review",
+        "desc": "A customer reviewed your shop or product."
+      },
+      "REVIEW_REPLIED": {
+        "label": "Seller replied to your review",
+        "desc": ""
+      },
+      "BULK_QUOTE_NEW": {
+        "label": "New bulk quote request",
+        "desc": "A business customer needs a quote."
+      },
+      "BULK_QUOTE_ACCEPTED": {
+        "label": "Bulk quote accepted",
+        "desc": ""
+      },
+      "BULK_QUOTE_OFFERED": {
+        "label": "Supplier sent a quote",
+        "desc": "Your bulk request has a price."
+      },
+      "ORDER_VAT_ISSUED": {
+        "label": "VAT invoice issued",
+        "desc": ""
+      },
+      "BULK_QUOTE_REJECTED": {
+        "label": "Bulk quote rejected",
+        "desc": ""
+      },
+      "ORDER_REFUNDED": {
+        "label": "Refund sent",
+        "desc": "Money for a cancelled order was refunded."
+      }
     }
   }
 }

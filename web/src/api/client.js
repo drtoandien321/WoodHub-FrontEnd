@@ -85,6 +85,9 @@ const REAL_ENDPOINTS = new Set([
   // BE-09 thống kê NCC / xưởng (SupplierStatsController)
   'getSupplierStatsSummary', 'getSupplierStatsTimeseries', 'getSupplierStatsTopProducts',
   // Hồ sơ + portfolio của chính supplier (SupplierController PUT /me, SupplierPortfolioController)
+  // BE-10 hồ sơ (PATCH, ảnh) · BE-12 §2 trả lời đánh giá · BE-14 tài khoản nhận tiền + cài đặt email thông báo
+  'patchSupplierMe', 'uploadSupplierImage', 'getSupplierReviewsPortal', 'replyReview', 'deleteReviewReply',
+  'getMyPayout', 'saveMyPayout', 'getMyCapability', 'saveMyCapability', 'getNotificationSettings', 'updateNotificationSettings',
   'updateSupplierMe', 'getMyPortfolio', 'addPortfolioItem', 'updatePortfolioItem', 'deletePortfolioItem',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
   'getNearbyStoresBySupplier', 'getNearestWorkshops', 'getWorkshopsWithinRadius',
@@ -820,6 +823,39 @@ export const api = {
   // PUT /suppliers/me — GHI ĐÈ toàn bộ (BE set mọi field theo body, kể cả null) → FE phải gửi đủ
   // { businessName*, taxCode, legalDocumentUrl, contactEmail, contactPhone, description }; 409 nếu trùng MST.
   updateSupplierMe: (body) => call(() => http.put('/suppliers/me', body), 'updateSupplierMe', body),
+  /*
+   * PATCH /suppliers/me (BE-10) — CHỈ cập nhật field có gửi: không gửi / null = giữ, "" = xoá. Có thêm 4 field mới
+   * logoUrl, coverUrl, hqAddress, contactName (PUT cũ không đụng tới 4 field này). businessName "" → 400.
+   */
+  patchSupplierMe: (body) => call(() => http.patch('/suppliers/me', body), 'patchSupplierMe', body),
+  /*
+   * POST /uploads/image?purpose=logo|cover|portfolio (multipart, file ≤ 10MB JPEG/PNG/WEBP/GIF) → { url }.
+   * Tải ảnh lên TRƯỚC, rồi mới gửi url vào API lưu (PATCH /suppliers/me hoặc portfolio).
+   */
+  uploadSupplierImage: ({ file, purpose }) => {
+    const form = new FormData();
+    form.append('file', file);
+    return call(() => http.post('/uploads/image', form, { params: { purpose } }), 'uploadSupplierImage', { file, purpose });
+  },
+  // GET /supplier/reviews?targetType=product|supplier&rating=&replied=true|false&page=&size= → Page<ReviewResponse> (+ targetName)
+  getSupplierReviewsPortal: (params) => call(() => http.get('/supplier/reviews', { params }), 'getSupplierReviewsPortal', params),
+  // POST /reviews/:id/reply { content ≤ 1000 } — gửi lại = sửa · 403 REVIEW_REPLY_FORBIDDEN · 409 REVIEW_HIDDEN
+  replyReview: ({ id, content }) => call(() => http.post('/reviews/' + id + '/reply', { content }), 'replyReview', { id, content }),
+  // DELETE /reviews/:id/reply → ReviewResponse với reply = null
+  deleteReviewReply: (id) => call(() => http.delete('/reviews/' + id + '/reply'), 'deleteReviewReply', id),
+  /*
+   * GET /suppliers/me/payout → { configured, bankCode, bankName, accountNumberMasked, accountHolder, branch, updatedAt }
+   * (accountNumber LUÔN null với NCC). PUT gửi ĐỦ field kể cả số TK đầy đủ (6–19 chữ số); 503 = server chưa có khoá mã hoá.
+   */
+  getMyPayout: () => call(() => http.get('/suppliers/me/payout'), 'getMyPayout'),
+  // GET /suppliers/me/capability (chỉ xưởng) → { productTypes[], maxLengthCm, maxWidthCm, maxHeightCm, materials[{id,name}], experienceYears, updatedAt }
+  getMyCapability: () => call(() => http.get('/suppliers/me/capability'), 'getMyCapability'),
+  // PUT ghi đè toàn bộ { productTypes, maxLengthCm, maxWidthCm, maxHeightCm, materialIds, experienceYears } · 403 SUPPLIER_NOT_WORKSHOP
+  saveMyCapability: (body) => call(() => http.put('/suppliers/me/capability', body), 'saveMyCapability', body),
+  saveMyPayout: (body) => call(() => http.put('/suppliers/me/payout', body), 'saveMyPayout', body),
+  // GET /users/me/notification-settings → { email: [{ type, enabled, defaultEnabled }] } · PUT { email: { TYPE: bool } } (chỉ loại muốn đổi)
+  getNotificationSettings: () => call(() => http.get('/users/me/notification-settings'), 'getNotificationSettings'),
+  updateNotificationSettings: (email) => call(() => http.put('/users/me/notification-settings', { email }), 'updateNotificationSettings', email),
   // Portfolio của tôi: PortfolioResponse[] { id, productId, productName, imageUrl, title, description, sortOrder }.
   // Gắn productId mà bỏ trống imageUrl → BE tự lấy ảnh của sản phẩm.
   getMyPortfolio: () => call(() => http.get('/suppliers/me/portfolio'), 'getMyPortfolio'),

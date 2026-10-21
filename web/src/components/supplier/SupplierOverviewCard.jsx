@@ -1,6 +1,7 @@
 import { useSupplierMe, usePortalBrand } from '../../hooks/useSupplierMe.js';
 import { useAuthStore } from '../../stores/authStore.js';
-import { Phone, Mail, Calendar, Briefcase } from '../suppliers/icons.jsx';
+import { useMyPayout } from '../../hooks/useSupplierPortal.js';
+import { Phone, Mail, Calendar, Briefcase, Wallet, MapPin } from '../suppliers/icons.jsx';
 
 const STATUS = {
   active: ['Đang hoạt động', 'bg-success/15 text-success', 'bg-success'],
@@ -10,16 +11,19 @@ const STATUS = {
 
 /*
  * Thẻ "Tổng quan" bên phải trang Cài đặt portal — đọc GET /suppliers/me (bản cũ lấy cứng từ file mock:
- * số chi nhánh, ngân hàng, số đuôi tài khoản… BE không có các field đó nên đã bỏ).
+ * số chi nhánh, ngân hàng…). Logo + trụ sở từ BE-10, tài khoản nhận tiền (đã che) từ BE-14.
  */
 export default function SupplierOverviewCard({ title = 'Tổng quan doanh nghiệp' }) {
   const { data } = useSupplierMe();
+  const { data: payout } = useMyPayout();
   const brand = usePortalBrand(useAuthStore((s) => s.user?.name));
   const [label, badge, dot] = STATUS[data?.status] ?? STATUS.pending;
   const rows = [
     { icon: Mail, label: 'Email', value: data?.contactEmail },
     { icon: Phone, label: 'SĐT', value: data?.contactPhone },
     { icon: Briefcase, label: 'Mã số thuế', value: data?.taxCode },
+    { icon: MapPin, label: 'Trụ sở', value: data?.hqAddress },
+    { icon: Wallet, label: 'Nhận tiền', value: payout?.configured ? `${payout.bankCode} ${payout.accountNumberMasked}` : null },
     { icon: Calendar, label: 'Tham gia', value: data?.createdAt && new Date(data.createdAt).toLocaleDateString('vi-VN') },
   ];
 
@@ -27,7 +31,9 @@ export default function SupplierOverviewCard({ title = 'Tổng quan doanh nghi�
     <aside className="h-fit rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm lg:sticky lg:top-24">
       <h2 className="mb-4 font-display text-lg">{title}</h2>
       <div className="flex flex-col items-center text-center">
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-secondary to-primary font-display text-2xl text-primary-content">{brand.initials}</span>
+        {data?.logoUrl
+          ? <img src={data.logoUrl} alt="" className="h-20 w-20 rounded-full border border-base-300 object-cover" />
+          : <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-secondary to-primary font-display text-2xl text-primary-content">{brand.initials}</span>}
         <p className="mt-3 font-display text-lg">{brand.name}</p>
         {data && (
           <span className={`mt-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${badge}`}>

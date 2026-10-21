@@ -177,6 +177,13 @@ export default function ReviewSection({ targetType, targetId, title }) {
                   </time>
                 </div>
                 {r.comment && <p className="whitespace-pre-line text-sm leading-relaxed text-base-content/75">{r.comment}</p>}
+                {/* Phản hồi của NCC (BE-12 §2) — hiện công khai dưới đánh giá */}
+                {r.reply && (
+                  <div className="rounded-xl border-l-4 border-primary/40 bg-base-200/50 px-3 py-2 text-sm">
+                    <p className="mb-0.5 text-xs font-medium text-base-content/60">{t('reviews.sellerReply')}</p>
+                    <p className="whitespace-pre-line text-base-content/75">{r.reply.content}</p>
+                  </div>
+                )}
                 {isMine && (
                   <div className="flex items-center justify-end gap-2">
                     {confirmDelete ? (
