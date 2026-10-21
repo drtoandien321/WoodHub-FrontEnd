@@ -20,7 +20,7 @@ export default function SupplierBranchDetail() {
   const store = stores?.find((s) => s.id === branchId);
 
   const { data: inventory, isLoading: loadingInventory } = useStoreInventory(branchId);
-  const { data: productsPage } = useMyProducts();
+  const { data: productsPage } = useMyProducts({ size: 500 }); // BE mặc định 20 SP/trang → chỉ định rõ để chọn được mọi SP
   const productNameById = new Map((productsPage?.content ?? []).map((p) => [p.id, p.name]));
 
   const deleteStore = useDeleteStore();

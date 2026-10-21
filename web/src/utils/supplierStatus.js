@@ -20,10 +20,11 @@ const PASTEL = {
  * một khái niệm THUỘC MODULE KHÁC (Store Inventory — theo cặp chi nhánh×variant, xem
  * StoreInventoryController), KHÔNG phải trạng thái của Product. Bỏ 2 giá trị đó ở đây.
  */
+// label: nhãn badge · option: chữ trong ô chọn đổi trạng thái · hint: giải thích ngắn cho NCC (ProductStatusSelect)
 export const PRODUCT_STATUS = {
-  draft: { label: 'Nháp', cls: PASTEL.neutral },
-  active: { label: 'Đang bán', cls: PASTEL.success },
-  hidden: { label: 'Đang ẩn', cls: PASTEL.warning },
+  active: { label: 'Đang bán', cls: PASTEL.success, option: 'Đang bán', hint: 'Hiện trên cửa hàng, khách đặt mua được.' },
+  hidden: { label: 'Tạm ẩn', cls: PASTEL.warning, option: 'Tạm ẩn (hết hàng / ngừng bán)', hint: 'Không hiện trên cửa hàng, khách không đặt mua được. Dùng khi hết hàng hoặc ngừng bán.' },
+  draft: { label: 'Nháp', cls: PASTEL.neutral, option: 'Nháp', hint: 'Chưa đăng bán, chỉ bạn thấy.' },
 };
 
 export const BRANCH_STATUS = {

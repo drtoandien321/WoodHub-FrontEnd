@@ -3,13 +3,19 @@ import { Link } from 'react-router-dom';
 import { formatVnd } from '../../utils/format.js';
 import { useMyProducts, useMyProductDetail, useDeleteProduct } from '../../hooks/useMyProducts.js';
 import { useCategories, useMaterials } from '../../hooks/useCatalog.js';
-import { productMeta } from '../../utils/supplierStatus.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
-import StatusBadge from '../../components/supplier/StatusBadge.jsx';
+import ProductStatusSelect from '../../components/supplier/ProductStatusSelect.jsx';
 import ProductFormModal from '../../components/supplier/ProductFormModal.jsx';
 import { Package, ShoppingBag, Search, Plus, Eye, Pencil, Trash } from '../../components/suppliers/icons.jsx';
 
-const STATUS_OPTS = [['all', 'Tất cả trạng thái'], ['draft', 'Nháp'], ['active', 'Đang bán'], ['hidden', 'Đang ẩn']];
+const STATUS_OPTS = [['all', 'Tất cả trạng thái'], ['active', 'Đang bán'], ['hidden', 'Tạm ẩn'], ['draft', 'Nháp']];
+/*
+ * BE /products/mine mặc định chỉ trả 20 SP/trang mà trang này không phân trang → NCC có > 20 SP bị thiếu, thẻ đếm
+ * cũng sai (QA 21/10). Tải 1 lần tối đa MY_PRODUCTS_LIMIT SP rồi lọc trạng thái / chất liệu / tên ở FE, nên thẻ đếm
+ * luôn tính trên toàn bộ SP (không bị đổi theo bộ lọc như trước).
+ */
+const MY_PRODUCTS_LIMIT = 500;
+const MY_PRODUCTS_PARAMS = { page: 0, size: MY_PRODUCTS_LIMIT };
 
 export default function SupplierProducts() {
   const [q, setQ] = useState('');
@@ -17,7 +23,7 @@ export default function SupplierProducts() {
   const [status, setStatus] = useState('all');
   const [modalMode, setModalMode] = useState(null); // null | 'create' | productId (đang sửa)
 
-  const { data, isLoading } = useMyProducts(status !== 'all' ? { status } : undefined);
+  const { data, isLoading } = useMyProducts(MY_PRODUCTS_PARAMS);
   const { data: categories } = useCategories();
   const { data: materials } = useMaterials();
   const deleteProduct = useDeleteProduct();
@@ -27,12 +33,13 @@ export default function SupplierProducts() {
   const items = data?.content ?? [];
   const list = useMemo(
     () => items.filter((p) =>
+      (status === 'all' || p.status === status) &&
       (materialName === 'all' || p.materialName === materialName) &&
       p.name.toLowerCase().includes(q.toLowerCase())),
-    [items, materialName, q]
+    [items, status, materialName, q]
   );
   const counts = useMemo(() => ({
-    total: items.length,
+    total: data?.page?.totalElements ?? items.length,
     active: items.filter((p) => p.status === 'active').length,
     draft: items.filter((p) => p.status === 'draft').length,
     hidden: items.filter((p) => p.status === 'hidden').length,
@@ -56,7 +63,7 @@ export default function SupplierProducts() {
         <StatCard icon={Package} label="Tổng sản phẩm" value={counts.total} hint="Tất cả sản phẩm" />
         <StatCard icon={ShoppingBag} label="Đang bán" value={counts.active} iconWrap="bg-success/10 text-success" />
         <StatCard icon={Package} label="Nháp" value={counts.draft} iconWrap="bg-base-300/60 text-base-content/60" />
-        <StatCard icon={Package} label="Đang ẩn" value={counts.hidden} iconWrap="bg-warning/10 text-warning" />
+        <StatCard icon={Package} label="Tạm ẩn" value={counts.hidden} iconWrap="bg-warning/10 text-warning" />
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm lg:flex-row lg:items-center">
@@ -96,11 +103,13 @@ export default function SupplierProducts() {
                   <td className="text-sm">{p.categoryName}</td>
                   <td className="text-right font-medium">{p.priceFrom != null ? `Từ ${formatVnd(p.priceFrom)}` : '—'}</td>
                   <td className="text-sm">{p.materialName ?? '—'}</td>
-                  <td><StatusBadge meta={productMeta(p.status)} /></td>
+                  <td><ProductStatusSelect product={p} /></td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <Link to={`/portal/supplier/products/${p.id}`} className="btn btn-ghost btn-xs btn-square" aria-label="Xem"><Eye width={15} height={15} /></Link>
-                      <button onClick={() => setModalMode(p.id)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa"><Pencil width={15} height={15} /></button>
+                      <button onClick={() => setModalMode(p.id)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa">
+                        {modalMode === p.id && editingDetail.isLoading ? <span className="loading loading-spinner loading-xs" /> : <Pencil width={15} height={15} />}
+                      </button>
                       <button onClick={() => handleDelete(p)} className="btn btn-ghost btn-xs btn-square text-error" aria-label="Xóa"><Trash width={15} height={15} /></button>
                     </div>
                   </td>
@@ -110,9 +119,17 @@ export default function SupplierProducts() {
             </tbody>
           </table>
         </div>
+        {items.length < counts.total && (
+          <p className="px-2 pt-3 text-xs text-base-content/50">Đang hiển thị {items.length}/{counts.total} sản phẩm mới nhất.</p>
+        )}
       </section>
 
-      {categories && (
+      {/*
+        CHỈ mount modal khi đã có dữ liệu (modalOpen). Lỗi cũ: modal mount ngay lúc bấm Sửa, khi chi tiết SP còn đang
+        tải → useState(initial) chỉ chạy 1 lần với initial = undefined → form sửa hiện TRỐNG (tên rỗng, trạng thái Nháp),
+        dữ liệu tải về sau cũng không đổ vào form.
+      */}
+      {categories && modalOpen && (
         <ProductFormModal
           key={modalMode === 'create' ? 'create' : modalMode} // remount mỗi lần mở sửa SP khác — reset state form sạch
           open={modalOpen}

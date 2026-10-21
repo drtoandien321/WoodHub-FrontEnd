@@ -81,6 +81,8 @@ const REAL_ENDPOINTS = new Set([
   'getAdminCreditPacks', 'createCreditPack', 'updateCreditPack', 'deleteCreditPack',
   // Module GPS/Vị trí — hồ sơ supplier tự thân (biết type để gate UI)
   'getSupplierMe',
+  // BE-09 thống kê NCC / xưởng (SupplierStatsController)
+  'getSupplierStatsSummary', 'getSupplierStatsTimeseries', 'getSupplierStatsTopProducts',
   // Hồ sơ + portfolio của chính supplier (SupplierController PUT /me, SupplierPortfolioController)
   'updateSupplierMe', 'getMyPortfolio', 'addPortfolioItem', 'updatePortfolioItem', 'deletePortfolioItem',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
@@ -712,6 +714,37 @@ export const api = {
    * cần các field khác của hồ sơ supplier (status, commissionRate, taxCode...) mà AuthResponse không có.
    */
   getSupplierMe: () => call(() => http.get('/suppliers/me'), 'getSupplierMe'),
+
+  /*
+   * ===== THỐNG KÊ NCC / XƯỞNG (BE-09, docs BE supplier-stats-fe.md) =====
+   * Tham số chung: { from, to, storeId? } — ISO có múi giờ (+07:00), kỳ [from, to), tối đa 366 ngày.
+   * Chỉ tính đơn đã thanh toán trở đi; ngày = ngày khách thanh toán theo giờ VN.
+   */
+  // → { orderCount, grossSales, shopDiscount, revenue, commissionRate, commission, netRevenue, avgOrderValue,
+  //     shippingFee, pendingOrders, rating, reviewCount, newReviews, unrepliedReviews, workshop: {...}|null }
+  getSupplierStatsSummary: (params) => call(() => http.get('/supplier/stats/summary', { params }), 'getSupplierStatsSummary', params),
+  // params + granularity=day|week|month → { granularity, points: [{ date, orders, revenue, customRevenue }] } (đủ mọi mốc)
+  getSupplierStatsTimeseries: (params) => call(() => http.get('/supplier/stats/timeseries', { params }), 'getSupplierStatsTimeseries', params),
+  // params + limit (1–50) → [{ productId|null, name, sold, revenue }] theo doanh thu giảm dần
+  getSupplierStatsTopProducts: (params) => call(() => http.get('/supplier/stats/top-products', { params }), 'getSupplierStatsTopProducts', params),
+  /*
+   * GET /supplier/stats/export?format=csv → file text/csv (mỗi đơn 1 dòng). KHÔNG đi qua call() vì cần
+   * responseType 'blob'. Trả Blob; khi lỗi body cũng là Blob → đọc text() rồi gắn lại vào err.response.data
+   * để apiErrorMessage() đọc được errorCode như mọi lỗi khác.
+   */
+  exportSupplierStats: async (params) => {
+    if (USE_MOCK) return mockAdapter.exportSupplierStats(params);
+    try {
+      const res = await http.get('/supplier/stats/export', { params: { ...params, format: 'csv' }, responseType: 'blob' });
+      return res.data;
+    } catch (err) {
+      const data = err.response?.data;
+      if (data instanceof Blob) {
+        try { err.response.data = JSON.parse(await data.text()); } catch { /* body không phải JSON — giữ nguyên */ }
+      }
+      throw err;
+    }
+  },
   // PUT /suppliers/me — GHI ĐÈ toàn bộ (BE set mọi field theo body, kể cả null) → FE phải gửi đủ
   // { businessName*, taxCode, legalDocumentUrl, contactEmail, contactPhone, description }; 409 nếu trùng MST.
   updateSupplierMe: (body) => call(() => http.put('/suppliers/me', body), 'updateSupplierMe', body),
