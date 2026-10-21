@@ -47,7 +47,7 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
   }));
   // Mỗi dòng: { id: null|uuid thật, sku, color, dimensions, price }. id=null nghĩa là dòng mới thêm ở form.
   const [variants, setVariants] = useState(() =>
-    initial?.variants?.length ? initial.variants.map((v) => ({ ...v })) : [{ id: null, sku: '', color: '', dimensions: '', price: '' }]
+    initial?.variants?.length ? initial.variants.map((v) => ({ ...v, sku: v.sku ?? '', color: v.color ?? '', dimensions: v.dimensions ?? '' })) /* BE trả null cho field trống → input cần '' */ : [{ id: null, sku: '', color: '', dimensions: '', price: '' }]
   );
   const [removedVariantIds, setRemovedVariantIds] = useState([]);
   // Tạo mới: file chờ upload sau khi có productId. Sửa: ảnh thật, thao tác ngay.
