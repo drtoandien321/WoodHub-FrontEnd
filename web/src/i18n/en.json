@@ -912,7 +912,8 @@
       "oak": "Oak",
       "walnut": "Walnut",
       "ash": "Ash",
-      "pine": "Pine"
+      "pine": "Pine",
+      "wood": "Wood"
     },
     "studio": {
       "title": "Custom Studio",

@@ -91,7 +91,10 @@ export default function DesignSnapshotCard({ snapshot, quantity, children }) {
           maxWidth="max-w-3xl"
           footer={<button onClick={() => setOpen(false)} className="btn btn-ghost btn-sm">{t('product.close3d')}</button>}
         >
-          <ModelViewer src={d.glbUrl} poster={d.posterUrl ?? undefined} alt={d.name ?? ''} color={tint} className="h-[60vh] w-full rounded-xl bg-base-200" showControls />
+          {/* ModelViewer cao 100% khung cha → khung cha phải có chiều cao cố định, không thì co về 0 trong modal */}
+          <div className="h-[60vh] w-full overflow-hidden rounded-xl bg-base-200">
+            <ModelViewer src={d.glbUrl} poster={d.posterUrl ?? undefined} alt={d.name ?? ''} color={tint} showControls />
+          </div>
           <p className="mt-2 text-xs text-base-content/55">{t('quote.design.view3dHint')}</p>
         </ModalShell>
       )}

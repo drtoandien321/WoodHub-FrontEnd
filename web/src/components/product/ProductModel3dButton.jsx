@@ -35,7 +35,9 @@ export default function ProductModel3dButton({ product }) {
             </>
           )}
         >
-          <ModelViewer src={m.modelGlbUrl} iosSrc={m.modelUsdzUrl ?? undefined} poster={m.posterUrl} alt={product.name} className="h-[60vh] w-full rounded-xl bg-base-200" showControls />
+          <div className="h-[60vh] w-full overflow-hidden rounded-xl bg-base-200">
+            <ModelViewer src={m.modelGlbUrl} iosSrc={m.modelUsdzUrl ?? undefined} poster={m.posterUrl} alt={product.name} showControls />
+          </div>
           <p className="mt-2 text-xs text-base-content/55">{t('product.view3dHint')}</p>
         </ModalShell>
       )}

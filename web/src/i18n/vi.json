@@ -908,7 +908,8 @@
       "oak": "Sồi (Oak)",
       "walnut": "Óc chó (Walnut)",
       "ash": "Tần bì (Ash)",
-      "pine": "Thông (Pine)"
+      "pine": "Thông (Pine)",
+      "wood": "Gỗ"
     },
     "studio": {
       "title": "Custom Studio",
