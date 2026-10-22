@@ -1614,7 +1614,7 @@
       "REVIEW_NEW": "Đánh giá mới {{rating}} sao cho {{targetName}}",
       "REVIEW_REPLIED": "{{replierName}} đã phản hồi đánh giá của bạn",
       "ORDER_REFUNDED": "Đơn #{{orderCode}} đã được hoàn {{amount}}",
-      "BULK_QUOTE_NEW": "{{customerName}} gửi yêu cầu báo giá số lượng lớn ({{itemCount}} sản phẩm)",
+      "BULK_QUOTE_NEW": "{{customerName}} gửi yêu cầu báo giá số lượng lớn ({{itemCount}} mặt hàng)",
       "BULK_QUOTE_OFFERED": "{{supplierName}} đã báo giá {{totalAmount}}",
       "BULK_QUOTE_ACCEPTED": "{{customerName}} đã chấp nhận báo giá — đơn #{{orderCode}}",
       "BULK_QUOTE_REJECTED": "{{byName}} đã từ chối báo giá số lượng lớn",
