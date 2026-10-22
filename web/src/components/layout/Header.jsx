@@ -2,6 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../hooks/useCart.js';
 import { useAuthStore } from '../../stores/authStore.js';
+import NotificationBell from '../notifications/NotificationBell.jsx';
 import { useUiStore } from '../../stores/uiStore.js';
 import { useLogout } from '../../hooks/useLogout.js';
 import { redirectPathForRole } from '../../utils/auth.js';
@@ -68,6 +69,9 @@ export default function Header() {
             {isDark ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />}
           </button>
           <LanguageSwitcher />
+
+          {/* Chuông thông báo (BE-12) — mọi tài khoản đã đăng nhập */}
+          {user && <NotificationBell />}
 
           {/* Giỏ hàng — chỉ còn ICON + badge số lượng (bỏ chữ "Giỏ hàng") */}
           {isBuyer && (

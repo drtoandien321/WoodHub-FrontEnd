@@ -1563,5 +1563,38 @@
         "desc": "Tiền của đơn bị huỷ đã được hoàn."
       }
     }
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Chưa có thông báo nào.",
+    "markAll": "Đánh dấu đã đọc hết",
+    "viewAll": "Xem tất cả",
+    "unreadOnly": "Chưa đọc",
+    "all": "Tất cả",
+    "loadError": "Không tải được thông báo.",
+    "loadMore": "Xem thêm",
+    "pageTitle": "Thông báo của bạn",
+    "opening": "Đang mở thông báo…",
+    "notFound": "Không tìm thấy thông báo này (có thể đã bị xoá sau 90 ngày).",
+    "backHome": "Về trang chủ",
+    "paymentType": {
+      "deposit": "tiền cọc",
+      "final": "phần còn lại"
+    },
+    "types": {
+      "ORDER_PAID": "Đơn mới #{{orderCode}} đã thanh toán {{totalAmount}} — xác nhận còn hàng trong 24 giờ",
+      "ORDER_STATUS_CHANGED": "Đơn #{{orderCode}}: {{status}}",
+      "QUOTE_NEW": "{{customerName}} gửi yêu cầu báo giá ({{quantity}} sản phẩm)",
+      "QUOTE_OFFER": "{{fromName}} gửi báo giá {{price}}",
+      "QUOTE_OFFER_ACCEPTED": "Báo giá {{price}} đã được chấp nhận — đơn {{orderNumber}}",
+      "QUOTE_OFFER_REJECTED": "Báo giá {{price}} đã bị từ chối",
+      "CUSTOM_ORDER_DEPOSIT_PAID": "Đơn {{orderNumber}}: khách đã đặt cọc {{amount}}",
+      "CUSTOM_ORDER_FINAL_PAID": "Đơn {{orderNumber}}: khách đã thanh toán đủ {{amount}}",
+      "CUSTOM_ORDER_PAYMENT_REQUESTED": "Đơn {{orderNumber}}: xưởng yêu cầu thanh toán {{paymentType}}",
+      "CUSTOM_ORDER_STATUS_CHANGED": "Đơn {{orderNumber}}: {{status}}",
+      "REVIEW_NEW": "Đánh giá mới {{rating}} sao cho {{targetName}}",
+      "REVIEW_REPLIED": "{{replierName}} đã phản hồi đánh giá của bạn",
+      "ORDER_REFUNDED": "Đơn #{{orderCode}} đã được hoàn {{amount}}"
+    }
   }
 }

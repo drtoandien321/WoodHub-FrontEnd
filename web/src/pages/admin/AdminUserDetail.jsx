@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore.js';
-import { useAdminUserDetail, useUpdateAdminUser, useDeleteUser } from '../../hooks/useAdminUsers.js';
+import { useAdminUserDetail, useUpdateAdminUser, useDeleteUser, useSetUserStatus } from '../../hooks/useAdminUsers.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 import { Trash } from '../../components/suppliers/icons.jsx';
 
 const ROLE_LABEL = { customer: 'Khách hàng', supplier: 'Nhà cung cấp', admin: 'Quản trị viên' };
@@ -9,7 +10,7 @@ const CUSTOMER_TYPE_LABEL = { individual: 'Cá nhân', business: 'Doanh nghiệp
 
 /*
  * AdminUserDetail — xem + sửa fullName/phone (PUT /users/{id}, tái dùng api.updateUser) + xoá.
- * KHÔNG có đổi mật khẩu hộ / khoá tài khoản — BE không hỗ trợ (xem ghi chú ở AdminUsers.jsx).
+ * Khoá / mở khoá tài khoản (BE-11) ở LockSection bên dưới. Không có đổi mật khẩu hộ (BE không hỗ trợ).
  * Email/vai trò/loại KH chỉ hiển thị, không sửa được (đúng UpdateUserRequest của BE).
  */
 export default function AdminUserDetail() {
@@ -98,6 +99,56 @@ export default function AdminUserDetail() {
           </div>
         </div>
       </section>
+
+      {user.role !== 'admin' && <LockSection user={user} />}
     </div>
+  );
+}
+
+/*
+ * Khoá / mở khoá tài khoản (BE-11): PUT /users/{id}/status. Khoá có hiệu lực NGAY — request kế tiếp của user bị
+ * 403 USER_LOCKED và mọi phiên bị đăng xuất. Khoá KHÔNG ẩn sản phẩm của NCC (muốn ngừng bán → đình chỉ NCC).
+ */
+function LockSection({ user }) {
+  const setStatus = useSetUserStatus();
+  const [reason, setReason] = useState('');
+  const [err, setErr] = useState('');
+  const locked = user.status === 'locked';
+
+  const submit = () => {
+    setErr('');
+    const next = locked ? 'active' : 'locked';
+    if (!locked && !window.confirm(`Khoá tài khoản "${user.email}"? Người dùng bị đăng xuất ngay trên mọi thiết bị.`)) return;
+    setStatus.mutate(
+      { id: user.id, status: next, reason: next === 'locked' ? reason.trim() || undefined : undefined },
+      { onSuccess: () => setReason(''), onError: (e) => setErr(apiErrorMessage(e, 'Không đổi được trạng thái tài khoản.')) }
+    );
+  };
+
+  return (
+    <section className={`max-w-xl rounded-2xl border p-5 shadow-sm ${locked ? 'border-error/40 bg-error/5' : 'border-base-300 bg-base-100'}`}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="font-display text-lg">Trạng thái tài khoản</h2>
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${locked ? 'bg-error/15 text-error' : 'bg-success/15 text-success'}`}>{locked ? 'Đã khoá' : 'Đang hoạt động'}</span>
+      </div>
+      {locked ? (
+        <p className="mb-3 text-sm text-base-content/75">
+          Khoá lúc {user.lockedAt ? new Date(user.lockedAt).toLocaleString('vi-VN') : '—'}{user.lockedReason ? ` · Lý do: ${user.lockedReason}` : ''}.
+          Mở khoá thì người dùng đăng nhập lại bình thường.
+        </p>
+      ) : (
+        <label className="mb-3 flex flex-col gap-1.5">
+          <span className="text-sm text-base-content/70">Lý do khoá (tuỳ chọn, người dùng thấy khi đăng nhập)</span>
+          <input value={reason} onChange={(e) => setReason(e.target.value.slice(0, 500))} placeholder="VD: Spam đánh giá" className="input input-bordered w-full" />
+        </label>
+      )}
+      {user.role === 'supplier' && !locked && (
+        <p className="mb-3 text-xs text-base-content/55">Khoá tài khoản không ẩn sản phẩm của NCC. Muốn ngừng bán, hãy đình chỉ NCC ở trang Nhà cung cấp.</p>
+      )}
+      {err && <p className="mb-2 text-xs text-error">{err}</p>}
+      <button onClick={submit} disabled={setStatus.isPending} className={`btn ${locked ? 'btn-primary' : 'btn-error btn-outline'}`}>
+        {setStatus.isPending ? <span className="loading loading-spinner loading-sm" /> : locked ? 'Mở khoá tài khoản' : 'Khoá tài khoản'}
+      </button>
+    </section>
   );
 }

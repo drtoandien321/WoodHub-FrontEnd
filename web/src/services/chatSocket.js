@@ -13,6 +13,8 @@ import { useAuthStore } from '../stores/authStore.js';
  *  - Kết nối "/ws" (SockJS), JWT gửi ở header Authorization của frame STOMP CONNECT.
  *  - Nhận tin: subscribe "/user/queue/messages" (đẩy riêng cho từng người, không phải topic chung).
  *  - Gửi tin: SEND "/app/conversations/{conversationId}/send".
+ *  - Thông báo (BE-12): subscribe "/user/queue/notifications" trên CÙNG kết nối (onNotification). Mỗi lần (re)connect
+ *    gọi onConnected listeners để chuông tải lại số chưa đọc — có thể đã lỡ thông báo lúc mất mạng.
  *
  * ⚠️ CHỦ ĐÍCH KHÔNG optimistic-echo ở tầng gọi: BE luôn đẩy tin realtime tới CẢ HAI người trong
  * cuộc, KỂ CẢ người gửi (xem comment broadcastToParticipants ở ChatServiceImpl) — nên bên gọi
@@ -21,8 +23,22 @@ import { useAuthStore } from '../stores/authStore.js';
  */
 let client = null;
 const listeners = new Set();
+const notificationListeners = new Set();
+const connectedListeners = new Set();
 
 const notify = (message) => listeners.forEach((cb) => cb(message));
+
+/** Đăng ký callback nhận thông báo realtime (NotificationResponse). Trả về hàm huỷ đăng ký. */
+export function onNotification(callback) {
+  notificationListeners.add(callback);
+  return () => notificationListeners.delete(callback);
+}
+
+/** Gọi mỗi khi kết nối (lại) thành công. Trả về hàm huỷ đăng ký. */
+export function onConnected(callback) {
+  connectedListeners.add(callback);
+  return () => connectedListeners.delete(callback);
+}
 
 /** Đăng ký callback nhận mọi tin nhắn đẩy về (kể cả tin của chính mình). Trả về hàm huỷ đăng ký. */
 export function onMessage(callback) {
@@ -40,7 +56,22 @@ export function ensureConnected() {
     webSocketFactory: () => new SockJS(WS_URL),
     connectHeaders: { Authorization: `Bearer ${token}` },
     reconnectDelay: 4000,
+    // Lấy token MỚI NHẤT trước mỗi lần (re)connect: access token sống 15 phút, đã được api/client.js refresh →
+    // dùng lại token lúc tạo client thì lần reconnect sau 15 phút bị BE từ chối.
+    beforeConnect: () => {
+      const latest = useAuthStore.getState().token;
+      if (latest) client.connectHeaders = { Authorization: `Bearer ${latest}` };
+    },
     onConnect: () => {
+      client.subscribe('/user/queue/notifications', (frame) => {
+        try {
+          const n = JSON.parse(frame.body);
+          notificationListeners.forEach((cb) => cb(n));
+        } catch {
+          // bỏ qua frame lỗi
+        }
+      });
+      connectedListeners.forEach((cb) => cb());
       client.subscribe('/user/queue/messages', (frame) => {
         try {
           notify(JSON.parse(frame.body));
