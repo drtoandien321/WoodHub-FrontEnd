@@ -781,8 +781,13 @@ const maskReviewerName = (fullName) => {
   if (!compact.length) return 'Ẩn danh';
   return compact.length === 1 ? `${compact[0]}*****` : `${compact[0]}*****${compact[compact.length - 1]}`;
 };
+// Câu trả lời của NCC theo reviewId (BE lưu trong review_replies) — mock persist để F5 vẫn còn
+const REVIEW_REPLIES_KEY = 'woodhub-mock-review-replies';
+let mockReviewReplies = storage.getItem(REVIEW_REPLIES_KEY, {});
+const persistReviewReplies = () => storage.setItem(REVIEW_REPLIES_KEY, mockReviewReplies);
 const toReviewResponse = (r, viewerId) => ({
   ...r,
+  reply: mockReviewReplies[r.id] ?? null,
   anonymous: !!r.anonymous,
   userId: r.anonymous ? null : r.userId,
   userName: r.anonymous ? maskReviewerName(r.userName) : r.userName,
@@ -2237,6 +2242,102 @@ export const mockAdapter = {
     });
     persistUserReviews();
     return toReviewResponse(review, review.userId);
+  },
+
+  // GET /supplier/reviews — đánh giá về cửa hàng mock + mọi SP của cửa hàng mock (MOCK_MY_SUPPLIER_IDS)
+  async getSupplierReviewsPortal(params = {}) {
+    await delay(250);
+    const productNames = new Map([
+      ...PRODUCTS.filter((p) => MOCK_MY_SUPPLIER_IDS.includes(p.supplierId)).map((p) => [p.id, p.name?.vi ?? p.name]),
+      ...myProducts.map((p) => [p.id, p.name]),
+    ]);
+    let list = [
+      ...MOCK_MY_SUPPLIER_IDS.flatMap((id) => allReviewsFor('supplier', id).map((r) => ({ ...r, targetName: MOCK_MY_SUPPLIER.name }))),
+      ...[...productNames].flatMap(([id, name]) => allReviewsFor('product', id).map((r) => ({ ...r, targetName: name }))),
+    ];
+    if (params.targetType) list = list.filter((r) => r.targetType === params.targetType);
+    if (params.rating) list = list.filter((r) => r.rating === Number(params.rating));
+    if (params.replied != null) list = list.filter((r) => !!mockReviewReplies[r.id] === (String(params.replied) === 'true'));
+    list.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return toSpringPage(list.map((r) => toReviewResponse(r, null)), params);
+  },
+
+  async replyReview({ id, content }) {
+    await delay(300);
+    if (!content?.trim() || content.length > 1000) throw reviewError(400, 'Nội dung phản hồi bắt buộc, tối đa 1000 ký tự');
+    mockReviewReplies[id] = { content: content.trim(), createdAt: mockReviewReplies[id]?.createdAt ?? new Date().toISOString() };
+    persistReviewReplies();
+    return { id, reply: mockReviewReplies[id] };
+  },
+
+  async deleteReviewReply(id) {
+    await delay(250);
+    delete mockReviewReplies[id];
+    persistReviewReplies();
+    return { id, reply: null };
+  },
+
+  // ===== BE-10 / BE-14 cho Portal NCC (mock gọn, lưu localStorage) =====
+  async patchSupplierMe(body) {
+    await delay(300);
+    const clean = Object.fromEntries(Object.entries(body).filter(([, v]) => v != null).map(([k, v]) => [k, v === '' ? null : v]));
+    if ('businessName' in body && body.businessName === '') throw reviewError(400, 'Tên cửa hàng không được để trống');
+    storage.setItem(SUPPLIER_ME_KEY, { ...storage.getItem(SUPPLIER_ME_KEY, {}), ...clean });
+    return this.getSupplierMe();
+  },
+
+  async uploadSupplierImage({ file }) {
+    await delay(500);
+    if (file.size > 10 * 1024 * 1024) throw Object.assign(new Error('IMAGE_TOO_LARGE'), { response: { status: 413, data: { errorCode: 'IMAGE_TOO_LARGE', params: { maxMb: 10 } } } });
+    // data URL để ảnh còn hiện sau F5 (mock không có storage thật)
+    const url = await new Promise((resolve) => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.readAsDataURL(file); });
+    return { url };
+  },
+
+  async getMyCapability() {
+    await delay(200);
+    return storage.getItem('woodhub-mock-capability', null) ?? { productTypes: [], maxLengthCm: null, maxWidthCm: null, maxHeightCm: null, materials: [], experienceYears: null, updatedAt: null };
+  },
+
+  async saveMyCapability(body) {
+    await delay(300);
+    const mats = await this.getMaterials();
+    const list = mats.content ?? mats;
+    const saved = { ...body, materials: list.filter((m) => (body.materialIds ?? []).includes(m.id)).map((m) => ({ id: m.id, name: m.name })), updatedAt: new Date().toISOString() };
+    delete saved.materialIds;
+    storage.setItem('woodhub-mock-capability', saved);
+    return saved;
+  },
+
+  async getMyPayout() {
+    await delay(200);
+    return storage.getItem('woodhub-mock-payout', null) ?? { configured: false, bankCode: null, bankName: null, accountNumberMasked: null, accountNumber: null, accountHolder: null, branch: null, updatedAt: null };
+  },
+
+  async saveMyPayout(body) {
+    await delay(300);
+    const digits = String(body.accountNumber ?? '');
+    if (!/^\d{6,19}$/.test(digits)) throw Object.assign(new Error('VALIDATION'), { response: { status: 400, data: { errorCode: 'VALIDATION_FAILED', fieldErrorCodes: { accountNumber: 'PATTERN' }, message: 'Số tài khoản 6–19 chữ số' } } });
+    const saved = {
+      configured: true, bankCode: body.bankCode, bankName: body.bankName, accountNumber: null,
+      accountNumberMasked: '*'.repeat(Math.max(0, digits.length - 4)) + digits.slice(-4),
+      accountHolder: String(body.accountHolder).toUpperCase(), branch: body.branch || null, updatedAt: new Date().toISOString(),
+    };
+    storage.setItem('woodhub-mock-payout', saved);
+    return saved;
+  },
+
+  async getNotificationSettings() {
+    await delay(200);
+    const defaults = { ORDER_PAID: true, QUOTE_NEW: true, QUOTE_OFFER_ACCEPTED: true, CUSTOM_ORDER_DEPOSIT_PAID: true, CUSTOM_ORDER_FINAL_PAID: true, REVIEW_NEW: false, QUOTE_OFFER: false, QUOTE_OFFER_REJECTED: false, CUSTOM_ORDER_STATUS_CHANGED: false, BULK_QUOTE_NEW: true, BULK_QUOTE_ACCEPTED: true, BULK_QUOTE_REJECTED: false };
+    const saved = storage.getItem('woodhub-mock-notif-email', {});
+    return { email: Object.entries(defaults).map(([type, def]) => ({ type, enabled: saved[type] ?? def, defaultEnabled: def })) };
+  },
+
+  async updateNotificationSettings(email) {
+    await delay(250);
+    storage.setItem('woodhub-mock-notif-email', { ...storage.getItem('woodhub-mock-notif-email', {}), ...email });
+    return this.getNotificationSettings();
   },
 
   async deleteReview(id) {

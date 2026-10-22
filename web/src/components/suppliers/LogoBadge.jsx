@@ -1,8 +1,15 @@
+import { useState } from 'react';
+
 /*
- * Logo/avatar placeholder cho xưởng khi chưa có ảnh logo thật.
- * Lấy chữ cái đầu của 2 từ cuối tên xưởng đặt trên nền gradient gỗ — luôn hợp lệ kể cả ảnh lỗi.
+ * Logo NCC / xưởng: có `src` (logoUrl — BE-10) thì hiện ảnh; chưa có ảnh hoặc ảnh lỗi → placeholder chữ cái đầu
+ * của 2 từ cuối tên trên nền gradient gỗ — luôn hợp lệ.
  */
-export default function LogoBadge({ name = '', className = '' }) {
+export default function LogoBadge({ name = '', src, className = '' }) {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
+    return <img src={src} alt={name} loading="lazy" onError={() => setFailed(true)} className={`bg-base-100 object-cover ${className}`} />;
+  }
+
   const initials = name
     .trim()
     .split(/\s+/)

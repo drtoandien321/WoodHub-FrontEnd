@@ -85,6 +85,7 @@ const WorkshopPortfolio = lazy(() => import('./pages/workshop/WorkshopPortfolio.
 const WorkshopReviews = lazy(() => import('./pages/workshop/WorkshopReviews.jsx'));
 const WorkshopReports = lazy(() => import('./pages/workshop/WorkshopReports.jsx'));
 const WorkshopSettings = lazy(() => import('./pages/workshop/WorkshopSettings.jsx'));
+const NotificationSettingsRedirect = lazy(() => import('./pages/NotificationSettingsRedirect.jsx'));
 
 export default function App() {
   const theme = useUiStore((s) => s.theme);
@@ -141,6 +142,8 @@ export default function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/profile" element={<Profile />} />
+            {/* Link "tắt email" trong email thông báo (BE-14) → chuyển tới đúng trang cài đặt theo vai trò */}
+            <Route path="/settings/notifications" element={<NotificationSettingsRedirect />} />
             <Route path="/account/subscription" element={<MySubscription />} />
             <Route path="/account/addresses" element={<MyAddresses />} />
             <Route path="/orders" element={<Orders />} />

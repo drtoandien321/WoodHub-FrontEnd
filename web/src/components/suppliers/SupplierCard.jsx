@@ -9,7 +9,7 @@ import { Heart, Mail, Phone } from './icons.jsx';
  * contactEmail, contactPhone, createdAt — KHÔNG có ảnh/rating/specialties/giá/chi nhánh.
  * Card này đã bỏ hết phần trước đây dựa vào field không tồn tại (cover, rating, reviewCount,
  * ordersDisplay, leadTimeLabel, responseTime, specialties, materialsDisplay, priceFrom, verified,
- * topRated) — giữ layout ngắn gọn, đúng dữ liệu thật. Ảnh dùng LogoBadge (initials) thay cover thật.
+ * topRated) — giữ layout ngắn gọn, đúng dữ liệu thật. Ảnh: logoUrl (BE-10), chưa có thì LogoBadge hiện chữ viết tắt.
  * onToggleFav/fav: trạng thái "yêu thích" chỉ ở client, chưa có API lưu lại.
  */
 export default function SupplierCard({ supplier, fav = false, onToggleFav }) {
@@ -19,7 +19,7 @@ export default function SupplierCard({ supplier, fav = false, onToggleFav }) {
     <article className="supplier-card group flex flex-col gap-3 rounded-[22px] border border-base-300 bg-base-100 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(76,52,36,0.12)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <LogoBadge name={supplier.businessName} className="h-14 w-14 shrink-0 rounded-2xl text-lg" />
+          <LogoBadge name={supplier.businessName} src={supplier.logoUrl} className="h-14 w-14 shrink-0 rounded-2xl text-lg" />
           <div className="min-w-0">
             <h3 className="truncate font-display text-lg leading-tight">{supplier.businessName}</h3>
             <span className="mt-1 inline-block rounded-full bg-base-200 px-2.5 py-0.5 text-xs font-medium text-base-content/70">

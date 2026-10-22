@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/authStore.js';
 import { useMe, useUpdateUser, useChangePassword } from '../hooks/useUser.js';
 import { apiErrorMessage } from '../utils/apiError.js';
 import BusinessProfileSection from '../components/profile/BusinessProfileSection.jsx';
+import NotificationSettingsCard from '../components/settings/NotificationSettingsCard.jsx';
 
 /*
  * Profile — trang "Thông tin cá nhân" mở từ dropdown tài khoản trên Header.
@@ -35,6 +36,9 @@ export default function Profile() {
       </div>
 
       {authUser.role === 'customer' && <BusinessProfileSection customerType={authUser.customerType} />}
+
+      {/* Bật/tắt email theo loại thông báo (BE-14) — id="notifications" cho link /settings/notifications trong email */}
+      {authUser.role === 'customer' && <NotificationSettingsCard />}
 
       <ChangePasswordSection onSubmit={changePassword} />
     </div>
