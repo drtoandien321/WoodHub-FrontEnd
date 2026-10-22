@@ -39,8 +39,10 @@ export default function PortalSettings({ subtitle, profileTabLabel, nameLabel, d
         <p className="mt-1 text-base-content/60">{subtitle}</p>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_minmax(0,1fr)_320px]">
-        <nav className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+      {/* 3 cột chỉ từ 2xl (≥1536px): ở laptop 1280–1440px, sidebar portal + menu tab + thẻ tổng quan chiếm hết → cột form
+          còn ~250px, ô nhập bị cắt chữ. Màn lg–xl: 2 cột, thẻ tổng quan xuống dưới form (cột 2). */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[200px_minmax(0,1fr)] 2xl:grid-cols-[220px_minmax(0,1fr)_320px]">
+        <nav className="flex gap-2 overflow-x-auto lg:row-span-2 lg:flex-col lg:self-start lg:overflow-visible 2xl:row-span-1">
           {tabs.map((t) => (
             <button
               key={t.key}
@@ -61,7 +63,9 @@ export default function PortalSettings({ subtitle, profileTabLabel, nameLabel, d
           {tab === 'security' && <ChangePasswordCard />}
         </div>
 
-        <SupplierOverviewCard title={overviewTitle} />
+        <div className="lg:col-start-2 2xl:col-start-auto">
+          <SupplierOverviewCard title={overviewTitle} />
+        </div>
       </div>
     </div>
   );
