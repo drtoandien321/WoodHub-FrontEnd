@@ -225,24 +225,6 @@
     "priceFromLabel": "From",
     "noResults": "No matching workshops found",
     "noResultsHint": "Try another keyword or remove some filters.",
-    "listStats": [
-      {
-        "value": "24+",
-        "label": "Verified workshops"
-      },
-      {
-        "value": "1,200+",
-        "label": "Completed orders"
-      },
-      {
-        "value": "4.8/5",
-        "label": "Average rating"
-      },
-      {
-        "value": "2h",
-        "label": "Average response"
-      }
-    ],
     "filters": [
       {
         "id": "all",
@@ -371,6 +353,11 @@
       "maxSize": "Max size",
       "experience": "Experience",
       "years": "{{count}} years"
+    },
+    "listStatsLabels": {
+      "total": "Partners on WoodHub",
+      "workshop": "Workshops",
+      "retailer": "Suppliers"
     }
   },
   "b2b": {
@@ -1175,7 +1162,8 @@
         "image": "AI model from photo",
         "template": "WoodHub library template",
         "uploaded": "Uploaded model"
-      }
+      },
+      "noSnapshot": "This request was sent before designs were attached to quotes — chat with the customer to see the design."
     }
   },
   "order": {

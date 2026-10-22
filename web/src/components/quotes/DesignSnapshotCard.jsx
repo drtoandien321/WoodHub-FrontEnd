@@ -24,11 +24,13 @@ export default function DesignSnapshotCard({ snapshot, quantity, children }) {
   const colorHex = color ? (String(color).startsWith('#') ? color : NAMED_COLORS[color] ?? null) : null;
   const tint = colorHex ?? MATERIAL_TINT[material] ?? null;
   const dims = dimensions && AXES.some((a) => dimensions[a]) ? dimensions : null;
+  // Báo giá tạo TRƯỚC BE-02 có snapshot rỗng ({color:null,…}) → không có ảnh/tên để hiện, chỉ báo ngắn thay vì ô ảnh trống
+  const hasDesign = !!(d.name || d.posterUrl || d.glbUrl);
 
   return (
     <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <button
+        {hasDesign && <button
           type="button"
           onClick={() => d.glbUrl && setOpen(true)}
           disabled={!d.glbUrl}
@@ -43,12 +45,14 @@ export default function DesignSnapshotCard({ snapshot, quantity, children }) {
               🧊 {t('quote.design.view3d')}
             </span>
           )}
-        </button>
+        </button>}
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-base-content/50">{t('quote.design.title')}</p>
-            <p className="font-display text-xl">{d.name || t('quote.design.untitled')}</p>
+            {hasDesign
+              ? <p className="font-display text-xl">{d.name || t('quote.design.untitled')}</p>
+              : <p className="text-sm text-base-content/55">{t('quote.design.noSnapshot')}</p>}
             {d.sourceType && <p className="text-xs text-base-content/55">{t(`quote.design.source.${d.sourceType}`, { defaultValue: d.sourceType })}</p>}
           </div>
 

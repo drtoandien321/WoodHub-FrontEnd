@@ -1,15 +1,15 @@
-import { CheckCircle, Calendar, Star, Clock } from './icons.jsx';
+import { CheckCircle, Tool, Briefcase } from './icons.jsx';
 
-// Icon cho 4 stat card (theo thứ tự: xưởng xác minh, đơn hoàn thành, đánh giá, phản hồi).
-const STAT_ICONS = [CheckCircle, Calendar, Star, Clock];
+// Icon theo thứ tự stat: tổng đối tác, xưởng mộc, nhà cung cấp.
+const STAT_ICONS = [CheckCircle, Tool, Briefcase];
 
 /*
  * Dải 4 stat card tổng quan dưới hero của trang /suppliers.
- * Nhận stats từ i18n (mỗi item { value, label }) để dễ đổi nội dung/dịch.
+ * Nhận stats đã tính sẵn (mỗi item { value, label }) — số đếm thật từ danh sách NCC công khai.
  */
 export default function SupplierListStats({ stats = [] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {stats.map((s, i) => {
         const Icon = STAT_ICONS[i] ?? CheckCircle;
         return (

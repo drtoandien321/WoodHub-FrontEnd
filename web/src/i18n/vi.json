@@ -225,24 +225,6 @@
     "priceFromLabel": "Giá từ",
     "noResults": "Không tìm thấy xưởng phù hợp",
     "noResultsHint": "Thử từ khóa khác hoặc bỏ bớt bộ lọc.",
-    "listStats": [
-      {
-        "value": "24+",
-        "label": "Xưởng xác minh"
-      },
-      {
-        "value": "1.200+",
-        "label": "Đơn hoàn thành"
-      },
-      {
-        "value": "4.8/5",
-        "label": "Đánh giá trung bình"
-      },
-      {
-        "value": "2h",
-        "label": "Phản hồi trung bình"
-      }
-    ],
     "filters": [
       {
         "id": "all",
@@ -371,6 +353,11 @@
       "maxSize": "Kích thước tối đa",
       "experience": "Kinh nghiệm",
       "years": "{{count}} năm"
+    },
+    "listStatsLabels": {
+      "total": "Đối tác trên sàn",
+      "workshop": "Xưởng mộc",
+      "retailer": "Nhà cung cấp"
     }
   },
   "b2b": {
@@ -1171,7 +1158,8 @@
         "image": "Mô hình AI tạo từ ảnh",
         "template": "Mẫu thư viện WoodHub",
         "uploaded": "Mô hình tải lên"
-      }
+      },
+      "noSnapshot": "Yêu cầu này được gửi trước khi hệ thống lưu kèm thông tin thiết kế — trao đổi với khách qua chat để xem mẫu."
     }
   },
   "order": {

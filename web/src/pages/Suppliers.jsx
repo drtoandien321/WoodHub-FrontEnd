@@ -37,7 +37,18 @@ export default function Suppliers() {
       return next;
     });
 
-  const listStats = t('suppliers.listStats', { returnObjects: true });
+  // Số liệu THẬT đếm từ danh sách NCC công khai (cùng query key với tab 'Tất cả' → không gọi thêm khi đang ở tab đó).
+  // Trước đây là số marketing cứng trong i18n (24+ xưởng, 1.200+ đơn, 4.8/5…) trong khi sàn mới có vài NCC — BE cũng
+  // chưa trả rating / số đơn của NCC nên không hiện các chỉ số đó.
+  const { data: allData } = usePublicSuppliers({ size: 100 });
+  const listStats = useMemo(() => {
+    const all = allData?.content ?? [];
+    return [
+      { value: allData?.page?.totalElements ?? all.length, label: t('suppliers.listStatsLabels.total') },
+      { value: all.filter((s) => s.type === 'workshop').length, label: t('suppliers.listStatsLabels.workshop') },
+      { value: all.filter((s) => s.type === 'retailer').length, label: t('suppliers.listStatsLabels.retailer') },
+    ];
+  }, [allData, t]);
   const filters = TYPE_FILTERS.map((f) => ({ id: f.id, label: t(f.labelKey) }));
 
   const visible = useMemo(() => {
@@ -79,7 +90,7 @@ export default function Suppliers() {
       </section>
 
       {/* 4 stat card tổng quan — nội dung marketing tĩnh (i18n), không phải số liệu tính từ dữ liệu thật */}
-      <SupplierListStats stats={listStats} />
+      {allData && <SupplierListStats stats={listStats} />}
 
       {/* Filter loại supplier — duy nhất filter BE hỗ trợ thật (param `type`) */}
       <SupplierFilterBar filters={filters} active={type} onChange={setType} />
