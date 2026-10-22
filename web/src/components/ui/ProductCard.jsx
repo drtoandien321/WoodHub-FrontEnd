@@ -33,12 +33,19 @@ function RatingLine({ product }) {
 /*
  * Card sản phẩm — dùng chung Shop/Landing/RelatedProducts. Khớp ProductSummaryResponse thật
  * (FE-4): { id,supplierId,supplierName,categoryId,categoryName,materialName,name,status,
- * priceFrom,primaryImageUrl,createdAt }. Không có stock/has3d ở tầng danh sách → không tự bịa hiển thị.
+ * priceFrom,primaryImageUrl,createdAt, has3d, customizable }. has3d / customizable (admin gắn mẫu 3D cho SP) → badge góc ảnh.
  */
 export default function ProductCard({ product }) {
+  const { t } = useTranslation();
   return (
     <Link to={`/product/${product.id}`} className="card bg-base-100 border border-base-300 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden">
-      <figure className="aspect-[4/3] bg-base-200">
+      <figure className="relative aspect-[4/3] bg-base-200">
+        {(product.has3d || product.customizable) && (
+          <span className="absolute left-2 top-2 z-10 flex gap-1">
+            {product.has3d && <span className="badge badge-sm border-0 bg-base-100/90 font-medium shadow-sm">3D</span>}
+            {product.customizable && <span className="badge badge-sm border-0 bg-primary/90 font-medium text-primary-content shadow-sm">{t('product.customizableBadge')}</span>}
+          </span>
+        )}
         {product.primaryImageUrl && (
           <img
             src={product.primaryImageUrl}

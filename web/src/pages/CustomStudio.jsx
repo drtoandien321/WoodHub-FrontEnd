@@ -241,6 +241,8 @@ export default function CustomStudio() {
               onChange={s.setConfiguration}
               onNext={() => s.goToStep(6)}
               onBack={() => s.goToStep(4)}
+              // Áp dụng chất liệu AI (BE-05) → thay model bằng biến thể; lưu thiết kế sẽ dùng biến thể này
+              onModelChange={(m) => useCustomStudioStore.setState({ model: m })}
             />
           )}
 

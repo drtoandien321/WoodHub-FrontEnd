@@ -2463,6 +2463,40 @@ export const mockAdapter = {
     return { ...p, accountNumber: '0123456789' };
   },
 
+  // ===== Mẫu 3D admin + retexture (mock rút gọn) =====
+  async getAdminModels3d(params = {}) {
+    await delay(250);
+    let list = MODELS_3D.filter((m) => m.source === 'template').map((m) => ({ ...m, status: storage.getItem('woodhub-mock-model-status', {})[m.id] ?? 'active', productId: storage.getItem('woodhub-mock-model-links', {})[m.id] ?? null }));
+    if (params.status) list = list.filter((m) => m.status === params.status);
+    if (params.keyword) list = list.filter((m) => m.name.toLowerCase().includes(String(params.keyword).toLowerCase()));
+    if (params.productType) list = list.filter((m) => m.productType === params.productType);
+    return toSpringPage(list, params);
+  },
+  async updateAdminModel3d({ id, ...body }) { await delay(250); return { ...MODELS_3D.find((m) => m.id === id), ...body }; },
+  async setAdminModel3dStatus({ id, status }) {
+    await delay(200);
+    storage.setItem('woodhub-mock-model-status', { ...storage.getItem('woodhub-mock-model-status', {}), [id]: status });
+    return { ...MODELS_3D.find((m) => m.id === id), status };
+  },
+  async deleteAdminModel3d() { await delay(200); throw Object.assign(new Error('IN_USE'), { response: { status: 409, data: { message: 'Mẫu đang được dùng trong thiết kế của khách — hãy ẩn mẫu thay vì xoá' } } }); },
+  async linkProductModel3d({ productId, model3dId }) {
+    await delay(250);
+    storage.setItem('woodhub-mock-model-links', { ...storage.getItem('woodhub-mock-model-links', {}), [model3dId]: productId });
+    return { id: productId };
+  },
+  async unlinkProductModel3d(productId) {
+    await delay(200);
+    const links = storage.getItem('woodhub-mock-model-links', {});
+    storage.setItem('woodhub-mock-model-links', Object.fromEntries(Object.entries(links).filter(([, p]) => p !== productId)));
+    return { id: productId };
+  },
+  async retextureModel({ modelId }) {
+    await delay(400);
+    const m = MODELS_3D.find((x) => x.id === modelId);
+    return { state: 'ready', taskId: null, status: 'succeeded', progress: 100, model: m ? { ...m, parentModelId: m.id, variantKey: 'material:mock' } : null };
+  },
+  async getModelVariants() { await delay(150); return []; },
+
   async getMyCapability() {
     await delay(200);
     return storage.getItem('woodhub-mock-capability', null) ?? { productTypes: [], maxLengthCm: null, maxWidthCm: null, maxHeightCm: null, materials: [], experienceYears: null, updatedAt: null };
