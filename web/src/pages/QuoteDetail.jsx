@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuoteDetail, useCreateOffer, useAcceptOffer, useRejectOffer, useCancelQuote } from '../hooks/useQuotes.js';
 import { useAuthStore } from '../stores/authStore.js';
 import { quoteMeta, offerMeta } from '../utils/quoteStatus.js';
-import { ai3dErrorKey } from '../utils/ai3dErrors.js';
+import { apiErrorMessage } from '../utils/apiError.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import { formatVnd } from '../utils/format.js';
 
@@ -128,7 +128,7 @@ export default function QuoteDetail() {
           </div>
         )}
         {(acceptOffer.isError || rejectOffer.isError) && (
-          <p className="mt-2 text-sm text-error">{t(ai3dErrorKey(acceptOffer.error || rejectOffer.error))}</p>
+          <p className="mt-2 text-sm text-error">{apiErrorMessage(acceptOffer.error || rejectOffer.error, t('order.genericError'))}</p>
         )}
       </div>
 
@@ -147,7 +147,7 @@ export default function QuoteDetail() {
             </label>
           </div>
           <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder={t('quote.notePlaceholder')} className="textarea textarea-bordered rounded-xl" />
-          {createOffer.isError && <p className="text-sm text-error">{t(ai3dErrorKey(createOffer.error))}</p>}
+          {createOffer.isError && <p className="text-sm text-error">{apiErrorMessage(createOffer.error, t('order.genericError'))}</p>}
           <button type="submit" disabled={createOffer.isPending} className="btn btn-primary self-start">
             {createOffer.isPending ? <span className="loading loading-spinner loading-sm" /> : t('quote.send')}
           </button>

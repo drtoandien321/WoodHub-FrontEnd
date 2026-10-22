@@ -72,7 +72,8 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
                   return (
                     <button
                       key={c.value}
-                      onClick={() => onChange({ color: c.value, material: null })}
+                      // KHÔNG xoá material khi chọn màu: material null không nằm trong editableOptions → BE 400 DESIGN_INVALID_OPTION
+                      onClick={() => onChange({ color: c.value })}
                       aria-label={name}
                       title={name}
                       className={`h-8 w-8 rounded-full border-2 transition ${configuration.color === c.value ? 'border-primary ring-2 ring-primary/30' : 'border-base-300'}`}

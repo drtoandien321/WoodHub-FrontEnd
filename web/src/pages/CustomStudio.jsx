@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
+import { normalizeOptions } from '../utils/modelOptions.js';
 import { useGenerate3D, useGenerate3DFromText, useRefineGenTask, useGenTask, useRetryGenTask, useCancelGenTask, useModel3d } from '../hooks/useModels3d.js';
 import { useCreateDesign, useUpdateDesign } from '../hooks/useCustomDesigns.js';
 import { api } from '../api/client.js';
@@ -107,6 +108,14 @@ export default function CustomStudio() {
     refine.mutate({ taskId: s.taskId, modelSlug: s.model?.slug }, { onSuccess: () => s.startRefine() });
   };
 
+  /*
+   * Cấu hình gửi BE: bỏ key rỗng (null / undefined). BE kiểm tra MỌI key có trong configuration phải nằm trong
+   * editableOptions của model → gửi material: null / color: null là 400 DESIGN_INVALID_OPTION; không gửi key thì BE bỏ qua.
+   */
+  // + bỏ dimensions khi mẫu KHÔNG khai báo kích thước (tiến trình lưu từ bản cũ còn số đo FE tự bịa → không gửi cho xưởng)
+  const cleanConfiguration = (c) => Object.fromEntries(Object.entries(c ?? {}).filter(([k, v]) =>
+    v != null && v !== '' && (k !== 'dimensions' || !!normalizeOptions(s.model).dimensions)));
+
   const handleSave = async () => {
     setSaveError(null);
     let id = s.designId;
@@ -114,14 +123,14 @@ export default function CustomStudio() {
     try {
       if (!id) {
         const created = await createDesign.mutateAsync({
-          name: s.designName, modelId: s.model.id, configuration: s.configuration, thumbnailUrl: s.model.posterUrl,
+          name: s.designName, modelId: s.model.id, configuration: cleanConfiguration(s.configuration), thumbnailUrl: s.model.posterUrl,
         });
         id = created.id;
         version = created.version;
         s.setDesignMeta({ id, version });
       }
       const updated = await updateDesign.mutateAsync({
-        id, name: s.designName, configuration: s.configuration, thumbnailUrl: s.model.posterUrl, status: 'completed', version,
+        id, name: s.designName, configuration: cleanConfiguration(s.configuration), thumbnailUrl: s.model.posterUrl, status: 'completed', version,
       });
       s.setDesignMeta({ id: updated.id, version: updated.version });
       // Model AI (từ ảnh) đã TỰ LƯU khi gen xong với tên mặc định "Model AI" — đặt tên theo thiết kế để dễ tìm trong
