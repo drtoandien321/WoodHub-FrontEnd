@@ -908,7 +908,8 @@
       "oak": "Sồi (Oak)",
       "walnut": "Óc chó (Walnut)",
       "ash": "Tần bì (Ash)",
-      "pine": "Thông (Pine)"
+      "pine": "Thông (Pine)",
+      "wood": "Gỗ"
     },
     "studio": {
       "title": "Custom Studio",
@@ -1157,7 +1158,21 @@
     },
     "locationOther": "Nhập địa chỉ khác…",
     "locationTooShort": "Vui lòng chọn hoặc nhập địa chỉ đầy đủ (ít nhất {{min}} ký tự).",
-    "addAddress": "+ Thêm địa chỉ vào sổ địa chỉ"
+    "addAddress": "+ Thêm địa chỉ vào sổ địa chỉ",
+    "design": {
+      "title": "Sản phẩm khách yêu cầu",
+      "untitled": "Thiết kế chưa đặt tên",
+      "view3d": "Xem 3D",
+      "view3dHint": "Mô hình đã nhuộm theo màu khách chọn. Kéo để xoay, cuộn để phóng to.",
+      "prompt": "Mô tả gốc của khách",
+      "dimsHint": "Rộng × Sâu × Cao",
+      "source": {
+        "text": "Mô hình AI tạo từ mô tả",
+        "image": "Mô hình AI tạo từ ảnh",
+        "template": "Mẫu thư viện WoodHub",
+        "uploaded": "Mô hình tải lên"
+      }
+    }
   },
   "order": {
     "myOrdersTitle": "Đơn custom của tôi",

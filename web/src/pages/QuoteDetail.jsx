@@ -7,6 +7,7 @@ import { quoteMeta, offerMeta } from '../utils/quoteStatus.js';
 import { apiErrorMessage } from '../utils/apiError.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import { formatVnd } from '../utils/format.js';
+import DesignSnapshotCard from '../components/quotes/DesignSnapshotCard.jsx';
 
 const TERMINAL = new Set(['accepted', 'rejected', 'expired', 'cancelled']);
 
@@ -73,22 +74,11 @@ export default function QuoteDetail() {
         </div>
       </div>
 
-      {/* Thông tin yêu cầu */}
-      <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-          {quote.designSnapshot?.thumbnailUrl && (
-            <img src={quote.designSnapshot.thumbnailUrl} alt="" className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
-          )}
-          <div className="grid flex-1 grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-            <div><p className="text-base-content/50">{t('quote.quantity')}</p><p className="font-medium">{quote.quantity}</p></div>
-            {quote.location && <div><p className="text-base-content/50">{t('quote.location')}</p><p className="font-medium">{quote.location}</p></div>}
-            {quote.designSnapshot?.configuration?.material && (
-              <div><p className="text-base-content/50">{t('product.material')}</p><p className="font-medium">{quote.designSnapshot.configuration.material}</p></div>
-            )}
-          </div>
-        </div>
-        {quote.note && <p className="mt-3 rounded-xl bg-base-200/60 p-3 text-sm text-base-content/70">{quote.note}</p>}
-      </div>
+      {/* Thiết kế khách yêu cầu (designSnapshot) + số lượng, địa điểm, ghi chú */}
+      <DesignSnapshotCard snapshot={quote.designSnapshot} quantity={quote.quantity}>
+        {quote.location && <div className="col-span-2"><p className="text-base-content/50">{t('quote.location')}</p><p className="font-medium">{quote.location}</p></div>}
+        {quote.note && <div className="col-span-full"><p className="text-base-content/50">{t('quote.note')}</p><p className="whitespace-pre-line text-base-content/80">{quote.note}</p></div>}
+      </DesignSnapshotCard>
 
       {quote.status === 'accepted' && (
         <div className="rounded-2xl bg-success/10 p-4 text-sm text-success-content">

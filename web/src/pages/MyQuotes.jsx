@@ -6,6 +6,7 @@ import { quoteMeta } from '../utils/quoteStatus.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import QuotePricing from '../components/quote/QuotePricing.jsx';
+import { readDesignSnapshot } from '../utils/designSnapshot.js';
 
 const TABS = ['', 'pending', 'negotiating', 'accepted', 'rejected', 'expired', 'cancelled'];
 
@@ -44,7 +45,7 @@ export default function MyQuotes() {
         <div className="flex flex-col gap-3">
           {items.map((q) => (
             <Link key={q.id} to={`/quotes/${q.id}`} className="flex items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-primary">
-              {q.designSnapshot?.thumbnailUrl && <img src={q.designSnapshot.thumbnailUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
+              {readDesignSnapshot(q.designSnapshot).posterUrl && <img src={readDesignSnapshot(q.designSnapshot).posterUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{q.workshopName}</p>
