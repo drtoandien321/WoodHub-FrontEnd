@@ -1569,5 +1569,38 @@
         "desc": "Money for a cancelled order was refunded."
       }
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet.",
+    "markAll": "Mark all as read",
+    "viewAll": "View all",
+    "unreadOnly": "Unread",
+    "all": "All",
+    "loadError": "Could not load notifications.",
+    "loadMore": "Load more",
+    "pageTitle": "Your notifications",
+    "opening": "Opening notification…",
+    "notFound": "This notification was not found (it may have been removed after 90 days).",
+    "backHome": "Back to home",
+    "paymentType": {
+      "deposit": "the deposit",
+      "final": "the final payment"
+    },
+    "types": {
+      "ORDER_PAID": "New order #{{orderCode}} paid {{totalAmount}} — confirm stock within 24 hours",
+      "ORDER_STATUS_CHANGED": "Order #{{orderCode}}: {{status}}",
+      "QUOTE_NEW": "{{customerName}} sent a quote request ({{quantity}} items)",
+      "QUOTE_OFFER": "{{fromName}} sent an offer of {{price}}",
+      "QUOTE_OFFER_ACCEPTED": "Your offer of {{price}} was accepted — order {{orderNumber}}",
+      "QUOTE_OFFER_REJECTED": "Your offer of {{price}} was rejected",
+      "CUSTOM_ORDER_DEPOSIT_PAID": "Order {{orderNumber}}: deposit of {{amount}} received",
+      "CUSTOM_ORDER_FINAL_PAID": "Order {{orderNumber}}: final payment of {{amount}} received",
+      "CUSTOM_ORDER_PAYMENT_REQUESTED": "Order {{orderNumber}}: the workshop requests {{paymentType}}",
+      "CUSTOM_ORDER_STATUS_CHANGED": "Order {{orderNumber}}: {{status}}",
+      "REVIEW_NEW": "New {{rating}}-star review for {{targetName}}",
+      "REVIEW_REPLIED": "{{replierName}} replied to your review",
+      "ORDER_REFUNDED": "Order #{{orderCode}} was refunded {{amount}}"
+    }
   }
 }

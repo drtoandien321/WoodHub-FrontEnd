@@ -781,6 +781,21 @@ const maskReviewerName = (fullName) => {
   if (!compact.length) return 'Ẩn danh';
   return compact.length === 1 ? `${compact[0]}*****` : `${compact[0]}*****${compact[compact.length - 1]}`;
 };
+// Thông báo mẫu cho mock — đọc trạng thái đã đọc từ storage để markRead có tác dụng
+const mockNotificationsFor = (user) => {
+  const readIds = new Set(storage.getItem('woodhub-mock-notif-read', []));
+  const now = Date.now();
+  const base = user?.role === 'supplier'
+    ? [
+      { id: 'n-s1', type: 'ORDER_PAID', title: 'Đơn mới #WH0001 đã thanh toán 1.500.000 ₫', params: { orderCode: 'WH0001', totalAmount: 1500000 }, targetType: 'order', targetId: 'o1' },
+      { id: 'n-s2', type: 'REVIEW_NEW', title: 'Đánh giá mới 5 sao', params: { rating: 5, targetName: 'Bàn ăn gỗ sồi', reviewTargetType: 'product', reviewTargetId: 'p1' }, targetType: 'review', targetId: 'r1' },
+    ]
+    : [
+      { id: 'n-c1', type: 'ORDER_STATUS_CHANGED', title: 'Đơn #WH0001 đã được xác nhận', params: { orderCode: 'WH0001', status: 'confirmed' }, targetType: 'order', targetId: 'o1' },
+    ];
+  return base.map((n, i) => ({ ...n, read: readIds.has(n.id), readAt: null, createdAt: new Date(now - (i + 1) * 3_600_000).toISOString() }));
+};
+
 // Câu trả lời của NCC theo reviewId (BE lưu trong review_replies) — mock persist để F5 vẫn còn
 const REVIEW_REPLIES_KEY = 'woodhub-mock-review-replies';
 let mockReviewReplies = storage.getItem(REVIEW_REPLIES_KEY, {});
@@ -2292,6 +2307,33 @@ export const mockAdapter = {
     // data URL để ảnh còn hiện sau F5 (mock không có storage thật)
     const url = await new Promise((resolve) => { const fr = new FileReader(); fr.onload = () => resolve(fr.result); fr.readAsDataURL(file); });
     return { url };
+  },
+
+  // ===== THÔNG BÁO (mock: vài thông báo mẫu theo vai, lưu trạng thái đã đọc) =====
+  async getNotifications(params = {}) {
+    await delay(200);
+    let list = mockNotificationsFor(useAuthStore.getState().user);
+    if (String(params.unread) === 'true') list = list.filter((n) => !n.read);
+    return toSpringPage(list, params);
+  },
+
+  async getUnreadNotificationCount() {
+    await delay(150);
+    return { unread: mockNotificationsFor(useAuthStore.getState().user).filter((n) => !n.read).length };
+  },
+
+  async markNotificationRead(id) {
+    await delay(150);
+    const readIds = storage.getItem('woodhub-mock-notif-read', []);
+    storage.setItem('woodhub-mock-notif-read', [...new Set([...readIds, id])]);
+    return mockNotificationsFor(useAuthStore.getState().user).find((n) => n.id === id) ?? null;
+  },
+
+  async markAllNotificationsRead() {
+    await delay(150);
+    const list = mockNotificationsFor(useAuthStore.getState().user);
+    storage.setItem('woodhub-mock-notif-read', list.map((n) => n.id));
+    return { updated: list.length };
   },
 
   async getMyCapability() {

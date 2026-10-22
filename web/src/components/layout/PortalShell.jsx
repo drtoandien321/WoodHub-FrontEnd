@@ -6,6 +6,7 @@ import PortalChatButton from '../portal/PortalChatButton.jsx';
 import PortalChatDrawer from '../portal/PortalChatDrawer.jsx';
 import { MenuIcon } from '../ui/icons.jsx';
 import { LogOut, X } from '../suppliers/icons.jsx';
+import NotificationBell from '../notifications/NotificationBell.jsx';
 
 /*
  * PortalShell — khung dùng chung cho Portal Nhà cung cấp & Xưởng mộc.
@@ -76,7 +77,8 @@ export default function PortalShell({ nav, brandName, brandInitials, home, title
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             {showChat && <PortalChatButton />}
-            {/* Chuông thông báo đã gỡ: chấm đỏ cố định + không mở gì (BE chưa có API notifications) */}
+            {/* Chuông thông báo (BE-12): đơn mới đã thanh toán, đánh giá mới, báo giá… realtime qua socket chat */}
+            <NotificationBell />
             <div className="flex items-center gap-2 rounded-full border border-base-300 py-1 pl-3 pr-1.5">
               <span className="hidden text-sm font-medium sm:inline">{brandName}</span>
               <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-secondary to-primary text-xs font-display text-primary-content">{brandInitials}</span>

@@ -87,6 +87,8 @@ const REAL_ENDPOINTS = new Set([
   // Hồ sơ + portfolio của chính supplier (SupplierController PUT /me, SupplierPortfolioController)
   // BE-10 hồ sơ (PATCH, ảnh) · BE-12 §2 trả lời đánh giá · BE-14 tài khoản nhận tiền + cài đặt email thông báo
   'patchSupplierMe', 'uploadSupplierImage', 'getSupplierReviewsPortal', 'replyReview', 'deleteReviewReply',
+  // BE-12 thông báo (chuông)
+  'getNotifications', 'getUnreadNotificationCount', 'markNotificationRead', 'markAllNotificationsRead',
   'getMyPayout', 'saveMyPayout', 'getMyCapability', 'saveMyCapability', 'getNotificationSettings', 'updateNotificationSettings',
   'updateSupplierMe', 'getMyPortfolio', 'addPortfolioItem', 'updatePortfolioItem', 'deletePortfolioItem',
   // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
@@ -847,6 +849,19 @@ export const api = {
    * GET /suppliers/me/payout → { configured, bankCode, bankName, accountNumberMasked, accountHolder, branch, updatedAt }
    * (accountNumber LUÔN null với NCC). PUT gửi ĐỦ field kể cả số TK đầy đủ (6–19 chữ số); 503 = server chưa có khoá mã hoá.
    */
+  /*
+   * ===== THÔNG BÁO (BE-12, docs BE notifications-fe.md) =====
+   * NotificationResponse { id, type, title (câu VI dự phòng), params, targetType: order|custom_order|quote|review,
+   * targetId, read, readAt, createdAt }. Realtime: /user/queue/notifications (services/chatSocket.js).
+   */
+  // GET /notifications?unread=&page=&size= → Page, mới nhất trước
+  getNotifications: (params) => call(() => http.get('/notifications', { params }), 'getNotifications', params),
+  // GET /notifications/unread-count → { unread }
+  getUnreadNotificationCount: () => call(() => http.get('/notifications/unread-count'), 'getUnreadNotificationCount'),
+  // POST /notifications/:id/read → thông báo đã đọc · 404 NOTIFICATION_NOT_FOUND
+  markNotificationRead: (id) => call(() => http.post('/notifications/' + id + '/read'), 'markNotificationRead', id),
+  // POST /notifications/read-all → { updated }
+  markAllNotificationsRead: () => call(() => http.post('/notifications/read-all'), 'markAllNotificationsRead'),
   getMyPayout: () => call(() => http.get('/suppliers/me/payout'), 'getMyPayout'),
   // GET /suppliers/me/capability (chỉ xưởng) → { productTypes[], maxLengthCm, maxWidthCm, maxHeightCm, materials[{id,name}], experienceYears, updatedAt }
   getMyCapability: () => call(() => http.get('/suppliers/me/capability'), 'getMyCapability'),
