@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { WOOD_MATERIALS } from '../../api/mock/customData.js';
-import { normalizeOptions, hexOfColor, scaleOf } from '../../utils/modelOptions.js';
+import { normalizeOptions, hexOfColor, scaleOf, MATERIAL_TINT } from '../../utils/modelOptions.js';
 import ModelViewer from '../custom3d/ModelViewer.jsx';
 import AiMaterialPanel from './AiMaterialPanel.jsx';
 
@@ -20,7 +19,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
   const hasDimensions = !!opt.dimensions;
   const nothingEditable = !hasColors && !hasMaterials && !hasDimensions;
 
-  const tintColor = hexOfColor(model, configuration.color) ?? (WOOD_MATERIALS.find((m) => m.id === configuration.material)?.hexColor ?? null);
+  const tintColor = hexOfColor(model, configuration.color) ?? (MATERIAL_TINT[configuration.material] ?? null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -46,7 +45,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
               <h3 className="mb-2 font-medium">{t('custom.ai.materialTitle')}</h3>
               <div className="flex flex-wrap gap-2">
                 {opt.materials.map((materialId) => {
-                  const mat = WOOD_MATERIALS.find((m) => m.id === materialId);
+                  const tint = MATERIAL_TINT[materialId];
                   const active = configuration.material === materialId;
                   return (
                     <button
@@ -54,7 +53,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
                       onClick={() => onChange({ material: materialId })}
                       className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${active ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:border-primary/50'}`}
                     >
-                      {mat && <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: mat.hexColor }} />}
+                      {tint && <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: tint }} />}
                       {t(`custom.materials.${materialId}`, { defaultValue: materialId })}
                     </button>
                   );
@@ -77,7 +76,8 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
                       aria-label={name}
                       title={name}
                       className={`h-8 w-8 rounded-full border-2 transition ${configuration.color === c.value ? 'border-primary ring-2 ring-primary/30' : 'border-base-300'}`}
-                      style={{ background: c.hex }}
+                      // hex null = màu gốc của mô hình (không nhuộm) → ô kẻ chéo thay vì ô màu
+                      style={{ background: c.hex ?? 'repeating-linear-gradient(45deg, #f3ede3 0 4px, #d6c8b2 4px 8px)' }}
                     />
                   );
                 })}
@@ -88,7 +88,6 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
           {hasDimensions && configuration.dimensions && (
             <section className="flex flex-col gap-3">
               <h3 className="font-medium">{t('custom.dimensions')}</h3>
-              {opt.nominal && <p className="-mt-2 text-xs text-base-content/50">{t('custom.studio.step5.nominalNote')}</p>}
               {(['width', 'height', 'depth']).map((axis) => {
                 const range = opt.dimensions[axis];
                 if (!range) return null;

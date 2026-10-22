@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModel3d } from '../hooks/useModels3d.js';
-import { WOOD_MATERIALS } from '../api/mock/customData.js';
+import { normalizeOptions } from '../utils/modelOptions.js';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
 import ModelViewer from '../components/custom3d/ModelViewer.jsx';
 
@@ -20,7 +20,6 @@ export default function CustomModelViewer() {
   const chooseTemplate = useCustomStudioStore((s) => s.chooseTemplate);
 
   const [color, setColor] = useState(null); // null = giữ texture gốc (Mặc định)
-  const [scale, setScale] = useState(1);
 
   const customizeThis = () => { chooseTemplate(model); navigate('/custom/studio', { state: { keep: true } }); };
 
@@ -49,7 +48,7 @@ export default function CustomModelViewer() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
         {/* Khung 3D/AR */}
         <div className="relative h-[58vh] min-h-[360px] overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-b from-[#efe7d8] to-[#e0d3bc]">
-          <ModelViewer src={model.modelGlbUrl} poster={model.posterUrl} alt={model.name} color={color} scale={scale} iosSrc={model.modelUsdzUrl} showControls />
+          <ModelViewer src={model.modelGlbUrl} poster={model.posterUrl} alt={model.name} color={color} iosSrc={model.modelUsdzUrl} showControls />
         </div>
 
         {/* Panel tuỳ chỉnh */}
@@ -69,32 +68,22 @@ export default function CustomModelViewer() {
               >
                 {t('custom.ai.materialDefault')}
               </button>
-              {WOOD_MATERIALS.map((mat) => (
-                <button
-                  key={mat.id}
-                  onClick={() => setColor(mat.hexColor)}
-                  title={t(`custom.materials.${mat.id}`)}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${color === mat.hexColor ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:border-primary/50'}`}
-                >
-                  <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: mat.hexColor }} />
-                  {t(`custom.materials.${mat.id}`)}
-                </button>
-              ))}
+              {/* Màu xem trước lấy từ editableOptions của CHÍNH mẫu (trước đây là danh sách mock cố định cho mọi mẫu) */}
+              {normalizeOptions(model).colors.filter((c) => c.hex).map((c) => {
+                const name = t(`custom.colors.${c.value}`, { defaultValue: c.label });
+                return (
+                  <button
+                    key={c.value}
+                    onClick={() => setColor(c.hex)}
+                    title={name}
+                    className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${color === c.hex ? 'border-primary bg-primary/10 text-primary' : 'border-base-300 hover:border-primary/50'}`}
+                  >
+                    <span className="h-4 w-4 rounded-full border border-black/10" style={{ background: c.hex }} />
+                    {name}
+                  </button>
+                );
+              })}
             </div>
-          </section>
-
-          {/* Tỉ lệ tổng thể */}
-          <section>
-            <div className="mb-1 flex items-center justify-between">
-              <h2 className="font-medium">{t('custom.ai.scaleTitle')}</h2>
-              <span className="font-mono text-sm">{Math.round(scale * 100)}%</span>
-            </div>
-            <input
-              type="range" min="0.6" max="1.4" step="0.05" value={scale}
-              onChange={(e) => setScale(Number(e.target.value))}
-              className="range range-primary range-sm"
-            />
-            <p className="mt-1 text-xs text-base-content/50">{t('custom.ai.scaleNote')}</p>
           </section>
 
           {/* Gợi ý AR */}

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api, USE_MOCK } from '../api/client.js';
 import { useAuthStore } from './authStore.js';
+import { initialsOf } from '../utils/initials.js';
 import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocket.js';
 
 /*
@@ -18,14 +19,12 @@ import { ensureConnected, onMessage, sendViaSocket } from '../services/chatSocke
  */
 let counter = 0;
 const nextId = () => `pcm_${Date.now()}_${counter++}`;
-const initialsOf = (name = '') =>
-  name.trim().split(/\s+/).filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase() || 'KH';
 
 const seedThreads = [
   { id: 'th_1', name: 'Nhà Xinh', snippet: 'Bàn ăn còn hàng không shop?', unread: 2, online: true, at: '10:24' },
   { id: 'th_2', name: 'Anh Minh Tuấn', snippet: 'Cho mình hỏi thời gian giao…', unread: 0, online: true, at: '09:50' },
   { id: 'th_3', name: 'Tủ Bếp Xanh', snippet: 'Cảm ơn shop nhé!', unread: 0, online: false, at: 'Hôm qua' },
-].map((t) => ({ ...t, initials: initialsOf(t.name) }));
+].map((t) => ({ ...t, initials: initialsOf(t.name, 'KH') }));
 
 const seedMessages = {
   th_1: [
@@ -67,7 +66,7 @@ const toThread = (c) => ({
   id: c.id,
   customerId: c.customerId, // nội bộ — không phải field UI, dùng để tra presence khi mở thread
   name: c.customerName,
-  initials: initialsOf(c.customerName),
+  initials: initialsOf(c.customerName, 'KH'),
   snippet: '',
   unread: c.unreadCount ?? 0,
   online: false,

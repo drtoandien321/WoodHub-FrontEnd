@@ -1,24 +1,13 @@
-/*
- * supplierStatus — bảng tra trạng thái cho Portal Nhà cung cấp (đơn hàng / sản phẩm / chi nhánh).
- * Trả { label, cls } để StatusBadge render đồng nhất. Dùng pastel (token/15) cho nhẹ nhàng,
- * KHÔNG chỉ dựa vào màu — luôn có label chữ (yêu cầu accessibility).
- */
-const PASTEL = {
-  success: 'bg-success/15 text-success',
-  warning: 'bg-warning/15 text-warning',
-  error: 'bg-error/15 text-error',
-  info: 'bg-info/15 text-info',
-  primary: 'bg-primary/15 text-primary',
-  neutral: 'bg-base-300/60 text-base-content/60',
-};
-
-// (Trạng thái ĐƠN B2C đã chuyển sang utils/orderStatus.js — luồng 7 bước thật của BE, thay luồng mock 4 bước cũ.)
+import { PASTEL } from './pastel.js';
 
 /*
- * Khớp đúng enum ProductStatus của BE thật: draft | active | hidden.
- * ⚠️ Trước đây có thêm "low"/"out" (sắp hết hàng/hết hàng) — đó là suy diễn từ TỒN KHO,
- * một khái niệm THUỘC MODULE KHÁC (Store Inventory — theo cặp chi nhánh×variant, xem
- * StoreInventoryController), KHÔNG phải trạng thái của Product. Bỏ 2 giá trị đó ở đây.
+ * supplierStatus — trạng thái SẢN PHẨM của portal Nhà cung cấp. Trả { label, cls } cho StatusBadge, luôn có chữ
+ * (không chỉ dựa vào màu — accessibility).
+ * Trạng thái ĐƠN B2C: utils/orderStatus.js · đơn custom / báo giá: utils/quoteStatus.js.
+ * (Đã bỏ BRANCH_STATUS / WORKSHOP_ORDER_STATUS / WORKSHOP_STEPS của mô hình mock cũ — BE không có các trạng thái đó.)
+ *
+ * Khớp enum ProductStatus của BE: draft | active | hidden. Không có "hết hàng" — sàn không quản lý tồn kho, hết hàng
+ * thì NCC chọn "Tạm ẩn".
  */
 // label: nhãn badge · option: chữ trong ô chọn đổi trạng thái · hint: giải thích ngắn cho NCC (ProductStatusSelect)
 export const PRODUCT_STATUS = {
@@ -26,29 +15,3 @@ export const PRODUCT_STATUS = {
   hidden: { label: 'Tạm ẩn', cls: PASTEL.warning, option: 'Tạm ẩn (hết hàng / ngừng bán)', hint: 'Không hiện trên cửa hàng, khách không đặt mua được. Dùng khi hết hàng hoặc ngừng bán.' },
   draft: { label: 'Nháp', cls: PASTEL.neutral, option: 'Nháp', hint: 'Chưa đăng bán, chỉ bạn thấy.' },
 };
-
-export const BRANCH_STATUS = {
-  active: { label: 'Hoạt động', cls: PASTEL.success },
-  paused: { label: 'Tạm ngưng', cls: PASTEL.warning },
-};
-
-// ===== XƯỞNG MỘC (custom) =====
-export const WORKSHOP_ORDER_STATUS = {
-  quote_pending: { label: 'Chờ báo giá', cls: PASTEL.warning },
-  quoted: { label: 'Đã báo giá', cls: PASTEL.info },
-  producing: { label: 'Đang sản xuất', cls: PASTEL.primary },
-  completed: { label: 'Hoàn thành', cls: PASTEL.success },
-  cancelled: { label: 'Đã hủy', cls: PASTEL.error },
-};
-// Quy trình sản xuất custom 5 bước (chỉ dùng cho xưởng mộc, KHÔNG dùng ở portal nhà cung cấp)
-export const WORKSHOP_STEPS = [
-  { key: 'received', label: 'Tiếp nhận' },
-  { key: 'designing', label: 'Thiết kế' },
-  { key: 'producing', label: 'Sản xuất' },
-  { key: 'finishing', label: 'Hoàn thiện' },
-  { key: 'delivering', label: 'Giao hàng' },
-];
-
-export const productMeta = (s) => PRODUCT_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
-export const branchMeta = (s) => BRANCH_STATUS[s] ?? { label: s, cls: PASTEL.neutral };
-export const workshopOrderMeta = (s) => WORKSHOP_ORDER_STATUS[s] ?? { label: s, cls: PASTEL.neutral };

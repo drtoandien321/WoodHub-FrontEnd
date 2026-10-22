@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client.js';
+import { initialsOf } from '../utils/initials.js';
 
 /*
  * useSupplierMe — hồ sơ supplier CHÍNH đang đăng nhập (GET /suppliers/me).
@@ -10,9 +11,6 @@ import { api } from '../api/client.js';
 export const useSupplierMe = () =>
   useQuery({ queryKey: ['supplierMe'], queryFn: api.getSupplierMe, staleTime: 5 * 60_000 });
 
-// "Nội Thất An Phát" → "AP" (2 từ cuối) — dùng cho avatar chữ trên header portal
-const initialsOf = (name = '') =>
-  name.trim().split(/\s+/).filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase() || 'NCC';
 
 /*
  * Tên + chữ viết tắt hiển thị trên header portal, lấy từ hồ sơ THẬT (businessName của /suppliers/me).
@@ -22,17 +20,6 @@ const initialsOf = (name = '') =>
 export const usePortalBrand = (fallbackName) => {
   const { data } = useSupplierMe();
   const name = data?.businessName || fallbackName || 'Nhà cung cấp';
-  return { name, initials: initialsOf(name) };
+  return { name, initials: initialsOf(name, 'NCC') };
 };
 
-/*
- * PUT /suppliers/me — BE trả SupplierResponse mới → ghi thẳng vào cache ['supplierMe'] (header portal,
- * thẻ tổng quan, trang hồ sơ đều đọc cache này nên đổi tên là cập nhật ngay, không cần refetch).
- */
-export const useUpdateSupplierMe = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: api.updateSupplierMe,
-    onSuccess: (data) => queryClient.setQueryData(['supplierMe'], data),
-  });
-};

@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../api/client.js';
+import { api, USE_MOCK } from '../../api/client.js';
 import { useAuthStore } from '../../stores/authStore.js';
 import { requestLocationOnce } from '../../services/geolocation.js';
 import { ensureFreeSubscription } from '../../services/subscription.js';
 import { isUserLocked } from '../../utils/accountLock.js';
 import { redirectPathForRole } from '../../utils/auth.js';
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const GoogleGlyph = () => (

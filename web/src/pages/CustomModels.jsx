@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useModels3d } from '../hooks/useModels3d.js';
-import { AI_PRODUCT_TYPES } from '../api/mock/customData.js';
+import { PRODUCT_TYPES } from '../utils/productTypes.js';
 import { useCustomStudioStore } from '../stores/customStudioStore.js';
 import { useAuthStore } from '../stores/authStore.js';
 import ModelCard from '../components/custom3d/ModelCard.jsx';
@@ -119,7 +119,7 @@ export default function CustomModels() {
           >
             {t('custom.studio.gallery.allTypes')}
           </button>
-          {AI_PRODUCT_TYPES.map((pt) => (
+          {PRODUCT_TYPES.map((pt) => (
             <button
               key={pt.id}
               onClick={() => setParam('productType', productType === pt.id ? null : pt.id)}

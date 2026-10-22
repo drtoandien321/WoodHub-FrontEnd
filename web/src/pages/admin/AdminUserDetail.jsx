@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useAdminUserDetail, useUpdateAdminUser, useDeleteUser, useSetUserStatus } from '../../hooks/useAdminUsers.js';
+import { ROLE_LABEL, CUSTOMER_TYPE_LABEL } from '../../utils/adminStatus.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
 import { Trash } from '../../components/suppliers/icons.jsx';
 
-const ROLE_LABEL = { customer: 'Khách hàng', supplier: 'Nhà cung cấp', admin: 'Quản trị viên' };
-const CUSTOMER_TYPE_LABEL = { individual: 'Cá nhân', business: 'Doanh nghiệp' };
 
 /*
  * AdminUserDetail — xem + sửa fullName/phone (PUT /users/{id}, tái dùng api.updateUser) + xoá.
