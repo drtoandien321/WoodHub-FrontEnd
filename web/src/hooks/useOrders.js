@@ -83,3 +83,18 @@ export const orderStatusBadge = (status) =>
     cancelled: 'badge-ghost',
     refunded: 'badge-error',
   })[status] ?? 'badge-neutral';
+
+/*
+ * Xem trước đơn (BE-07): POST /orders/preview — cùng phép tính với checkout nên phí ship / giảm giá / tổng KHỚP số tiền
+ * khi đặt thật. Dùng useQuery (POST nhưng không đổi dữ liệu) để tự gọi lại khi đổi địa chỉ / voucher / giỏ.
+ * keepPreviousData: giữ số cũ trong lúc tính lại → tóm tắt không nháy về "đang tính".
+ */
+export const useOrderPreview = ({ addressId, promotionIds, cartKey, enabled = true }) =>
+  useQuery({
+    queryKey: ['orderPreview', addressId ?? null, [...(promotionIds ?? [])].sort().join(','), cartKey],
+    queryFn: () => api.previewOrder({ addressId, promotionIds: promotionIds?.length ? promotionIds : undefined }),
+    enabled: enabled && !!addressId,
+    placeholderData: (prev) => prev,
+    staleTime: 15_000,
+    retry: false,
+  });

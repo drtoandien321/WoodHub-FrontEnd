@@ -6,6 +6,7 @@ import { formatVnd } from './format.js';
  *  - order:        NCC → /portal/supplier/orders (portal chưa có trang chi tiết đơn) · khách → /orders/:id
  *  - custom_order: /custom-orders/:id (trang chi tiết dùng chung khách + xưởng)
  *  - quote:        /quotes/:id (dùng chung)
+ *  - bulk_quote:   NCC → /portal/supplier/bulk-quotes/:id · khách → /bulk-quotes/:id (BE-08)
  *  - review:       NCC/xưởng → trang Đánh giá của portal · khách → trang SP / NCC được đánh giá
  */
 export function notificationLink(n, user) {
@@ -17,6 +18,8 @@ export function notificationLink(n, user) {
       return `/custom-orders/${n.targetId}`;
     case 'quote':
       return `/quotes/${n.targetId}`;
+    case 'bulk_quote':
+      return portal ? `${portal}/bulk-quotes/${n.targetId}` : `/bulk-quotes/${n.targetId}`;
     case 'review':
       if (portal) return `${portal}/reviews`;
       return n.params?.reviewTargetType === 'product' ? `/product/${n.params.reviewTargetId}` : `/suppliers/${n.params?.reviewTargetId}`;

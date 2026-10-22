@@ -12,6 +12,7 @@ const NAV = [
   { to: '/portal/supplier/branches', label: 'Chi nhánh', icon: Store },
   { to: '/portal/supplier/products', label: 'Sản phẩm', icon: Package },
   { to: '/portal/supplier/orders', label: 'Đơn hàng', icon: ShoppingBag },
+  { to: '/portal/supplier/bulk-quotes', label: 'Báo giá SL lớn', icon: Briefcase },
   { to: '/portal/supplier/promotions', label: 'Khuyến mãi', icon: Tag },
   { to: '/portal/supplier/reviews', label: 'Đánh giá', icon: Star },
   { to: '/portal/supplier/profile', label: 'Hồ sơ & Portfolio', icon: Briefcase },

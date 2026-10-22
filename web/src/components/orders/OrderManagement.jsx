@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useManagedOrders, useUpdateOrderStatus } from '../../hooks/useOrderManagement.js';
+import { useManagedOrders, useUpdateOrderStatus, useMarkVatIssued } from '../../hooks/useOrderManagement.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 import { pageInfoOf } from '../../hooks/useOrders.js';
 import { ORDER_STATUS_LABEL, ORDER_STATUS_BADGE as BADGE, ORDER_ACTION_LABEL, nextActions } from '../../utils/orderStatus.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
@@ -140,6 +141,12 @@ export default function OrderManagement({ scope, title, subtitle }) {
                     <p className="text-xs text-base-content/45">Tổng đơn</p>
                     <p className="text-sm font-semibold">{formatVnd(o.totalAmount)}</p>
                     <span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE[o.status] ?? ''}`}>{ORDER_STATUS_LABEL[o.status] ?? o.status}</span>
+                    {o.vat && (
+                      <span className={`ml-1 mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${o.vat.issued ? 'bg-success/15 text-success' : 'bg-warning/15 text-warning'}`}>
+                        {o.vat.issued ? 'Đã xuất VAT' : 'Cần xuất VAT'}
+                      </span>
+                    )}
+                    {o.bulkQuoteId && <span className="ml-1 mt-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Báo giá SL lớn</span>}
                   </div>
                 </div>
 
@@ -167,6 +174,7 @@ export default function OrderManagement({ scope, title, subtitle }) {
                       <p className="text-base-content/70">{[o.shippingAddress, o.ward, o.district, o.city].filter(Boolean).join(', ')}</p>
                       <p className="mt-1 text-xs text-base-content/55">Từ chi nhánh: {[o.storeAddress, o.storeCity].filter(Boolean).join(', ') || '—'}</p>
                       {o.note && <p className="mt-2 text-xs"><span className="text-base-content/55">Ghi chú của khách:</span> {o.note}</p>}
+                      {o.vat && <VatBlock order={o} canEdit={scope === 'supplier'} />}
                     </div>
                     <div>
                       <ul className="flex flex-col gap-1">
@@ -260,6 +268,56 @@ export default function OrderManagement({ scope, title, subtitle }) {
           </div>
         )}
       </ModalShell>
+    </div>
+  );
+}
+
+/*
+ * Hoá đơn VAT của 1 đơn (BE-08 §4): thông tin công ty khách chụp lúc đặt. NCC tự xuất hoá đơn điện tử bên ngoài
+ * (MISA, Viettel…) rồi nhập số hoá đơn (+ link) — gửi lại để sửa. Chỉ làm được khi đơn đã thanh toán, chưa huỷ (409).
+ * Khách nhận thông báo ORDER_VAT_ISSUED ở lần đánh dấu đầu.
+ */
+function VatBlock({ order: o, canEdit }) {
+  const mark = useMarkVatIssued();
+  const [editing, setEditing] = useState(false);
+  const [number, setNumber] = useState(o.vat.invoiceNumber ?? '');
+  const [url, setUrl] = useState(o.vat.invoiceUrl ?? '');
+  const [err, setErr] = useState('');
+  const c = o.vat.companyInfo ?? {};
+  const payable = !['pending_payment', 'cancelled', 'refunded'].includes(o.status);
+
+  const save = () => {
+    setErr('');
+    if (!number.trim()) { setErr('Nhập số hoá đơn.'); return; }
+    if (url.trim() && !/^https?:\/\//i.test(url.trim())) { setErr('Link hoá đơn phải bắt đầu bằng http:// hoặc https://'); return; }
+    mark.mutate({ id: o.id, invoiceNumber: number.trim(), invoiceUrl: url.trim() || undefined }, {
+      onSuccess: () => setEditing(false),
+      onError: (e) => setErr(apiErrorMessage(e, 'Lưu hoá đơn chưa được.')),
+    });
+  };
+
+  return (
+    <div className="mt-3 rounded-lg border border-base-300 bg-base-100 p-3 text-xs">
+      <p className="mb-1 font-medium">Hoá đơn VAT {o.vat.issued ? <span className="text-success">· đã xuất {o.vat.invoiceNumber}</span> : <span className="text-warning">· chưa xuất</span>}</p>
+      <p>{c.companyName} · MST <span className="font-mono">{c.taxCode}</span></p>
+      {c.companyAddress && <p className="text-base-content/60">{c.companyAddress}</p>}
+      {c.email && <p className="text-base-content/60">Email nhận hoá đơn: {c.email}</p>}
+      {o.vat.invoiceUrl && <a href={o.vat.invoiceUrl} target="_blank" rel="noreferrer" className="link link-primary">Xem hoá đơn</a>}
+      {canEdit && payable && !editing && (
+        <button type="button" onClick={() => setEditing(true)} className="btn btn-outline btn-xs mt-2">{o.vat.issued ? 'Sửa thông tin hoá đơn' : 'Đã xuất hoá đơn VAT'}</button>
+      )}
+      {canEdit && !payable && !o.vat.issued && <p className="mt-1 text-base-content/50">Xuất hoá đơn sau khi khách thanh toán.</p>}
+      {editing && (
+        <div className="mt-2 flex flex-col gap-2">
+          <input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Số hoá đơn, VD: HD001" className="input input-bordered input-xs w-full font-mono" />
+          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Link hoá đơn điện tử (tuỳ chọn)" className="input input-bordered input-xs w-full" />
+          <div className="flex gap-2">
+            <button type="button" onClick={save} disabled={mark.isPending} className="btn btn-primary btn-xs">{mark.isPending ? <span className="loading loading-spinner loading-xs" /> : 'Lưu'}</button>
+            <button type="button" onClick={() => setEditing(false)} className="btn btn-ghost btn-xs">Huỷ</button>
+          </div>
+        </div>
+      )}
+      {err && <p className="mt-1 text-error">{err}</p>}
     </div>
   );
 }

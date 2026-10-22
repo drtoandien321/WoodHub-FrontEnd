@@ -102,6 +102,7 @@ export default function Header() {
                 {user.role === 'customer' && <li><Link to="/custom/designs">{t('custom.studio.designs.title')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/quotes">{t('nav.quotes')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/custom-orders">{t('nav.customOrders')}</Link></li>}
+                {user.role === 'customer' && user.customerType === 'business' && <li><Link to="/bulk-quotes">{t('nav.bulkQuotes')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/account/subscription">{t('nav.subscription')}</Link></li>}
                 {user.role === 'customer' && <li><Link to="/account/addresses">{t('nav.addresses')}</Link></li>}
                 <li><Link to="/profile">{t('nav.profile')}</Link></li>

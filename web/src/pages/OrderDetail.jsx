@@ -56,6 +56,25 @@ export default function OrderDetail() {
       {/* Hạn NCC xác nhận 24h / thông báo hoàn tiền 48h khi đơn đã trả tiền bị huỷ */}
       <OrderDeadlineNote order={order} />
 
+      {/* Hoá đơn VAT (BE-08 §4.2): companyInfo là ảnh chụp lúc đặt; NCC xuất bên ngoài rồi nhập số hoá đơn */}
+      {order.vat && (
+        <section className="rounded-2xl border border-base-300 bg-base-100 p-4 text-sm">
+          <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-medium">{t('orders.vat.title')}</h2>
+            <span className={`badge badge-sm ${order.vat.issued ? 'badge-success' : 'badge-warning'}`}>{t(order.vat.issued ? 'orders.vat.issued' : 'orders.vat.pending')}</span>
+          </div>
+          <p className="text-base-content/70">{order.vat.companyInfo?.companyName} · {t('orders.vat.taxCode')} {order.vat.companyInfo?.taxCode}</p>
+          {order.vat.companyInfo?.companyAddress && <p className="text-xs text-base-content/55">{order.vat.companyInfo.companyAddress}</p>}
+          {order.vat.issued && (
+            <p className="mt-2">
+              {t('orders.vat.number')} <span className="font-mono font-medium">{order.vat.invoiceNumber}</span>
+              {order.vat.issuedAt && <span className="text-base-content/55"> · {formatDate(order.vat.issuedAt)}</span>}
+              {order.vat.invoiceUrl && <> · <a href={order.vat.invoiceUrl} target="_blank" rel="noreferrer" className="link link-primary">{t('orders.vat.download')}</a></>}
+            </p>
+          )}
+        </section>
+      )}
+
       {/* Tiến trình — đơn hủy/hoàn tiền thì thay bằng thông báo (không nằm trên luồng chính) */}
       {isClosed ? (
         <div role="status" className="alert">{t(`orders.closed.${order.status}`)}</div>

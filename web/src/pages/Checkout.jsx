@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../hooks/useCart.js';
 import { useAddresses, formatAddressLine } from '../hooks/useAddresses.js';
-import { useCheckout, useAvailableVouchers } from '../hooks/useOrders.js';
+import { useCheckout, useAvailableVouchers, useOrderPreview } from '../hooks/useOrders.js';
+import { useAuthStore } from '../stores/authStore.js';
+import { translateErrorCode } from '../utils/apiError.js';
 import { formatVnd } from '../utils/format.js';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import AddressFormModal from '../components/address/AddressFormModal.jsx';
@@ -95,6 +97,22 @@ export default function Checkout() {
   });
   const vouchers = useMemo(() => vouchersQuery.data ?? [], [vouchersQuery.data]);
 
+  // Khách doanh nghiệp: tuỳ chọn xuất hoá đơn VAT cho mọi đơn của lần checkout này (BE-08 §4.1)
+  const isBusiness = useAuthStore((s) => s.user?.customerType) === 'business';
+  const [vatInvoice, setVatInvoice] = useState(false);
+
+  /*
+   * Xem trước (BE-07): cùng phép tính với checkout → phí ship, giảm giá, tổng chính xác trước khi đặt. Tự gọi lại khi
+   * đổi địa chỉ / voucher / giỏ. Thay dòng "Phí ship: tính khi đặt hàng" và giảm giá "dự kiến" của bản trước.
+   */
+  const preview = useOrderPreview({
+    addressId: selectedAddress?.hasCoordinates ? selectedAddress.id : undefined,
+    promotionIds: voucherIds,
+    cartKey,
+    enabled: !!cart?.items?.length && !result,
+  });
+  const couponErrors = preview.data?.couponErrors ?? [];
+
   /*
    * Mỗi lần có danh sách mới: chưa đụng tay → chọn đúng các voucher BE gợi ý; đã đụng tay → giữ lựa chọn của khách
    * nhưng bỏ những voucher không còn dùng được (giỏ/địa chỉ đổi làm voucher hết điều kiện).
@@ -174,11 +192,15 @@ export default function Checkout() {
   const selected = selectedAddress;
   // Món ngừng bán (available=false) không đặt được — BE trả 409 → khoá nút, bảo khách về giỏ xoá trước
   const unavailableCount = cart.unavailableCount ?? items.filter((i) => i.available === false).length;
-  const canSubmit = !!selected?.hasCoordinates && !checkout.isPending && unavailableCount === 0;
-  // Tổng giảm DỰ KIẾN = cộng estimatedDiscount từng voucher (BE tính khi dùng riêng) — số thật do checkout quyết định
-  const estimatedDiscount = vouchers
-    .filter((v) => voucherIds.includes(v.id))
-    .reduce((sum, v) => sum + (Number(v.estimatedDiscount) || 0), 0);
+  // Voucher đã chọn mà preview báo không áp được → checkout sẽ lỗi → bắt khách bỏ voucher đó trước (docs BE-07)
+  const canSubmit = !!selected?.hasCoordinates && !checkout.isPending && unavailableCount === 0 && couponErrors.length === 0;
+  const p = preview.data;
+  const voucherName = (id) => vouchers.find((v) => v.id === id)?.name ?? '';
+  const couponErrorText = (e) => translateErrorCode(e.errorCode, e.params) ?? e.message;
+  const dropErroredVouchers = () => {
+    setVoucherTouched(true);
+    setVoucherIds((ids) => ids.filter((id) => !couponErrors.some((e) => e.promotionId === id)));
+  };
 
   const handleSubmit = () => {
     if (!selected?.hasCoordinates) return;
@@ -188,6 +210,7 @@ export default function Checkout() {
         addressId: selected.id,
         note: note.trim() || undefined,
         promotionIds: voucherIds.length ? voucherIds : undefined,
+        vatInvoice: isBusiness && vatInvoice ? true : undefined,
       },
       {
         onSuccess: (res) => { setResult(res); window.scrollTo({ top: 0 }); },
@@ -201,6 +224,8 @@ export default function Checkout() {
             setSubmitErr(`${apiErrorMessage(err, t('checkout.submitFailed'))} ${t('checkout.voucherChanged')}`);
             return;
           }
+          // VAT mà chưa có hồ sơ công ty → dẫn tới Hồ sơ doanh nghiệp
+          if (err?.response?.data?.errorCode === 'BUSINESS_PROFILE_REQUIRED') { setSubmitErr(t('checkout.vatNeedProfile')); return; }
           setSubmitErr(apiErrorMessage(err, t('checkout.submitFailed')));
         },
       }
@@ -291,6 +316,16 @@ export default function Checkout() {
                 hasAddress={!!selected?.hasCoordinates}
               />
             )}
+            {couponErrors.length > 0 && (
+              <div role="alert" className="mt-3 flex flex-col gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-xs">
+                <ul className="flex flex-col gap-1">
+                  {couponErrors.map((e) => (
+                    <li key={e.promotionId}><b>{voucherName(e.promotionId) || e.params?.voucherName}</b>: {couponErrorText(e)}</li>
+                  ))}
+                </ul>
+                <button type="button" onClick={dropErroredVouchers} className="btn btn-warning btn-xs self-start">{t('checkout.dropInvalidVouchers')}</button>
+              </div>
+            )}
             <p className="mt-2 text-xs text-base-content/50">{t('checkout.voucherHint')}</p>
           </Section>
 
@@ -314,6 +349,15 @@ export default function Checkout() {
               </div>
               <span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-content"><Check width={14} height={14} /></span>
             </div>
+            {isBusiness && (
+              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-base-300 p-4">
+                <input type="checkbox" className="checkbox checkbox-primary checkbox-sm mt-0.5" checked={vatInvoice} onChange={(e) => setVatInvoice(e.target.checked)} />
+                <span className="text-sm">
+                  <span className="block font-medium">{t('checkout.vatInvoice')}</span>
+                  <span className="block text-xs text-base-content/60">{t('checkout.vatInvoiceHint')} <Link to="/profile#business" className="link link-primary">{t('checkout.vatEditProfile')}</Link></span>
+                </span>
+              </label>
+            )}
           </Section>
         </div>
 
@@ -336,16 +380,30 @@ export default function Checkout() {
           </ul>
 
           <div className="divider my-0" />
-          <div className="flex justify-between text-sm"><span>{t('checkout.subtotal')}</span><span>{formatVnd(cart.subtotal)}</span></div>
-          <div className="flex justify-between text-sm text-base-content/60"><span>{t('checkout.shippingFee')}</span><span>{t('checkout.calculatedOnOrder')}</span></div>
-          {voucherIds.length > 0 && (
-            <div className="flex justify-between text-sm text-success">
-              <span>{t('checkout.discountEstimated')}</span>
-              <span>{estimatedDiscount > 0 ? `−${formatVnd(estimatedDiscount)}` : t('checkout.calculatedOnOrder')}</span>
+          {/* Số liệu từ POST /orders/preview — chưa chọn địa chỉ thì chưa tính được ship */}
+          <div className={`flex flex-col gap-3 transition-opacity ${preview.isFetching ? 'opacity-60' : ''}`}>
+            <div className="flex justify-between text-sm"><span>{t('checkout.subtotal')}</span><span>{formatVnd(p?.subtotal ?? cart.subtotal)}</span></div>
+            <div className="flex justify-between text-sm">
+              <span>{t('checkout.shippingFee')}</span>
+              <span>{p ? (Number(p.shippingFee) === 0 ? t('checkout.freeShipping') : formatVnd(p.shippingFee)) : <span className="text-base-content/60">{t('checkout.pickAddressForShipping')}</span>}</span>
             </div>
-          )}
-          <p className="text-xs text-base-content/50">{t('checkout.summaryHint')}</p>
+            {Number(p?.discount) > 0 && (
+              <div className="flex justify-between text-sm text-success"><span>{t('checkout.discount')}</span><span>−{formatVnd(p.discount)}</span></div>
+            )}
+            {(p?.groups ?? []).filter((g) => g.amountToFreeShip > 0).map((g) => (
+              <p key={g.supplierId} className="rounded-lg bg-info/10 px-3 py-1.5 text-xs text-info">
+                {t('checkout.amountToFreeShip', { amount: formatVnd(g.amountToFreeShip), supplier: g.supplierName })}
+              </p>
+            ))}
+            {p?.groups?.length > 1 && <p className="text-xs text-base-content/50">{t('checkout.splitPreview', { count: p.groups.length })}</p>}
+            {preview.isError && <p className="text-xs text-error">{apiErrorMessage(preview.error, t('checkout.previewFailed'))}</p>}
+          </div>
           <div className="divider my-0" />
+          <div className="flex items-baseline justify-between">
+            <span className="font-medium">{t('checkout.grandTotal')}</span>
+            <span className="text-2xl font-semibold text-primary">{formatVnd(p?.grandTotal ?? cart.subtotal)}</span>
+          </div>
+          {!p && <p className="text-xs text-base-content/50">{t('checkout.summaryHint')}</p>}
 
           <button onClick={handleSubmit} disabled={!canSubmit} className="btn btn-primary btn-lg w-full">
             {checkout.isPending ? <span className="loading loading-spinner loading-sm" /> : t('checkout.placeOrder')}

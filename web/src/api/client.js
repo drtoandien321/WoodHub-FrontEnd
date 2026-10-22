@@ -124,6 +124,10 @@ const REAL_ENDPOINTS = new Set([
   'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
   // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
   'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'getAvailableVouchers', 'submitContact',
+  // BE-07 xem trước · BE-08 báo giá số lượng lớn + VAT
+  'previewOrder', 'markVatIssued',
+  'createBulkQuote', 'getMyBulkQuotes', 'getBulkQuote', 'acceptBulkQuote', 'rejectBulkQuote', 'cancelBulkQuote',
+  'getSupplierBulkQuotes', 'offerBulkQuote', 'declineBulkQuote',
   // Xử lý đơn (supplier/admin) + CRUD khuyến mãi + cấu hình ship (docs/promotions-admin-fe.md)
   'getSupplierOrders', 'updateSupplierOrderStatus', 'getAdminOrders', 'updateAdminOrderStatus',
   'getPromotions', 'getPromotion', 'createPromotion', 'updatePromotion', 'deletePromotion',
@@ -650,6 +654,32 @@ export const api = {
   // POST /orders/checkout  body: { addressId } | { recipientName, recipientPhone, addressLine, ward?, district?, city, latitude, longitude, locationSource?, saveAddress? }
   //   + { note?, promotionIds? } → 201 CheckoutResponse { orders: OrderResponse[], payment: PaymentResponse, grandTotal }
   checkout: (body) => call(() => http.post('/orders/checkout', body), 'checkout', body),
+  /*
+   * POST /orders/preview (BE-07) — body giống checkout { addressId, promotionIds } → { groups[] (mỗi NCC 1 đơn: subtotal,
+   * shippingFee, productDiscount, shippingDiscount, total, appliedVouchers, amountToFreeShip), subtotal, shippingFee,
+   * discount, grandTotal, couponErrors[], unavailableItems[] }. KHÔNG tạo đơn / trừ voucher → gọi bao nhiêu lần cũng được.
+   */
+  previewOrder: (body) => call(() => http.post('/orders/preview', body), 'previewOrder', body),
+  // PUT /supplier/orders/:id/vat-invoice { invoiceNumber, invoiceUrl? } — NCC ghi nhận đã xuất hoá đơn VAT (gửi lại = sửa)
+  markVatIssued: ({ id, ...body }) => call(() => http.put('/supplier/orders/' + id + '/vat-invoice', body), 'markVatIssued', { id, ...body }),
+
+  /*
+   * ===== BÁO GIÁ SỐ LƯỢNG LỚN (BE-08, docs BE b2b-bulk-quote-vat-fe.md) =====
+   * Luồng: khách DN gửi (pending) → NCC báo giá (offered, gửi lại = thay) → khách chấp nhận (accepted → 1 đơn QR)
+   * | khách từ chối (rejected) | NCC từ chối (declined) | khách huỷ (cancelled) | 7 ngày chưa báo giá (expired).
+   */
+  // POST /bulk-quotes { items: [{ variantId, quantity }], addressId, vatInvoice, note } · 403 BUSINESS_PROFILE_REQUIRED · 400 BULK_QUOTE_MIXED_SUPPLIERS
+  createBulkQuote: (body) => call(() => http.post('/bulk-quotes', body), 'createBulkQuote', body),
+  getMyBulkQuotes: (params) => call(() => http.get('/bulk-quotes', { params }), 'getMyBulkQuotes', params),
+  getBulkQuote: (id) => call(() => http.get('/bulk-quotes/' + id), 'getBulkQuote', id),
+  // POST /bulk-quotes/:id/accept { offerId } → giống checkout { orders, payment, grandTotal } · 409 BULK_QUOTE_INVALID_STATE / QUOTE_EXPIRED
+  acceptBulkQuote: ({ id, offerId }) => call(() => http.post('/bulk-quotes/' + id + '/accept', { offerId }), 'acceptBulkQuote', { id, offerId }),
+  rejectBulkQuote: (id) => call(() => http.post('/bulk-quotes/' + id + '/reject'), 'rejectBulkQuote', id),
+  cancelBulkQuote: (id) => call(() => http.post('/bulk-quotes/' + id + '/cancel'), 'cancelBulkQuote', id),
+  getSupplierBulkQuotes: (params) => call(() => http.get('/supplier/bulk-quotes', { params }), 'getSupplierBulkQuotes', params),
+  // POST /supplier/bulk-quotes/:id/offer { items: [{ quoteItemId, unitPrice }] (đủ MỌI dòng), shippingFee, leadTimeDays, validDays, note }
+  offerBulkQuote: ({ id, ...body }) => call(() => http.post('/supplier/bulk-quotes/' + id + '/offer', body), 'offerBulkQuote', { id, ...body }),
+  declineBulkQuote: ({ id, reason }) => call(() => http.post('/supplier/bulk-quotes/' + id + '/decline', { reason }), 'declineBulkQuote', { id, reason }),
   // GET /orders?status=&page=&size=&sort= → Page<OrderResponse> (mặc định createdAt,desc)
   getOrders: (params) => call(() => http.get('/orders', { params }), 'getOrders', params),
   // GET /orders/:id → OrderResponse (đơn người khác → 404)

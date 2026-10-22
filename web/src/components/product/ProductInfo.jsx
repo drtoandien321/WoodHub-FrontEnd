@@ -17,7 +17,7 @@ const variantLabel = (v, fallback) => [v.color, v.dimensions].filter(Boolean).jo
  * (qty, variant đang chọn, hiệu ứng "đã thêm"); hành động ghi (giỏ hàng/mua ngay/chat) uỷ quyền
  * ra ngoài qua props để KHÔNG đụng logic cart/chat.
  */
-export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, cartPending = false }) {
+export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, cartPending = false, extraActions = null }) {
   const { t } = useTranslation();
   // Không có variant thật thì không thêm được vào giỏ (giỏ thêm theo variantId) → khoá nút mua
   const hasVariants = product.variants?.length > 0;
@@ -111,6 +111,8 @@ export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, ca
         <button onClick={onChat} className="btn btn-outline btn-primary gap-2">
           <MessageCircle width={18} height={18} /> {t('product.chatSupplier')}
         </button>
+        {/* Hành động thêm do trang cha truyền vào (vd Yêu cầu báo giá số lượng lớn cho khách doanh nghiệp) */}
+        {extraActions}
       </div>
 
       <ProductTrustCards />

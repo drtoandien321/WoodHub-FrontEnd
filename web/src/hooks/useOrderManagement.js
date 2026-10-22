@@ -30,3 +30,9 @@ export const useUpdateOrderStatus = (scope) => {
     onSuccess: () => qc.invalidateQueries({ queryKey: managedOrdersKey(scope) }),
   });
 };
+
+// NCC ghi nhận đã xuất hoá đơn VAT (BE-08 §4.3): { id, invoiceNumber, invoiceUrl? }
+export const useMarkVatIssued = () => {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: api.markVatIssued, onSuccess: () => qc.invalidateQueries({ queryKey: managedOrdersKey('supplier') }) });
+};
