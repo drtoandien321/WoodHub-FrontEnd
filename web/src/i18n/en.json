@@ -740,7 +740,16 @@
     "showLessVouchers": "Show less",
     "unavailableBlock": "Your cart has {{count}} item(s) that are no longer sold. Go back to the cart and remove them to place your order.",
     "backToCart": "Back to cart",
-    "confirmNotice": "After you pay, the seller confirms stock within 24 hours. If an item is out of stock, the order is cancelled and you are refunded within 48 hours."
+    "confirmNotice": "After you pay, the seller confirms stock within 24 hours. If an item is out of stock, the order is cancelled and you are refunded within 48 hours.",
+    "dropInvalidVouchers": "Remove vouchers that cannot be applied",
+    "vatInvoice": "Request a VAT invoice",
+    "vatInvoiceHint": "Uses your company profile. The seller issues the invoice after confirming the order.",
+    "vatEditProfile": "View / edit company profile",
+    "vatNeedProfile": "A company profile with name, tax code and address is required for a VAT invoice. Go to Profile → Business profile to complete it.",
+    "pickAddressForShipping": "Pick an address to calculate",
+    "amountToFreeShip": "Spend {{amount}} more at {{supplier}} for free shipping.",
+    "splitPreview": "Your cart has {{count}} sellers → {{count}} orders, paid with one QR.",
+    "previewFailed": "Could not calculate shipping, please try again."
   },
   "orders": {
     "title": "Your orders",

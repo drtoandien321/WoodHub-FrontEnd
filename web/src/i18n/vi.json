@@ -738,7 +738,16 @@
     "showLessVouchers": "Thu gọn",
     "unavailableBlock": "Giỏ có {{count}} sản phẩm đã ngừng bán. Quay lại giỏ hàng để xoá rồi mới đặt hàng được.",
     "backToCart": "Về giỏ hàng",
-    "confirmNotice": "Sau khi bạn thanh toán, nhà cung cấp sẽ xác nhận còn hàng trong vòng 24 giờ. Nếu sản phẩm hết hàng, đơn sẽ được huỷ và tiền được hoàn lại cho bạn trong vòng 48 giờ."
+    "confirmNotice": "Sau khi bạn thanh toán, nhà cung cấp sẽ xác nhận còn hàng trong vòng 24 giờ. Nếu sản phẩm hết hàng, đơn sẽ được huỷ và tiền được hoàn lại cho bạn trong vòng 48 giờ.",
+    "dropInvalidVouchers": "Bỏ các voucher không áp được",
+    "vatInvoice": "Xuất hoá đơn VAT",
+    "vatInvoiceHint": "Dùng thông tin trong hồ sơ công ty. Nhà cung cấp xuất hoá đơn sau khi xác nhận đơn.",
+    "vatEditProfile": "Xem / sửa hồ sơ công ty",
+    "vatNeedProfile": "Cần hồ sơ công ty đủ tên, mã số thuế và địa chỉ để xuất hoá đơn VAT. Vào Hồ sơ → Hồ sơ doanh nghiệp để bổ sung.",
+    "pickAddressForShipping": "Chọn địa chỉ để tính",
+    "amountToFreeShip": "Mua thêm {{amount}} ở {{supplier}} để được miễn phí vận chuyển.",
+    "splitPreview": "Giỏ gồm {{count}} nhà cung cấp → tạo {{count}} đơn, thanh toán chung 1 QR.",
+    "previewFailed": "Chưa tính được phí ship, vui lòng thử lại."
   },
   "orders": {
     "title": "Đơn hàng của bạn",

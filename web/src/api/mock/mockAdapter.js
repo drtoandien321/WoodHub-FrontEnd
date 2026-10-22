@@ -1629,7 +1629,13 @@ export const mockAdapter = {
     };
     mockPayments = [payment, ...mockPayments];
     persistMockPayments();
-    orders.forEach((o) => { o.paymentId = payment.id; memoryDb.orders.set(o.id, o); });
+    // BE-08: vatInvoice → chụp thông tin công ty vào từng đơn (mock lấy từ hồ sơ doanh nghiệp đã lưu)
+    const bp = storage.getItem(BUSINESS_PROFILE_KEY, {})[useAuthStore.getState().user?.id];
+    orders.forEach((o) => {
+      o.paymentId = payment.id;
+      o.vat = body.vatInvoice ? { companyInfo: { companyName: bp?.companyName ?? 'Công ty demo', taxCode: bp?.taxCode ?? '0101234567', companyAddress: bp?.companyAddress ?? '', email: null }, issued: false, invoiceNumber: null, invoiceUrl: null, issuedAt: null } : null;
+      memoryDb.orders.set(o.id, o);
+    });
     persistOrders();
     saveCart({ ...cart, items: [] });
 
@@ -1667,6 +1673,50 @@ export const mockAdapter = {
    * GET /vouchers/available — mô phỏng gọn: tính trên tạm tính giỏ (mock không biết phí ship trước khi đặt → voucher
    * vận chuyển có estimatedDiscount = null). Gợi ý: voucher sản phẩm giảm nhiều nhất + 1 voucher ship.
    */
+  // POST /orders/preview — mock: ship cố định 30.000đ/NCC, giảm theo voucher đã chọn (ước tính như getAvailableVouchers)
+  async previewOrder(body = {}) {
+    await delay(250);
+    const cart = toCartResponse(loadCart());
+    const items = (cart.items ?? []).filter((i) => i.available !== false);
+    const bySupplier = new Map();
+    for (const i of items) bySupplier.set(i.supplierId ?? 'sup', [...(bySupplier.get(i.supplierId ?? 'sup') ?? []), i]);
+    const vouchers = await this.getAvailableVouchers();
+    const picked = vouchers.filter((v) => (body.promotionIds ?? []).includes(v.id));
+    const groups = [...bySupplier].map(([supplierId, list]) => {
+      const subtotal = list.reduce((s, i) => s + Number(i.lineTotal), 0);
+      const shippingFee = body.addressId ? 30_000 : 0;
+      const productDiscount = picked.filter((v) => v.type === 'product' && v.eligible).reduce((s, v) => s + (v.estimatedDiscount ?? 0), 0);
+      const shippingDiscount = picked.some((v) => v.type === 'shipping' && v.eligible) ? shippingFee : 0;
+      return { supplierId, supplierName: list[0]?.supplierName ?? 'Nhà cung cấp', storeId: null, distanceKm: 5, subtotal, shippingFee, productDiscount, shippingDiscount,
+        total: subtotal + shippingFee - productDiscount - shippingDiscount, appliedVouchers: [], amountToFreeShip: null };
+    });
+    const sum = (k) => groups.reduce((s, g) => s + g[k], 0);
+    return {
+      groups, subtotal: sum('subtotal'), shippingFee: sum('shippingFee'), discount: sum('productDiscount') + sum('shippingDiscount'), grandTotal: sum('total'),
+      couponErrors: picked.filter((v) => !v.eligible).map((v) => ({ promotionId: v.id, errorCode: v.reasonCode, message: v.reason, params: { ...v.reasonParams, voucherName: v.name } })),
+      unavailableItems: (cart.items ?? []).filter((i) => i.available === false).map((i) => ({ cartItemId: i.id, productName: i.productName, reason: i.unavailableReason })),
+    };
+  },
+
+  // ===== BÁO GIÁ SỐ LƯỢNG LỚN (BE-08) — mock rút gọn: danh sách rỗng, thao tác báo cần BE thật =====
+  async getMyBulkQuotes(params = {}) { await delay(200); return toSpringPage([], params); },
+  async getSupplierBulkQuotes(params = {}) { await delay(200); return toSpringPage([], params); },
+  async getBulkQuote() { await delay(150); throw Object.assign(new Error('Not found'), { response: { status: 404 } }); },
+  async createBulkQuote() { await delay(300); throw Object.assign(new Error('MOCK'), { response: { status: 400, data: { message: 'Báo giá số lượng lớn chỉ chạy với BE thật (VITE_USE_MOCK=false).' } } }); },
+  async acceptBulkQuote() { return this.createBulkQuote(); },
+  async rejectBulkQuote() { return this.createBulkQuote(); },
+  async cancelBulkQuote() { return this.createBulkQuote(); },
+  async offerBulkQuote() { return this.createBulkQuote(); },
+  async declineBulkQuote() { return this.createBulkQuote(); },
+  async markVatIssued({ id, invoiceNumber, invoiceUrl }) {
+    await delay(250);
+    const o = memoryDb.orders.get(id);
+    if (!o?.vat) throw Object.assign(new Error('VAT_NOT_REQUESTED'), { response: { status: 409, data: { errorCode: 'VAT_NOT_REQUESTED' } } });
+    o.vat = { ...o.vat, issued: true, invoiceNumber, invoiceUrl: invoiceUrl ?? null, issuedAt: new Date().toISOString() };
+    persistOrders();
+    return o;
+  },
+
   async getAvailableVouchers() {
     await delay(250);
     const subtotal = toCartResponse(loadCart()).subtotal ?? 0;
