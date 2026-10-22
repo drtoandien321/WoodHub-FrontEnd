@@ -2336,6 +2336,83 @@ export const mockAdapter = {
     return { updated: list.length };
   },
 
+  // ===== ADMIN mock (BE-11 / hoàn tiền / liên hệ / payout) — đủ để chạy UI =====
+  async setUserStatus({ id, status, reason }) {
+    await delay(300);
+    const u = mockAdminUsers.find((x) => x.id === id);
+    if (!u) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    if (u.role === 'admin') throw Object.assign(new Error('CANNOT_LOCK_ADMIN'), { response: { status: 409, data: { errorCode: 'CANNOT_LOCK_ADMIN', message: 'Không thể khoá tài khoản quản trị' } } });
+    Object.assign(u, { status, lockedReason: status === 'locked' ? reason ?? null : null, lockedAt: status === 'locked' ? new Date().toISOString() : null });
+    return { ...u };
+  },
+
+  async getAdminReviews(params = {}) {
+    await delay(250);
+    const hidden = storage.getItem('woodhub-mock-hidden-reviews', {});
+    let list = mockUserReviews.map((r) => ({
+      id: r.id, targetType: r.targetType, targetId: r.targetId, targetName: null, rating: r.rating, comment: r.comment, anonymous: !!r.anonymous,
+      author: { id: r.userId, fullName: r.userName, email: null }, hidden: !!hidden[r.id], hiddenReason: hidden[r.id]?.reason ?? null,
+      hiddenAt: hidden[r.id]?.at ?? null, createdAt: r.createdAt, updatedAt: r.updatedAt,
+    }));
+    if (params.targetType) list = list.filter((r) => r.targetType === params.targetType);
+    if (params.rating) list = list.filter((r) => r.rating === Number(params.rating));
+    if (params.hidden != null) list = list.filter((r) => r.hidden === (String(params.hidden) === 'true'));
+    return toSpringPage(list, params);
+  },
+
+  async moderateReview({ id, hidden, reason }) {
+    await delay(250);
+    const map = storage.getItem('woodhub-mock-hidden-reviews', {});
+    if (hidden) map[id] = { reason: reason ?? null, at: new Date().toISOString() }; else delete map[id];
+    storage.setItem('woodhub-mock-hidden-reviews', map);
+    return (await this.getAdminReviews({ size: 500 })).content.find((r) => r.id === id);
+  },
+
+  async deleteAdminReview(id) {
+    await delay(250);
+    mockUserReviews = mockUserReviews.filter((r) => r.id !== id);
+    persistUserReviews();
+    return null;
+  },
+
+  async getPendingRefunds(params = {}) {
+    await delay(250);
+    const list = Array.from(memoryDb.orders.values()).filter((o) => o.status === 'cancelled' && o.paidAt && !o.refund);
+    return toSpringPage(list, params);
+  },
+
+  async confirmRefund({ id, reference, amount, note }) {
+    await delay(300);
+    const o = memoryDb.orders.get(id);
+    if (!o) throw Object.assign(new Error('Not found'), { response: { status: 404 } });
+    if (o.refund) throw Object.assign(new Error('ALREADY'), { response: { status: 409, data: { errorCode: 'ORDER_ALREADY_REFUNDED' } } });
+    o.refund = { amount: amount ?? o.totalAmount, reference, note: note ?? null, refundedAt: new Date().toISOString() };
+    persistOrders();
+    return o;
+  },
+
+  async getAdminContacts(params = {}) {
+    await delay(250);
+    let list = storage.getItem('woodhub-mock-contacts', []);
+    if (params.status) list = list.filter((c) => c.status === params.status);
+    if (params.keyword) list = list.filter((c) => [c.name, c.email, c.subject].join(' ').toLowerCase().includes(String(params.keyword).toLowerCase()));
+    return toSpringPage(list, params);
+  },
+
+  async updateContactStatus({ id, status }) {
+    await delay(200);
+    const list = storage.getItem('woodhub-mock-contacts', []).map((c) => (c.id === id ? { ...c, status } : c));
+    storage.setItem('woodhub-mock-contacts', list);
+    return list.find((c) => c.id === id);
+  },
+
+  async getAdminSupplierPayout() {
+    await delay(250);
+    const p = storage.getItem('woodhub-mock-payout', null);
+    if (!p) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { errorCode: 'PAYOUT_ACCOUNT_NOT_FOUND' } } });
+    return { ...p, accountNumber: '0123456789' };
+  },
+
   async getMyCapability() {
     await delay(200);
     return storage.getItem('woodhub-mock-capability', null) ?? { productTypes: [], maxLengthCm: null, maxWidthCm: null, maxHeightCm: null, materials: [], experienceYears: null, updatedAt: null };
@@ -2792,7 +2869,10 @@ export const mockAdapter = {
 
   async submitContact(body) {
     await delay(500);
-    return { ok: true };
+    // Lưu lại để trang admin Liên hệ (mock) có dữ liệu
+    const contact = { id: crypto.randomUUID(), ...body, phone: body.phone ?? null, status: 'new', userId: useAuthStore.getState().user?.id ?? null, createdAt: new Date().toISOString() };
+    storage.setItem('woodhub-mock-contacts', [contact, ...storage.getItem('woodhub-mock-contacts', [])]);
+    return contact;
   },
 
   // ===== CHAT (hội thoại khách hàng ↔ nhà cung cấp) — xem ghi chú ở CONVERSATIONS_KEY =====

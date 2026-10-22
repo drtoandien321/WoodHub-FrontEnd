@@ -25,3 +25,9 @@ export const useDeleteUser = () => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: api.deleteUser, onSuccess: () => invalidateUsers(qc) });
 };
+
+// Khoá / mở khoá (BE-11): { id, status: 'locked'|'active', reason? }
+export const useSetUserStatus = () => {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: api.setUserStatus, onSuccess: (data) => invalidateUsers(qc, data.id) });
+};

@@ -11,14 +11,16 @@ const CUSTOMER_TYPE_LABEL = { individual: 'Cá nhân', business: 'Doanh nghiệp
  * AdminUsers — danh sách người dùng (GET /users, Pageable). CỐ TÌNH KHÔNG có ô tìm kiếm:
  * BE không hỗ trợ search/filter (chỉ phân trang) — filter client-side trên 1 trang sẽ chỉ lọc
  * được đúng trang đang xem, gây hiểu nhầm là đã lọc toàn bộ dữ liệu.
- * KHÔNG có khoá/mở khoá — BE chưa có API này (xem TestCase.md/ghi chú Pha 0A), chỉ Xem/Sửa/Xoá.
+ * Tab "Bị khoá" dùng filter thật của BE (GET /users?status=locked, BE-11). Khoá / mở khoá ở trang chi tiết.
  */
 const PAGE_SIZE = 20;
+const STATUS_TABS = [['', 'Tất cả'], ['active', 'Đang hoạt động'], ['locked', 'Bị khoá']];
 
 export default function AdminUsers() {
   const [page, setPage] = useState(0);
+  const [status, setStatus] = useState('');
   const myId = useAuthStore((s) => s.user?.id);
-  const { data, isLoading } = useAdminUsers({ page, size: PAGE_SIZE });
+  const { data, isLoading } = useAdminUsers({ page, size: PAGE_SIZE, status: status || undefined });
   const deleteUser = useDeleteUser();
 
   const items = data?.content ?? [];
@@ -34,8 +36,14 @@ export default function AdminUsers() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Người dùng</h1>
-        <p className="mt-1 text-base-content/60">Xem, sửa và xoá tài khoản người dùng trên hệ thống.</p>
+        <p className="mt-1 text-base-content/60">Xem, sửa, khoá và xoá tài khoản người dùng trên hệ thống.</p>
       </header>
+
+      <div className="inline-flex w-fit gap-1 rounded-2xl border border-base-300 bg-base-100 p-1 shadow-sm">
+        {STATUS_TABS.map(([v, l]) => (
+          <button key={v || 'all'} onClick={() => { setStatus(v); setPage(0); }} className={`rounded-xl px-4 py-2 text-sm ${status === v ? 'bg-primary text-primary-content' : 'text-base-content/70 hover:bg-base-200'}`}>{l}</button>
+        ))}
+      </div>
 
       <section className="rounded-2xl border border-base-300 bg-base-100 p-2 shadow-sm md:p-4">
         <div className="overflow-x-auto">
@@ -49,7 +57,10 @@ export default function AdminUsers() {
               {isLoading && <tr><td colSpan={6} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
               {!isLoading && items.map((u) => (
                 <tr key={u.id} className="hover:bg-base-200/50">
-                  <td><Link to={`/admin/users/${u.id}`} className="font-medium hover:text-primary">{u.email}</Link></td>
+                  <td>
+                    <Link to={`/admin/users/${u.id}`} className="font-medium hover:text-primary">{u.email}</Link>
+                    {u.status === 'locked' && <span className="ml-2 rounded-full bg-error/15 px-2 py-0.5 text-xs font-medium text-error">Bị khoá</span>}
+                  </td>
                   <td className="text-sm">{u.fullName}</td>
                   <td className="text-sm">{ROLE_LABEL[u.role] ?? u.role}</td>
                   <td className="text-sm">{CUSTOMER_TYPE_LABEL[u.customerType] ?? '—'}</td>

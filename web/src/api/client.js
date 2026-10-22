@@ -71,6 +71,9 @@ const REAL_ENDPOINTS = new Set([
   'getAdminSuppliers', 'getAdminSupplierDetail', 'createSupplier', 'updateSupplierStatus',
   // Module Admin — User quản trị (Portal Quản trị /admin/users)
   'getAdminUsers', 'getAdminUserDetail', 'deleteUser',
+  // BE-11 khoá tài khoản + kiểm duyệt đánh giá · hoàn tiền (no-inventory §5.1) · BE-06 liên hệ · BE-14 payout NCC
+  'setUserStatus', 'getAdminReviews', 'moderateReview', 'deleteAdminReview',
+  'getPendingRefunds', 'confirmRefund', 'getAdminContacts', 'updateContactStatus', 'getAdminSupplierPayout',
   // Module Admin — quản lý thanh toán (Portal Quản trị /admin/payments) — API chỉ đọc
   'getAdminPayments', 'getAdminPayment', 'getAdminPaymentStats',
   // Module Admin — Dashboard tổng quan (Portal Quản trị /admin/dashboard) — API chỉ đọc
@@ -405,6 +408,33 @@ export const api = {
   // DELETE /users/{id} — chỉ admin. XOÁ CỨNG (hard delete), BE không có cơ chế khoá/mở khoá user thường
   // (đã ghi nhận ở Pha 0A — "API khóa user — chờ BE bổ sung", ngoài phạm vi module này).
   deleteUser: (id) => call(() => http.delete(`/users/${id}`), 'deleteUser', id),
+  /*
+   * PUT /users/:id/status { status: 'locked'|'active', reason? ≤ 500 } → UserResponse (+ status, lockedReason, lockedAt).
+   * Khoá có hiệu lực NGAY (request kế tiếp của user → 403 USER_LOCKED, thu hồi mọi refresh token). 409 CANNOT_LOCK_ADMIN.
+   */
+  setUserStatus: ({ id, status, reason }) => call(() => http.put('/users/' + id + '/status', { status, reason }), 'setUserStatus', { id, status, reason }),
+  /*
+   * GET /admin/reviews?targetType=&rating=&hidden=&page=&size= → Page { id, targetType, targetId, targetName, rating, comment,
+   * anonymous, author: { id, fullName, email } (admin luôn thấy người viết thật), hidden, hiddenReason, hiddenAt, createdAt }
+   */
+  getAdminReviews: (params) => call(() => http.get('/admin/reviews', { params }), 'getAdminReviews', params),
+  // PATCH /admin/reviews/:id { hidden, reason? } — ẩn thì không hiện công khai + không tính điểm TB; hiện lại được
+  moderateReview: ({ id, hidden, reason }) => call(() => http.patch('/admin/reviews/' + id, { hidden, reason }), 'moderateReview', { id, hidden, reason }),
+  // DELETE /admin/reviews/:id → 204 (xoá vĩnh viễn — nên ưu tiên Ẩn)
+  deleteAdminReview: (id) => call(() => http.delete('/admin/reviews/' + id), 'deleteAdminReview', id),
+  // GET /admin/orders/refunds/pending?page=&size= → Page<OrderResponse> đã trả tiền + bị huỷ + chưa hoàn (huỷ sớm nhất trước)
+  getPendingRefunds: (params) => call(() => http.get('/admin/orders/refunds/pending', { params }), 'getPendingRefunds', params),
+  /*
+   * POST /admin/orders/:id/refund { reference* ≤ 100 (mã GD ngân hàng), amount? (bỏ trống = toàn bộ), note? } → OrderResponse (+ refund)
+   * 400 REFUND_AMOUNT_INVALID · 409 ORDER_NOT_REFUNDABLE / ORDER_ALREADY_REFUNDED
+   */
+  confirmRefund: ({ id, ...body }) => call(() => http.post('/admin/orders/' + id + '/refund', body), 'confirmRefund', { id, ...body }),
+  // GET /admin/contacts?status=new|handled|spam&keyword=&page=&size= → Page<ContactResponse>
+  getAdminContacts: (params) => call(() => http.get('/admin/contacts', { params }), 'getAdminContacts', params),
+  // PATCH /admin/contacts/:id { status: new|handled|spam } → ContactResponse
+  updateContactStatus: ({ id, status }) => call(() => http.patch('/admin/contacts/' + id, { status }), 'updateContactStatus', { id, status }),
+  // GET /admin/suppliers/:id/payout → như /suppliers/me/payout nhưng accountNumber ĐẦY ĐỦ (mỗi lần xem BE ghi nhật ký)
+  getAdminSupplierPayout: (id) => call(() => http.get('/admin/suppliers/' + id + '/payout'), 'getAdminSupplierPayout', id),
 
   /*
    * ===== PRODUCTS (B2C catalog công khai — /shop, /product/:id) — FE-4 =====

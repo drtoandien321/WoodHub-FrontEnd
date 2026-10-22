@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAdminSupplierDetail, useUpdateSupplierStatus } from '../../hooks/useAdminSuppliers.js';
+import { useAdminSupplierPayout } from '../../hooks/useAdminOps.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 import StatusBadge from '../../components/supplier/StatusBadge.jsx';
 import { supplierAdminMeta, SUPPLIER_TYPE_LABEL } from '../../utils/adminStatus.js';
 import { Briefcase, Info, Mail, Phone } from '../../components/suppliers/icons.jsx';
@@ -103,6 +105,42 @@ export default function AdminSupplierDetail() {
           </div>
         </section>
       </div>
+
+      <PayoutSection supplierId={supplier.id} />
     </div>
+  );
+}
+
+/*
+ * Tài khoản nhận tiền của NCC (BE-14 §1.3): mặc định CHE, admin bấm "Hiện số tài khoản" mới gọi
+ * GET /admin/suppliers/{id}/payout (trả số đầy đủ, mỗi lần xem BE ghi nhật ký) — dùng khi chuyển tiền bán hàng cho NCC.
+ */
+function PayoutSection({ supplierId }) {
+  const [reveal, setReveal] = useState(false);
+  const { data, isFetching, isError, error } = useAdminSupplierPayout(supplierId, reveal);
+  const notConfigured = isError && error?.response?.status === 404;
+
+  return (
+    <section className="max-w-xl rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+      <h2 className="mb-1 font-display text-lg">Tài khoản nhận tiền</h2>
+      <p className="mb-3 text-xs text-base-content/55">Số tài khoản được mã hoá. Mỗi lần hiện số đầy đủ, hệ thống ghi nhật ký người xem.</p>
+      {!reveal ? (
+        <button onClick={() => setReveal(true)} className="btn btn-outline btn-sm">Hiện số tài khoản</button>
+      ) : isFetching ? (
+        <div className="skeleton h-16 rounded-xl" />
+      ) : notConfigured ? (
+        <p className="text-sm text-base-content/60">NCC chưa khai báo tài khoản nhận tiền.</p>
+      ) : isError ? (
+        <p className="text-sm text-error">{apiErrorMessage(error, 'Không tải được tài khoản nhận tiền.')}</p>
+      ) : data && (
+        <dl className="grid grid-cols-1 gap-3 rounded-xl bg-base-200/50 p-4 text-sm sm:grid-cols-2">
+          <div><dt className="text-xs text-base-content/55">Ngân hàng</dt><dd className="font-medium">{data.bankName} ({data.bankCode})</dd></div>
+          <div><dt className="text-xs text-base-content/55">Số tài khoản</dt><dd className="font-mono font-medium">{data.accountNumber}</dd></div>
+          <div><dt className="text-xs text-base-content/55">Chủ tài khoản</dt><dd className="font-medium">{data.accountHolder}</dd></div>
+          <div><dt className="text-xs text-base-content/55">Chi nhánh</dt><dd className="font-medium">{data.branch || '—'}</dd></div>
+          <button onClick={() => setReveal(false)} className="btn btn-ghost btn-xs justify-self-start">Ẩn lại</button>
+        </dl>
+      )}
+    </section>
   );
 }

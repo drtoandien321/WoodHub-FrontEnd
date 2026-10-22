@@ -87,6 +87,9 @@ const WorkshopReports = lazy(() => import('./pages/workshop/WorkshopReports.jsx'
 const WorkshopSettings = lazy(() => import('./pages/workshop/WorkshopSettings.jsx'));
 const NotificationSettingsRedirect = lazy(() => import('./pages/NotificationSettingsRedirect.jsx'));
 const Notifications = lazy(() => import('./pages/Notifications.jsx'));
+const AdminRefunds = lazy(() => import('./pages/admin/AdminRefunds.jsx'));
+const AdminReviews = lazy(() => import('./pages/admin/AdminReviews.jsx'));
+const AdminContacts = lazy(() => import('./pages/admin/AdminContacts.jsx'));
 
 export default function App() {
   const theme = useUiStore((s) => s.theme);
@@ -219,6 +222,9 @@ export default function App() {
             <Route path="promotions" element={<AdminPromotions />} />
             <Route path="shipping-config" element={<AdminShippingConfig />} />
             <Route path="credit-packs" element={<AdminCreditPacks />} />
+            <Route path="refunds" element={<AdminRefunds />} />
+            <Route path="reviews" element={<AdminReviews />} />
+            <Route path="contacts" element={<AdminContacts />} />
           </Route>
         </Route>
       </Routes>
