@@ -6,6 +6,7 @@ import { customOrderMeta, CUSTOM_ORDER_TABS } from '../utils/quoteStatus.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import EmptyState from '../components/ui/EmptyState.jsx';
 import { formatVnd } from '../utils/format.js';
+import { readDesignSnapshot } from '../utils/designSnapshot.js';
 
 // Tab theo luồng BE-01 (cọc → sản xuất → thanh toán → giao) — xem utils/quoteStatus.js
 const TABS = CUSTOM_ORDER_TABS;
@@ -45,7 +46,7 @@ export default function MyCustomOrders() {
         <div className="flex flex-col gap-3">
           {items.map((o) => (
             <Link key={o.id} to={`/custom-orders/${o.id}`} className="flex items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition hover:border-primary">
-              {o.designSnapshot?.thumbnailUrl && <img src={o.designSnapshot.thumbnailUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
+              {readDesignSnapshot(o.designSnapshot).posterUrl && <img src={readDesignSnapshot(o.designSnapshot).posterUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-mono text-xs text-base-content/50">{o.orderNumber}</p>

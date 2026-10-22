@@ -1161,7 +1161,21 @@
     },
     "locationOther": "Enter another address…",
     "locationTooShort": "Please choose or enter a full address (at least {{min}} characters).",
-    "addAddress": "+ Add an address to your address book"
+    "addAddress": "+ Add an address to your address book",
+    "design": {
+      "title": "Requested product",
+      "untitled": "Untitled design",
+      "view3d": "View 3D",
+      "view3dHint": "Tinted with the customer's chosen color. Drag to rotate, scroll to zoom.",
+      "prompt": "Customer's original description",
+      "dimsHint": "Width × Depth × Height",
+      "source": {
+        "text": "AI model from text description",
+        "image": "AI model from photo",
+        "template": "WoodHub library template",
+        "uploaded": "Uploaded model"
+      }
+    }
   },
   "order": {
     "myOrdersTitle": "My custom orders",

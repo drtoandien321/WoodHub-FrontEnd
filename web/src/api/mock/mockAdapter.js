@@ -1947,7 +1947,7 @@ export const mockAdapter = {
       id, customerId: me?.id ?? 'mock-user', customerName: me?.name ?? 'Khách',
       workshopId, workshopName: workshop?.name ?? 'Xưởng mộc',
       customDesignId,
-      designSnapshot: { modelId: design.modelId, modelSlug: design.modelSlug, configuration: design.configuration, thumbnailUrl: design.thumbnailUrl },
+      designSnapshot: { ...design.configuration, design: { designName: design.name, modelId: design.modelId, modelSlug: design.modelSlug, posterUrl: design.thumbnailUrl, modelGlbUrl: null, sourceType: 'template', prompt: null } },
       quantity: quantity ?? 1, location: location ?? null, note: note ?? null,
       status: 'pending', expiresAt: expiresAt ?? null, createdAt: now,
       offers: [],
