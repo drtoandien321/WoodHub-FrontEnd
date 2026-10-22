@@ -80,3 +80,31 @@ export const useRenameModel = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['myModels'] }),
   });
 };
+
+// ----- Admin thư viện mẫu 3D (BE-04) + gắn model cho sản phẩm -----
+const ADMIN_MODELS_KEY = ['adminModels3d'];
+export const useAdminModels3d = (params) =>
+  useQuery({ queryKey: [...ADMIN_MODELS_KEY, params], queryFn: () => api.getAdminModels3d(params), placeholderData: (prev) => prev });
+
+const useAdminModelMutation = (mutationFn) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ADMIN_MODELS_KEY });
+      qc.invalidateQueries({ queryKey: ['models3d'] }); // thư viện công khai đổi theo (ẩn / hiện / mẫu mới)
+      qc.invalidateQueries({ queryKey: ['products'] }); // badge 3D + bộ lọc has3d
+    },
+  });
+};
+export const useCreateAdminModel3d = () => useAdminModelMutation(api.createAdminModel3d);
+export const useUpdateAdminModel3d = () => useAdminModelMutation(api.updateAdminModel3d);
+export const useSetAdminModel3dStatus = () => useAdminModelMutation(api.setAdminModel3dStatus);
+export const useDeleteAdminModel3d = () => useAdminModelMutation(api.deleteAdminModel3d);
+export const useLinkProductModel3d = () => useAdminModelMutation(api.linkProductModel3d);
+export const useUnlinkProductModel3d = () => useAdminModelMutation(api.unlinkProductModel3d);
+
+// ----- Áp dụng chất liệu bằng AI (BE-05) -----
+export const useRetextureModel = () => useMutation({ mutationFn: api.retextureModel });
+export const useModelVariants = (modelId) =>
+  useQuery({ queryKey: ['modelVariants', modelId], queryFn: () => api.getModelVariants(modelId), enabled: !!modelId });

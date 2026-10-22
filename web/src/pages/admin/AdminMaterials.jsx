@@ -48,14 +48,15 @@ export default function AdminMaterials() {
           <table className="table">
             <thead>
               <tr className="text-base-content/55">
-                <th>Tên vật liệu</th><th>Ngày tạo</th><th className="text-right">Thao tác</th>
+                <th>Tên vật liệu</th><th>AI đổi chất liệu</th><th>Ngày tạo</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={3} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={4} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
               {!isLoading && list.map((m) => (
                 <tr key={m.id} className="hover:bg-base-200/50">
                   <td className="font-medium">{m.name}</td>
+                  <td className="max-w-xs truncate text-xs text-base-content/60" title={m.retexturePrompt ?? ''}>{m.retexturePrompt || <span className="text-base-content/35">Chưa có</span>}</td>
                   <td className="text-sm text-base-content/60">{new Date(m.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
@@ -66,7 +67,7 @@ export default function AdminMaterials() {
                 </tr>
               ))}
               {!isLoading && !list.length && (
-                <tr><td colSpan={3} className="py-10 text-center text-base-content/50">Không tìm thấy vật liệu phù hợp.</td></tr>
+                <tr><td colSpan={4} className="py-10 text-center text-base-content/50">Không tìm thấy vật liệu phù hợp.</td></tr>
               )}
             </tbody>
           </table>

@@ -90,6 +90,7 @@ const Notifications = lazy(() => import('./pages/Notifications.jsx'));
 const AdminRefunds = lazy(() => import('./pages/admin/AdminRefunds.jsx'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews.jsx'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts.jsx'));
+const AdminModels3d = lazy(() => import('./pages/admin/AdminModels3d.jsx'));
 const BulkQuotes = lazy(() => import('./pages/bulk/BulkQuotes.jsx'));
 const BulkQuoteDetail = lazy(() => import('./pages/bulk/BulkQuoteDetail.jsx'));
 const SupplierBulkQuotes = lazy(() => import('./pages/supplier/SupplierBulkQuotes.jsx'));
@@ -234,6 +235,7 @@ export default function App() {
             <Route path="refunds" element={<AdminRefunds />} />
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="contacts" element={<AdminContacts />} />
+            <Route path="models3d" element={<AdminModels3d />} />
           </Route>
         </Route>
       </Routes>

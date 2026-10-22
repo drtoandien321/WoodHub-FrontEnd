@@ -110,6 +110,9 @@ const REAL_ENDPOINTS = new Set([
    * shape khớp 100% những gì FE đã code). Bật thật CẢ NHÓM AI 3D + CustomDesign + Quote/Order —
    * xem chi tiết từng hàm ở nơi định nghĩa (đã cập nhật comment, không còn "CHƯA thêm vào set này").
    */
+  // BE-04 admin mẫu 3D · gắn model cho SP · BE-05 retexture (áp dụng chất liệu)
+  'getAdminModels3d', 'updateAdminModel3d', 'setAdminModel3dStatus', 'deleteAdminModel3d',
+  'linkProductModel3d', 'unlinkProductModel3d', 'retextureModel', 'getModelVariants',
   'getModels3d', 'getModel3d', 'getMyModels', 'renameModel', 'getGenTask', 'retryGenTask', 'cancelGenTask', 'getMyGenTasks',
   // Text-to-3D + nâng cấp texture (BE commit 40ece30, docs/custom-model-3d-fe.md mục 1b/1c)
   'generate3DFromText', 'refineGenTask',
@@ -973,6 +976,46 @@ export const api = {
    */
   // GET /custom/models?keyword=&productType=&page=&size= → Page<Model3dResponse>
   getModels3d: (params) => call(() => http.get('/custom/models', { params }), 'getModels3d', params),
+
+  /*
+   * ===== ADMIN — THƯ VIỆN MẪU 3D (BE-04, docs BE admin-models3d-fe.md) =====
+   * GET /admin/models3d?status=active|hidden&keyword=&productType=&page=&size= → Page<Model3dResponse> (+ status, productId)
+   */
+  getAdminModels3d: (params) => call(() => http.get('/admin/models3d', { params }), 'getAdminModels3d', params),
+  /*
+   * POST /admin/models3d (multipart): part "data" = Blob JSON { name, productType, description?, editableOptions? },
+   * "glb" (≤ 50MB), "poster" (ảnh ≤ 10MB), "usdz"? (≤ 50MB). KHÔNG đi qua call(): cần FormData + tiến độ upload.
+   * onProgress(0..100) cho thanh tiến độ vì file GLB có thể vài chục MB.
+   */
+  createAdminModel3d: async ({ data, glb, poster, usdz, onProgress }) => {
+    if (USE_MOCK) throw Object.assign(new Error('MOCK'), { response: { status: 400, data: { message: 'Tải mẫu 3D chỉ chạy với BE thật (VITE_USE_MOCK=false).' } } });
+    const form = new FormData();
+    form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    form.append('glb', glb);
+    form.append('poster', poster);
+    if (usdz) form.append('usdz', usdz);
+    const res = await http.post('/admin/models3d', form, {
+      timeout: 10 * 60_000, // file lớn + Render chậm → nới timeout mặc định 60s
+      onUploadProgress: (e) => e.total && onProgress?.(Math.round((e.loaded / e.total) * 100)),
+    });
+    return res.data;
+  },
+  // PUT /admin/models3d/:id { name, productType, description?, editableOptions? } — THAY toàn bộ (không gửi = xoá)
+  updateAdminModel3d: ({ id, ...body }) => call(() => http.put('/admin/models3d/' + id, body), 'updateAdminModel3d', { id, ...body }),
+  // PATCH /admin/models3d/:id/status { status: active|hidden } — ẩn: biến khỏi thư viện nhưng link cũ vẫn mở được
+  setAdminModel3dStatus: ({ id, status }) => call(() => http.patch('/admin/models3d/' + id + '/status', { status }), 'setAdminModel3dStatus', { id, status }),
+  // DELETE /admin/models3d/:id → 204 · 409 khi mẫu đã có thiết kế dùng / đã có biến thể chất liệu (→ gợi ý Ẩn)
+  deleteAdminModel3d: (id) => call(() => http.delete('/admin/models3d/' + id), 'deleteAdminModel3d', id),
+  // PUT /admin/products/:productId/model3d { model3dId } → ProductResponse · 409 MODEL_ALREADY_LINKED · 400 MODEL_NOT_LINKABLE
+  linkProductModel3d: ({ productId, model3dId }) => call(() => http.put('/admin/products/' + productId + '/model3d', { model3dId }), 'linkProductModel3d', { productId, model3dId }),
+  unlinkProductModel3d: (productId) => call(() => http.delete('/admin/products/' + productId + '/model3d'), 'unlinkProductModel3d', productId),
+  /*
+   * POST /custom/models/:id/variants { materialId } (BE-05) → { state: ready|processing, taskId, status, progress, model }
+   * 200 ready = biến thể đã có (không trừ lượt) · 202 processing = poll taskId · 429 hết lượt retexture tháng này
+   */
+  retextureModel: ({ modelId, materialId }) => call(() => http.post('/custom/models/' + modelId + '/variants', { materialId }), 'retextureModel', { modelId, materialId }),
+  // GET /custom/models/:id/variants → Model3dResponse[] (variantKey = "material:<id>") — đánh dấu vật liệu "Có sẵn"
+  getModelVariants: (modelId) => call(() => http.get('/custom/models/' + modelId + '/variants'), 'getModelVariants', modelId),
   // GET /custom/models/:slug → Model3dResponse (công khai; model riêng của user cần đăng nhập)
   getModel3d: (slug) => call(() => http.get(`/custom/models/${slug}`), 'getModel3d', slug),
   // GET /custom/models/my?page=&size=&sort= → Page<Model3dResponse> — thư viện "model của tôi" (model AI tự lưu khi gen xong). Cần đăng nhập.

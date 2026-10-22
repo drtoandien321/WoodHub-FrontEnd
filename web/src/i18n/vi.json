@@ -612,7 +612,12 @@
         "title": "Giao hàng toàn quốc",
         "desc": "Nhận hàng 3–7 ngày"
       }
-    }
+    },
+    "view3d": "Xem 3D / AR",
+    "customize3d": "Tuỳ chỉnh thiết kế",
+    "close3d": "Đóng",
+    "view3dHint": "Kéo để xoay, cuộn để phóng to. Trên điện thoại bấm biểu tượng AR để đặt thử vào phòng.",
+    "customizableBadge": "Tuỳ chỉnh"
   },
   "chat": {
     "subtitle": "Chat tư vấn thời gian thực",
@@ -1063,6 +1068,20 @@
       "stepLabelsText": {
         "2": "Mô tả"
       }
+    },
+    "retexture": {
+      "title": "Áp dụng chất liệu bằng AI",
+      "hint": "AI vẽ lại vân bề mặt của mô hình theo vật liệu bạn chọn (khác ô tô màu bên dưới). Vật liệu \"Có sẵn\" hiện ngay, không tốn lượt.",
+      "left": "Còn {{count}} lượt tháng này",
+      "unlimited": "Không giới hạn lượt",
+      "ready": "Có sẵn",
+      "processing": "AI đang đổi chất liệu… {{progress}}% (khoảng 1–3 phút)",
+      "taskFailed": "Đổi chất liệu chưa thành công.",
+      "retry": "Thử lại",
+      "original": "↺ Về mô hình gốc",
+      "outOfCredits": "Bạn đã hết lượt đổi chất liệu tháng này. Nâng cấp gói để có thêm lượt.",
+      "failed": "Chưa đổi được chất liệu, vui lòng thử lại sau.",
+      "loadFailed": "Không tải được mô hình mới."
     }
   },
   "quote": {
@@ -1492,7 +1511,8 @@
     "features": {
       "ai_chat": "Chat AI",
       "design": "Thiết kế 3D",
-      "export": "Xuất file"
+      "export": "Xuất file",
+      "retexture": "Đổi chất liệu AI"
     },
     "paymentStatus": {
       "pending": "Đang chờ",

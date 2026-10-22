@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { WOOD_MATERIALS } from '../../api/mock/customData.js';
 import { normalizeOptions, hexOfColor, scaleOf } from '../../utils/modelOptions.js';
 import ModelViewer from '../custom3d/ModelViewer.jsx';
+import AiMaterialPanel from './AiMaterialPanel.jsx';
 
 const DIM_LABELS = { width: 'dimensionWidth', height: 'dimensionHeight', depth: 'dimensionDepth' };
 
@@ -9,8 +10,9 @@ const DIM_LABELS = { width: 'dimensionWidth', height: 'dimensionHeight', depth: 
  * Bước 5 — Chỉnh sửa: CHỈ render control cho key nào THỰC SỰ có trong model.editableOptions
  * (đúng yêu cầu "không cho chỉnh thuộc tính backend không hỗ trợ"). Model không có editableOptions
  * nào (vd décor) → hiện thông báo "không hỗ trợ chỉnh sửa", vẫn cho qua bước 6 với cấu hình rỗng.
+ * Trên cùng: "Áp dụng chất liệu" bằng AI (BE-05) — đổi sang model biến thể thật, xem AiMaterialPanel.
  */
-export default function Step5Edit({ model, configuration, onChange, onNext, onBack }) {
+export default function Step5Edit({ model, configuration, onChange, onNext, onBack, onModelChange }) {
   const { t } = useTranslation();
   const opt = normalizeOptions(model);
   const hasColors = opt.colors.length > 0;
@@ -33,6 +35,8 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
         </div>
 
         <aside className="flex flex-col gap-5 rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
+          {onModelChange && <AiMaterialPanel model={model} onModelChange={onModelChange} />}
+
           {nothingEditable && (
             <p className="rounded-xl bg-base-200/60 p-3 text-sm text-base-content/60">{t('custom.studio.step5.notEditable')}</p>
           )}

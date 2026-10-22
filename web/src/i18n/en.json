@@ -612,7 +612,12 @@
         "title": "Nationwide shipping",
         "desc": "Delivery in 3–7 days"
       }
-    }
+    },
+    "view3d": "View in 3D / AR",
+    "customize3d": "Customise design",
+    "close3d": "Close",
+    "view3dHint": "Drag to rotate, scroll to zoom. On a phone, tap the AR icon to place it in your room.",
+    "customizableBadge": "Customisable"
   },
   "chat": {
     "subtitle": "Real-time consultation",
@@ -1067,6 +1072,20 @@
       "stepLabelsText": {
         "2": "Describe"
       }
+    },
+    "retexture": {
+      "title": "Apply material with AI",
+      "hint": "AI repaints the model surface with the chosen material (unlike the colour tint below). \"Ready\" materials load instantly at no cost.",
+      "left": "{{count}} left this month",
+      "unlimited": "Unlimited",
+      "ready": "Ready",
+      "processing": "AI is applying the material… {{progress}}% (about 1–3 minutes)",
+      "taskFailed": "Applying the material failed.",
+      "retry": "Retry",
+      "original": "↺ Back to original model",
+      "outOfCredits": "You have used all material changes this month. Upgrade your plan for more.",
+      "failed": "Could not apply the material, please try again later.",
+      "loadFailed": "Could not load the new model."
     }
   },
   "quote": {
@@ -1498,7 +1517,8 @@
     "features": {
       "ai_chat": "AI chat",
       "design": "3D design",
-      "export": "File export"
+      "export": "File export",
+      "retexture": "AI material change"
     },
     "paymentStatus": {
       "pending": "Pending",

@@ -10,7 +10,7 @@ import { formatVnd, formatDate } from '../utils/format.js';
 import { apiErrorMessage } from '../utils/apiError.js';
 
 // Enum UsageFeature hiển thị (nhãn ở i18n mySub.features.*). ar_3d đã bỏ: AR dùng Scene Viewer free, BE không còn trả trong /usage/me.
-const SHOWN_FEATURES = new Set(['ai_chat', 'design', 'export']);
+const SHOWN_FEATURES = new Set(['ai_chat', 'design', 'export', 'retexture']); // retexture: đổi chất liệu AI (BE-05)
 
 // PaymentResponse chỉ có planName cho gói đăng ký → nhãn theo purpose cho các loại khác
 const paymentLabel = (p, t) =>
