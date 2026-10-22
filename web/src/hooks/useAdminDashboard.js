@@ -29,3 +29,28 @@ export const useAdminDashboardTraffic = (params) =>
     retry: (count, error) => error?.response?.status !== 503 && count < 2,
     ...opts,
   });
+
+/*
+ * Lượt bán gói (ô KPI thứ 3): đếm giao dịch ĐÃ THANH TOÁN của gói đăng ký + gói lượt thiết kế trong kỳ.
+ * BE chưa có số này trong /admin/dashboard/summary (subscriptions.activeTotal đếm cả gói Free — 0đ, không phát sinh
+ * giao dịch) → dùng GET /admin/payments?status=paid&purpose=… (lọc có sẵn của trang Thanh toán):
+ * totalElements = số lượt bán, cộng `amount` của trang (size 500 — đủ cho quy mô hiện tại) = doanh thu từ gói.
+ */
+const SALE_PAGE = 500;
+const sumAmount = (page) => (page?.content ?? []).reduce((s, p) => s + Number(p.amount ?? 0), 0);
+export function useAdminPlanSales(params) {
+  const q = (purpose) => ({
+    queryKey: ['adminPlanSales', purpose, params],
+    queryFn: () => api.getAdminPayments({ ...params, status: 'paid', purpose, page: 0, size: SALE_PAGE }),
+    ...opts,
+  });
+  const sub = useQuery(q('subscription'));
+  const pack = useQuery(q('credit_pack'));
+  if (!sub.data || !pack.data) return { data: null, isLoading: sub.isLoading || pack.isLoading };
+  const subscriptions = sub.data.page?.totalElements ?? sub.data.content?.length ?? 0;
+  const creditPacks = pack.data.page?.totalElements ?? pack.data.content?.length ?? 0;
+  return {
+    data: { total: subscriptions + creditPacks, subscriptions, creditPacks, revenue: sumAmount(sub.data) + sumAmount(pack.data) },
+    isLoading: false,
+  };
+}

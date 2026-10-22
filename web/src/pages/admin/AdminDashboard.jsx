@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic } from '../../hooks/useAdminDashboard.js';
+import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic, useAdminPlanSales } from '../../hooks/useAdminDashboard.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
 import DailyBarChart from '../../components/admin/DailyBarChart.jsx';
@@ -199,6 +199,7 @@ export default function AdminDashboard() {
   const summary = useAdminDashboardSummary(params);
   const series = useAdminDashboardTimeseries(params);
   const top = useAdminDashboardTop({ ...params, limit: 5 });
+  const planSales = useAdminPlanSales(params);
 
   const s = summary.data;
   const revenueSeries = useMemo(
@@ -255,9 +256,12 @@ export default function AdminDashboard() {
             <StatCard icon={Users} label="Tổng người dùng" value={s.users.total}
               hint={`+${s.users.newInPeriod} mới trong kỳ · ${s.users.activeRecently} hoạt động 24h`} to="/admin/users"
               iconWrap="bg-info/10 text-info" />
-            <StatCard icon={CreditCard} label="Gói đang hoạt động" value={s.subscriptions.activeTotal}
-              hint={`${s.subscriptions.expiringIn7Days} gói hết hạn trong 7 ngày`} to="/admin/subscription-plans"
-              iconWrap="bg-success/10 text-success" />
+            {/* Lượt bán gói trả phí (giao dịch thành công): gói đăng ký + gói lượt thiết kế, không tính gói Free */}
+            <StatCard icon={CreditCard} label="Gói đã bán (thanh toán thành công)" value={planSales.data?.total ?? '…'}
+              hint={planSales.data
+                ? `${planSales.data.subscriptions} gói đăng ký · ${planSales.data.creditPacks} gói thiết kế · ${formatVnd(planSales.data.revenue)}`
+                : 'Đang tải…'}
+              to="/admin/payments" iconWrap="bg-success/10 text-success" />
             <StatCard icon={Wallet} label="MRR ước tính" value={s.subscriptions.estimatedMrr} money
               hint="Tổng giá gói của các đăng ký active" iconWrap="bg-warning/10 text-warning" />
           </div>
