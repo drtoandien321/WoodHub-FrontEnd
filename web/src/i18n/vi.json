@@ -1717,5 +1717,42 @@
       "cancelled": "Đã huỷ",
       "expired": "Hết hạn"
     }
+  },
+  "feedback": {
+    "title": "Bạn chấm WoodHub mấy sao?",
+    "editTitle": "Sửa đánh giá của bạn",
+    "afterOrderIntro": "Đặt hàng thành công! Dành 30 giây cho chúng mình biết trải nghiệm của bạn nhé.",
+    "rewardOffer": "Gửi đánh giá lần đầu để nhận {{count}} lượt thiết kế 3D miễn phí.",
+    "ratingLabel": "Số sao",
+    "starN": "{{count}} sao",
+    "ratingText": {
+      "1": "Rất tệ",
+      "2": "Chưa tốt",
+      "3": "Bình thường",
+      "4": "Tốt",
+      "5": "Tuyệt vời"
+    },
+    "commentLabel": "Điều bạn thích hoặc muốn WoodHub cải thiện",
+    "commentPlaceholder": "VD: Tìm sản phẩm dễ, nhưng muốn có thêm mẫu 3D cho tủ bếp…",
+    "minChars": "Viết ít nhất {{count}} ký tự",
+    "submit": "Gửi đánh giá",
+    "later": "Để sau",
+    "cancel": "Huỷ",
+    "close": "Đóng",
+    "error": "Chưa gửi được đánh giá, vui lòng thử lại.",
+    "thanksTitle": "Cảm ơn bạn!",
+    "thanksBody": "Góp ý của bạn giúp WoodHub tốt hơn mỗi ngày.",
+    "rewardGranted": "Bạn được tặng {{count}} lượt thiết kế 3D 🎁",
+    "rewardBalance": "Số lượt thiết kế đã mua hiện có: {{count}}",
+    "tryDesign": "Thiết kế ngay",
+    "loginHint": "Đăng nhập để gửi đánh giá. Lần đánh giá đầu tiên được tặng {{count}} lượt thiết kế 3D.",
+    "loginCta": "Đăng nhập",
+    "footerCta": "Đánh giá WoodHub",
+    "landingTitle": "Bạn thấy WoodHub thế nào?",
+    "landingBody": "Chấm sao và để lại vài dòng góp ý — nhận ngay {{count}} lượt thiết kế 3D cho lần đánh giá đầu tiên.",
+    "landingThanks": "Cảm ơn bạn đã đánh giá WoodHub. Bạn có thể sửa đánh giá bất cứ lúc nào.",
+    "landingCount": "{{count}} lượt đánh giá",
+    "landingCta": "Đánh giá ngay",
+    "editCta": "Sửa đánh giá"
   }
 }

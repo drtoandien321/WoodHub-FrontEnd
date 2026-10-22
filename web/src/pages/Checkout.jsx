@@ -14,6 +14,8 @@ import VoucherPicker from '../components/checkout/VoucherPicker.jsx';
 import { Check, Wallet, Shield, Plus } from '../components/suppliers/icons.jsx';
 // Lỗi BE: dùng message tiếng Việt khi UI là VI, còn lại dùng câu đã dịch (xem utils/apiError.js)
 import { apiErrorMessage } from '../utils/apiError.js';
+import { useFeedbackStore } from '../stores/feedbackStore.js';
+import { useMyPlatformFeedback, FEEDBACK_ENABLED } from '../hooks/usePlatformFeedback.js';
 
 const NOTE_MAX = 500;
 
@@ -130,6 +132,19 @@ export default function Checkout() {
     const usable = addresses.filter((a) => a.hasCoordinates);
     setSelectedId((usable.find((a) => a.isDefault) ?? usable[0])?.id ?? null);
   }, [addresses, selectedId]);
+
+  /*
+   * Đơn vừa thanh toán thành công → mời 'Bạn chấm WoodHub mấy sao?' (docs/BE-platform-feedback.md). Chỉ khi khách CHƯA
+   * đánh giá (GET /feedback/me = 404) và chưa bấm 'Để sau' trong phiên. Trễ 1,5s để khách kịp thấy màn 'Đặt hàng thành công'.
+   */
+  const myFeedback = useMyPlatformFeedback();
+  const openFeedback = useFeedbackStore((st) => st.openFeedback);
+  const dismissedAfterOrder = useFeedbackStore((st) => st.dismissedAfterOrder);
+  useEffect(() => {
+    if (!FEEDBACK_ENABLED || !paid || dismissedAfterOrder || !myFeedback.isFetched || myFeedback.data) return;
+    const timer = setTimeout(() => openFeedback('after_order'), 1500);
+    return () => clearTimeout(timer);
+  }, [paid, dismissedAfterOrder, myFeedback.isFetched, myFeedback.data, openFeedback]);
 
   // ===== Màn THANH TOÁN (sau khi checkout thành công) =====
   if (result) {

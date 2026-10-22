@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useFeedbackStore } from '../../stores/feedbackStore.js';
+import { FEEDBACK_ENABLED } from '../../hooks/usePlatformFeedback.js';
 
 export default function Footer() {
   const { t } = useTranslation();
+  const openFeedback = useFeedbackStore((s) => s.openFeedback);
   return (
     <footer className="border-t border-base-300 bg-base-200">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
@@ -24,6 +27,10 @@ export default function Footer() {
           <Link to="/about" className="link link-hover text-base-content/60">{t('nav.about')}</Link>
           <Link to="/pricing" className="link link-hover text-base-content/60">{t('nav.pricing')}</Link>
           <Link to="/contact" className="link link-hover text-base-content/60">{t('nav.contact')}</Link>
+          {/* Đánh giá WoodHub (docs/BE-platform-feedback.md) — ẩn tới khi BE xong */}
+          {FEEDBACK_ENABLED && (
+            <button onClick={() => openFeedback('footer')} className="link link-hover w-fit text-left text-base-content/60">★ {t('feedback.footerCta')}</button>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 justify-end text-base-content/60">

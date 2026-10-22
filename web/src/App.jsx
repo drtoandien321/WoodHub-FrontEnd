@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop.jsx';
 import AnalyticsTracker from './components/AnalyticsTracker.jsx';
 import ChatWidget from './components/chatbot/ChatWidget.jsx';
 import ChatDrawer from './components/chat/ChatDrawer.jsx';
+import FeedbackModal from './components/feedback/FeedbackModal.jsx';
 import { useUiStore } from './stores/uiStore.js';
 
 /*
@@ -112,6 +113,8 @@ export default function App() {
       <ChatWidget />
       {/* Khung chat với nhà cung cấp (mở từ trang sản phẩm / hồ sơ NCC) */}
       <ChatDrawer />
+      {/* Modal Đánh giá WoodHub — mở từ popup sau đặt hàng, footer, landing (useFeedbackStore) */}
+      <FeedbackModal />
       <Routes>
         {/* Landing đứng riêng: hero full-screen, không dùng layout chung */}
         <Route path="/" element={<Landing />} />

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic, useAdminPlanSales } from '../../hooks/useAdminDashboard.js';
+import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic, useAdminPlanSales, useAdminReviewAverage } from '../../hooks/useAdminDashboard.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
 import DailyBarChart from '../../components/admin/DailyBarChart.jsx';
@@ -9,6 +9,7 @@ import { formatVnd } from '../../utils/format.js';
 import { startOfDayIso, endOfDayIso, toYmd } from '../../utils/dateRange.js';
 import { PRODUCT_STATUS } from '../../utils/supplierStatus.js';
 import { ROLE_LABEL, supplierAdminMeta } from '../../utils/adminStatus.js';
+import { useAdminFeedbackSummary, FEEDBACK_ENABLED } from '../../hooks/usePlatformFeedback.js';
 
 // Khoảng thời gian nhanh. days = null → toàn bộ (không gửi from/to)
 const RANGES = [
@@ -59,6 +60,30 @@ function Breakdown({ title, items, total }) {
         ))}
       </ul>
     </section>
+  );
+}
+
+/*
+ * Ô KPI thứ 4 — Đánh giá người dùng. Số chính = điểm trung bình đánh giá WEB + APP (docs/BE-platform-feedback.md);
+ * dòng phụ tách Web / App / Sản phẩm & NCC. BE chưa làm đánh giá nền tảng (FEEDBACK_ENABLED = false) hoặc chưa có lượt nào
+ * → số chính tạm lấy điểm sản phẩm & NCC (bảng reviews) và ghi rõ nguồn, không để ô trống.
+ */
+const fmtRating = (r) => (r == null ? '—' : `★ ${Number(r).toFixed(1)}`);
+function RatingStatCard({ platform, reviews }) {
+  const app = platform && ['android', 'ios'].map((k) => platform.byPlatform?.[k]).filter((x) => x?.count);
+  const appCount = app?.reduce((n, x) => n + x.count, 0) ?? 0;
+  const appAvg = appCount ? app.reduce((n, x) => n + x.avgRating * x.count, 0) / appCount : null;
+  const hasPlatform = platform?.count > 0;
+  const parts = [
+    hasPlatform && `Web ${fmtRating(platform.byPlatform?.web?.avgRating)} (${platform.byPlatform?.web?.count ?? 0})`,
+    hasPlatform && `App ${fmtRating(appAvg)} (${appCount})`,
+    reviews && `Sản phẩm & NCC ${fmtRating(reviews.avgRating)} (${reviews.count})`,
+    !FEEDBACK_ENABLED && 'đánh giá web/app: chờ BE',
+  ].filter(Boolean);
+  return (
+    <StatCard icon={Star} label={hasPlatform ? `Đánh giá người dùng · ${platform.count} lượt` : 'Đánh giá người dùng'}
+      value={hasPlatform ? fmtRating(platform.avgRating) : fmtRating(reviews?.avgRating)}
+      hint={parts.join(' · ') || 'Đang tải…'} to="/admin/reviews" iconWrap="bg-warning/10 text-warning" />
   );
 }
 
@@ -200,6 +225,8 @@ export default function AdminDashboard() {
   const series = useAdminDashboardTimeseries(params);
   const top = useAdminDashboardTop({ ...params, limit: 5 });
   const planSales = useAdminPlanSales(params);
+  const reviewAvg = useAdminReviewAverage();
+  const feedback = useAdminFeedbackSummary(params);
 
   const s = summary.data;
   const revenueSeries = useMemo(
@@ -257,13 +284,12 @@ export default function AdminDashboard() {
               hint={`+${s.users.newInPeriod} mới trong kỳ · ${s.users.activeRecently} hoạt động 24h`} to="/admin/users"
               iconWrap="bg-info/10 text-info" />
             {/* Lượt bán gói trả phí (giao dịch thành công): gói đăng ký + gói lượt thiết kế, không tính gói Free */}
-            <StatCard icon={CreditCard} label="Gói đã bán (thanh toán thành công)" value={planSales.data?.total ?? '…'}
+            <StatCard icon={CreditCard} label="Lượt mua gói (thanh toán thành công)" value={planSales.data?.total ?? '…'}
               hint={planSales.data
-                ? `${planSales.data.subscriptions} gói đăng ký · ${planSales.data.creditPacks} gói thiết kế · ${formatVnd(planSales.data.revenue)}`
+                ? `${planSales.data.subscriptions} gói đăng ký · ${planSales.data.creditPacks} gói thiết kế · ${planSales.data.buyers} tài khoản · ${formatVnd(planSales.data.revenue)}`
                 : 'Đang tải…'}
               to="/admin/payments" iconWrap="bg-success/10 text-success" />
-            <StatCard icon={Wallet} label="MRR ước tính" value={s.subscriptions.estimatedMrr} money
-              hint="Tổng giá gói của các đăng ký active" iconWrap="bg-warning/10 text-warning" />
+            <RatingStatCard platform={feedback.data} reviews={reviewAvg.data} />
           </div>
 
           {/* Biểu đồ doanh thu + user mới */}

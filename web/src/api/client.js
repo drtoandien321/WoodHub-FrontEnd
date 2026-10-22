@@ -1175,4 +1175,23 @@ export const api = {
   // POST /contact (BE-06, không cần đăng nhập) body: { name*, email*, phone?, subject*, message* } → 201 ContactResponse
   // 400 lỗi theo field · 429 quá 5 lần/giờ từ cùng mạng
   submitContact: (body) => call(() => http.post('/contact', body), 'submitContact', body),
+
+  // ===== ĐÁNH GIÁ WOODHUB (web + app) — docs/BE-platform-feedback.md · CHỜ BE, chưa vào REAL_ENDPOINTS =====
+  // GET /feedback/me?platform=web → PlatformFeedback | 404 FEEDBACK_NOT_FOUND (chưa đánh giá)
+  getMyPlatformFeedback: (params = { platform: 'web' }) => call(() => http.get('/feedback/me', { params }), 'getMyPlatformFeedback', params),
+  // POST /feedback { platform, context, rating, comment } → { feedback, rewardGranted, rewardCredits, designCreditBalance }
+  // Lần đầu của tài khoản customer → BE tặng 5 lượt thiết kế (1 lần duy nhất)
+  submitPlatformFeedback: (body) => call(() => http.post('/feedback', body), 'submitPlatformFeedback', body),
+  // GET /feedback/summary (công khai) → { avgRating, count }
+  getPlatformFeedbackSummary: () => call(() => http.get('/feedback/summary'), 'getPlatformFeedbackSummary'),
+  // GET /admin/feedback (Pageable + platform/rating/hidden/from/to) · GET /admin/feedback/summary (from/to)
+  getAdminFeedback: (params) => call(() => http.get('/admin/feedback', { params }), 'getAdminFeedback', params),
+  getAdminFeedbackSummary: (params) => call(() => http.get('/admin/feedback/summary', { params }), 'getAdminFeedbackSummary', params),
 };
+
+/*
+ * Endpoint đã chạy được chưa: bật mock (dev) HOẶC đã có BE thật. Dùng để ẨN tính năng mà BE chưa làm khỏi production —
+ * call() tự rơi về mockAdapter cho key chưa có BE, nên nếu không chặn, production sẽ chạy dữ liệu giả (vd báo '+5 lượt'
+ * nhưng không cộng lượt thật).
+ */
+export const endpointReady = (mockKey) => USE_MOCK || REAL_ENDPOINTS.has(mockKey);

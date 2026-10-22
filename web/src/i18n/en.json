@@ -1723,5 +1723,42 @@
       "cancelled": "Cancelled",
       "expired": "Expired"
     }
+  },
+  "feedback": {
+    "title": "How would you rate WoodHub?",
+    "editTitle": "Edit your review",
+    "afterOrderIntro": "Order placed! Take 30 seconds to tell us about your experience.",
+    "rewardOffer": "Send your first review and get {{count}} free 3D design credits.",
+    "ratingLabel": "Rating",
+    "starN": "{{count}} stars",
+    "ratingText": {
+      "1": "Terrible",
+      "2": "Poor",
+      "3": "Okay",
+      "4": "Good",
+      "5": "Excellent"
+    },
+    "commentLabel": "What you like or what WoodHub should improve",
+    "commentPlaceholder": "e.g. Easy to find products, but I want more 3D models for kitchen cabinets…",
+    "minChars": "Write at least {{count}} characters",
+    "submit": "Send review",
+    "later": "Later",
+    "cancel": "Cancel",
+    "close": "Close",
+    "error": "Could not send your review, please try again.",
+    "thanksTitle": "Thank you!",
+    "thanksBody": "Your feedback helps WoodHub get better every day.",
+    "rewardGranted": "You received {{count}} 3D design credits 🎁",
+    "rewardBalance": "Purchased design credits available: {{count}}",
+    "tryDesign": "Design now",
+    "loginHint": "Log in to send a review. Your first review earns {{count}} 3D design credits.",
+    "loginCta": "Log in",
+    "footerCta": "Rate WoodHub",
+    "landingTitle": "What do you think of WoodHub?",
+    "landingBody": "Rate us and leave a few words — get {{count}} 3D design credits for your first review.",
+    "landingThanks": "Thanks for reviewing WoodHub. You can edit your review any time.",
+    "landingCount": "{{count}} reviews",
+    "landingCta": "Rate now",
+    "editCta": "Edit review"
   }
 }
