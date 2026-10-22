@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { usePublicSuppliers } from '../../hooks/usePublicSuppliers.js';
 import { useCreateQuote } from '../../hooks/useQuotes.js';
-import { ai3dErrorKey } from '../../utils/ai3dErrors.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 import { useAddresses, formatAddressLine } from '../../hooks/useAddresses.js';
 
 const OTHER = '__other__'; // giá trị option "Nhập địa chỉ khác"
@@ -109,7 +109,7 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t('quote.notePlaceholder')} className="textarea textarea-bordered w-full rounded-xl" />
           </label>
 
-          {createQuote.isError && <p className="text-sm text-error" role="alert">{t(ai3dErrorKey(createQuote.error))}</p>}
+          {createQuote.isError && <p className="text-sm text-error" role="alert">{apiErrorMessage(createQuote.error, t('order.genericError'))}</p>}
 
           <div className="mt-1 flex justify-end gap-2">
             <button type="button" onClick={onClose} className="btn btn-ghost">{t('rooms.close')}</button>

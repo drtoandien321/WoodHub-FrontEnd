@@ -1011,7 +1011,8 @@
         "newDesign": "Tạo thiết kế mới",
         "nameLabel": "Tên thiết kế",
         "namePlaceholder": "VD: Sofa phòng khách của tôi",
-        "cta": "Lưu thiết kế"
+        "cta": "Lưu thiết kế",
+        "saveFailed": "Chưa lưu được thiết kế, vui lòng thử lại."
       },
       "myModels": {
         "title": "Model 3D của tôi",
@@ -1481,7 +1482,9 @@
     "COUPON_NOT_APPLICABLE_TO_ITEMS": "Không áp dụng cho sản phẩm trong giỏ.",
     "COUPON_ALREADY_FREE_SHIPPING": "Đơn đã được miễn phí vận chuyển.",
     "CART_EMPTY": "Giỏ hàng trống.",
-    "PRODUCT_UNAVAILABLE": "Sản phẩm \"{{productName}}\" hiện không còn được bán. Giỏ hàng đã được cập nhật."
+    "PRODUCT_UNAVAILABLE": "Sản phẩm \"{{productName}}\" hiện không còn được bán. Giỏ hàng đã được cập nhật.",
+    "DESIGN_INVALID_OPTION": "Tuỳ chọn \"{{key}}\" không được mẫu này hỗ trợ. Hãy chọn lại ở bước Chỉnh sửa.",
+    "DESIGN_INVALID_DIMENSION": "Kích thước \"{{key}}\" không hợp lệ."
   },
   "mySub": {
     "title": "Gói của tôi",

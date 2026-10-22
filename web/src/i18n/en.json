@@ -1015,7 +1015,8 @@
         "newDesign": "Start a new design",
         "nameLabel": "Design name",
         "namePlaceholder": "e.g. My living room sofa",
-        "cta": "Save design"
+        "cta": "Save design",
+        "saveFailed": "Could not save the design, please try again."
       },
       "myModels": {
         "title": "My 3D models",
@@ -1487,7 +1488,9 @@
     "COUPON_NOT_APPLICABLE_TO_ITEMS": "Not applicable to items in your cart.",
     "COUPON_ALREADY_FREE_SHIPPING": "This order already ships free.",
     "CART_EMPTY": "Your cart is empty.",
-    "PRODUCT_UNAVAILABLE": "\"{{productName}}\" is no longer sold. Your cart has been updated."
+    "PRODUCT_UNAVAILABLE": "\"{{productName}}\" is no longer sold. Your cart has been updated.",
+    "DESIGN_INVALID_OPTION": "Option \"{{key}}\" is not supported by this model. Please pick again in the Edit step.",
+    "DESIGN_INVALID_DIMENSION": "Dimension \"{{key}}\" is invalid."
   },
   "mySub": {
     "title": "My plan",

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ai3dErrorKey } from '../../utils/ai3dErrors.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 import MyDesignsList from './MyDesignsList.jsx';
 
 /*
@@ -33,7 +33,7 @@ export default function Step6Save({ designName, onNameChange, onSave, saving, sa
             maxLength={100}
             className="input input-bordered mt-2 w-full rounded-xl"
           />
-          {saveError && <p className="mt-2 text-sm text-error" role="alert">{t(ai3dErrorKey(saveError))}</p>}
+          {saveError && <p className="mt-2 text-sm text-error" role="alert">{apiErrorMessage(saveError, t('custom.studio.step6.saveFailed'))}</p>}
           <button onClick={onSave} disabled={saving || !designName.trim()} className="btn btn-primary mt-4 w-full sm:w-auto">
             {saving ? <span className="loading loading-spinner loading-sm" /> : t('custom.studio.step6.cta')}
           </button>
