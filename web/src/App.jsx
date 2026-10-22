@@ -90,6 +90,10 @@ const Notifications = lazy(() => import('./pages/Notifications.jsx'));
 const AdminRefunds = lazy(() => import('./pages/admin/AdminRefunds.jsx'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews.jsx'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts.jsx'));
+const BulkQuotes = lazy(() => import('./pages/bulk/BulkQuotes.jsx'));
+const BulkQuoteDetail = lazy(() => import('./pages/bulk/BulkQuoteDetail.jsx'));
+const SupplierBulkQuotes = lazy(() => import('./pages/supplier/SupplierBulkQuotes.jsx'));
+const SupplierBulkQuoteDetail = lazy(() => import('./pages/supplier/SupplierBulkQuoteDetail.jsx'));
 
 export default function App() {
   const theme = useUiStore((s) => s.theme);
@@ -165,6 +169,9 @@ export default function App() {
             <Route path="/quotes/:id" element={<QuoteDetail />} />
             <Route path="/custom-orders" element={<MyCustomOrders />} />
             <Route path="/custom-orders/:id" element={<CustomOrderDetail />} />
+            {/* Báo giá số lượng lớn của khách doanh nghiệp (BE-08) */}
+            <Route path="/bulk-quotes" element={<BulkQuotes />} />
+            <Route path="/bulk-quotes/:id" element={<BulkQuoteDetail />} />
           </Route>
 
           <Route path="/403" element={<Forbidden />} />
@@ -185,6 +192,8 @@ export default function App() {
             <Route path="products" element={<SupplierProducts />} />
             <Route path="products/:productId" element={<SupplierProductDetail />} />
             <Route path="orders" element={<SupplierOrders />} />
+            <Route path="bulk-quotes" element={<SupplierBulkQuotes />} />
+            <Route path="bulk-quotes/:id" element={<SupplierBulkQuoteDetail />} />
             <Route path="promotions" element={<SupplierPromotions />} />
             <Route path="reviews" element={<SupplierReviewsPage />} />
             <Route path="profile" element={<SupplierProfilePage />} />

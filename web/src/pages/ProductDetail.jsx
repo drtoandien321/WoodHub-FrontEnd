@@ -7,6 +7,7 @@ import { useSupplierChatStore } from '../stores/supplierChatStore.js';
 import ProductGallery from '../components/product/ProductGallery.jsx';
 import ProductInfo from '../components/product/ProductInfo.jsx';
 import RelatedProducts from '../components/product/RelatedProducts.jsx';
+import BulkQuoteRequestButton from '../components/bulk/BulkQuoteRequestButton.jsx';
 import ReviewSection from '../components/reviews/ReviewSection.jsx';
 
 export default function ProductDetail() {
@@ -86,6 +87,7 @@ export default function ProductDetail() {
           cartPending={addCartItem.isPending}
           // openFromProduct (chat) kỳ vọng shape cũ {image, price} — chiếu từ product.images[0]/variants[0]
           onChat={() => openChat({ ...product, image: product.images?.[0]?.url, price: product.variants?.[0]?.price })}
+          extraActions={<BulkQuoteRequestButton product={product} />}
         />
       </div>
 
