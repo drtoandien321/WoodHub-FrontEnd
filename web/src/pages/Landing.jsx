@@ -6,6 +6,7 @@ import ProductCard from '../components/ui/ProductCard.jsx';
 import Footer from '../components/layout/Footer.jsx';
 import SideRail from '../components/ui/SideRail.jsx';
 import { useProducts } from '../hooks/useProducts.js';
+import LandingFeedbackSection from '../components/feedback/LandingFeedbackSection.jsx';
 
 const FLOW_LINKS = ['/shop', '/b2b', '/custom'];
 
@@ -75,6 +76,9 @@ export default function Landing() {
           </div>
         )}
       </section>
+
+      {/* Mời đánh giá WoodHub (+5 lượt thiết kế cho lần đầu) */}
+      <LandingFeedbackSection />
 
       <Footer />
     </div>

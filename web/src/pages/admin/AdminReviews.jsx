@@ -4,6 +4,7 @@ import { useAdminReviews, useModerateReview, useDeleteAdminReview } from '../../
 import { apiErrorMessage } from '../../utils/apiError.js';
 import Stars from '../../components/suppliers/Stars.jsx';
 import { formatDate } from '../../utils/format.js';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 const HIDDEN_TABS = [['', 'Tất cả'], ['false', 'Đang hiển thị'], ['true', 'Đã ẩn']];
@@ -60,15 +61,7 @@ export default function AdminReviews() {
         <div className="flex flex-col gap-3">{items.map((r) => <ReviewRow key={r.id} review={r} />)}</div>
       )}
 
-      {pageInfo.totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-base-content/60">
-          <span>Trang {pageInfo.number + 1} / {pageInfo.totalPages} — {pageInfo.totalElements} đánh giá</span>
-          <div className="join">
-            <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm join-item">«</button>
-            <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm join-item">»</button>
-          </div>
-        </div>
-      )}
+      <Pagination pageInfo={pageInfo} onChange={setPage} unit="đánh giá" />
     </div>
   );
 }

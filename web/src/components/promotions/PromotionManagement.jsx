@@ -4,6 +4,7 @@ import { pageInfoOf } from '../../hooks/useOrders.js';
 import PromotionFormModal from './PromotionFormModal.jsx';
 import { formatVnd, formatDate } from '../../utils/format.js';
 import { Plus, Pencil, Trash } from '../suppliers/icons.jsx';
+import Pagination from '../ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 
@@ -108,15 +109,7 @@ export default function PromotionManagement({ scope, title, subtitle }) {
             </tbody>
           </table>
         </div>
-        {pageInfo.totalPages > 1 && (
-          <div className="flex items-center justify-between px-2 pt-3 text-sm text-base-content/60">
-            <span>Trang {pageInfo.number + 1} / {pageInfo.totalPages}</span>
-            <div className="join">
-              <button onClick={() => setPage((x) => Math.max(0, x - 1))} disabled={pageInfo.number === 0} className="btn btn-sm join-item">‹</button>
-              <button onClick={() => setPage((x) => x + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm join-item">›</button>
-            </div>
-          </div>
-        )}
+        <Pagination pageInfo={pageInfo} onChange={setPage} unit="mã" className="px-2 pt-3" />
       </section>
 
       {modal && <PromotionFormModal key={modal === 'create' ? 'new' : modal.id} scope={scope} initial={modal === 'create' ? null : modal} onClose={() => setModal(null)} />}

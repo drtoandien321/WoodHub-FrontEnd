@@ -3,6 +3,7 @@ import ModalShell from '../../components/admin/ModalShell.jsx';
 import { useAdminCreditPacks, useCreateCreditPack, useUpdateCreditPack, useDeleteCreditPack } from '../../hooks/useAdminCreditPacks.js';
 import { formatVnd } from '../../utils/format.js';
 import { Plus, Pencil, Trash } from '../../components/suppliers/icons.jsx';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
  * CreditPackFormModal — Thêm/Sửa gói lượt (POST/PUT /admin/credit-packs).
@@ -38,7 +39,7 @@ function CreditPackFormModal({ initial, onClose }) {
       else await create.mutateAsync(body);
       onClose();
     } catch (e) {
-      setErr(e?.response?.data?.message || 'Không lưu được gói, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không lưu được gói, vui lòng thử lại'));
     }
   };
   const saving = create.isPending || update.isPending;
@@ -101,7 +102,7 @@ export default function AdminCreditPacks() {
 
   const handleDelete = (p) => {
     if (!window.confirm(`Xoá gói "${p.displayName}"? Lượt khách đã mua vẫn giữ nguyên.`)) return;
-    deletePack.mutate(p.id, { onError: (err) => window.alert(err?.response?.data?.message || 'Xoá gói thất bại, vui lòng thử lại') });
+    deletePack.mutate(p.id, { onError: (err) => window.alert(apiErrorMessage(err, 'Xoá gói thất bại, vui lòng thử lại')) });
   };
 
   return (

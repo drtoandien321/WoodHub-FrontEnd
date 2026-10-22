@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useShippingConfig, useUpdateShippingConfig } from '../../hooks/usePromotions.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
  * Công thức BE áp khi checkout (docs/promotions-admin-fe.md — PHẦN B):
@@ -69,7 +70,7 @@ export default function AdminShippingConfig() {
     if (!validate()) return;
     update.mutate(body, {
       onSuccess: () => setMsg({ type: 'success', text: 'Đã lưu. Cấu hình mới áp dụng cho các đơn đặt từ bây giờ.' }),
-      onError: (err) => setMsg({ type: 'error', text: err?.response?.data?.message || 'Lưu thất bại, vui lòng thử lại.' }),
+      onError: (err) => setMsg({ type: 'error', text: apiErrorMessage(err, 'Lưu thất bại, vui lòng thử lại.') }),
     });
   };
 

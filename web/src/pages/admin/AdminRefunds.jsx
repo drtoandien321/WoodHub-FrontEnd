@@ -5,6 +5,7 @@ import { apiErrorMessage } from '../../utils/apiError.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
 import { formatRemaining, useNow } from '../../utils/orderDeadline.js';
 import ModalShell from '../../components/admin/ModalShell.jsx';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 const OVERDUE_PARAMS = { status: 'paid', page: 0, size: 100 };
@@ -104,13 +105,7 @@ export default function AdminRefunds() {
             </table>
           </div>
         )}
-        {pageInfo.totalPages > 1 && (
-          <div className="mt-3 flex items-center justify-end gap-2 text-sm">
-            <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm">«</button>
-            <span>{pageInfo.number + 1} / {pageInfo.totalPages}</span>
-            <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm">»</button>
-          </div>
-        )}
+        <Pagination pageInfo={pageInfo} onChange={setPage} className="mt-3" />
       </section>
 
       {refunding && <RefundModal order={refunding} onClose={() => setRefunding(null)} />}

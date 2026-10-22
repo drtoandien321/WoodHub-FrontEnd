@@ -7,6 +7,7 @@ import { formatVnd, formatDate } from '../../utils/format.js';
 import { confirmInfo, refundInfo, formatRemaining, useNow } from '../../utils/orderDeadline.js';
 import ModalShell from '../admin/ModalShell.jsx';
 import { Calendar, Phone, Clock } from '../suppliers/icons.jsx';
+import Pagination from '../ui/Pagination.jsx';
 
 const PAGE_SIZE = 10;
 // Tab "Cần xác nhận": tải nhiều hơn để sắp theo hạn trên cả trang (BE trả mới nhất trước)
@@ -213,15 +214,7 @@ export default function OrderManagement({ scope, title, subtitle }) {
         </div>
       )}
 
-      {pageInfo.totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-base-content/60">
-          <span>Trang {pageInfo.number + 1} / {pageInfo.totalPages} — {pageInfo.totalElements} đơn</span>
-          <div className="join">
-            <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm join-item">‹</button>
-            <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm join-item">›</button>
-          </div>
-        </div>
-      )}
+      <Pagination pageInfo={pageInfo} onChange={setPage} unit="đơn" />
 
       <ModalShell
         open={!!pending}

@@ -543,6 +543,11 @@ const CREDIT_WALLET_KEY = 'woodhub:credit-wallet-v1';
 let mockCreditWallet = storage.getItem(CREDIT_WALLET_KEY, { design: 0 });
 const persistCreditWallet = () => storage.setItem(CREDIT_WALLET_KEY, mockCreditWallet);
 
+// Đánh giá WoodHub (web/app) — docs/BE-platform-feedback.md. Thưởng 5 lượt thiết kế cho lần đánh giá đầu của tài khoản.
+const FEEDBACK_KEY = 'woodhub-mock-platform-feedback';
+const FEEDBACK_REWARD = 5;
+const avgOf = (list) => (list.length ? Math.round((list.reduce((s, f) => s + f.rating, 0) / list.length) * 10) / 10 : null);
+
 /*
  * Traffic GA4 giả lập — số ổn định theo ngày (không random mỗi lần gọi) để biểu đồ không nhảy khi refetch.
  * Bật cờ localStorage 'woodhub:mock-ga-off' = '1' để giả lập BE chưa cấu hình GA (503).
@@ -2957,6 +2962,53 @@ export const mockAdapter = {
     const contact = { id: crypto.randomUUID(), ...body, phone: body.phone ?? null, status: 'new', userId: useAuthStore.getState().user?.id ?? null, createdAt: new Date().toISOString() };
     storage.setItem('woodhub-mock-contacts', [contact, ...storage.getItem('woodhub-mock-contacts', [])]);
     return contact;
+  },
+
+  // ===== ĐÁNH GIÁ WOODHUB (docs/BE-platform-feedback.md) — lưu localStorage, thưởng 5 lượt design 1 lần / tài khoản =====
+  async getMyPlatformFeedback({ platform = 'web' } = {}) {
+    await delay(200);
+    const me = useAuthStore.getState().user;
+    const fb = storage.getItem(FEEDBACK_KEY, []).find((f) => f.userId === me?.id && f.platform === platform);
+    if (!fb) throw Object.assign(new Error('FEEDBACK_NOT_FOUND'), { response: { status: 404, data: { errorCode: 'FEEDBACK_NOT_FOUND' } } });
+    return fb;
+  },
+  async submitPlatformFeedback({ platform = 'web', context, rating, comment }) {
+    await delay(500);
+    const me = useAuthStore.getState().user;
+    if (!me) throw Object.assign(new Error('UNAUTHORIZED'), { response: { status: 401, data: { errorCode: 'UNAUTHORIZED' } } });
+    if (!(rating >= 1 && rating <= 5) || String(comment ?? '').trim().length < 10) {
+      throw Object.assign(new Error('VALIDATION_FAILED'), { response: { status: 400, data: { errorCode: 'VALIDATION_FAILED', message: 'Vui lòng chọn số sao và viết ít nhất 10 ký tự' } } });
+    }
+    const all = storage.getItem(FEEDBACK_KEY, []);
+    const now = new Date().toISOString();
+    const idx = all.findIndex((f) => f.userId === me.id && f.platform === platform);
+    const alreadyRewarded = all.some((f) => f.userId === me.id && f.rewardCredits > 0);
+    const rewardGranted = !alreadyRewarded && me.role === 'customer';
+    const base = idx >= 0 ? all[idx] : { id: crypto.randomUUID(), userId: me.id, userEmail: me.email, userFullName: me.fullName ?? me.name, platform, rewardCredits: 0, hidden: false, appVersion: null, createdAt: now };
+    const fb = { ...base, context, rating, comment: comment.trim(), updatedAt: now, rewardCredits: base.rewardCredits || (rewardGranted ? FEEDBACK_REWARD : 0) };
+    if (idx >= 0) all[idx] = fb; else all.unshift(fb);
+    storage.setItem(FEEDBACK_KEY, all);
+    if (rewardGranted) { mockCreditWallet.design = (mockCreditWallet.design ?? 0) + FEEDBACK_REWARD; persistCreditWallet(); }
+    return { feedback: fb, rewardGranted, rewardCredits: rewardGranted ? FEEDBACK_REWARD : 0, designCreditBalance: mockCreditWallet.design ?? 0 };
+  },
+  async getPlatformFeedbackSummary() {
+    await delay(200);
+    const list = storage.getItem(FEEDBACK_KEY, []).filter((f) => !f.hidden);
+    return { avgRating: avgOf(list), count: list.length };
+  },
+  async getAdminFeedback(params = {}) {
+    await delay(250);
+    let list = storage.getItem(FEEDBACK_KEY, []);
+    if (params.platform) list = list.filter((f) => f.platform === params.platform);
+    if (params.rating) list = list.filter((f) => f.rating === Number(params.rating));
+    return toSpringPage(list, params);
+  },
+  async getAdminFeedbackSummary() {
+    await delay(250);
+    const list = storage.getItem(FEEDBACK_KEY, []);
+    const byPlatform = Object.fromEntries(['web', 'android', 'ios'].map((p) => { const l = list.filter((f) => f.platform === p); return [p, { avgRating: avgOf(l), count: l.length }]; }));
+    const distribution = Object.fromEntries([1, 2, 3, 4, 5].map((r) => [r, list.filter((f) => f.rating === r).length]));
+    return { avgRating: avgOf(list), count: list.length, byPlatform, distribution, rewardedUsers: new Set(list.filter((f) => f.rewardCredits > 0).map((f) => f.userId)).size };
   },
 
   // ===== CHAT (hội thoại khách hàng ↔ nhà cung cấp) — xem ghi chú ở CONVERSATIONS_KEY =====

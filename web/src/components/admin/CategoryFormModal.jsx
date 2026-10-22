@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import ModalShell from './ModalShell.jsx';
 import { useCreateCategory, useUpdateCategory } from '../../hooks/useAdminCategories.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
  * CategoryFormModal — Thêm/Sửa danh mục, gọi API THẬT (POST/PUT /categories).
@@ -43,7 +44,7 @@ export default function CategoryFormModal({ open, onClose, initial = null, tree 
       else await createCategory.mutateAsync(body);
       onClose();
     } catch (e) {
-      setErr(e?.response?.data?.message ?? 'Không lưu được danh mục, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không lưu được danh mục, vui lòng thử lại'));
     }
   };
 

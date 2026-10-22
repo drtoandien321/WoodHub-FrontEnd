@@ -43,7 +43,7 @@ export default function AdminSupplierDetail() {
     try {
       await updateStatus.mutateAsync({ id: supplier.id, status, commissionRate: Number(commissionRate) });
     } catch (e) {
-      setErr(e?.response?.data?.message ?? 'Không lưu được, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không lưu được, vui lòng thử lại'));
     }
   };
 
