@@ -9,8 +9,10 @@
  *
  * Meshy sinh ra 1 mesh cố định có texture sẵn (không parametric) nên "chỉnh" ở đây chỉ là:
  *  - Màu: nhuộm (nhân) lên texture bằng baseColorFactor — đúng cho gỗ sáng, KHÔNG phải sơn lại hoàn toàn.
- *  - Kích thước: phóng/thu theo từng trục để xem trước & ghi vào cấu hình gửi xưởng (số đo thật do xưởng chốt).
- *  - Chất liệu: chỉ là nhãn tham khảo cho xưởng.
+ *  - Kích thước: CHỈ khi mẫu có editableOptions.dimensions (mẫu thư viện admin khai báo) → phóng/thu theo trục để xem
+ *    trước + ghi vào cấu hình gửi xưởng. Model AI KHÔNG có dimensions → không hiện (trước đây FE tự bịa khoảng kích thước
+ *    "danh nghĩa" theo loại → khách tưởng chỉnh được số đo thật; sai nguyên tắc chỉ hiện thuộc tính BE hỗ trợ).
+ *  - Chất liệu: chỉ là nhãn tham khảo cho xưởng (muốn đổi vân thật → "Áp dụng chất liệu bằng AI", BE-05).
  */
 export const NAMED_COLORS = {
   default: null, // không nhuộm — giữ màu gốc của mô hình
@@ -19,30 +21,23 @@ export const NAMED_COLORS = {
   cherry: '#8B3A2B',
 };
 
-// Kích thước danh nghĩa (cm: rộng, cao, sâu) theo loại — mesh AI không mang số đo thật
-const DEFAULT_DIMS = {
-  sofa: [210, 85, 90], chair: [48, 85, 52], table: [160, 75, 85], cabinet: [150, 200, 58], shelf: [80, 180, 32], bed: [180, 45, 200], decor: [30, 45, 30],
-};
+// Màu nhuộm xem trước cho giá trị chất liệu trong editableOptions.material(s) — chỉ để tô trên trình duyệt
+export const MATERIAL_TINT = { oak: '#c8a165', walnut: '#5d4030', ash: '#d9c7a7', pine: '#e0c694', wood: null };
 
 const mid = ([min, max]) => Math.round((min + max) / 2);
 
 export function normalizeOptions(model) {
   const opt = model?.editableOptions ?? {};
   const rawColors = Array.isArray(opt.colors) ? opt.colors : Array.isArray(opt.color) ? opt.color : [];
-  const colors = rawColors.map((v) => ({ value: v, hex: String(v).startsWith('#') ? v : (NAMED_COLORS[v] ?? '#B08968'), label: v }));
+  // hex null = KHÔNG nhuộm (giữ màu gốc). Lỗi cũ: 'default' (null) bị ?? biến thành nâu #B08968 → 'màu gốc' vẫn nhuộm mô hình.
+  const hexOf = (v) => (String(v).startsWith('#') ? v : v in NAMED_COLORS ? NAMED_COLORS[v] : '#B08968');
+  const colors = rawColors.map((v) => ({ value: v, hex: hexOf(v), label: v }));
   const materials = Array.isArray(opt.materials) ? opt.materials : Array.isArray(opt.material) ? opt.material : [];
 
-  let dimensions = null;
-  let nominal = false;
-  if (opt.dimensions) {
-    dimensions = { width: opt.dimensions.width, height: opt.dimensions.height, depth: opt.dimensions.depth };
-  } else if (model?.source === 'ai_generated' || opt.color || opt.material) {
-    const [w, h, d] = DEFAULT_DIMS[String(model?.productType || '').toLowerCase()] ?? [100, 75, 60];
-    const r = (b) => [Math.max(10, Math.round(b * 0.5)), Math.round(b * 1.6)];
-    dimensions = { width: r(w), height: r(h), depth: r(d) };
-    nominal = true;
-  }
-  return { colors, materials, dimensions, nominal };
+  const dimensions = opt.dimensions
+    ? { width: opt.dimensions.width, height: opt.dimensions.height, depth: opt.dimensions.depth }
+    : null;
+  return { colors, materials, dimensions };
 }
 
 export const hexOfColor = (model, value) => {

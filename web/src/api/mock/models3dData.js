@@ -6,7 +6,7 @@
  * - MODELS_3D: thư viện mẫu dựng sẵn (source='template'). glbUrl trỏ tới model mẫu chuẩn của
  *   Khronos (chỉ để dev có model THẬT render được). Khi có asset của team → thay bằng /models/*.glb.
  * - buildGeneratedModel: dựng record model (source='ai_generated') khi 1 AI task 'succeeded'.
- * - editableOptions: đặt theo bộ vật liệu sẵn có ở customData.js (WOOD_MATERIALS) — model nào
+ * - editableOptions: đặt theo bảng MATERIAL_TINT ở utils/modelOptions.js — model nào
  *   không có editableOptions.materials (rỗng) nghĩa là KHÔNG hỗ trợ chỉnh sửa (xem FE-2 bước 5).
  */
 const img = (p) => encodeURI(p);
@@ -14,7 +14,7 @@ const GLB = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/m
 
 /*
  * editableOptions — quy ước dùng chung cho FE-2 bước 5 (không phải field cứng của BE, JSONB tự do):
- *   colors: string[] (hex) | materials: string[] (id khớp WOOD_MATERIALS) |
+ *   colors: string[] (hex) | materials: string[] (id khớp MATERIAL_TINT) |
  *   dimensions: { width:[min,max], height:[min,max], depth:[min,max] } (cm, đơn vị nào có mặt mới cho chỉnh)
  * Thiếu/rỗng key nào → KHÔNG render control cho key đó (đúng yêu cầu "không cho chỉnh thuộc tính BE không hỗ trợ").
  */

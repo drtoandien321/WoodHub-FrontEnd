@@ -9,15 +9,8 @@
  * UI English nhưng badge vẫn "Đã chốt", "Chờ phản hồi").
  */
 import i18n from '../i18n/index.js';
+import { PASTEL } from './pastel.js';
 
-const PASTEL = {
-  success: 'bg-success/15 text-success',
-  warning: 'bg-warning/15 text-warning',
-  error: 'bg-error/15 text-error',
-  info: 'bg-info/15 text-info',
-  primary: 'bg-primary/15 text-primary',
-  neutral: 'bg-base-300/60 text-base-content/60',
-};
 
 export const QUOTE_STATUS = {
   pending: { label: 'Chờ phản hồi', cls: PASTEL.warning },

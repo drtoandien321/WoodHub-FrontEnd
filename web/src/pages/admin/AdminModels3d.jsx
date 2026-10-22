@@ -7,14 +7,11 @@ import {
 import { useProducts } from '../../hooks/useProducts.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
 import ModalShell from '../../components/admin/ModalShell.jsx';
+import { PRODUCT_TYPES, productTypeLabel } from '../../utils/productTypes.js';
 
 const PAGE_SIZE = 24;
-// productType hợp lệ của BE (giá trị khác → 400) — admin-models3d-fe.md §1
-export const PRODUCT_TYPES = [
-  ['decor', 'Đồ trang trí'], ['dining_table', 'Bàn ăn'], ['chair', 'Ghế'], ['sofa', 'Sofa gỗ'], ['wardrobe', 'Tủ quần áo'],
-  ['bookshelf', 'Kệ sách'], ['bed', 'Giường'], ['desk', 'Bàn học / làm việc'], ['kitchen_cabinet', 'Tủ bếp'],
-];
-const typeLabel = (v) => PRODUCT_TYPES.find(([k]) => k === v)?.[1] ?? v;
+// productType hợp lệ của BE — dùng chung utils/productTypes.js (cùng bộ với bộ lọc thư viện + Custom Studio)
+const typeLabel = productTypeLabel;
 const MB = 1024 * 1024;
 
 /*
@@ -60,7 +57,7 @@ export default function AdminModels3d() {
         </select>
         <select value={productType} onChange={(e) => { setProductType(e.target.value); setPage(0); }} className="select select-bordered select-sm" aria-label="Loại">
           <option value="">Mọi loại</option>
-          {PRODUCT_TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          {PRODUCT_TYPES.map((p) => <option key={p.id} value={p.id}>{productTypeLabel(p.id)}</option>)}
         </select>
         <form onSubmit={(e) => { e.preventDefault(); setQuery(keyword.trim()); setPage(0); }} className="flex gap-2">
           <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm theo tên…" className="input input-bordered input-sm" />
@@ -184,7 +181,7 @@ function ModelFormModal({ model, onClose }) {
       <div className="flex flex-col gap-3 text-sm">
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Tên mẫu *</span><input value={name} onChange={(e) => setName(e.target.value.slice(0, 255))} className="input input-bordered w-full" /></label>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Loại *</span>
-          <select value={productType} onChange={(e) => setProductType(e.target.value)} className="select select-bordered w-full">{PRODUCT_TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+          <select value={productType} onChange={(e) => setProductType(e.target.value)} className="select select-bordered w-full">{PRODUCT_TYPES.map((p) => <option key={p.id} value={p.id}>{productTypeLabel(p.id)}</option>)}</select>
         </label>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Mô tả</span><textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className="textarea textarea-bordered w-full" /></label>
         <label className="flex flex-col gap-1.5">

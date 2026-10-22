@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { api } from '../api/client.js';
+import { api, USE_MOCK } from '../api/client.js';
 import { useAuthStore } from '../stores/authStore.js';
 import { requestLocationOnce } from '../services/geolocation.js';
 import { ensureFreeSubscription } from '../services/subscription.js';
@@ -12,9 +12,7 @@ import { MailIcon, LockIcon } from '../components/ui/icons.jsx';
 import { redirectPathForRole } from '../utils/auth.js';
 import { isUserLocked, readAccountLockedNotice, clearAccountLockedNotice } from '../utils/accountLock.js';
 
-// Chế độ mock: hiện gợi ý 2 tài khoản test (supplier/admin) để demo khi chưa chạy BE.
-// BE thật xác định role từ tài khoản → không cần chọn role ở FE.
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
+// Chế độ mock (USE_MOCK từ api/client.js): hiện gợi ý tài khoản test (supplier/admin) để demo khi chưa chạy BE.
 
 export default function Login() {
   const navigate = useNavigate();

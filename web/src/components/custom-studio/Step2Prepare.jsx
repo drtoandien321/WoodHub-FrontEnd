@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AI_PRODUCT_TYPES } from '../../api/mock/customData.js';
+import { PRODUCT_TYPES } from '../../utils/productTypes.js';
 import { useCustomStudioStore } from '../../stores/customStudioStore.js';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -97,7 +97,7 @@ export default function Step2Prepare({ onNext, onBack, pending }) {
       <div>
         <h3 className="mb-2 font-medium">{t('custom.studio.step2.productTypeTitle')}</h3>
         <div className="flex flex-wrap gap-2">
-          {AI_PRODUCT_TYPES.map((pt) => (
+          {PRODUCT_TYPES.map((pt) => (
             <button
               key={pt.id}
               onClick={() => setProductType(pt.id)}

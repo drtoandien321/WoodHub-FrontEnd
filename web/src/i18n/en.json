@@ -969,7 +969,12 @@
         "cabinet": "Cabinet",
         "shelf": "Shelf",
         "bed": "Bed",
-        "decor": "Decor"
+        "decor": "Decor",
+        "dining_table": "Dining table",
+        "wardrobe": "Wardrobe",
+        "bookshelf": "Bookshelf",
+        "desk": "Desk",
+        "kitchen_cabinet": "Kitchen cabinet"
       },
       "step3": {
         "stageQueued": "Queued for processing…",
@@ -999,7 +1004,6 @@
       "step5": {
         "title": "Edit",
         "subtitle": "Only properties the system supports show up here.",
-        "nominalNote": "Reference size for preview and the workshop; final dimensions are confirmed in the quote.",
         "notEditable": "This template doesn't support editing material/color/size yet.",
         "colorTitle": "Color",
         "cta": "Continue to save"

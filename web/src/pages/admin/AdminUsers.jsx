@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useAdminUsers, useDeleteUser } from '../../hooks/useAdminUsers.js';
+import { ROLE_LABEL, CUSTOMER_TYPE_LABEL } from '../../utils/adminStatus.js';
 import { Eye, Trash } from '../../components/suppliers/icons.jsx';
 
-const ROLE_LABEL = { customer: 'Khách hàng', supplier: 'Nhà cung cấp', admin: 'Quản trị viên' };
-const CUSTOMER_TYPE_LABEL = { individual: 'Cá nhân', business: 'Doanh nghiệp' };
 
 /*
  * AdminUsers — danh sách người dùng (GET /users, Pageable). CỐ TÌNH KHÔNG có ô tìm kiếm:

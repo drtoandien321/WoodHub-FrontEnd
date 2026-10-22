@@ -1,0 +1,3 @@
+// "Nội Thất An Phát" → "AP" (chữ đầu 2 từ cuối) — avatar chữ ở header portal, khung chat…
+export const initialsOf = (name = '', fallback = '') =>
+  String(name).trim().split(/\s+/).filter(Boolean).slice(-2).map((w) => w[0]).join('').toUpperCase() || fallback;

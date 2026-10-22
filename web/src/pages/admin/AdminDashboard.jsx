@@ -7,6 +7,8 @@ import DailyBarChart from '../../components/admin/DailyBarChart.jsx';
 import { Wallet, Users, Briefcase, Package, CreditCard, Bolt, Star } from '../../components/suppliers/icons.jsx';
 import { formatVnd } from '../../utils/format.js';
 import { startOfDayIso, endOfDayIso, toYmd } from '../../utils/dateRange.js';
+import { PRODUCT_STATUS } from '../../utils/supplierStatus.js';
+import { ROLE_LABEL } from '../../utils/adminStatus.js';
 
 // Khoảng thời gian nhanh. days = null → toàn bộ (không gửi from/to)
 const RANGES = [
@@ -18,8 +20,6 @@ const RANGES = [
 
 const pct = (n) => `${Math.round((n ?? 0) * 100)}%`;
 const SUPPLIER_STATUS = { pending: 'Chờ duyệt', active: 'Hoạt động', suspended: 'Tạm khóa' };
-const PRODUCT_STATUS = { draft: 'Nháp', active: 'Đang bán', hidden: 'Ẩn' };
-const ROLE_LABEL = { customer: 'Khách hàng', supplier: 'Nhà cung cấp', admin: 'Quản trị' };
 
 const errorText = (error) => {
   const s = error?.response?.status;
@@ -302,7 +302,7 @@ export default function AdminDashboard() {
             <Breakdown title="Nhà cung cấp theo trạng thái" total={s.suppliers.total}
               items={Object.entries(s.suppliers.byStatus).map(([k, v]) => ({ label: SUPPLIER_STATUS[k] ?? k, value: v }))} />
             <Breakdown title="Sản phẩm theo trạng thái" total={s.products.total}
-              items={Object.entries(s.products.byStatus).map(([k, v]) => ({ label: PRODUCT_STATUS[k] ?? k, value: v }))} />
+              items={Object.entries(s.products.byStatus).map(([k, v]) => ({ label: PRODUCT_STATUS[k]?.label ?? k, value: v }))} />
           </div>
         </>
       )}
