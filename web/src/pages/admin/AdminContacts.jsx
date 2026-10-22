@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAdminContacts, useUpdateContactStatus } from '../../hooks/useAdminOps.js';
 import { formatDate } from '../../utils/format.js';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 const TABS = [['new', 'Mới'], ['handled', 'Đã xử lý'], ['spam', 'Spam'], ['', 'Tất cả']];
@@ -79,13 +80,7 @@ export default function AdminContacts() {
         </ul>
       )}
 
-      {pageInfo.totalPages > 1 && (
-        <div className="flex items-center justify-end gap-2 text-sm">
-          <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm">«</button>
-          <span>{pageInfo.number + 1} / {pageInfo.totalPages}</span>
-          <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm">»</button>
-        </div>
-      )}
+      <Pagination pageInfo={pageInfo} onChange={setPage} />
     </div>
   );
 }

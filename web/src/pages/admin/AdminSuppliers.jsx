@@ -6,6 +6,7 @@ import StatCard from '../../components/supplier/StatCard.jsx';
 import SupplierFormModal from '../../components/admin/SupplierFormModal.jsx';
 import { supplierAdminMeta, SUPPLIER_TYPE_LABEL } from '../../utils/adminStatus.js';
 import { Briefcase, Plus, Eye } from '../../components/suppliers/icons.jsx';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 /*
  * AdminSuppliers — danh sách nhà cung cấp (GET /suppliers, admin). CHỈ filter theo status/type
@@ -96,15 +97,7 @@ export default function AdminSuppliers() {
           </table>
         </div>
 
-        {pageInfo.totalPages > 1 && (
-          <div className="flex items-center justify-between px-2 py-3 text-sm text-base-content/60">
-            <span>Trang {pageInfo.number + 1} / {pageInfo.totalPages} — {pageInfo.totalElements} nhà cung cấp</span>
-            <div className="join">
-              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm join-item">«</button>
-              <button onClick={() => setPage((p) => Math.min(pageInfo.totalPages - 1, p + 1))} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm join-item">»</button>
-            </div>
-          </div>
-        )}
+        <Pagination pageInfo={pageInfo} onChange={setPage} unit="nhà cung cấp" className="px-2 py-3" />
       </section>
 
       <SupplierFormModal open={modalOpen} onClose={() => setModalOpen(false)} />

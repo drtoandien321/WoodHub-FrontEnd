@@ -46,7 +46,7 @@ export default function AdminUserDetail() {
       await updateUser.mutateAsync({ id: user.id, fullName: fullName.trim(), phone });
       setSaved(true);
     } catch (e) {
-      setErr(e?.response?.data?.message ?? 'Không lưu được, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không lưu được, vui lòng thử lại'));
     }
   };
 

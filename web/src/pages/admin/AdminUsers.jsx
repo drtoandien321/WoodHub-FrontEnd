@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore.js';
 import { useAdminUsers, useDeleteUser } from '../../hooks/useAdminUsers.js';
 import { ROLE_LABEL, CUSTOMER_TYPE_LABEL } from '../../utils/adminStatus.js';
 import { Eye, Trash } from '../../components/suppliers/icons.jsx';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 
 /*
@@ -79,15 +80,7 @@ export default function AdminUsers() {
           </table>
         </div>
 
-        {pageInfo.totalPages > 1 && (
-          <div className="flex items-center justify-between px-2 py-3 text-sm text-base-content/60">
-            <span>Trang {pageInfo.number + 1} / {pageInfo.totalPages} — {pageInfo.totalElements} người dùng</span>
-            <div className="join">
-              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm join-item">«</button>
-              <button onClick={() => setPage((p) => Math.min(pageInfo.totalPages - 1, p + 1))} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm join-item">»</button>
-            </div>
-          </div>
-        )}
+        <Pagination pageInfo={pageInfo} onChange={setPage} unit="người dùng" className="px-2 py-3" />
       </section>
     </div>
   );

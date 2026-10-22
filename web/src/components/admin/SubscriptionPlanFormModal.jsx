@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ModalShell from './ModalShell.jsx';
 import { useCreateSubscriptionPlan, useUpdateSubscriptionPlan } from '../../hooks/useAdminSubscriptionPlans.js';
 import { Plus, Trash } from '../suppliers/icons.jsx';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 // Tính năng có hạn mức của BE. ar_3d đã bỏ (AR dùng Scene Viewer free, không giới hạn — subscription-fe.md)
 const FEATURES = [
@@ -76,7 +77,7 @@ export default function SubscriptionPlanFormModal({ open, onClose, initial = nul
       else await createPlan.mutateAsync(body);
       onClose();
     } catch (e) {
-      setErr(e?.response?.data?.message ?? 'Không lưu được gói, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không lưu được gói, vui lòng thử lại'));
     }
   };
 

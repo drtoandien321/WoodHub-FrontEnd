@@ -5,6 +5,7 @@ import RevenueChart from '../../components/supplier/RevenueChart.jsx';
 import { Wallet, CheckCircle, Clock, X, Search, Eye } from '../../components/suppliers/icons.jsx';
 import { formatVnd, formatDate } from '../../utils/format.js';
 import { startOfDayIso, endOfDayIso, toYmd } from '../../utils/dateRange.js';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 const STATUS_LABEL = { pending: 'Chờ thanh toán', paid: 'Đã thanh toán', failed: 'Thất bại', expired: 'Hết hạn' };
@@ -248,15 +249,7 @@ export default function AdminPayments() {
           </table>
         </div>
 
-        {pageInfo.totalPages > 1 && (
-          <div className="flex items-center justify-between px-2 py-3 text-sm text-base-content/60">
-            <span>Trang {pageInfo.number + 1} / {pageInfo.totalPages} — {pageInfo.totalElements} giao dịch</span>
-            <div className="join">
-              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm join-item">«</button>
-              <button onClick={() => setPage((p) => Math.min(pageInfo.totalPages - 1, p + 1))} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm join-item">»</button>
-            </div>
-          </div>
-        )}
+        <Pagination pageInfo={pageInfo} onChange={setPage} unit="giao dịch" className="px-2 py-3" />
       </section>
 
       {selectedId && <PaymentDetailModal id={selectedId} onClose={() => setSelectedId(null)} />}

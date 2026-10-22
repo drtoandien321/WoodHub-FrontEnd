@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ModalShell from './ModalShell.jsx';
 import { useCreateSupplier } from '../../hooks/useAdminSuppliers.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
  * SupplierFormModal — Admin tạo tài khoản NHÀ CUNG CẤP mới (POST /suppliers).
@@ -48,7 +49,7 @@ export default function SupplierFormModal({ open, onClose }) {
       });
       setSuccessEmail(created ? form.email.trim() : '');
     } catch (e) {
-      setErr(e?.response?.data?.message ?? 'Không tạo được nhà cung cấp, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không tạo được nhà cung cấp, vui lòng thử lại'));
     }
   };
 

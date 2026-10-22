@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMyBulkQuotes, useSupplierBulkQuotes } from '../../hooks/useBulkQuotes.js';
 import { bulkQuoteMeta, BULK_QUOTE_TABS } from '../../utils/bulkQuoteStatus.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
+import Pagination from '../ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 
@@ -77,13 +78,7 @@ export default function BulkQuoteList({ role }) {
         </ul>
       )}
 
-      {pageInfo.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 text-sm">
-          <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm">«</button>
-          <span>{pageInfo.number + 1} / {pageInfo.totalPages}</span>
-          <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm">»</button>
-        </div>
-      )}
+      <Pagination pageInfo={pageInfo} onChange={setPage} />
     </div>
   );
 }

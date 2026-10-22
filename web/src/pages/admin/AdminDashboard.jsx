@@ -8,7 +8,7 @@ import { Wallet, Users, Briefcase, Package, CreditCard, Bolt, Star } from '../..
 import { formatVnd } from '../../utils/format.js';
 import { startOfDayIso, endOfDayIso, toYmd } from '../../utils/dateRange.js';
 import { PRODUCT_STATUS } from '../../utils/supplierStatus.js';
-import { ROLE_LABEL } from '../../utils/adminStatus.js';
+import { ROLE_LABEL, supplierAdminMeta } from '../../utils/adminStatus.js';
 
 // Khoảng thời gian nhanh. days = null → toàn bộ (không gửi from/to)
 const RANGES = [
@@ -19,7 +19,6 @@ const RANGES = [
 ];
 
 const pct = (n) => `${Math.round((n ?? 0) * 100)}%`;
-const SUPPLIER_STATUS = { pending: 'Chờ duyệt', active: 'Hoạt động', suspended: 'Tạm khóa' };
 
 const errorText = (error) => {
   const s = error?.response?.status;
@@ -300,7 +299,7 @@ export default function AdminDashboard() {
             <Breakdown title="Người dùng theo vai trò" total={s.users.total}
               items={Object.entries(s.users.byRole).map(([k, v]) => ({ label: ROLE_LABEL[k] ?? k, value: v }))} />
             <Breakdown title="Nhà cung cấp theo trạng thái" total={s.suppliers.total}
-              items={Object.entries(s.suppliers.byStatus).map(([k, v]) => ({ label: SUPPLIER_STATUS[k] ?? k, value: v }))} />
+              items={Object.entries(s.suppliers.byStatus).map(([k, v]) => ({ label: supplierAdminMeta(k).label, value: v }))} />
             <Breakdown title="Sản phẩm theo trạng thái" total={s.products.total}
               items={Object.entries(s.products.byStatus).map(([k, v]) => ({ label: PRODUCT_STATUS[k]?.label ?? k, value: v }))} />
           </div>

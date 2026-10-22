@@ -3,6 +3,7 @@ import { useAdminSubscriptionPlans, useDeleteSubscriptionPlan } from '../../hook
 import SubscriptionPlanFormModal from '../../components/admin/SubscriptionPlanFormModal.jsx';
 import { formatVnd } from '../../utils/format.js';
 import { Plus, Pencil, Trash } from '../../components/suppliers/icons.jsx';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
  * AdminSubscriptionPlans (/admin/subscription-plans) — CRUD gói đăng ký (mục 6 tài liệu
@@ -19,7 +20,7 @@ export default function AdminSubscriptionPlans() {
   const handleDelete = (p) => {
     if (!window.confirm(`Xoá gói "${p.displayName}"? Hành động này không thể hoàn tác.`)) return;
     deletePlan.mutate(p.id, {
-      onError: (err) => window.alert(err?.response?.data?.message || 'Xoá gói thất bại, vui lòng thử lại'),
+      onError: (err) => window.alert(apiErrorMessage(err, 'Xoá gói thất bại, vui lòng thử lại')),
     });
   };
 

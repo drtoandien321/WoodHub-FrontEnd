@@ -8,6 +8,7 @@ import { useProducts } from '../../hooks/useProducts.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
 import ModalShell from '../../components/admin/ModalShell.jsx';
 import { PRODUCT_TYPES, productTypeLabel } from '../../utils/productTypes.js';
+import Pagination from '../../components/ui/Pagination.jsx';
 
 const PAGE_SIZE = 24;
 // productType hợp lệ của BE — dùng chung utils/productTypes.js (cùng bộ với bộ lọc thư viện + Custom Studio)
@@ -77,13 +78,7 @@ export default function AdminModels3d() {
         </div>
       )}
 
-      {pageInfo.totalPages > 1 && (
-        <div className="flex items-center justify-end gap-2 text-sm">
-          <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={pageInfo.number === 0} className="btn btn-sm">«</button>
-          <span>{pageInfo.number + 1} / {pageInfo.totalPages}</span>
-          <button onClick={() => setPage((p) => p + 1)} disabled={pageInfo.number >= pageInfo.totalPages - 1} className="btn btn-sm">»</button>
-        </div>
-      )}
+      <Pagination pageInfo={pageInfo} onChange={setPage} unit="mẫu" />
 
       {modal?.kind === 'create' && <ModelFormModal onClose={() => setModal(null)} />}
       {modal?.kind === 'edit' && <ModelFormModal model={modal.model} onClose={() => setModal(null)} />}

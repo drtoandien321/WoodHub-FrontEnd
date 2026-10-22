@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ModalShell from './ModalShell.jsx';
 import { useCreateMaterial, useUpdateMaterial } from '../../hooks/useAdminMaterials.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 
 const PROMPT_MAX = 500;
 
@@ -29,7 +30,7 @@ export default function MaterialFormModal({ open, onClose, initial = null }) {
       else await createMaterial.mutateAsync({ ...body, retexturePrompt: body.retexturePrompt || undefined });
       onClose();
     } catch (e) {
-      setErr(e?.response?.data?.message ?? 'Không lưu được vật liệu, vui lòng thử lại');
+      setErr(apiErrorMessage(e, 'Không lưu được vật liệu, vui lòng thử lại'));
     }
   };
 
