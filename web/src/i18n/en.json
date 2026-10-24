@@ -1494,7 +1494,10 @@
     "CART_EMPTY": "Your cart is empty.",
     "PRODUCT_UNAVAILABLE": "\"{{productName}}\" is no longer sold. Your cart has been updated.",
     "DESIGN_INVALID_OPTION": "Option \"{{key}}\" is not supported by this model. Please pick again in the Edit step.",
-    "DESIGN_INVALID_DIMENSION": "Dimension \"{{key}}\" is invalid."
+    "DESIGN_INVALID_DIMENSION": "Dimension \"{{key}}\" is invalid.",
+    "AUTH_EMAIL_NOT_VERIFIED": "Please verify your email before continuing.",
+    "FEEDBACK_NOT_FOUND": "You haven't reviewed WoodHub yet.",
+    "FEEDBACK_RATE_LIMITED": "You've edited your review too many times today, please try again later."
   },
   "mySub": {
     "title": "My plan",
@@ -1750,7 +1753,7 @@
     "thanksTitle": "Thank you!",
     "thanksBody": "Your feedback helps WoodHub get better every day.",
     "rewardGranted": "You received {{count}} 3D design credits 🎁",
-    "rewardBalance": "Purchased design credits available: {{count}}",
+    "rewardBalance": "Purchased / bonus design credits available: {{count}}",
     "tryDesign": "Design now",
     "loginHint": "Log in to send a review. Your first review earns {{count}} 3D design credits.",
     "loginCta": "Log in",

@@ -1488,7 +1488,10 @@
     "CART_EMPTY": "Giỏ hàng trống.",
     "PRODUCT_UNAVAILABLE": "Sản phẩm \"{{productName}}\" hiện không còn được bán. Giỏ hàng đã được cập nhật.",
     "DESIGN_INVALID_OPTION": "Tuỳ chọn \"{{key}}\" không được mẫu này hỗ trợ. Hãy chọn lại ở bước Chỉnh sửa.",
-    "DESIGN_INVALID_DIMENSION": "Kích thước \"{{key}}\" không hợp lệ."
+    "DESIGN_INVALID_DIMENSION": "Kích thước \"{{key}}\" không hợp lệ.",
+    "AUTH_EMAIL_NOT_VERIFIED": "Vui lòng xác thực email trước khi tiếp tục.",
+    "FEEDBACK_NOT_FOUND": "Bạn chưa đánh giá WoodHub.",
+    "FEEDBACK_RATE_LIMITED": "Bạn đã sửa đánh giá quá nhiều lần hôm nay, vui lòng thử lại sau."
   },
   "mySub": {
     "title": "Gói của tôi",
@@ -1744,7 +1747,7 @@
     "thanksTitle": "Cảm ơn bạn!",
     "thanksBody": "Góp ý của bạn giúp WoodHub tốt hơn mỗi ngày.",
     "rewardGranted": "Bạn được tặng {{count}} lượt thiết kế 3D 🎁",
-    "rewardBalance": "Số lượt thiết kế đã mua hiện có: {{count}}",
+    "rewardBalance": "Lượt thiết kế đã mua / được tặng hiện có: {{count}}",
     "tryDesign": "Thiết kế ngay",
     "loginHint": "Đăng nhập để gửi đánh giá. Lần đánh giá đầu tiên được tặng {{count}} lượt thiết kế 3D.",
     "loginCta": "Đăng nhập",

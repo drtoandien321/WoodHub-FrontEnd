@@ -4,12 +4,16 @@ import { useAuthStore } from '../stores/authStore.js';
 
 /*
  * Đánh giá WoodHub (web + app) — docs/BE-platform-feedback.md.
- * FEEDBACK_ENABLED = false trên production cho tới khi BE xong (5 mockKey chưa vào REAL_ENDPOINTS) → mọi nút / popup /
- * khối landing / ô dashboard đều ẩn, tránh chạy dữ liệu giả trên web thật.
+ * FEEDBACK_ENABLED: true khi đã có BE thật (5 mockKey trong REAL_ENDPOINTS) hoặc đang bật mock. Còn tắt thì mọi nút /
+ * popup / khối landing / ô dashboard đều ẩn, tránh chạy dữ liệu giả trên web thật.
  */
 export const FEEDBACK_ENABLED = endpointReady('submitPlatformFeedback');
 export const FEEDBACK_REWARD = 5;
 export const FEEDBACK_MIN_COMMENT = 10;
+export const FEEDBACK_MAX_COMMENT = 1000;
+// BE đếm số KÝ TỰ sau khi trim (codePointCount, khớp CHECK char_length của Postgres): 1 emoji = 1 ký tự.
+// String.length đếm theo UTF-16 (emoji = 2) → '😀' × 5 qua được FE nhưng bị BE trả VALIDATION_FAILED.
+export const commentLength = (s = '') => [...s.trim()].length;
 
 // Đánh giá web của tôi. 404 = chưa đánh giá → trả null (không coi là lỗi) để popup biết còn được mời.
 export function useMyPlatformFeedback() {
