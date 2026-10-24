@@ -546,7 +546,7 @@ const persistCreditWallet = () => storage.setItem(CREDIT_WALLET_KEY, mockCreditW
 // Đánh giá WoodHub (web/app) — docs/BE-platform-feedback.md. Thưởng 5 lượt thiết kế cho lần đánh giá đầu của tài khoản.
 const FEEDBACK_KEY = 'woodhub-mock-platform-feedback';
 const FEEDBACK_REWARD = 5;
-const avgOf = (list) => (list.length ? Math.round((list.reduce((s, f) => s + f.rating, 0) / list.length) * 10) / 10 : null);
+const avgOf = (list) => (list.length ? Math.round((list.reduce((s, f) => s + f.rating, 0) / list.length) * 10) / 10 : 0); // BE: chưa có → 0
 
 /*
  * Traffic GA4 giả lập — số ổn định theo ngày (không random mỗi lần gọi) để biểu đồ không nhảy khi refetch.
@@ -2976,7 +2976,7 @@ export const mockAdapter = {
     await delay(500);
     const me = useAuthStore.getState().user;
     if (!me) throw Object.assign(new Error('UNAUTHORIZED'), { response: { status: 401, data: { errorCode: 'UNAUTHORIZED' } } });
-    if (!(rating >= 1 && rating <= 5) || String(comment ?? '').trim().length < 10) {
+    if (!(rating >= 1 && rating <= 5) || [...String(comment ?? '').trim()].length < 10) {
       throw Object.assign(new Error('VALIDATION_FAILED'), { response: { status: 400, data: { errorCode: 'VALIDATION_FAILED', message: 'Vui lòng chọn số sao và viết ít nhất 10 ký tự' } } });
     }
     const all = storage.getItem(FEEDBACK_KEY, []);

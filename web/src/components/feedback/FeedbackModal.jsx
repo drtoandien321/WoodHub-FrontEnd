@@ -5,7 +5,7 @@ import ModalShell from '../admin/ModalShell.jsx';
 import { Star } from '../suppliers/icons.jsx';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useFeedbackStore } from '../../stores/feedbackStore.js';
-import { useMyPlatformFeedback, useSubmitPlatformFeedback, FEEDBACK_ENABLED, FEEDBACK_REWARD, FEEDBACK_MIN_COMMENT } from '../../hooks/usePlatformFeedback.js';
+import { useMyPlatformFeedback, useSubmitPlatformFeedback, FEEDBACK_ENABLED, FEEDBACK_REWARD, FEEDBACK_MIN_COMMENT, FEEDBACK_MAX_COMMENT, commentLength } from '../../hooks/usePlatformFeedback.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
 
 /*
@@ -47,7 +47,8 @@ export default function FeedbackModal() {
   const existing = mine.data;
   const isCustomer = user?.role === 'customer';
   const canReward = isCustomer && !existing?.rewardCredits;
-  const tooShort = comment.trim().length < FEEDBACK_MIN_COMMENT;
+  const length = commentLength(comment);
+  const tooShort = length < FEEDBACK_MIN_COMMENT;
 
   const send = () => {
     if (!rating || tooShort) return;
@@ -125,13 +126,13 @@ export default function FeedbackModal() {
           <span className="text-sm text-base-content/70">{t('feedback.commentLabel')}</span>
           <textarea
             value={comment}
-            onChange={(e) => setComment(e.target.value.slice(0, 1000))}
+            onChange={(e) => setComment([...e.target.value].slice(0, FEEDBACK_MAX_COMMENT).join(''))}
             rows={4}
             placeholder={t('feedback.commentPlaceholder')}
             className="textarea textarea-bordered w-full rounded-xl"
           />
           <span className={`text-xs ${comment && tooShort ? 'text-warning' : 'text-base-content/45'}`}>
-            {tooShort ? t('feedback.minChars', { count: FEEDBACK_MIN_COMMENT }) : `${comment.length}/1000`}
+            {tooShort ? t('feedback.minChars', { count: FEEDBACK_MIN_COMMENT }) : `${length}/${FEEDBACK_MAX_COMMENT}`}
           </span>
         </label>
 

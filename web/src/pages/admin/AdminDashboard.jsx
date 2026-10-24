@@ -75,7 +75,7 @@ function RatingStatCard({ platform, reviews }) {
   const appAvg = appCount ? app.reduce((n, x) => n + x.avgRating * x.count, 0) / appCount : null;
   const hasPlatform = platform?.count > 0;
   const parts = [
-    hasPlatform && `Web ${fmtRating(platform.byPlatform?.web?.avgRating)} (${platform.byPlatform?.web?.count ?? 0})`,
+    hasPlatform && `Web ${fmtRating(platform.byPlatform?.web?.count ? platform.byPlatform.web.avgRating : null)} (${platform.byPlatform?.web?.count ?? 0})`,
     hasPlatform && `App ${fmtRating(appAvg)} (${appCount})`,
     reviews && `Sản phẩm & NCC ${fmtRating(reviews.avgRating)} (${reviews.count})`,
     !FEEDBACK_ENABLED && 'đánh giá web/app: chờ BE',

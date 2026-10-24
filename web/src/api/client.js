@@ -127,6 +127,8 @@ const REAL_ENDPOINTS = new Set([
   'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
   // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
   'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'getAvailableVouchers', 'submitContact',
+  // Đánh giá WoodHub web/app + tặng 5 lượt (BE PR #25, docs BE platform-feedback-fe.md)
+  'getMyPlatformFeedback', 'submitPlatformFeedback', 'getPlatformFeedbackSummary', 'getAdminFeedback', 'getAdminFeedbackSummary',
   // BE-07 xem trước · BE-08 báo giá số lượng lớn + VAT
   'previewOrder', 'markVatIssued',
   'createBulkQuote', 'getMyBulkQuotes', 'getBulkQuote', 'acceptBulkQuote', 'rejectBulkQuote', 'cancelBulkQuote',
@@ -1176,13 +1178,13 @@ export const api = {
   // 400 lỗi theo field · 429 quá 5 lần/giờ từ cùng mạng
   submitContact: (body) => call(() => http.post('/contact', body), 'submitContact', body),
 
-  // ===== ĐÁNH GIÁ WOODHUB (web + app) — docs/BE-platform-feedback.md · CHỜ BE, chưa vào REAL_ENDPOINTS =====
+  // ===== ĐÁNH GIÁ WOODHUB (web + app) — BE docs/platform-feedback-fe.md (đã có BE thật) =====
   // GET /feedback/me?platform=web → PlatformFeedback | 404 FEEDBACK_NOT_FOUND (chưa đánh giá)
   getMyPlatformFeedback: (params = { platform: 'web' }) => call(() => http.get('/feedback/me', { params }), 'getMyPlatformFeedback', params),
   // POST /feedback { platform, context, rating, comment } → { feedback, rewardGranted, rewardCredits, designCreditBalance }
   // Lần đầu của tài khoản customer → BE tặng 5 lượt thiết kế (1 lần duy nhất)
   submitPlatformFeedback: (body) => call(() => http.post('/feedback', body), 'submitPlatformFeedback', body),
-  // GET /feedback/summary (công khai) → { avgRating, count }
+  // GET /feedback/summary (công khai, cache 10 phút) → { avgRating, count } — chưa có đánh giá: avgRating = 0, count = 0
   getPlatformFeedbackSummary: () => call(() => http.get('/feedback/summary'), 'getPlatformFeedbackSummary'),
   // GET /admin/feedback (Pageable + platform/rating/hidden/from/to) · GET /admin/feedback/summary (from/to)
   getAdminFeedback: (params) => call(() => http.get('/admin/feedback', { params }), 'getAdminFeedback', params),
