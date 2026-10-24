@@ -80,7 +80,8 @@
     "tagline": "Wood furniture marketplace B2C · B2B · Custom — EXE101 capstone, FPT University HCMC",
     "explore": "Explore",
     "company": "Company",
-    "copyright": "© 2026 WoodHub Team"
+    "copyright": "© 2026 WoodHub Team",
+    "privacy": "Privacy policy"
   },
   "profile": {
     "title": "My profile",
@@ -1760,5 +1761,85 @@
     "landingCount": "{{count}} reviews",
     "landingCta": "Rate now",
     "editCta": "Edit review"
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "updated": "Last updated: October 24, 2026",
+    "intro": "WoodHub (\"we\") operates the WoodHub website and Android app (vn.woodhub.app) — a wood furniture marketplace for B2C, B2B and custom orders. This policy explains what data we collect, how we use it and your rights over it.",
+    "sections": [
+      {
+        "title": "1. Data we collect",
+        "items": [
+          "Account information: name, email, phone number, password (stored hashed, we cannot read it). If you sign in with Google, we receive your name, email and profile picture from Google.",
+          "Delivery information: shipping addresses and the map location you pick when adding an address.",
+          "Order and payment information: products, quantities, order value, payment status. We do NOT store card numbers or banking passwords — payments are made by VietQR bank transfer in your own banking app.",
+          "Business information (B2B customers, suppliers, workshops): company name, tax code, contact details and payout account.",
+          "Content you create: images and descriptions uploaded for 3D design, product reviews, messages with suppliers and conversations with the AI assistant.",
+          "Usage data: pages viewed, device and browser type, used for statistics and product improvement."
+        ]
+      },
+      {
+        "title": "2. How we use it",
+        "items": [
+          "Creating and managing your account, authenticating sign-in (including email OTP codes).",
+          "Processing orders, quotes, delivery and payment reconciliation.",
+          "Connecting you with the supplier / workshop fulfilling your order.",
+          "Product advice via the AI assistant and generating custom 3D models.",
+          "Sending order and account notifications; customer support.",
+          "Traffic statistics to improve the website and app."
+        ]
+      },
+      {
+        "title": "3. Sharing with third parties",
+        "body": "We do not sell personal data. Data is shared only as needed with:",
+        "items": [
+          "The supplier / workshop handling your order: name, phone number, delivery address and order details.",
+          "SePay / VietQR: bank transfer reconciliation.",
+          "Google: Google sign-in and Google Analytics (traffic statistics).",
+          "Goong Maps: maps and address suggestions.",
+          "AI services (including Meshy): processing images/descriptions to generate 3D models and answer advisory questions.",
+          "Competent authorities when required by law."
+        ]
+      },
+      {
+        "title": "4. Android app permissions",
+        "items": [
+          "Internet, network / Wi-Fi state: to load content, place orders and detect when you are offline.",
+          "Camera: when you use AR furniture placement or take a photo to upload. The camera feed is processed on your device and is not sent to our servers unless you choose to upload a photo.",
+          "Photos, videos and storage: when you pick images from your device to upload (design references, review photos) or save files (invoices, QR codes).",
+          "Microphone: only when you use voice input (where available); audio is not recorded or stored.",
+          "Location: when you choose \"use my current location\" while adding a delivery address. We do not track your location in the background.",
+          "Fingerprint / biometrics: only for quick unlock if you enable it; biometric data stays on your device and is never sent to us.",
+          "Display over other apps, vibration: for notifications and the floating chat window.",
+          "Android asks for each of these permissions when needed (except internet, network and vibration), and you can revoke them at any time in your phone settings."
+        ]
+      },
+      {
+        "title": "5. Storage and security",
+        "items": [
+          "Data is transmitted over encrypted HTTPS connections and stored on WoodHub servers.",
+          "Passwords are hashed before storage; only authorized team members can access admin data.",
+          "Data is kept while your account is active; order records may be kept longer for accounting and tax obligations."
+        ]
+      },
+      {
+        "title": "6. Your rights",
+        "items": [
+          "View and edit your personal information and addresses on the Profile page.",
+          "Request deletion of your account and personal data by emailing us (see Contact). We process requests within 30 days.",
+          "Turn off notifications in Notification settings."
+        ]
+      },
+      {
+        "title": "7. Children",
+        "body": "WoodHub is not intended for people under 16 and does not knowingly collect data from children."
+      },
+      {
+        "title": "8. Changes to this policy",
+        "body": "When this policy changes, we will update the date at the top of this page. For significant changes, we will notify you on the website or in the app."
+      }
+    ],
+    "contactTitle": "9. Contact",
+    "contactBody": "For any questions or requests about your personal data, please contact:"
   }
 }

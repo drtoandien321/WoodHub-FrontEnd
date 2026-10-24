@@ -27,6 +27,7 @@ export default function Footer() {
           <Link to="/about" className="link link-hover text-base-content/60">{t('nav.about')}</Link>
           <Link to="/pricing" className="link link-hover text-base-content/60">{t('nav.pricing')}</Link>
           <Link to="/contact" className="link link-hover text-base-content/60">{t('nav.contact')}</Link>
+          <Link to="/privacy" className="link link-hover text-base-content/60">{t('footer.privacy')}</Link>
           {/* Đánh giá WoodHub (docs/BE-platform-feedback.md) — ẩn tới khi BE xong */}
           {FEEDBACK_ENABLED && (
             <button onClick={() => openFeedback('footer')} className="link link-hover w-fit text-left text-base-content/60">★ {t('feedback.footerCta')}</button>

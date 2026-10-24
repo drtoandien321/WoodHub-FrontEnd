@@ -47,6 +47,7 @@ const B2b = lazy(() => import('./pages/B2b.jsx'));
 const About = lazy(() => import('./pages/About.jsx'));
 const Pricing = lazy(() => import('./pages/Pricing.jsx'));
 const Contact = lazy(() => import('./pages/Contact.jsx'));
+const Privacy = lazy(() => import('./pages/Privacy.jsx'));
 const NotFound = lazy(() => import('./pages/NotFound.jsx'));
 const Forbidden = lazy(() => import('./pages/Forbidden.jsx'));
 // Portal Quản trị viên — /admin/*
@@ -147,6 +148,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/contact" element={<Contact />} />
+          {/* Công khai — link khai báo với APKPure / store làm "Privacy policy URL" */}
+          <Route path="/privacy" element={<Privacy />} />
 
           {/* ProtectedRoute: chưa login thì đẩy về /login (xem routes/ProtectedRoute.jsx) */}
           <Route element={<ProtectedRoute />}>

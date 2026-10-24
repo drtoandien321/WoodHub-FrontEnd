@@ -89,6 +89,7 @@ Routes thật trong `web/src/App.jsx`.
 | `/suppliers/:slug`               | SupplierProfile   | Hồ sơ xưởng (năng lực, portfolio, review, liên hệ)                                            | 🟡                           |
 | `/b2b`                           | B2b               | Trang giới thiệu B2B                                                                          | ✅ (tĩnh) · luồng báo giá 🔵 |
 | `/about`, `/pricing`, `/contact` | —                 | Giới thiệu / Bảng giá / Liên hệ                                                               | ✅ (contact submit 🟡)       |
+| `/privacy`                       | Privacy           | Chính sách bảo mật — link khai báo "Privacy policy URL" cho app Android (APKPure)             | ✅ (tĩnh)                    |
 
 ### Xác thực (AuthLayout riêng, không header/footer)
 
