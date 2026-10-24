@@ -80,7 +80,8 @@
     "tagline": "Sàn nội thất gỗ B2C · B2B · Custom — Đồ án EXE101, FPT University HCMC",
     "explore": "Khám phá",
     "company": "Công ty",
-    "copyright": "© 2026 WoodHub Team"
+    "copyright": "© 2026 WoodHub Team",
+    "privacy": "Chính sách bảo mật"
   },
   "profile": {
     "title": "Thông tin cá nhân",
@@ -1754,5 +1755,85 @@
     "landingCount": "{{count}} lượt đánh giá",
     "landingCta": "Đánh giá ngay",
     "editCta": "Sửa đánh giá"
+  },
+  "privacy": {
+    "title": "Chính sách bảo mật",
+    "updated": "Cập nhật lần cuối: 24/10/2026",
+    "intro": "WoodHub (\"chúng tôi\") vận hành website và ứng dụng Android WoodHub (vn.woodhub.app) — sàn nội thất gỗ B2C, B2B và đặt làm theo yêu cầu. Chính sách này giải thích chúng tôi thu thập dữ liệu gì, dùng vào việc gì và quyền của bạn đối với dữ liệu đó.",
+    "sections": [
+      {
+        "title": "1. Dữ liệu chúng tôi thu thập",
+        "items": [
+          "Thông tin tài khoản: họ tên, email, số điện thoại, mật khẩu (được mã hoá, chúng tôi không đọc được). Nếu bạn đăng nhập bằng Google, chúng tôi nhận tên, email và ảnh đại diện từ Google.",
+          "Thông tin giao hàng: địa chỉ nhận hàng và vị trí trên bản đồ bạn chọn khi thêm địa chỉ.",
+          "Thông tin đơn hàng và thanh toán: sản phẩm, số lượng, giá trị đơn, trạng thái thanh toán. Chúng tôi KHÔNG lưu số thẻ hay mật khẩu ngân hàng — thanh toán được thực hiện qua chuyển khoản VietQR trong ứng dụng ngân hàng của bạn.",
+          "Thông tin doanh nghiệp (khách B2B, nhà cung cấp, xưởng mộc): tên công ty, mã số thuế, thông tin liên hệ và tài khoản nhận thanh toán.",
+          "Nội dung bạn tạo: ảnh và mô tả bạn tải lên để thiết kế mẫu 3D, đánh giá sản phẩm, tin nhắn với nhà cung cấp và nội dung trò chuyện với trợ lý AI.",
+          "Dữ liệu sử dụng: các trang bạn xem, loại thiết bị và trình duyệt, nhằm thống kê và cải thiện sản phẩm."
+        ]
+      },
+      {
+        "title": "2. Mục đích sử dụng",
+        "items": [
+          "Tạo và quản lý tài khoản, xác thực đăng nhập (bao gồm gửi mã OTP qua email).",
+          "Xử lý đơn hàng, báo giá, giao hàng và đối soát thanh toán.",
+          "Kết nối bạn với nhà cung cấp / xưởng mộc thực hiện đơn hàng.",
+          "Tư vấn sản phẩm bằng trợ lý AI và tạo mẫu 3D theo yêu cầu.",
+          "Gửi thông báo về đơn hàng và tài khoản; hỗ trợ khách hàng.",
+          "Thống kê truy cập để cải thiện website và ứng dụng."
+        ]
+      },
+      {
+        "title": "3. Chia sẻ dữ liệu với bên thứ ba",
+        "body": "Chúng tôi không bán dữ liệu cá nhân. Dữ liệu chỉ được chia sẻ ở mức cần thiết với:",
+        "items": [
+          "Nhà cung cấp / xưởng mộc nhận đơn của bạn: tên, số điện thoại, địa chỉ giao hàng và nội dung đơn.",
+          "SePay / VietQR: đối soát giao dịch chuyển khoản.",
+          "Google: đăng nhập bằng Google và Google Analytics (thống kê truy cập).",
+          "Goong Maps: hiển thị bản đồ và gợi ý địa chỉ.",
+          "Dịch vụ AI (bao gồm Meshy): xử lý ảnh/mô tả để tạo mẫu 3D và trả lời câu hỏi tư vấn.",
+          "Cơ quan nhà nước có thẩm quyền khi pháp luật yêu cầu."
+        ]
+      },
+      {
+        "title": "4. Quyền truy cập trên ứng dụng Android",
+        "items": [
+          "Internet, trạng thái mạng / Wi-Fi: để tải nội dung, đặt hàng và báo khi mất kết nối.",
+          "Camera: khi bạn dùng tính năng xem nội thất bằng AR hoặc chụp ảnh để tải lên. Hình ảnh camera được xử lý trên thiết bị, không gửi về máy chủ trừ khi bạn chủ động tải ảnh lên.",
+          "Ảnh, video và bộ nhớ: khi bạn chọn ảnh từ máy để tải lên (ảnh thiết kế, ảnh đánh giá) hoặc lưu file (hoá đơn, mã QR).",
+          "Micro: chỉ khi bạn dùng tính năng nhập bằng giọng nói (nếu có); âm thanh không được ghi lại hay lưu trữ.",
+          "Vị trí: khi bạn chọn \"dùng vị trí hiện tại\" lúc thêm địa chỉ giao hàng. Chúng tôi không theo dõi vị trí ở chế độ nền.",
+          "Vân tay / sinh trắc học: chỉ dùng để mở khoá nhanh nếu bạn bật, dữ liệu sinh trắc học nằm trên thiết bị và chúng tôi không nhận được.",
+          "Hiển thị trên ứng dụng khác, rung: cho thông báo và cửa sổ chat nổi.",
+          "Tất cả quyền trên đều do Android hỏi bạn khi cần (trừ Internet, mạng, rung) và bạn có thể thu hồi bất cứ lúc nào trong Cài đặt của điện thoại."
+        ]
+      },
+      {
+        "title": "5. Lưu trữ và bảo mật",
+        "items": [
+          "Dữ liệu được truyền qua kết nối mã hoá HTTPS và lưu trên máy chủ của WoodHub.",
+          "Mật khẩu được băm (hash) trước khi lưu; chỉ thành viên có thẩm quyền mới truy cập được dữ liệu quản trị.",
+          "Dữ liệu được giữ trong thời gian tài khoản còn hoạt động; thông tin đơn hàng có thể được giữ lâu hơn để phục vụ nghĩa vụ kế toán, thuế."
+        ]
+      },
+      {
+        "title": "6. Quyền của bạn",
+        "items": [
+          "Xem và chỉnh sửa thông tin cá nhân, địa chỉ trong trang Hồ sơ.",
+          "Yêu cầu xoá tài khoản và dữ liệu cá nhân bằng cách gửi email cho chúng tôi (xem mục Liên hệ). Chúng tôi xử lý trong vòng 30 ngày.",
+          "Tắt thông báo trong phần Cài đặt thông báo."
+        ]
+      },
+      {
+        "title": "7. Trẻ em",
+        "body": "WoodHub không dành cho người dưới 16 tuổi và không cố ý thu thập dữ liệu của trẻ em."
+      },
+      {
+        "title": "8. Thay đổi chính sách",
+        "body": "Khi chính sách thay đổi, chúng tôi sẽ cập nhật ngày ở đầu trang này. Nếu thay đổi quan trọng, chúng tôi sẽ thông báo trên website hoặc ứng dụng."
+      }
+    ],
+    "contactTitle": "9. Liên hệ",
+    "contactBody": "Mọi câu hỏi hoặc yêu cầu về dữ liệu cá nhân, vui lòng liên hệ:"
   }
 }
