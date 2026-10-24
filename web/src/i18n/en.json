@@ -1734,7 +1734,6 @@
     "afterOrderIntro": "Order placed! Take 30 seconds to tell us about your experience.",
     "rewardOffer": "Send your first review and get {{count}} free 3D design credits.",
     "ratingLabel": "Rating",
-    "starN": "{{count}} stars",
     "ratingText": {
       "1": "Terrible",
       "2": "Poor",
@@ -1761,9 +1760,12 @@
     "landingTitle": "What do you think of WoodHub?",
     "landingBody": "Rate us and leave a few words — get {{count}} 3D design credits for your first review.",
     "landingThanks": "Thanks for reviewing WoodHub. You can edit your review any time.",
-    "landingCount": "{{count}} reviews",
     "landingCta": "Rate now",
-    "editCta": "Edit review"
+    "editCta": "Edit review",
+    "starN_one": "{{count}} star",
+    "starN_other": "{{count}} stars",
+    "landingCount_one": "{{count}} review",
+    "landingCount_other": "{{count}} reviews"
   },
   "privacy": {
     "title": "Privacy policy",
