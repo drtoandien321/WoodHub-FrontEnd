@@ -75,7 +75,7 @@ export default function QuoteDetail() {
       </div>
 
       {/* Thiết kế khách yêu cầu (designSnapshot) + số lượng, địa điểm, ghi chú */}
-      <DesignSnapshotCard snapshot={quote.designSnapshot} quantity={quote.quantity}>
+      <DesignSnapshotCard snapshot={quote.designSnapshot} quantity={quote.quantity} viewerRole={myRole}>
         {quote.location && <div className="col-span-2"><p className="text-base-content/50">{t('quote.location')}</p><p className="font-medium">{quote.location}</p></div>}
         {quote.note && <div className="col-span-full"><p className="text-base-content/50">{t('quote.note')}</p><p className="whitespace-pre-line text-base-content/80">{quote.note}</p></div>}
       </DesignSnapshotCard>

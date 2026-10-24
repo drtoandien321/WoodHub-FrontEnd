@@ -14,7 +14,9 @@ const AXES = ['width', 'depth', 'height'];
  * Dữ liệu lấy từ designSnapshot (bản chụp lúc gửi báo giá) chứ không gọi /custom-designs/{id}: thiết kế là của khách,
  * xưởng không có quyền đọc, và khách có sửa thiết kế sau đó thì báo giá vẫn giữ đúng bản đã gửi.
  */
-export default function DesignSnapshotCard({ snapshot, quantity, children }) {
+// viewerRole: 'customer' | 'workshop' — chỉ đổi câu báo khi snapshot rỗng (khách nhắn xưởng, xưởng nhắn khách). Mặc định
+// workshop = hành vi cũ. QA BUG-018: trước đây khách cũng thấy "trao đổi với khách".
+export default function DesignSnapshotCard({ snapshot, quantity, children, viewerRole = 'workshop' }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const d = readDesignSnapshot(snapshot);
@@ -52,7 +54,7 @@ export default function DesignSnapshotCard({ snapshot, quantity, children }) {
             <p className="text-xs uppercase tracking-wide text-base-content/50">{t('quote.design.title')}</p>
             {hasDesign
               ? <p className="font-display text-xl">{d.name || t('quote.design.untitled')}</p>
-              : <p className="text-sm text-base-content/55">{t('quote.design.noSnapshot')}</p>}
+              : <p className="text-sm text-base-content/55">{t(viewerRole === 'customer' ? 'quote.design.noSnapshotCustomer' : 'quote.design.noSnapshotWorkshop')}</p>}
             {d.sourceType && <p className="text-xs text-base-content/55">{t(`quote.design.source.${d.sourceType}`, { defaultValue: d.sourceType })}</p>}
           </div>
 
