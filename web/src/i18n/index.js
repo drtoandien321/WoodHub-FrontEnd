@@ -28,4 +28,14 @@ i18n
     },
   });
 
+/*
+ * Đồng bộ <html lang> với ngôn ngữ đang dùng (index.html cố định lang="vi") — trình đọc màn hình chọn giọng đọc và
+ * trình duyệt gợi ý dịch theo thuộc tính này (QA BUG-012). Gán ngay lần đầu + mỗi lần đổi ngôn ngữ.
+ */
+const syncHtmlLang = (lng) => {
+  if (typeof document !== 'undefined' && lng) document.documentElement.lang = lng.slice(0, 2);
+};
+syncHtmlLang(i18n.resolvedLanguage);
+i18n.on('languageChanged', syncHtmlLang);
+
 export default i18n;

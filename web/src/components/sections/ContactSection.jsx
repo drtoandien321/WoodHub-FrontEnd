@@ -14,7 +14,9 @@ const PHONE_RE = /^[0-9 +\-().]{1,20}$/;
  * Gửi THẬT qua POST /contact (BE-06) — trước đây submitContact chỉ là mock (trả ok, không lưu đâu cả) nên
  * liên hệ của khách bị mất. Lỗi BE: 400 theo field → hiện dưới từng ô; 429 (quá 5 lần/giờ) → hiện câu của BE.
  */
-export default function ContactSection() {
+// standalone: trang /contact đứng riêng → tiêu đề là h1 (QA BUG-005); trong /about (đã có h1) giữ h2
+export default function ContactSection({ standalone = false }) {
+  const Title = standalone ? 'h1' : 'h2';
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
@@ -63,7 +65,7 @@ export default function ContactSection() {
     <section className="grid md:grid-cols-2 gap-8">
       {/* Cột trái: tiêu đề + form */}
       <div>
-        <h2 className="font-display text-3xl mb-2">{t('contact.title')}</h2>
+        <Title className="font-display text-3xl mb-2">{t('contact.title')}</Title>
         <p className="text-sm text-base-content/60 mb-5 max-w-md">{t('contact.subtitle')}</p>
 
         {success && (
@@ -75,31 +77,31 @@ export default function ContactSection() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="grid sm:grid-cols-2 gap-3">
             <div>
-              <input type="text" placeholder={t('contact.namePlaceholder')} className="input input-bordered w-full"
+              <input type="text" aria-label={t('contact.namePlaceholder')} placeholder={t('contact.namePlaceholder')} className="input input-bordered w-full"
                 value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               {errors.name && <p className="text-error text-sm mt-1">{errors.name}</p>}
             </div>
             <div>
-              <input type="email" placeholder={t('contact.emailPlaceholder')} className="input input-bordered w-full"
+              <input type="email" aria-label={t('contact.emailPlaceholder')} placeholder={t('contact.emailPlaceholder')} className="input input-bordered w-full"
                 value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               {errors.email && <p className="text-error text-sm mt-1">{errors.email}</p>}
             </div>
           </div>
 
           <div>
-            <input type="tel" placeholder={t('contact.phonePlaceholder')} className="input input-bordered w-full"
+            <input type="tel" aria-label={t('contact.phonePlaceholder')} placeholder={t('contact.phonePlaceholder')} className="input input-bordered w-full"
               value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             {errors.phone && <p className="text-error text-sm mt-1">{errors.phone}</p>}
           </div>
 
           <div>
-            <input type="text" placeholder={t('contact.subjectPlaceholder')} className="input input-bordered w-full"
+            <input type="text" aria-label={t('contact.subjectPlaceholder')} placeholder={t('contact.subjectPlaceholder')} className="input input-bordered w-full"
               value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
             {errors.subject && <p className="text-error text-sm mt-1">{errors.subject}</p>}
           </div>
 
           <div>
-            <textarea placeholder={t('contact.messagePlaceholder')} rows={5} className="textarea textarea-bordered w-full"
+            <textarea aria-label={t('contact.messagePlaceholder')} placeholder={t('contact.messagePlaceholder')} rows={5} className="textarea textarea-bordered w-full"
               value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
             {errors.message && <p className="text-error text-sm mt-1">{errors.message}</p>}
           </div>

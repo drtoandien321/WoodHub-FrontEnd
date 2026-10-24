@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LogoBadge from './LogoBadge.jsx';
-import { Heart, Mail, Phone } from './icons.jsx';
+import { Mail, Phone } from './icons.jsx';
 
 /*
  * Card 1 supplier trong grid /suppliers.
@@ -10,9 +10,9 @@ import { Heart, Mail, Phone } from './icons.jsx';
  * Card này đã bỏ hết phần trước đây dựa vào field không tồn tại (cover, rating, reviewCount,
  * ordersDisplay, leadTimeLabel, responseTime, specialties, materialsDisplay, priceFrom, verified,
  * topRated) — giữ layout ngắn gọn, đúng dữ liệu thật. Ảnh: logoUrl (BE-10), chưa có thì LogoBadge hiện chữ viết tắt.
- * onToggleFav/fav: trạng thái "yêu thích" chỉ ở client, chưa có API lưu lại.
+ * Đã gỡ nút ♥ "yêu thích": chỉ lưu state client (mất khi F5), BE chưa có API → nút không có tác dụng thật (QA BUG-009).
  */
-export default function SupplierCard({ supplier, fav = false, onToggleFav }) {
+export default function SupplierCard({ supplier }) {
   const { t } = useTranslation();
 
   return (
@@ -21,21 +21,12 @@ export default function SupplierCard({ supplier, fav = false, onToggleFav }) {
         <div className="flex items-center gap-3 min-w-0">
           <LogoBadge name={supplier.businessName} src={supplier.logoUrl} className="h-14 w-14 shrink-0 rounded-2xl text-lg" />
           <div className="min-w-0">
-            <h3 className="truncate font-display text-lg leading-tight">{supplier.businessName}</h3>
+            <h2 className="truncate font-display text-lg leading-tight">{supplier.businessName}</h2>
             <span className="mt-1 inline-block rounded-full bg-base-200 px-2.5 py-0.5 text-xs font-medium text-base-content/70">
               {t(`suppliers.typeFilters.${supplier.type}`)}
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => onToggleFav?.(supplier.id)}
-          aria-label={t('suppliers.saveSupplier')}
-          aria-pressed={fav}
-          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-primary transition-colors hover:bg-base-200"
-        >
-          <Heart width={18} height={18} filled={fav} />
-        </button>
       </div>
 
       {supplier.description && (

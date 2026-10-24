@@ -27,15 +27,8 @@ export default function Suppliers() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [type, setType] = useState('all');
-  const [favs, setFavs] = useState(() => new Set());
   const { data, isLoading } = usePublicSuppliers({ size: 100, ...(type !== 'all' && { type }) });
 
-  const toggleFav = (id) =>
-    setFavs((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
 
   // Số liệu THẬT đếm từ danh sách NCC công khai (cùng query key với tab 'Tất cả' → không gọi thêm khi đang ở tab đó).
   // Trước đây là số marketing cứng trong i18n (24+ xưởng, 1.200+ đơn, 4.8/5…) trong khi sàn mới có vài NCC — BE cũng
@@ -72,6 +65,7 @@ export default function Suppliers() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('suppliers.searchPlaceholder')}
+              aria-label={t('suppliers.searchPlaceholder')}
               className="input input-bordered h-12 w-full rounded-2xl border-base-300 bg-base-100 pr-12 shadow-sm focus:border-primary focus:outline-none"
             />
             <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-base-content/50">
@@ -110,7 +104,7 @@ export default function Suppliers() {
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {visible.map((s) => (
-            <SupplierCard key={s.id} supplier={s} fav={favs.has(s.id)} onToggleFav={toggleFav} />
+            <SupplierCard key={s.id} supplier={s} />
           ))}
         </div>
       )}

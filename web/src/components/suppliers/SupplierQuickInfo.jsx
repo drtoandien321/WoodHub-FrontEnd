@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { Phone, Mail, Bookmark, CheckCircle } from './icons.jsx';
+import { Phone, Mail } from './icons.jsx';
 
 /*
  * Sidebar "Thông tin nhanh" của trang hồ sơ — sticky trên desktop.
  * Đã bỏ: giá tham khảo, thời gian phản hồi, khu vực phục vụ, hình thức làm việc, lắp đặt,
  * tag chuyên môn/gỗ hỗ trợ — KHÔNG field nào trong số này tồn tại ở SupplierPublicResponse.
- * Chỉ còn Liên hệ (contactEmail/contactPhone — có thể null nếu supplier chưa điền) + CTA lưu xưởng.
+ * Chỉ còn Liên hệ (contactEmail/contactPhone — có thể null nếu supplier chưa điền) (đã gỡ nút "Lưu nhà cung cấp" — chưa có API lưu, QA BUG-009).
  */
-export default function SupplierQuickInfo({ supplier, fav = false, onToggleFav }) {
+export default function SupplierQuickInfo({ supplier }) {
   const { t } = useTranslation();
   const hasContact = supplier.contactPhone || supplier.contactEmail;
 
@@ -39,19 +39,6 @@ export default function SupplierQuickInfo({ supplier, fav = false, onToggleFav }
         ) : (
           <p className="text-sm text-base-content/55">{t('suppliers.noContact')}</p>
         )}
-
-        <div className="border-t border-base-300" />
-
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={() => onToggleFav?.(supplier.id)}
-            aria-pressed={fav}
-            className="btn btn-outline gap-2 border-base-300 hover:border-primary hover:bg-primary/10"
-          >
-            {fav ? <CheckCircle width={16} height={16} /> : <Bookmark width={16} height={16} />}
-            {fav ? t('suppliers.saved') : t('suppliers.saveSupplier')}
-          </button>
-        </div>
       </div>
     </aside>
   );

@@ -4,7 +4,7 @@ import PricingSection from '../components/sections/PricingSection.jsx';
 export default function Pricing() {
   return (
     <div className="py-6">
-      <PricingSection />
+      <PricingSection standalone />
     </div>
   );
 }

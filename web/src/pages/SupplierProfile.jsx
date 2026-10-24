@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,7 +12,6 @@ import SupplierPortfolio from '../components/suppliers/SupplierPortfolio.jsx';
 import ReviewSection from '../components/reviews/ReviewSection.jsx';
 import SupplierWorkflow from '../components/suppliers/SupplierWorkflow.jsx';
 import SupplierQuickInfo from '../components/suppliers/SupplierQuickInfo.jsx';
-import SupplierStrengths from '../components/suppliers/SupplierStrengths.jsx';
 import { Info } from '../components/suppliers/icons.jsx';
 
 /*
@@ -27,7 +25,6 @@ export default function SupplierProfile() {
   const { data: branches } = useSupplierStores(id);
   const { data: portfolio } = useSupplierPortfolio(id);
   const { data: reviewSummary } = useSupplierReviewSummary(id);
-  const [fav, setFav] = useState(false);
   const openChat = useSupplierChatStore((s) => s.openFromSupplier);
 
   const contactSupplier = () => openChat({ id, name: supplier?.businessName });
@@ -72,7 +69,6 @@ export default function SupplierProfile() {
           {supplier.description && (
             <SectionCard icon={Info} title={t('suppliers.sectionAbout')}>
               <p className="leading-relaxed text-base-content/75">{supplier.description}</p>
-              <SupplierStrengths />
             </SectionCard>
           )}
 
@@ -83,7 +79,7 @@ export default function SupplierProfile() {
           <SupplierWorkflow />
         </div>
 
-        <SupplierQuickInfo supplier={supplier} fav={fav} onToggleFav={() => setFav((v) => !v)} />
+        <SupplierQuickInfo supplier={supplier} />
       </div>
     </div>
   );
