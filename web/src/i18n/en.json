@@ -1157,7 +1157,8 @@
         "template": "WoodHub library template",
         "uploaded": "Uploaded model"
       },
-      "noSnapshot": "This request was sent before designs were attached to quotes — chat with the customer to see the design."
+      "noSnapshotCustomer": "This request was sent before designs were attached to quotes — send your photo/design to the workshop via chat if needed.",
+      "noSnapshotWorkshop": "This request was sent before designs were attached to quotes — chat with the customer to see the design."
     }
   },
   "order": {
@@ -1511,8 +1512,7 @@
     "usageTitle": "This month's quota",
     "unlimited": "Unlimited",
     "usageLine": "{{used}}/{{limit}} ({{remaining}} left)",
-    "purchased": "+{{count}} purchased credits",
-    "usageNote": "Monthly quota resets at the start of each month. Purchased credits never expire and are used after the monthly quota.",
+    "usageNote": "Monthly quota resets at the start of each month. Purchased and bonus credits never expire and are used after the monthly quota.",
     "buyCreditsTitle": "Buy more design credits",
     "buyCreditsDesc": "Keep designing after you run out this month — no plan upgrade needed.",
     "packLine": "{{credits}} credits · {{unit}}/credit",
@@ -1532,7 +1532,9 @@
       "paid": "Paid",
       "failed": "Failed",
       "expired": "Expired"
-    }
+    },
+    "purchased_one": "+{{count}} purchased / bonus credit",
+    "purchased_other": "+{{count}} purchased / bonus credits"
   },
   "notifSettings": {
     "title": "Email notifications",

@@ -73,7 +73,7 @@ export default function CustomOrderDetail() {
         <p className="mt-1 font-mono text-sm text-base-content/50">{order.orderNumber}</p>
       </div>
 
-      <DesignSnapshotCard snapshot={order.designSnapshot} quantity={order.quantity} />
+      <DesignSnapshotCard snapshot={order.designSnapshot} quantity={order.quantity} viewerRole={myRole} />
 
       <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">

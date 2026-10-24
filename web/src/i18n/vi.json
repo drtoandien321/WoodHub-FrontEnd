@@ -1153,7 +1153,8 @@
         "template": "Mẫu thư viện WoodHub",
         "uploaded": "Mô hình tải lên"
       },
-      "noSnapshot": "Yêu cầu này được gửi trước khi hệ thống lưu kèm thông tin thiết kế — trao đổi với khách qua chat để xem mẫu."
+      "noSnapshotCustomer": "Yêu cầu này được gửi trước khi hệ thống lưu kèm thông tin thiết kế — gửi lại ảnh/mẫu cho xưởng qua chat nếu cần.",
+      "noSnapshotWorkshop": "Yêu cầu này được gửi trước khi hệ thống lưu kèm thông tin thiết kế — trao đổi với khách qua chat để xem mẫu."
     }
   },
   "order": {
@@ -1505,8 +1506,7 @@
     "usageTitle": "Hạn mức tháng này",
     "unlimited": "Không giới hạn",
     "usageLine": "{{used}}/{{limit}} (còn {{remaining}})",
-    "purchased": "+{{count}} lượt đã mua",
-    "usageNote": "Hạn mức tháng tự làm mới đầu mỗi tháng. Lượt đã mua không hết hạn, chỉ dùng khi đã hết hạn mức tháng.",
+    "usageNote": "Hạn mức tháng tự làm mới đầu mỗi tháng. Lượt đã mua / được tặng không hết hạn, chỉ dùng khi đã hết hạn mức tháng.",
     "buyCreditsTitle": "Mua thêm lượt thiết kế",
     "buyCreditsDesc": "Hết lượt trong tháng vẫn thiết kế tiếp được, không cần nâng cấp gói.",
     "packLine": "{{credits}} lượt · {{unit}}/lượt",
@@ -1526,7 +1526,8 @@
       "paid": "Đã thanh toán",
       "failed": "Thất bại",
       "expired": "Hết hạn"
-    }
+    },
+    "purchased": "+{{count}} lượt đã mua / được tặng"
   },
   "notifSettings": {
     "title": "Thông báo qua email",
