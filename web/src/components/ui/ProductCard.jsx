@@ -57,7 +57,7 @@ export default function ProductCard({ product }) {
         )}
       </figure>
       <div className="card-body p-4 gap-1">
-        <h3 className="font-medium leading-snug line-clamp-2">{product.name}</h3>
+        <h2 className="font-medium leading-snug line-clamp-2">{product.name}</h2>
         <p className="text-xs text-base-content/60">{product.supplierName}</p>
         {product.materialName && <p className="text-xs text-base-content/50">{product.materialName}</p>}
         <RatingLine product={product} />

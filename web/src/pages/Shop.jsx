@@ -101,7 +101,7 @@ export default function Shop() {
     <div className="flex flex-col gap-6">
       {/* Danh mục */}
       <div>
-        <h3 className="font-medium mb-3">{t('shop.filterCategory')}</h3>
+        <h2 className="font-medium mb-3">{t('shop.filterCategory')}</h2>
         <div className="flex flex-col gap-1.5">
           <button onClick={() => goCategory('')} className={`text-left hover:text-primary transition-colors ${!categoryId ? 'font-semibold text-primary' : ''}`}>
             {t('shop.all')}
@@ -129,7 +129,7 @@ export default function Shop() {
 
       {/* Vật liệu */}
       <div>
-        <h3 className="font-medium mb-3">{t('shop.filterMaterial')}</h3>
+        <h2 className="font-medium mb-3">{t('shop.filterMaterial')}</h2>
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
             <input type="radio" name="materialId" className="radio radio-xs radio-primary" checked={!materialId} onChange={() => setParam('materialId', null)} />
@@ -149,12 +149,12 @@ export default function Shop() {
       {/* Giá tối đa */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-medium">{t('shop.filterMaxPrice')}</h3>
+          <h2 className="font-medium">{t('shop.filterMaxPrice')}</h2>
           <span className="text-sm font-semibold text-primary">
             {priceDisplay >= PRICE_MAX ? t('shop.priceMax') : formatVnd(priceDisplay)}
           </span>
         </div>
-        <input type="range" min={PRICE_MIN} max={PRICE_MAX} step="500000" value={priceDisplay} onChange={handlePriceChange} className="range range-primary range-sm" />
+        <input type="range" aria-label={t('shop.filterMaxPrice')} min={PRICE_MIN} max={PRICE_MAX} step="500000" value={priceDisplay} onChange={handlePriceChange} className="range range-primary range-sm" />
         <div className="flex justify-between text-xs mt-2 text-base-content/60">
           <span>{t('shop.priceMin')}</span>
           <span>{t('shop.priceMax')}</span>
@@ -166,7 +166,7 @@ export default function Shop() {
         <>
           <div className="divider my-0" />
           <div>
-            <h3 className="font-medium mb-3">{t('shop.filterStyle')}</h3>
+            <h2 className="font-medium mb-3">{t('shop.filterStyle')}</h2>
             <div className="flex flex-wrap gap-2">
               {styles.map((s) => (
                 <button
@@ -215,7 +215,7 @@ export default function Shop() {
             * serialize response. BE đã fix (2026-07-20, đã curl xác nhận tăng/giảm dần đúng) nên
             * bật lại, không còn nhãn "sắp ra mắt".
             */}
-          <select value={sort} onChange={(e) => setParam('sort', e.target.value || null)} className="select select-bordered select-sm w-44">
+          <select aria-label={t('shop.sortLabel')} value={sort} onChange={(e) => setParam('sort', e.target.value || null)} className="select select-bordered select-sm w-44">
             <option value="">{t('shop.sort.default')}</option>
             <option value="price,asc">{t('shop.sort.price_asc')}</option>
             <option value="price,desc">{t('shop.sort.price_desc')}</option>

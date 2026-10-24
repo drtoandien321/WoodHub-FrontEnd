@@ -262,8 +262,6 @@
     ],
     "breadcrumbHome": "Trang chủ",
     "contactConsult": "Liên hệ tư vấn",
-    "saveSupplier": "Lưu xưởng",
-    "saved": "Đã lưu",
     "reviewsCount": "{{count}} đánh giá",
     "headerStats": {
       "perOrder": "/ đơn",
@@ -273,12 +271,6 @@
       "ordersDone": "Đơn hoàn thành"
     },
     "sectionAbout": "Giới thiệu",
-    "strengths": {
-      "naturalWood": "Gỗ tự nhiên cao cấp",
-      "customDesign": "Thiết kế theo yêu cầu",
-      "inhouse": "Sản xuất khép kín",
-      "warranty": "Bảo hành dài hạn"
-    },
     "sectionCapabilities": "Năng lực sản xuất",
     "sectionBranches": "Chi nhánh",
     "sectionPortfolio": "Portfolio",
@@ -548,7 +540,8 @@
       "name_asc": "Tên A-Z",
       "name_desc": "Tên Z-A",
       "newest": "Mới nhất"
-    }
+    },
+    "sortLabel": "Sắp xếp theo"
   },
   "rooms": {
     "title": "Không gian",

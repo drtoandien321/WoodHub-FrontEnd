@@ -22,7 +22,10 @@ const COLLAPSED = 4; // trên mobile chỉ hiện 4 dòng đầu, còn lại b�
  * "Gói đang dùng": user đăng nhập mà KHÔNG có gói active được coi là đang dùng gói Free — đúng với hạn mức thật
  * (BE rơi về hạn mức Free khi không có gói active, AUD-003).
  */
-export default function PricingSection() {
+// standalone: trang /pricing đứng riêng → tiêu đề là h1 (QA BUG-005); trong /about (đã có h1) giữ h2
+export default function PricingSection({ standalone = false }) {
+  const Title = standalone ? 'h1' : 'h2';
+  const PlanTitle = standalone ? 'h2' : 'h3';
   const { data: plans, isLoading, isError, refetch } = useSubscriptionPlans();
   const { token } = useAuthStore();
   const { data: mySub } = useMySubscription({ enabled: !!token });
@@ -72,7 +75,7 @@ export default function PricingSection() {
       {/* Tiêu đề nằm trên ảnh nền ở /about → đặt trên nền mờ để đủ tương phản cả sáng/tối */}
       <div className="mb-8 text-center">
         <div className="inline-block max-w-xl rounded-2xl bg-base-100/85 px-6 py-4 shadow-sm backdrop-blur-sm">
-          <h2 className="font-display text-3xl">{t('pricing.title')}</h2>
+          <Title className="font-display text-3xl">{t('pricing.title')}</Title>
           <p className="mt-1 text-sm text-base-content/75">{t('pricing.subtitle')}</p>
         </div>
       </div>
@@ -101,7 +104,7 @@ export default function PricingSection() {
               >
                 {isCurrent && <span className="badge badge-primary absolute -top-3 right-6">{t('pricing.currentPlan')}</span>}
                 <div>
-                  <h3 className="font-display text-xl">{plan.displayName}</h3>
+                  <PlanTitle className="font-display text-xl">{plan.displayName}</PlanTitle>
                   {plan.description && <p className="mt-1 text-sm text-base-content/70">{plan.description}</p>}
                 </div>
 

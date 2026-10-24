@@ -4,7 +4,7 @@ import ContactSection from '../components/sections/ContactSection.jsx';
 export default function Contact() {
   return (
     <div className="py-6">
-      <ContactSection />
+      <ContactSection standalone />
     </div>
   );
 }

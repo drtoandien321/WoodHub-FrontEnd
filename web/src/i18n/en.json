@@ -262,8 +262,6 @@
     ],
     "breadcrumbHome": "Home",
     "contactConsult": "Contact for advice",
-    "saveSupplier": "Save workshop",
-    "saved": "Saved",
     "reviewsCount": "{{count}} reviews",
     "headerStats": {
       "perOrder": "/ order",
@@ -273,12 +271,6 @@
       "ordersDone": "Completed orders"
     },
     "sectionAbout": "About",
-    "strengths": {
-      "naturalWood": "Premium natural wood",
-      "customDesign": "Made to order",
-      "inhouse": "In-house production",
-      "warranty": "Long-term warranty"
-    },
     "sectionCapabilities": "Production capabilities",
     "sectionBranches": "Branches",
     "sectionPortfolio": "Portfolio",
@@ -548,7 +540,8 @@
       "name_asc": "Name A-Z",
       "name_desc": "Name Z-A",
       "newest": "Newest"
-    }
+    },
+    "sortLabel": "Sort by"
   },
   "rooms": {
     "title": "Rooms",

@@ -38,7 +38,7 @@ export default function ModelCard({ model, onClick }) {
         <span className="absolute right-3 top-3 rounded-full bg-primary/90 px-2.5 py-1 text-xs font-semibold text-primary-content">3D</span>
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-4">
-        <h3 className="font-display text-lg leading-tight">{model.name}</h3>
+        <h2 className="font-display text-lg leading-tight">{model.name}</h2>
         {materialNames.length > 0 && (
           <p className="text-xs text-base-content/55">{materialNames.join(', ')}{opt.materials.length > 2 ? '…' : ''}</p>
         )}
