@@ -15,8 +15,12 @@ import { redirectPathForRole } from '../utils/auth.js';
  * supplierPortal: 'retailer' | 'workshop' — portal riêng của từng loại NCC. Supplier vào nhầm portal → đưa về portal
  * đúng loại (không 403, để link cũ vẫn dùng được). Trước đây chỉ xét role → xưởng gõ /portal/supplier/products vẫn
  * vào được trang sản phẩm bán sẵn (QA BUG-021). Quy ước loại giống redirectPathForRole: chỉ 'workshop' là xưởng.
+ *
+ * customerOnly: trang chỉ dành cho khách (giỏ, thanh toán, đơn B2C, sổ địa chỉ, gói, Custom Studio, báo giá sỉ). NCC/admin
+ * mở (gõ tay, link cũ trong email) → đưa về trang chủ của vai đó thay vì thấy "Giỏ trống" (QA OBS-10). Không dùng 403
+ * vì đây không phải truy cập trái phép, chỉ là nhầm khu vực.
  */
-export default function ProtectedRoute({ allow, supplierPortal }) {
+export default function ProtectedRoute({ allow, supplierPortal, customerOnly }) {
   const { token, user } = useAuthStore();
   const location = useLocation();
 
@@ -35,6 +39,9 @@ export default function ProtectedRoute({ allow, supplierPortal }) {
   }
   if (allow && !allow.includes(user?.role)) {
     return <Navigate to="/403" replace />;
+  }
+  if (customerOnly && user?.role !== 'customer') {
+    return <Navigate to={redirectPathForRole(user?.role, undefined, user?.supplierType)} replace />;
   }
   if (supplierPortal && user?.role === 'supplier') {
     const isWorkshop = user.supplierType === 'workshop';

@@ -13,6 +13,8 @@ export function notificationLink(n, user) {
   const portal = user?.role === 'supplier' ? (user.supplierType === 'workshop' ? '/portal/workshop' : '/portal/supplier') : null;
   switch (n?.targetType) {
     case 'order':
+      // admin: /orders/:id chỉ dành cho khách (OBS-10) → mở danh sách đơn toàn sàn
+      if (user?.role === 'admin') return '/admin/orders';
       return portal ? `${portal}/orders` : `/orders/${n.targetId}`;
     case 'custom_order':
       return `/custom-orders/${n.targetId}`;

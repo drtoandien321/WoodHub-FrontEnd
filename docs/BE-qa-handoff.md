@@ -72,7 +72,15 @@ SECURITY;` vào `sql/platform_feedback.sql`. Lệnh đã chạy trên production
 
 ---
 
-## 6. Ghi chú khác
+## 6. OBS-09 — Task AI 3D treo `processing`
+
+- **DB production:** 2 task `processing` không đổi từ 07/10 15:00Z và 08/10 18:23Z.
+- **Gốc:** `Ai3DGenerationServiceImpl.getTask` (dòng ~221) chỉ gọi `provider.getStatus` khi client GET; không có `@Scheduled` nào
+  (chỉ có Payment/Quote/Subscription/Notification scheduler). Khách đóng tab → task không bao giờ chuyển terminal.
+- **Đề xuất:** scheduler 5 phút đồng bộ task chưa terminal (giới hạn số lượng/lần), và quá N giờ (vd 2h) thì set `failed`
+  + hoàn lượt `design` nếu đã trừ. Dashboard tính "đang treo" riêng.
+
+## 7. Ghi chú khác
 
 - Swagger UI công khai trên production (OBS-06) — cân nhắc tắt `springdoc.swagger-ui.enabled` ở profile prod.
 - `refresh_tokens` ≈ 607 dòng / 14 user (OBS-04) — thêm job xoá token hết hạn/đã thu hồi.
