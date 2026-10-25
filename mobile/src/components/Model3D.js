@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { View, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 
@@ -37,13 +37,17 @@ model-viewer{width:100%;height:100%;background:transparent;--poster-color:transp
   window.setColor=function(hex){ tint=hex||[1,1,1,1]; applyTint(); };
   window.setScale=function(x,y,z){ mv.scale=x+' '+y+' '+z; };
   window.resetView=function(){ mv.cameraOrbit='-32deg 75deg auto'; mv.fieldOfView='auto'; mv.jumpCameraToGoal&&mv.jumpCameraToGoal(); };
+  // Bắt tay: app hỏi lại trạng thái → trả 'loaded' nếu model đã xong (sự kiện 'load' có thể phát trước khi app nghe)
+  window.ping=function(){ if(mv.loaded) post({t:'loaded'}); };
   window.addEventListener('message',function(ev){ try{ var d=JSON.parse(ev.data); if(d.fn&&window[d.fn]) window[d.fn].apply(null,d.args||[]); }catch(e){} });
 })();
 </script></body></html>`;
 
 const Model3D = forwardRef(function Model3D({ src, poster, autoRotate = true, bg = 'transparent', onProgress, onLoaded, onError, style }, ref) {
   const web = useRef(null);
+  const loadedRef = useRef(false);
   const html = useMemo(() => buildHtml({ src, poster, autoRotate, bg }), [src, poster, autoRotate, bg]);
+  useEffect(() => { loadedRef.current = false; }, [html]);
 
   const call = (fn, ...args) => {
     const js = `window.${fn} && window.${fn}.apply(null, ${JSON.stringify(args)}); true;`;
@@ -56,23 +60,45 @@ const Model3D = forwardRef(function Model3D({ src, poster, autoRotate = true, bg
     resetView: () => call('resetView'),
   }));
 
+  // Giữ callback mới nhất trong ref: listener web đăng ký 1 lần, không được dùng closure của lần render đầu
+  const cb = useRef({});
+  cb.current = { onProgress, onLoaded, onError };
   const handle = (raw) => {
     try {
       const m = JSON.parse(typeof raw === 'string' ? raw : raw?.nativeEvent?.data);
-      if (m.t === 'progress') onProgress?.(m.v);
-      else if (m.t === 'loaded') onLoaded?.();
-      else if (m.t === 'error') onError?.();
+      if (m.t === 'progress') cb.current.onProgress?.(m.v);
+      else if (m.t === 'loaded') {
+        if (loadedRef.current) return; // ping trả lời nhiều lần → chỉ báo 1 lần
+        loadedRef.current = true;
+        cb.current.onLoaded?.();
+      } else if (m.t === 'error') cb.current.onError?.();
     } catch { /* tin nhắn không phải của mình */ }
   };
 
+  /*
+   * Bắt tay chống lỡ sự kiện: trước đây màn Viewer kẹt "Đang tải mô hình… 100%" dù model đã hiện, và màu/kích thước không
+   * áp lên model — vì tin 'loaded' phát ra lúc app chưa nghe. Nay cứ 1s hỏi lại (ping) tới khi nhận 'loaded' (tối đa 60s).
+   */
+  useEffect(() => {
+    let n = 0;
+    const t = setInterval(() => {
+      if (loadedRef.current || ++n > 60) { clearInterval(t); return; }
+      call('ping');
+    }, 1000);
+    return () => clearInterval(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [html]);
+
+  // Web (dev): iframe + lắng nghe message. Hook phải gọi vô điều kiện ở mọi nền tảng (luật hooks) → bỏ qua ở native.
+  useEffect(() => {
+    if (Platform.OS !== 'web') return undefined;
+    const fn = (e) => { if (e.source === web.current?.contentWindow) handle(e.data); };
+    window.addEventListener('message', fn);
+    return () => window.removeEventListener('message', fn);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (Platform.OS === 'web') {
-    // Xem trước trên trình duyệt (dev): iframe + lắng nghe message
-    React.useEffect(() => {
-      const fn = (e) => handle(e.data);
-      window.addEventListener('message', fn);
-      return () => window.removeEventListener('message', fn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
     return <View style={style}>{React.createElement('iframe', { ref: web, srcDoc: html, style: { border: 0, width: '100%', height: '100%', background: 'transparent' } })}</View>;
   }
 

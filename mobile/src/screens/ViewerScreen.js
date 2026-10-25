@@ -106,12 +106,18 @@ export default function ViewerScreen({ navigation }) {
               <T v="label">Kích thước</T>
               {model.source === 'ai_generated' ? <T v="small" mute style={{ marginTop: -8 }}>Kích thước tham khảo để xem trước; số đo thật do xưởng chốt khi báo giá.</T> : null}
               {dim('W', 'Rộng')}{dim('H', 'Cao')}{dim('D', 'Sâu')}
+              {/* Sản phẩm bán sẵn: giá cố định của NCC, chỉnh màu/kích thước chỉ để xem trước → không hiện "giá ước tính do xưởng báo" */}
               <View style={{ backgroundColor: c.surf2, borderRadius: 16, padding: 14 }}>
                 <Row style={{ justifyContent: 'space-between' }}>
-                  <View><T v="small" mute>Giá ước tính</T><T v="price" color={c.pri}>{formatVnd(price)}</T></View>
+                  <View>
+                    <T v="small" mute>{mode === 'product' ? 'Giá sản phẩm' : 'Giá ước tính'}</T>
+                    <T v="price" color={c.pri}>{formatVnd(mode === 'product' ? base : price)}</T>
+                  </View>
                   {dirty ? <Pressable onPress={resetCfg} style={{ height: 44, justifyContent: 'center' }}><T v="semi" color={c.pri}>Đặt lại</T></Pressable> : null}
                 </Row>
-                <T v="small" mute style={{ marginTop: 4 }}>Chỉ là ước tính tham khảo — giá chính thức do xưởng báo.</T>
+                <T v="small" mute style={{ marginTop: 4 }}>
+                  {mode === 'product' ? 'Đổi màu/kích thước chỉ để xem trước trên mô hình — sản phẩm giao theo phiên bản bạn chọn ở trang sản phẩm.' : 'Chỉ là ước tính tham khảo — giá chính thức do xưởng báo.'}
+                </T>
               </View>
             </ScrollView>
           ) : null}

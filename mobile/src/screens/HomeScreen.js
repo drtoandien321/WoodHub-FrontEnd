@@ -3,6 +3,7 @@ import { View, ScrollView, Pressable, TextInput, RefreshControl } from 'react-na
 import { Screen, T, Button, Chip, Skeleton, ErrorState } from '../components/ui.js';
 import { ModelCard, ProductCard, Grid2 } from '../components/cards.js';
 import Icon from '../components/Icon.js';
+import CartButton from '../components/CartButton.js';
 import { useTheme } from '../theme/theme.js';
 import { useAuth } from '../store/auth.js';
 import { useStudio } from '../store/studio.js';
@@ -35,10 +36,13 @@ export default function HomeScreen({ navigation }) {
             <T mute>Xin chào{first ? `, ${first}` : ''} 👋</T>
             <T v="h2">Tìm món đồ cho ngôi nhà</T>
           </View>
-          <Pressable onPress={() => navigation.navigate('Chat')} accessibilityLabel="Trợ lý AI"
-            style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.surf2, alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="chat" size={24} color={c.pri} />
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Pressable onPress={() => navigation.navigate('Chat')} accessibilityLabel="Trợ lý AI"
+              style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: c.surf2, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="chat" size={24} color={c.pri} />
+            </Pressable>
+            <CartButton />
+          </View>
         </View>
 
         <View style={{ paddingHorizontal: 20, marginTop: 14 }}>

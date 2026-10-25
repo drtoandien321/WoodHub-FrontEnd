@@ -130,6 +130,52 @@ export const api = {
   createPayment: (planId) => d(http.post('/payments/subscription', { planId })),
   getPayment: (id) => d(http.get(`/payments/${id}`)),
 
+  /*
+   * ----- Mua hàng (đợt 3, cùng hợp đồng với web api/client.js) -----
+   * Giỏ hàng server-side: MỌI endpoint giỏ trả CartResponse đầy đủ → hook ghi đè cache, không GET lại.
+   * Địa chỉ: checkout BẮT BUỘC địa chỉ có toạ độ (hasCoordinates) để BE tính phí ship theo khoảng cách.
+   * Checkout: FE chỉ gửi { addressId, note?, promotionIds? } — BE tự tách đơn theo NCC, tính ship, áp voucher, tạo 1 QR chung.
+   */
+  getCart: () => d(http.get('/cart')),
+  addCartItem: (b) => d(http.post('/cart/items', b)), // { variantId, quantity } — đã có thì CỘNG DỒN
+  updateCartItem: ({ itemId, quantity }) => d(http.put(`/cart/items/${itemId}`, { quantity })), // GHI ĐÈ số lượng
+  removeCartItem: (itemId) => d(http.delete(`/cart/items/${itemId}`)),
+
+  getAddresses: () => d(http.get('/addresses')),
+  createAddress: (b) => d(http.post('/addresses', b)),
+  updateAddress: ({ id, ...b }) => d(http.put(`/addresses/${id}`, b)), // PUT ghi đè toàn bộ → gửi đủ field (kể cả lat/lng)
+  deleteAddress: (id) => d(http.delete(`/addresses/${id}`)),
+  setDefaultAddress: (id) => d(http.patch(`/addresses/${id}/default`)),
+
+  getAvailableVouchers: (params) => d(http.get('/vouchers/available', { params })),
+  previewOrder: (b) => d(http.post('/orders/preview', b)), // không tạo đơn → gọi lại thoải mái
+  checkout: (b) => d(http.post('/orders/checkout', b)), // → { orders[], payment, grandTotal }
+  getOrders: (params) => d(http.get('/orders', { params })),
+  getOrder: (id) => d(http.get(`/orders/${id}`)),
+  cancelOrder: (id) => d(http.post(`/orders/${id}/cancel`)), // chỉ khi pending_payment, sai → 409
+  repayOrder: (id) => d(http.post(`/orders/${id}/payment`)), // QR hết hạn → gia hạn CÙNG payment (txnRef giữ nguyên)
+
+  /*
+   * ----- Tài khoản (đợt 4, cùng hợp đồng web) -----
+   * PUT /users/{id} chỉ nhận { fullName, phone } (không đổi email). Đổi mật khẩu: PUT /users/{id}/password → 204.
+   * Hồ sơ DN: GET 404 khi chưa có; POST tạo + BE tự nâng customerType → business (409 nếu đã có); PUT ghi đè 3 field.
+   */
+  updateUser: ({ id, fullName, phone }) => d(http.put(`/users/${id}`, { fullName, phone })),
+  changePassword: ({ id, currentPassword, newPassword }) => d(http.put(`/users/${id}/password`, { currentPassword, newPassword })),
+  getBusinessProfile: () => d(http.get('/users/me/business-profile')).catch((e) => (e?.response?.status === 404 ? null : Promise.reject(e))),
+  createBusinessProfile: (b) => d(http.post('/users/me/business-profile', b)),
+  updateBusinessProfile: (b) => d(http.put('/users/me/business-profile', b)),
+  // Gói lượt thiết kế mua thêm (credit pack): dùng đến hết, không reset theo tháng; thanh toán QR như gói đăng ký
+  getCreditPacks: () => d(http.get('/credit-packs')),
+  createCreditPackPayment: (packId) => d(http.post('/payments/credit-pack', { packId })),
+  // Báo giá số lượng lớn (BE-08) — chỉ khách doanh nghiệp. accept → giống checkout { orders, payment, grandTotal }
+  createBulkQuote: (b) => d(http.post('/bulk-quotes', b)), // { items:[{variantId, quantity}], addressId, vatInvoice, note? }
+  getMyBulkQuotes: (params) => d(http.get('/bulk-quotes', { params })),
+  getBulkQuote: (id) => d(http.get(`/bulk-quotes/${id}`)),
+  acceptBulkQuote: ({ id, offerId }) => d(http.post(`/bulk-quotes/${id}/accept`, { offerId })),
+  rejectBulkQuote: (id) => d(http.post(`/bulk-quotes/${id}/reject`)),
+  cancelBulkQuote: (id) => d(http.post(`/bulk-quotes/${id}/cancel`)),
+
   // ----- Trợ lý AI -----
   createAiSession: (b) => d(http.post('/ai-chat/sessions', b ?? {})),
   getAiSessions: () => d(http.get('/ai-chat/sessions')),

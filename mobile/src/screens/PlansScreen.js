@@ -11,8 +11,11 @@ import { api, errMsg } from '../api/client.js';
 import { formatVnd, formatDate } from '../utils/format.js';
 import { sortPlans, planHighlights, planValidity } from '../utils/planFeatures.js';
 import { formatDay } from '../utils/quoteSummary.js';
+import CreditPackSheet from '../components/CreditPackSheet.js';
+import { useCreditPacks } from '../hooks/account.js';
 
-const FEATURE = { design: 'Thiết kế 3D / tháng', ai_chat: 'Chat trợ lý AI / tháng' };
+// Nhãn giống web (mySub.features); thiếu nhãn trước đây hiện mã thô "export", "retexture"
+const FEATURE = { design: 'Thiết kế 3D / tháng', ai_chat: 'Chat trợ lý AI / tháng', export: 'Xuất file / tháng', retexture: 'Đổi chất liệu AI / tháng' };
 const label = (h) => (h.type === 'text' ? h.text : `${FEATURE[h.key] || h.key}: ${h.kind === 'unlimited' ? 'không giới hạn' : h.count}`);
 
 /*
@@ -119,6 +122,8 @@ export default function PlansScreen({ navigation }) {
   const sub = useQuery({ queryKey: ['subscription'], queryFn: api.getMySubscription });
   const usage = useQuery({ queryKey: ['usage'], queryFn: api.getMyUsage });
   const [pay, setPay] = useState(null);
+  const packs = useCreditPacks();
+  const [packPay, setPackPay] = useState(null);
   const [busy, setBusy] = useState(null);
 
   const choose = async (p) => {
@@ -144,7 +149,9 @@ export default function PlansScreen({ navigation }) {
                   <T v="small">{FEATURE[u.feature]?.replace(' / tháng', '') || u.feature}</T>
                   <T v="small" mute>{u.unlimited ? 'Không giới hạn' : `${u.used}/${u.limit} (còn ${u.remaining})`}</T>
                 </Row>
-                {!u.unlimited && u.limit > 0 ? <ProgressBar pct={(u.used / u.limit) * 100} color={u.remaining === 0 ? c.err : c.pri} /> : null}
+                {/* Lượt mua thêm / được tặng (credit pack, đánh giá WoodHub) — không reset theo tháng, dùng sau khi hết hạn mức */}
+                {u.purchasedRemaining > 0 ? <T v="small" color={c.forest}>+{u.purchasedRemaining} lượt đã mua / được tặng</T> : null}
+                {!u.unlimited && u.limit > 0 ? <ProgressBar pct={(u.used / u.limit) * 100} color={u.remaining === 0 && !(u.purchasedRemaining > 0) ? c.err : c.pri} /> : null}
               </View>
             ))}
           </Card>
@@ -166,7 +173,23 @@ export default function PlansScreen({ navigation }) {
             </Card>
           );
         })}
+
+        {/* Gói lượt thiết kế mua thêm (credit pack) — giống web /account/subscription */}
+        {(packs.data || []).filter((k) => k.isActive !== false).length ? (
+          <>
+            <T v="h3" style={{ marginTop: 6 }}>Mua thêm lượt thiết kế</T>
+            <T v="small" mute style={{ marginTop: -8 }}>Lượt mua dùng đến hết, không reset theo tháng.</T>
+            {packs.data.filter((k) => k.isActive !== false).map((k) => (
+              <Card key={k.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: c.surf2, alignItems: 'center', justifyContent: 'center' }}><Icon name="sparkle" size={24} color={c.pri} /></View>
+                <View style={{ flex: 1 }}><T v="semi">{k.displayName}</T><T v="small" mute>+{k.credits} lượt thiết kế 3D</T></View>
+                <Button small title={formatVnd(k.price)} onPress={() => setPackPay(k)} style={{ paddingHorizontal: 14 }} />
+              </Card>
+            ))}
+          </>
+        ) : null}
       </ScrollView>
+      <CreditPackSheet pack={packPay} onClose={() => setPackPay(null)} />
       <PaymentSheet plan={pay} subscription={sub.data} onClose={() => setPay(null)} />
     </Screen>
   );

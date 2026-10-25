@@ -53,7 +53,8 @@ export function Button({ title, onPress, kind = 'pri', icon, loading, disabled, 
       {loading ? <ActivityIndicator color={k.fg} /> : (
         <>
           {icon ? <Icon name={icon} size={22} color={k.fg} /> : null}
-          <Text style={{ fontFamily: fonts.semi, fontSize: small ? 14 : 16, color: k.fg }}>{title}</Text>
+          {/* 1 dòng: nút hẹp (2 nút cạnh nhau) trước đây xuống dòng "Yêu cầu báo / giá" */}
+          <Text numberOfLines={1} style={{ flexShrink: 1, fontFamily: fonts.semi, fontSize: small ? 14 : 16, color: k.fg }}>{title}</Text>
         </>
       )}
     </Pressable>
@@ -194,13 +195,23 @@ export function ErrorState({ title = 'Không tải được dữ liệu', hint, 
 }
 
 // ---------- Placeholder / ảnh ----------
-export function Photo({ uri, label, style, radius = 16 }) {
+/*
+ * Không có ảnh → khối màu gỗ + icon (giống web: nền gradient gỗ, không chữ). Trước đây in `label` (slug/tên) bằng font
+ * mono trong khung → trông như chỗ giữ chỗ khi dev ("pot-of-coals", "Thiết kế B"). `label` nay chỉ dùng cho trình đọc màn hình.
+ * Ảnh tải lỗi (URL hỏng) cũng rơi về placeholder thay vì khung trống.
+ */
+export function Photo({ uri, label, style, radius = 16, icon = 'cube' }) {
   const { c } = useTheme();
-  if (uri) return <Image source={{ uri }} style={[{ borderRadius: radius, backgroundColor: c.ph1 }, style]} resizeMode="cover" />;
+  const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [uri]);
+  if (uri && !broken) {
+    return <Image source={{ uri }} accessibilityLabel={label} onError={() => setBroken(true)} style={[{ borderRadius: radius, backgroundColor: c.ph1 }, style]} resizeMode="cover" />;
+  }
   return (
-    <View style={[{ borderRadius: radius, backgroundColor: c.ph1, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }, style]}>
-      <Icon name="image" size={28} color={c.mute} />
-      {label ? <Text numberOfLines={1} style={{ marginTop: 4, paddingHorizontal: 6, fontFamily: TEXT.mono.fontFamily, fontSize: 11, color: c.mute }}>{label}</Text> : null}
+    <View accessibilityLabel={label} style={[{ borderRadius: radius, backgroundColor: c.ph2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }, style]}>
+      {/* vệt sáng chéo giả gradient gỗ (RN không có linear-gradient sẵn) */}
+      <View style={{ position: 'absolute', top: '-30%', left: '-30%', width: '90%', height: '90%', borderRadius: 999, backgroundColor: c.ph1, opacity: 0.9 }} />
+      <Icon name={icon} size={30} color={c.oak} />
     </View>
   );
 }

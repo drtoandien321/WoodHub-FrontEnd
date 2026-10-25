@@ -1,3 +1,8 @@
 node_modules
 .expo
 dist
+
+# Biến môi trường (key Goong của app, API URL dev) — không commit
+.env
+.env.*
+!.env.example

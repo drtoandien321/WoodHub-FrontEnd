@@ -18,6 +18,12 @@ function Brand() {
   );
 }
 
+/*
+ * Đăng nhập Google: TẠM ẨN. BE (GoogleTokenVerifier) chỉ chấp nhận idToken có audience = web client ID, nên app cần
+ * Android/iOS client ID + BE nhận thêm audience đó (xem README "Đăng nhập Google"). Bật lại bằng cờ này khi xong.
+ */
+const GOOGLE_ENABLED = false;
+
 function GoogleBtn({ label }) {
   const { c } = useTheme();
   const toast = useToast();
@@ -68,10 +74,14 @@ export function LoginScreen({ navigation }) {
           <T v="semi" color={c.pri}>Quên mật khẩu?</T>
         </Pressable>
         <Button title="Đăng nhập" onPress={submit} loading={busy} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: c.line }} /><T v="small" mute>hoặc</T><View style={{ flex: 1, height: 1, backgroundColor: c.line }} />
-        </View>
-        <GoogleBtn label="Đăng nhập với Google" />
+        {GOOGLE_ENABLED ? (
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: c.line }} /><T v="small" mute>hoặc</T><View style={{ flex: 1, height: 1, backgroundColor: c.line }} />
+            </View>
+            <GoogleBtn label="Đăng nhập với Google" />
+          </>
+        ) : null}
         <View style={{ flex: 1 }} />
         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4 }}>
           <T mute>Chưa có tài khoản?</T>
@@ -124,7 +134,7 @@ export function RegisterScreen({ navigation }) {
         {err.agree ? <T v="small" color={c.err}>{err.agree}</T> : null}
         {err.form ? <T v="small" color={c.err}>{err.form}</T> : null}
         <Button title="Đăng ký" onPress={submit} loading={busy} />
-        <GoogleBtn label="Đăng ký với Google" />
+        {GOOGLE_ENABLED ? <GoogleBtn label="Đăng ký với Google" /> : null}
         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 4 }}>
           <T mute>Đã có tài khoản?</T>
           <Pressable onPress={() => navigation.goBack()} style={{ height: 44, justifyContent: 'center' }}><T v="semi" color={c.pri} style={{ fontFamily: fonts.bold }}>Đăng nhập</T></Pressable>
