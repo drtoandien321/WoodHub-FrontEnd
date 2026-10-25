@@ -33,6 +33,7 @@ Khi xong EAS cho link tải file `.apk`; gửi link/file đó cho thành viên, 
 | Mục | Giá trị |
 |---|---|
 | API | mặc định `https://woodhub-be.onrender.com/api`; đổi bằng biến `EXPO_PUBLIC_API_URL` (xem `src/config.js`) |
+| Bản đồ Goong (sổ địa chỉ) | `EXPO_PUBLIC_GOONG_API_KEY` (geocode) + `EXPO_PUBLIC_GOONG_MAPTILES_KEY` (bản đồ) — **key riêng của app**, không dùng key web (key web giới hạn tên miền woodhub.io.vn → app bị 403). Đặt trong file `.env` cạnh `app.json` (không commit) hoặc biến môi trường EAS. Thiếu key: form địa chỉ báo rõ và cho lấy toạ độ bằng GPS tạm |
 | Package | `vn.woodhub.app` (đổi trong `app.json`) |
 | Quyền | camera (chụp ảnh dựng 3D), thư viện ảnh, vị trí (xưởng gần bạn), lưu ảnh (mã QR) |
 

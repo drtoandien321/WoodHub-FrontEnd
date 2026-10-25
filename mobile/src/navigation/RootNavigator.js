@@ -25,6 +25,12 @@ import WorkshopsScreen from '../screens/WorkshopsScreen.js';
 import ChatScreen from '../screens/ChatScreen.js';
 import ProfileScreen from '../screens/ProfileScreen.js';
 import PlansScreen from '../screens/PlansScreen.js';
+import CartScreen from '../screens/CartScreen.js';
+import CheckoutScreen from '../screens/CheckoutScreen.js';
+import OrdersScreen from '../screens/OrdersScreen.js';
+import OrderDetailScreen from '../screens/OrderDetailScreen.js';
+import AddressesScreen from '../screens/AddressesScreen.js';
+import AddressFormScreen from '../screens/AddressFormScreen.js';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -114,6 +120,13 @@ export default function RootNavigator() {
           <Stack.Screen name="Workshops" component={WorkshopsScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="Plans" component={PlansScreen} />
+          {/* Mua hàng (đợt 3) */}
+          <Stack.Screen name="Cart" component={CartScreen} />
+          <Stack.Screen name="Checkout" component={CheckoutScreen} />
+          <Stack.Screen name="Orders" component={OrdersScreen} />
+          <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+          <Stack.Screen name="Addresses" component={AddressesScreen} />
+          <Stack.Screen name="AddressForm" component={AddressFormScreen} />
         </>
       )}
     </Stack.Navigator>

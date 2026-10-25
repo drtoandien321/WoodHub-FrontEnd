@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Screen, T, Button, Card, Photo, Skeleton, ErrorState, Row, AppBar, Tag3D } from '../components/ui.js';
+import { Screen, T, Button, Card, Photo, Skeleton, ErrorState, Row, AppBar, Tag3D, Stepper, useToast } from '../components/ui.js';
 import Icon from '../components/Icon.js';
+import CartButton from '../components/CartButton.js';
+import { useAddCartItem, cartErrMsg } from '../hooks/shop.js';
 import { useTheme, fonts } from '../theme/theme.js';
 import { api } from '../api/client.js';
 import { useStudio } from '../store/studio.js';
@@ -12,7 +14,8 @@ import { formatVnd } from '../utils/format.js';
  * Trang sản phẩm. Mô hình 3D/AR lấy từ ProductResponse.model3d (admin gắn mẫu cho SP — giống web ProductModel3dButton);
  * SP chưa gắn mẫu thì KHÔNG hiện 3D/AR. Bản cũ tự đoán "mẫu 3D tham khảo" theo tên danh mục (thời BE chưa liên kết) → ghế
  * mở ra mô hình chậu than, và nút "Yêu cầu báo giá" tạo thiết kế từ mẫu đó gửi cho xưởng — luồng web không có (hàng bán
- * sẵn mua qua giỏ hàng; khách doanh nghiệp dùng báo giá số lượng lớn) → đã bỏ, đợt 3 thay bằng giỏ hàng.
+ * sẵn mua qua giỏ hàng; khách doanh nghiệp dùng báo giá số lượng lớn) → đã bỏ.
+ * Mua: giỏ server-side thêm theo BIẾN THỂ (variantId) — BE tự lấy giá, FE không gửi giá. "Mua ngay" = thêm rồi mở giỏ.
  */
 
 export default function ProductScreen({ navigation, route }) {
@@ -21,6 +24,10 @@ export default function ProductScreen({ navigation, route }) {
   const q = useQuery({ queryKey: ['product', id], queryFn: () => api.getProduct(id) });
   const openModel = useStudio((s) => s.openModel);
   const [img, setImg] = useState(0);
+  const [qty, setQty] = useState(1);
+  const [cartErr, setCartErr] = useState('');
+  const add = useAddCartItem();
+  const toast = useToast();
 
   const p = q.data;
   const variants = p?.variants?.length ? p.variants : [];
@@ -36,6 +43,16 @@ export default function ProductScreen({ navigation, route }) {
     navigation.navigate(ar ? 'ArPerm' : 'Viewer');
   };
 
+  const variant = variants[vi];
+  const addToCart = async (thenOpen) => {
+    if (!variant) return;
+    setCartErr('');
+    try {
+      await add.mutateAsync({ variantId: variant.id, quantity: qty });
+      if (thenOpen) navigation.navigate('Cart'); else toast(`Đã thêm ${qty} sản phẩm vào giỏ`);
+    } catch (e) { setCartErr(cartErrMsg(e)); }
+  };
+
   if (q.isError) return <Screen><AppBar title="" onBack={() => navigation.goBack()} /><ErrorState offline={!q.error?.response} onRetry={q.refetch} /></Screen>;
 
   return (
@@ -48,6 +65,7 @@ export default function ProductScreen({ navigation, route }) {
               <Icon name="back" size={24} color={c.ink} />
             </Pressable>
           </View>
+          <View style={{ position: 'absolute', top: 8, right: 8 }}><CartButton bg={c.surf} /></View>
           {model ? (
             <Pressable onPress={() => view3d(true)} style={{ position: 'absolute', right: 16, bottom: 16, height: 44, paddingHorizontal: 16, borderRadius: 22, backgroundColor: c.gold, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Icon name="ar" size={20} color="#2B2119" /><T v="semi" color="#2B2119">Xem AR</T>
@@ -88,16 +106,35 @@ export default function ProductScreen({ navigation, route }) {
                 <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: c.surf2, alignItems: 'center', justifyContent: 'center' }}><Icon name="store" size={24} color={c.pri} /></View>
                 <View style={{ flex: 1 }}><T v="small" mute>Cung cấp bởi</T><T v="semi">{p.supplierName}</T></View>
               </Card>
-              {model ? <Row style={{ gap: 8 }}><Tag3D label="3D · AR" /><T v="small" mute style={{ flex: 1 }}>Xoay xem 3D hoặc đặt thử vào phòng bằng AR.</T></Row> : null}
+              {model ? (
+                <Card style={{ gap: 10 }}>
+                  <Row style={{ gap: 8 }}><Tag3D label="3D · AR" /><T v="small" mute style={{ flex: 1 }}>Xoay xem 3D hoặc đặt thử vào phòng bằng AR.</T></Row>
+                  <Row style={{ gap: 10 }}>
+                    <Button small title="Xem 3D" kind="outline" icon="cube" style={{ flex: 1 }} onPress={() => view3d(false)} />
+                    <Button small title="Đặt thử AR" kind="gold" icon="ar" style={{ flex: 1 }} onPress={() => view3d(true)} />
+                  </Row>
+                </Card>
+              ) : null}
+              {variant ? (
+                <Row style={{ justifyContent: 'space-between' }}>
+                  <T v="label">Số lượng</T>
+                  <Stepper value={qty} onChange={setQty} min={1} max={999} />
+                </Row>
+              ) : null}
+              {cartErr ? <T color={c.err}>{cartErr}</T> : null}
             </>
           )}
         </View>
       </ScrollView>
 
-      {model ? (
+      {p ? (
         <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, flexDirection: 'row', gap: 10, backgroundColor: c.surf, borderTopWidth: 1, borderTopColor: c.line }}>
-          <Button title="Xem 3D" kind="outline" icon="cube" style={{ flex: 1 }} onPress={() => view3d(false)} />
-          <Button title="Đặt thử AR" kind="gold" icon="ar" style={{ flex: 1 }} onPress={() => view3d(true)} />
+          {variant ? (
+            <>
+              <Button title="Thêm vào giỏ" kind="outline" icon="cart" style={{ flex: 1 }} onPress={() => addToCart(false)} loading={add.isPending} />
+              <Button title="Mua ngay" style={{ flex: 1 }} onPress={() => addToCart(true)} disabled={add.isPending} />
+            </>
+          ) : <T mute style={{ flex: 1, textAlign: 'center' }}>Sản phẩm chưa có phiên bản để đặt mua.</T>}
         </View>
       ) : null}
     </Screen>

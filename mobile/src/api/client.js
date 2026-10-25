@@ -130,6 +130,31 @@ export const api = {
   createPayment: (planId) => d(http.post('/payments/subscription', { planId })),
   getPayment: (id) => d(http.get(`/payments/${id}`)),
 
+  /*
+   * ----- Mua hàng (đợt 3, cùng hợp đồng với web api/client.js) -----
+   * Giỏ hàng server-side: MỌI endpoint giỏ trả CartResponse đầy đủ → hook ghi đè cache, không GET lại.
+   * Địa chỉ: checkout BẮT BUỘC địa chỉ có toạ độ (hasCoordinates) để BE tính phí ship theo khoảng cách.
+   * Checkout: FE chỉ gửi { addressId, note?, promotionIds? } — BE tự tách đơn theo NCC, tính ship, áp voucher, tạo 1 QR chung.
+   */
+  getCart: () => d(http.get('/cart')),
+  addCartItem: (b) => d(http.post('/cart/items', b)), // { variantId, quantity } — đã có thì CỘNG DỒN
+  updateCartItem: ({ itemId, quantity }) => d(http.put(`/cart/items/${itemId}`, { quantity })), // GHI ĐÈ số lượng
+  removeCartItem: (itemId) => d(http.delete(`/cart/items/${itemId}`)),
+
+  getAddresses: () => d(http.get('/addresses')),
+  createAddress: (b) => d(http.post('/addresses', b)),
+  updateAddress: ({ id, ...b }) => d(http.put(`/addresses/${id}`, b)), // PUT ghi đè toàn bộ → gửi đủ field (kể cả lat/lng)
+  deleteAddress: (id) => d(http.delete(`/addresses/${id}`)),
+  setDefaultAddress: (id) => d(http.patch(`/addresses/${id}/default`)),
+
+  getAvailableVouchers: (params) => d(http.get('/vouchers/available', { params })),
+  previewOrder: (b) => d(http.post('/orders/preview', b)), // không tạo đơn → gọi lại thoải mái
+  checkout: (b) => d(http.post('/orders/checkout', b)), // → { orders[], payment, grandTotal }
+  getOrders: (params) => d(http.get('/orders', { params })),
+  getOrder: (id) => d(http.get(`/orders/${id}`)),
+  cancelOrder: (id) => d(http.post(`/orders/${id}/cancel`)), // chỉ khi pending_payment, sai → 409
+  repayOrder: (id) => d(http.post(`/orders/${id}/payment`)), // QR hết hạn → gia hạn CÙNG payment (txnRef giữ nguyên)
+
   // ----- Trợ lý AI -----
   createAiSession: (b) => d(http.post('/ai-chat/sessions', b ?? {})),
   getAiSessions: () => d(http.get('/ai-chat/sessions')),

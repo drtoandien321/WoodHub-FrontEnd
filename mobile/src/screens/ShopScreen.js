@@ -3,6 +3,7 @@ import { View, TextInput, Pressable, FlatList } from 'react-native';
 import { Screen, T, Button, Chip, Skeleton, ErrorState, EmptyState, BottomSheet, Field } from '../components/ui.js';
 import { ProductCard } from '../components/cards.js';
 import Icon from '../components/Icon.js';
+import CartButton from '../components/CartButton.js';
 import { useTheme, fonts } from '../theme/theme.js';
 import { useProducts, useCategories, useMaterials } from '../hooks/data.js';
 
@@ -43,7 +44,10 @@ export default function ShopScreen({ navigation, route }) {
 
   return (
     <Screen>
-      <View style={{ paddingHorizontal: 20, paddingTop: 8 }}><T v="h1">Cửa hàng</T></View>
+      <View style={{ paddingHorizontal: 20, paddingTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <T v="h1">Cửa hàng</T>
+        <CartButton />
+      </View>
       <View style={{ paddingHorizontal: 20, marginTop: 12, flexDirection: 'row', gap: 10 }}>
         <View style={{ flex: 1, height: 52, borderRadius: 16, borderWidth: 1.5, borderColor: c.line, backgroundColor: c.surf, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, gap: 10 }}>
           <Icon name="search" size={22} color={c.mute} />
