@@ -16,8 +16,8 @@ export default function TemplatesScreen({ navigation, route }) {
   return (
     <Screen>
       <AppBar title={intent === 'ar' ? 'Chọn mẫu để thử AR' : 'Chọn mẫu 3D'} onBack={() => navigation.goBack()} />
-      <FlatList horizontal data={[null, ...TYPES]} keyExtractor={(t) => String(t)} showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}
+      <FlatList horizontal data={[null, ...TYPES]} keyExtractor={(t) => String(t)} showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, height: 52 }}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8, alignItems: 'center' }}
         renderItem={({ item }) => <Chip label={item ? TYPE_LABELS[item] : 'Tất cả'} selected={type === item} onPress={() => setType(item)} />} />
       {q.isError ? <ErrorState offline={!q.error?.response} onRetry={q.refetch} /> : (
         <FlatList

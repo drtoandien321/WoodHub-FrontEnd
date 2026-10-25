@@ -59,7 +59,8 @@ export default function ShopScreen({ navigation, route }) {
 
       <FlatList
         horizontal data={[{ id: null, name: 'Tất cả' }, ...(cats.data || [])]} keyExtractor={(k) => String(k.id)} showsHorizontalScrollIndicator={false}
-        style={{ flexGrow: 0, marginTop: 12 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8 }}
+        // height cố định: FlatList ngang + flexGrow 0 trên RN-web co về 0 → chip bị cắt mất chữ
+        style={{ flexGrow: 0, height: 48, marginTop: 12 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, alignItems: 'center' }}
         renderItem={({ item }) => <Chip label={item.name} selected={categoryId === item.id} onPress={() => setCategoryId(item.id)} />}
       />
 

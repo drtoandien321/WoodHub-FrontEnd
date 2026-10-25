@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { View, FlatList, Pressable } from 'react-native';
 import { Screen, T, HTabs, Card, Badge, Photo, Skeleton, EmptyState, ErrorState, Row } from '../components/ui.js';
 import { useTheme } from '../theme/theme.js';
-import { useMyQuotes } from '../hooks/data.js';
+import { useMyQuotes, useMyDesigns } from '../hooks/data.js';
 import { quoteCardModel, formatDay } from '../utils/quoteSummary.js';
 import { formatVnd } from '../utils/format.js';
+import { readDesignSnapshot } from '../utils/design.js';
 
 const TABS = [
   { l: 'Tất cả', f: () => true },
@@ -37,6 +38,10 @@ export function PriceLine({ q }) {
 
 export default function QuotesScreen({ navigation }) {
   const q = useMyQuotes();
+  // Báo giá tạo trước khi BE thêm `designSnapshot.design` chỉ có màu/chất liệu/kích thước → lấy tên + ảnh từ
+  // "Thiết kế của tôi" theo customDesignId (cùng cache với tab Thiết kế, không gọi thêm API khi đã mở tab đó)
+  const designs = useMyDesigns();
+  const designById = Object.fromEntries((designs.data || []).map((d) => [d.id, d]));
   const [tab, setTab] = useState(0);
   const list = (q.data || []).filter(TABS[tab].f);
 
@@ -54,12 +59,15 @@ export default function QuotesScreen({ navigation }) {
           ListEmptyComponent={q.isLoading ? null : <EmptyState icon="quote" title="Chưa có yêu cầu báo giá" hint="Lưu một thiết kế rồi gửi cho xưởng mộc để nhận báo giá." action="Bắt đầu thiết kế" onAction={() => navigation.navigate('Design')} />}
           renderItem={({ item }) => {
             const [kind, label] = STATUS[item.status] || ['muted', item.status];
+            const snap = readDesignSnapshot(item.designSnapshot);
+            const own = designById[item.customDesignId];
+            const name = snap.name || own?.name || 'Thiết kế';
             return (
               <Card onPress={() => navigation.navigate('QuoteDetail', { id: item.id })} style={{ gap: 10 }}>
                 <Row style={{ gap: 12, alignItems: 'flex-start' }}>
-                  <Photo uri={item.designSnapshot?.thumbnailUrl} style={{ width: 64, height: 64 }} radius={14} />
+                  <Photo uri={snap.posterUrl || own?.thumbnailUrl} label={name} style={{ width: 64, height: 64 }} radius={14} />
                   <View style={{ flex: 1, gap: 4 }}>
-                    <T v="semi" numberOfLines={1}>{item.designSnapshot?.name || item.designName || 'Thiết kế'}</T>
+                    <T v="semi" numberOfLines={1}>{name}</T>
                     <T v="small" mute numberOfLines={1}>{item.workshopName}</T>
                     <Badge kind={kind} label={label} />
                   </View>

@@ -7,6 +7,8 @@ import { useAuth } from '../store/auth.js';
 import { api, errMsg } from '../api/client.js';
 import { formatVnd, formatDateTime } from '../utils/format.js';
 import { STATUS } from './QuotesScreen.js';
+import { readDesignSnapshot } from '../utils/design.js';
+import { useMyDesigns } from '../hooks/data.js';
 
 const TERMINAL = ['accepted', 'rejected', 'expired', 'cancelled'];
 const OFFER = { pending: ['pending', 'Chờ phản hồi'], accepted: ['closed', 'Đã chấp nhận'], rejected: ['rej', 'Đã từ chối'], superseded: ['muted', 'Đã bị thay thế'] };
@@ -18,6 +20,7 @@ export default function QuoteDetailScreen({ navigation, route }) {
   const me = useAuth((s) => s.user);
   const { id } = route.params;
   const q = useQuery({ queryKey: ['quote', id], queryFn: () => api.getQuote(id) });
+  const designs = useMyDesigns(); // fallback tên/ảnh cho báo giá cũ (xem QuotesScreen)
   const [sheet, setSheet] = useState(false);
   const [price, setPrice] = useState('');
   const [days, setDays] = useState('');
@@ -41,6 +44,9 @@ export default function QuoteDetailScreen({ navigation, route }) {
   const mine = me?.id === quote.customerId ? 'customer' : 'workshop';
   const canRespond = latest?.status === 'pending' && latest.offeredBy !== mine && !terminal;
   const [kind, label] = STATUS[quote.status] || ['muted', quote.status];
+  const s0 = readDesignSnapshot(quote.designSnapshot);
+  const own = (designs.data || []).find((d) => d.id === quote.customDesignId);
+  const snap = { ...s0, name: s0.name || own?.name || null, posterUrl: s0.posterUrl || own?.thumbnailUrl || null };
 
   const sendCounter = async () => {
     const ok = await run('counter', () => api.createOffer({ quoteId: id, price: Number(price), leadTimeDays: Number(days), note: note.trim() || undefined }), 'Đã gửi đề xuất');
@@ -53,9 +59,10 @@ export default function QuoteDetailScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}>
         <Card style={{ gap: 12 }}>
           <Row style={{ gap: 12, alignItems: 'flex-start' }}>
-            <Photo uri={quote.designSnapshot?.thumbnailUrl} style={{ width: 72, height: 72 }} radius={16} />
+            <Photo uri={snap.posterUrl} label={snap.name} style={{ width: 72, height: 72 }} radius={16} />
             <View style={{ flex: 1, gap: 4 }}>
-              <T v="h3" numberOfLines={2}>{quote.workshopName}</T>
+              {snap.name ? <T v="semi" numberOfLines={2}>{snap.name}</T> : null}
+              <T v={snap.name ? 'small' : 'h3'} mute={!!snap.name} numberOfLines={2}>{quote.workshopName}</T>
               <Badge kind={kind} label={label} />
             </View>
           </Row>
