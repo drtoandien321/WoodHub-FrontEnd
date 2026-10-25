@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../hooks/useCart.js';
@@ -16,6 +16,12 @@ import { Check, Wallet, Shield, Plus } from '../components/suppliers/icons.jsx';
 import { apiErrorMessage } from '../utils/apiError.js';
 import { useFeedbackStore } from '../stores/feedbackStore.js';
 import { useMyPlatformFeedback, FEEDBACK_ENABLED } from '../hooks/usePlatformFeedback.js';
+import { trackEvent } from '../services/analytics.js';
+
+// Món trong giỏ → item GA4 (giá là số VND, không định dạng)
+const gaItems = (items = []) => items.map((i) => ({
+  item_id: i.variantId ?? i.id, item_name: i.productName, price: Number(i.unitPrice) || 0, quantity: i.quantity,
+}));
 
 const NOTE_MAX = 500;
 
@@ -32,12 +38,12 @@ function Steps({ t, current }) {
             <span className="flex items-center gap-2">
               <span
                 className={`grid h-7 w-7 place-items-center rounded-full text-xs font-semibold ${
-                  done ? 'bg-primary text-primary-content' : active ? 'border-2 border-primary text-primary' : 'border border-base-300 text-base-content/40'
+                  done ? 'bg-primary text-primary-content' : active ? 'border-2 border-primary text-primary' : 'border border-base-300 text-base-content/70'
                 }`}
               >
                 {done ? <Check width={14} height={14} /> : i + 1}
               </span>
-              <span className={active ? 'font-medium' : 'text-base-content/55'}>{label}</span>
+              <span className={active ? 'font-medium' : 'text-base-content/70'}>{label}</span>
             </span>
             {i < steps.length - 1 && <span className="h-px w-6 bg-base-300 sm:w-12" aria-hidden="true" />}
           </li>
@@ -146,6 +152,27 @@ export default function Checkout() {
     return () => clearTimeout(timer);
   }, [paid, dismissedAfterOrder, myFeedback.isFetched, myFeedback.data, openFeedback]);
 
+  /*
+   * GA4 chuyển đổi (services/analytics.js): begin_checkout 1 lần khi giỏ đã tải và còn món; purchase 1 lần khi QR báo
+   * đã thanh toán (tiền thật đã vào — không bắn lúc mới tạo đơn chờ thanh toán). Ref chặn bắn lại khi re-render/refetch.
+   * Items của purchase lấy từ ảnh giỏ lúc bắt đầu (BE xoá giỏ sau checkout).
+   */
+  const checkoutItemsRef = useRef(null);
+  useEffect(() => {
+    if (checkoutItemsRef.current || result || !cart?.items?.length) return;
+    checkoutItemsRef.current = gaItems(cart.items);
+    trackEvent('begin_checkout', { currency: 'VND', value: Number(cart.subtotal) || 0, items: checkoutItemsRef.current });
+  }, [cart, result]);
+  const purchaseSentRef = useRef(false);
+  useEffect(() => {
+    if (!paid || !result || purchaseSentRef.current) return;
+    purchaseSentRef.current = true;
+    trackEvent('purchase', {
+      transaction_id: result.payment?.txnRef ?? result.payment?.id, currency: 'VND', value: Number(result.grandTotal) || 0,
+      items: checkoutItemsRef.current ?? [],
+    });
+  }, [paid, result]);
+
   // ===== Màn THANH TOÁN (sau khi checkout thành công) =====
   if (result) {
     return (
@@ -154,7 +181,7 @@ export default function Checkout() {
         <div className="grid items-start gap-6 md:grid-cols-[1fr_340px]">
           <div className="flex flex-col gap-4">
             <h1 className="font-display text-3xl">{paid ? t('checkout.doneTitle') : t('checkout.payTitle')}</h1>
-            {result.orders.length > 1 && <p className="text-sm text-base-content/65">{t('checkout.splitNote', { count: result.orders.length })}</p>}
+            {result.orders.length > 1 && <p className="text-sm text-base-content/70">{t('checkout.splitNote', { count: result.orders.length })}</p>}
             {/* Sàn không quản lý tồn kho: NCC xác nhận trong 24h, hết hàng thì huỷ + hoàn tiền 48h (no-inventory-order-confirm-fe.md) */}
             {!paid && <p className="rounded-xl border border-info/30 bg-info/5 p-3 text-sm text-base-content/75">{t('checkout.confirmNotice')}</p>}
             <ul className="flex flex-col gap-3">
@@ -164,13 +191,13 @@ export default function Checkout() {
                     <span className="font-medium">{o.supplierName}</span>
                     <Link to={`/orders/${o.id}`} className="font-mono text-xs text-primary hover:underline">{o.orderCode}</Link>
                   </div>
-                  <p className="mt-1 text-xs text-base-content/55">
+                  <p className="mt-1 text-xs text-base-content/70">
                     {t('checkout.shipFrom', { store: [o.storeAddress, o.storeCity].filter(Boolean).join(', '), km: o.distanceKm })}
                   </p>
                   <dl className="mt-3 grid gap-1">
-                    <div className="flex justify-between"><dt className="text-base-content/60">{t('checkout.subtotal')}</dt><dd>{formatVnd(o.subtotal)}</dd></div>
+                    <div className="flex justify-between"><dt className="text-base-content/70">{t('checkout.subtotal')}</dt><dd>{formatVnd(o.subtotal)}</dd></div>
                     {o.productDiscount > 0 && <div className="flex justify-between text-success"><dt>{t('checkout.productDiscount')}</dt><dd>−{formatVnd(o.productDiscount)}</dd></div>}
-                    <div className="flex justify-between"><dt className="text-base-content/60">{t('checkout.shippingFee')}</dt><dd>{o.shippingFee === 0 ? t('checkout.freeShipping') : formatVnd(o.shippingFee)}</dd></div>
+                    <div className="flex justify-between"><dt className="text-base-content/70">{t('checkout.shippingFee')}</dt><dd>{o.shippingFee === 0 ? t('checkout.freeShipping') : formatVnd(o.shippingFee)}</dd></div>
                     {o.shippingDiscount > 0 && <div className="flex justify-between text-success"><dt>{t('checkout.shippingDiscount')}</dt><dd>−{formatVnd(o.shippingDiscount)}</dd></div>}
                     <div className="flex justify-between font-semibold"><dt>{t('checkout.orderTotal')}</dt><dd className="text-primary">{formatVnd(o.totalAmount)}</dd></div>
                   </dl>
@@ -292,7 +319,7 @@ export default function Checkout() {
                       <div className="min-w-0 flex-1 text-sm">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{a.recipientName}</span>
-                          <span className="text-base-content/60">{a.recipientPhone}</span>
+                          <span className="text-base-content/70">{a.recipientPhone}</span>
                           {a.isDefault && <span className="badge badge-primary badge-xs">{t('address.default')}</span>}
                         </div>
                         <p className="mt-0.5 text-base-content/70">{formatAddressLine(a)}</p>
@@ -322,7 +349,7 @@ export default function Checkout() {
                 <button type="button" onClick={() => vouchersQuery.refetch()} className="link link-primary">{t('checkout.vouchersRetry')}</button>
               </p>
             ) : !vouchers.length ? (
-              <p className="text-sm text-base-content/60">{t('checkout.vouchersEmpty')}</p>
+              <p className="text-sm text-base-content/70">{t('checkout.vouchersEmpty')}</p>
             ) : (
               <VoucherPicker
                 vouchers={vouchers}
@@ -341,7 +368,7 @@ export default function Checkout() {
                 <button type="button" onClick={dropErroredVouchers} className="btn btn-warning btn-xs self-start">{t('checkout.dropInvalidVouchers')}</button>
               </div>
             )}
-            <p className="mt-2 text-xs text-base-content/50">{t('checkout.voucherHint')}</p>
+            <p className="mt-2 text-xs text-base-content/70">{t('checkout.voucherHint')}</p>
           </Section>
 
           {/* 3. Ghi chú + phương thức thanh toán */}
@@ -360,7 +387,7 @@ export default function Checkout() {
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Wallet width={20} height={20} /></span>
               <div className="flex-1">
                 <p className="font-medium">{t('checkout.bank')}</p>
-                <p className="text-sm text-base-content/60">{t('checkout.bankQrDesc')}</p>
+                <p className="text-sm text-base-content/70">{t('checkout.bankQrDesc')}</p>
               </div>
               <span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-content"><Check width={14} height={14} /></span>
             </div>
@@ -369,7 +396,7 @@ export default function Checkout() {
                 <input type="checkbox" className="checkbox checkbox-primary checkbox-sm mt-0.5" checked={vatInvoice} onChange={(e) => setVatInvoice(e.target.checked)} />
                 <span className="text-sm">
                   <span className="block font-medium">{t('checkout.vatInvoice')}</span>
-                  <span className="block text-xs text-base-content/60">{t('checkout.vatInvoiceHint')} <Link to="/profile#business" className="link link-primary">{t('checkout.vatEditProfile')}</Link></span>
+                  <span className="block text-xs text-base-content/70">{t('checkout.vatInvoiceHint')} <Link to="/profile#business" className="link link-primary">{t('checkout.vatEditProfile')}</Link></span>
                 </span>
               </label>
             )}
@@ -400,7 +427,7 @@ export default function Checkout() {
             <div className="flex justify-between text-sm"><span>{t('checkout.subtotal')}</span><span>{formatVnd(p?.subtotal ?? cart.subtotal)}</span></div>
             <div className="flex justify-between text-sm">
               <span>{t('checkout.shippingFee')}</span>
-              <span>{p ? (Number(p.shippingFee) === 0 ? t('checkout.freeShipping') : formatVnd(p.shippingFee)) : <span className="text-base-content/60">{t('checkout.pickAddressForShipping')}</span>}</span>
+              <span>{p ? (Number(p.shippingFee) === 0 ? t('checkout.freeShipping') : formatVnd(p.shippingFee)) : <span className="text-base-content/70">{t('checkout.pickAddressForShipping')}</span>}</span>
             </div>
             {Number(p?.discount) > 0 && (
               <div className="flex justify-between text-sm text-success"><span>{t('checkout.discount')}</span><span>−{formatVnd(p.discount)}</span></div>
@@ -410,7 +437,7 @@ export default function Checkout() {
                 {t('checkout.amountToFreeShip', { amount: formatVnd(g.amountToFreeShip), supplier: g.supplierName })}
               </p>
             ))}
-            {p?.groups?.length > 1 && <p className="text-xs text-base-content/50">{t('checkout.splitPreview', { count: p.groups.length })}</p>}
+            {p?.groups?.length > 1 && <p className="text-xs text-base-content/70">{t('checkout.splitPreview', { count: p.groups.length })}</p>}
             {preview.isError && <p className="text-xs text-error">{apiErrorMessage(preview.error, t('checkout.previewFailed'))}</p>}
           </div>
           <div className="divider my-0" />
@@ -418,7 +445,7 @@ export default function Checkout() {
             <span className="font-medium">{t('checkout.grandTotal')}</span>
             <span className="text-2xl font-semibold text-primary">{formatVnd(p?.grandTotal ?? cart.subtotal)}</span>
           </div>
-          {!p && <p className="text-xs text-base-content/50">{t('checkout.summaryHint')}</p>}
+          {!p && <p className="text-xs text-base-content/70">{t('checkout.summaryHint')}</p>}
 
           <button onClick={handleSubmit} disabled={!canSubmit} className="btn btn-primary btn-lg w-full">
             {checkout.isPending ? <span className="loading loading-spinner loading-sm" /> : t('checkout.placeOrder')}
@@ -429,9 +456,9 @@ export default function Checkout() {
               <Link to="/cart" className="link link-primary font-medium">{t('checkout.backToCart')}</Link>
             </div>
           )}
-          {!selected?.hasCoordinates && <p className="text-xs text-base-content/55">{t('checkout.selectAddressHint')}</p>}
+          {!selected?.hasCoordinates && <p className="text-xs text-base-content/70">{t('checkout.selectAddressHint')}</p>}
           {submitErr && <div role="alert" className="alert alert-error py-2 text-sm">{submitErr}</div>}
-          <p className="flex items-center justify-center gap-1.5 text-xs text-base-content/55"><Shield width={14} height={14} /> {t('cart.secure')}</p>
+          <p className="flex items-center justify-center gap-1.5 text-xs text-base-content/70"><Shield width={14} height={14} /> {t('cart.secure')}</p>
         </aside>
       </div>
 

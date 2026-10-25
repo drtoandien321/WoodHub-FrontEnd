@@ -47,6 +47,3 @@ export const useDeleteStock = (storeId) => {
   const qc = useQueryClient();
   return useMutation({ mutationFn: api.deleteStock, onSuccess: () => invalidateInventory(qc, storeId) });
 };
-
-export const useVariantInventory = (variantId) =>
-  useQuery({ queryKey: ['variantInventory', variantId], queryFn: () => api.getVariantInventory(variantId), enabled: !!variantId });

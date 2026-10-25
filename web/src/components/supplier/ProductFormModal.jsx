@@ -199,7 +199,7 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
               <select value={form.status} onChange={set('status')} className="select select-bordered w-full">
                 {Object.entries(PRODUCT_STATUS).map(([v, m]) => <option key={v} value={v}>{m.option}</option>)}
               </select>
-              <span className="text-xs text-base-content/50">{PRODUCT_STATUS[form.status]?.hint}</span>
+              <span className="text-xs text-base-content/70">{PRODUCT_STATUS[form.status]?.hint}</span>
             </Field>
           </Section>
 
@@ -259,7 +259,7 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
                   </button>
                 </div>
               ))}
-              <label className="grid aspect-square cursor-pointer place-items-center rounded-xl border border-dashed border-base-300 text-xs text-base-content/50 hover:border-primary hover:text-primary">
+              <label className="grid aspect-square cursor-pointer place-items-center rounded-xl border border-dashed border-base-300 text-xs text-base-content/70 hover:border-primary hover:text-primary">
                 + Thêm ảnh
                 <input
                   type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden
@@ -267,7 +267,7 @@ export default function ProductFormModal({ open, onClose, initial = null }) {
                 />
               </label>
             </div>
-            <p className="mt-2 text-xs text-base-content/45">JPEG/PNG/WEBP/GIF, tối đa 5MB mỗi ảnh. Ảnh đầu tiên tự động làm ảnh đại diện.</p>
+            <p className="mt-2 text-xs text-base-content/70">JPEG/PNG/WEBP/GIF, tối đa 5MB mỗi ảnh. Ảnh đầu tiên tự động làm ảnh đại diện.</p>
           </fieldset>
 
           <fieldset>

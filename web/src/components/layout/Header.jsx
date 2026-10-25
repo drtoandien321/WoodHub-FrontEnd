@@ -79,7 +79,7 @@ export default function Header() {
         {/* THƯƠNG HIỆU — tách riêng bên trái, cỡ lớn hơn + tagline */}
         <Link to="/" className="flex flex-col leading-none shrink-0">
           <span className="font-display text-xl sm:text-2xl md:text-3xl text-primary tracking-tight">WOODHUB</span>
-          <span className="text-[8px] sm:text-[10px] md:text-[11px] tracking-[0.2em] sm:tracking-[0.32em] text-base-content/45 mt-1">FURNITURE &amp; CRAFT</span>
+          <span className="text-[8px] sm:text-[10px] md:text-[11px] tracking-[0.2em] sm:tracking-[0.32em] text-base-content/70 mt-1">FURNITURE &amp; CRAFT</span>
         </Link>
 
         {/* MENU — chiếm khoảng giữa (flex-1) và căn giữa; KHÔNG absolute nữa để không đè lên cụm phải */}
@@ -121,7 +121,7 @@ export default function Header() {
                 </span>
                 {/* Giới hạn độ dài: tên dài đẩy header tràn ở 1280 px (menu tiếng Việt hiện đủ từ xl) */}
                 <span className="hidden sm:inline max-w-[9rem] truncate" title={user.name}>{t('nav.greeting', { name: user.name })}</span>
-                <ChevronDownIcon className="w-4 h-4 text-base-content/50" />
+                <ChevronDownIcon className="w-4 h-4 text-base-content/70" />
               </div>
               <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-20 w-48 p-2 shadow border border-base-300 mt-2">
                 <li><Link to={roleArea.to}>{roleArea.label}</Link></li>

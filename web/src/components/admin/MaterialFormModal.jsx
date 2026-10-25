@@ -58,7 +58,7 @@ export default function MaterialFormModal({ open, onClose, initial = null }) {
         <label className="flex flex-col gap-1.5">
           <span className="text-sm text-base-content/70">Mô tả cho AI đổi chất liệu (tiếng Anh, tuỳ chọn)</span>
           <textarea value={prompt} onChange={(e) => setPrompt(e.target.value.slice(0, PROMPT_MAX))} rows={2} className="textarea textarea-bordered w-full" placeholder="VD: dark walnut wood, rich brown grain, satin finish" />
-          <span className="text-xs text-base-content/45">Có mô tả thì khách mới chọn được vật liệu này ở "Áp dụng chất liệu" (Custom Studio). Để trống = không dùng cho AI. {prompt.length}/{PROMPT_MAX}</span>
+          <span className="text-xs text-base-content/70">Có mô tả thì khách mới chọn được vật liệu này ở "Áp dụng chất liệu" (Custom Studio). Để trống = không dùng cho AI. {prompt.length}/{PROMPT_MAX}</span>
         </label>
         {err && <span className="text-xs text-error">{err}</span>}
       </div>

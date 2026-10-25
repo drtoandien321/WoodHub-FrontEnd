@@ -64,7 +64,7 @@ function ProductSuggestion({ product, onNavigate }) {
       {image && <img src={image} alt={name} loading="lazy" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium leading-snug line-clamp-2">{name}</p>
-        {meta && <p className="text-xs text-base-content/55 mt-0.5 truncate">{meta}</p>}
+        {meta && <p className="text-xs text-base-content/70 mt-0.5 truncate">{meta}</p>}
         {typeof price === 'number' && <p className="text-xs text-primary font-semibold mt-0.5">{formatVnd(price)}</p>}
         {reasons.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
@@ -254,8 +254,8 @@ export default function ChatPanel() {
       {/* Danh sách các cuộc trò chuyện cũ (GET /ai-chat/sessions) */}
       {showHistory && (
         <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
-          <p className="text-xs font-medium text-base-content/55">{t('chatbot.historyTitle')}</p>
-          {sessionsQuery.isLoading && <p className="text-sm text-base-content/50 py-6 text-center">{t('chatbot.loading')}</p>}
+          <p className="text-xs font-medium text-base-content/70">{t('chatbot.historyTitle')}</p>
+          {sessionsQuery.isLoading && <p className="text-sm text-base-content/70 py-6 text-center">{t('chatbot.loading')}</p>}
           {sessionsQuery.isError && (
             <div className="flex flex-col gap-1.5 rounded-2xl bg-error/10 px-3 py-2 text-sm text-error">
               <span>{t('chatbot.errors.sessions')}</span>
@@ -263,7 +263,7 @@ export default function ChatPanel() {
             </div>
           )}
           {sessionsQuery.isSuccess && !savedSessions.length && (
-            <p className="text-sm text-base-content/50 py-6 text-center">{t('chatbot.historyEmpty')}</p>
+            <p className="text-sm text-base-content/70 py-6 text-center">{t('chatbot.historyEmpty')}</p>
           )}
           {savedSessions.map((s) => (
             <button
@@ -272,7 +272,7 @@ export default function ChatPanel() {
               className={`text-left rounded-xl border px-3 py-2 transition-colors hover:border-primary ${s.id === sessionId ? 'border-primary bg-primary/5' : 'border-base-300 bg-base-100'}`}
             >
               <p className="text-sm font-medium line-clamp-2">{s.title || t('chatbot.untitled')}</p>
-              <p className="text-xs text-base-content/50 mt-0.5">{formatDate(s.updatedAt ?? s.createdAt)}</p>
+              <p className="text-xs text-base-content/70 mt-0.5">{formatDate(s.updatedAt ?? s.createdAt)}</p>
             </button>
           ))}
         </div>
@@ -329,7 +329,7 @@ export default function ChatPanel() {
         )}
 
         {sendMessage.isPending && slow && (
-          <p className="self-start max-w-[90%] text-xs text-base-content/55">{t('chatbot.coldStart')}</p>
+          <p className="self-start max-w-[90%] text-xs text-base-content/70">{t('chatbot.coldStart')}</p>
         )}
 
         {sendMessage.isError && (

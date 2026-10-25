@@ -56,19 +56,19 @@ export default function SupplierProducts() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-3xl">Sản phẩm</h1>
-        <p className="text-base-content/60">Quản lý danh sách sản phẩm bạn đang bán trên WoodHub.</p>
+        <p className="text-base-content/70">Quản lý danh sách sản phẩm bạn đang bán trên WoodHub.</p>
       </header>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={Package} label="Tổng sản phẩm" value={counts.total} hint="Tất cả sản phẩm" />
         <StatCard icon={ShoppingBag} label="Đang bán" value={counts.active} iconWrap="bg-success/10 text-success" />
-        <StatCard icon={Package} label="Nháp" value={counts.draft} iconWrap="bg-base-300/60 text-base-content/60" />
+        <StatCard icon={Package} label="Nháp" value={counts.draft} iconWrap="bg-base-300/60 text-base-content/70" />
         <StatCard icon={Package} label="Tạm ẩn" value={counts.hidden} iconWrap="bg-warning/10 text-warning" />
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm lg:flex-row lg:items-center">
         <label className="input input-bordered flex flex-1 items-center gap-2">
-          <Search width={16} height={16} className="text-base-content/40" />
+          <Search width={16} height={16} className="text-base-content/70" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm kiếm sản phẩm…" className="grow" />
         </label>
         <select value={materialName} onChange={(e) => setMaterialName(e.target.value)} className="select select-bordered" aria-label="Lọc chất liệu">
@@ -85,19 +85,19 @@ export default function SupplierProducts() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Ảnh</th><th>Tên sản phẩm</th><th>Danh mục</th><th className="text-right">Giá</th>
                 <th>Chất liệu</th><th>Trạng thái</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!isLoading && list.map((p) => (
                 <tr key={p.id} className="hover:bg-base-200/50">
                   <td>
                     {p.primaryImageUrl
                       ? <img src={p.primaryImageUrl} alt="" className="h-12 w-16 rounded-lg object-cover" loading="lazy" />
-                      : <div className="grid h-12 w-16 place-items-center rounded-lg bg-base-200 text-[10px] text-base-content/40">Chưa có ảnh</div>}
+                      : <div className="grid h-12 w-16 place-items-center rounded-lg bg-base-200 text-[10px] text-base-content/70">Chưa có ảnh</div>}
                   </td>
                   <td><Link to={`/portal/supplier/products/${p.id}`} className="font-medium hover:text-primary">{p.name}</Link></td>
                   <td className="text-sm">{p.categoryName}</td>
@@ -115,12 +115,12 @@ export default function SupplierProducts() {
                   </td>
                 </tr>
               ))}
-              {!isLoading && !list.length && <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Không tìm thấy sản phẩm phù hợp.</td></tr>}
+              {!isLoading && !list.length && <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Không tìm thấy sản phẩm phù hợp.</td></tr>}
             </tbody>
           </table>
         </div>
         {items.length < counts.total && (
-          <p className="px-2 pt-3 text-xs text-base-content/50">Đang hiển thị {items.length}/{counts.total} sản phẩm mới nhất.</p>
+          <p className="px-2 pt-3 text-xs text-base-content/70">Đang hiển thị {items.length}/{counts.total} sản phẩm mới nhất.</p>
         )}
       </section>
 

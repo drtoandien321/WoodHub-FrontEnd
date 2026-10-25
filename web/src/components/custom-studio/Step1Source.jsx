@@ -15,7 +15,7 @@ function SourceCard({ onClick, title, tip, icon }) {
         </svg>
       </span>
       <p className="font-display text-lg">{title}</p>
-      <p className="max-w-md text-xs text-base-content/55">{tip}</p>
+      <p className="max-w-md text-xs text-base-content/70">{tip}</p>
     </button>
   );
 }
@@ -38,7 +38,7 @@ export default function Step1Source() {
     <div className="flex flex-col gap-8">
       <div>
         <h2 className="font-display text-2xl">{t('custom.studio.step1.title')}</h2>
-        <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.step1.subtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('custom.studio.step1.subtitle')}</p>
       </div>
 
       {/* 2 nguồn AI: upload ảnh (image-to-3D) hoặc mô tả bằng chữ (text-to-3D) — dùng chung 1 lượt 'design' */}
@@ -83,7 +83,7 @@ export default function Step1Source() {
                     </button>
                   ))
                 : (
-                  <p className="col-span-full rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-base-content/55">
+                  <p className="col-span-full rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-base-content/70">
                     {t('custom.studio.step1.templateEmpty')}
                   </p>
                 )}

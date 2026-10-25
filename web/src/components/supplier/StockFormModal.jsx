@@ -66,7 +66,7 @@ export default function StockFormModal({ open, onClose, storeId, existingVariant
                 ))}
               </select>
               {productId && !availableVariants.length && (
-                <span className="text-xs text-base-content/50">Sản phẩm này không có biến thể nào (khác) để thêm.</span>
+                <span className="text-xs text-base-content/70">Sản phẩm này không có biến thể nào (khác) để thêm.</span>
               )}
             </label>
             <label className="flex flex-col gap-1.5">

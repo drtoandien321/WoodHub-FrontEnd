@@ -34,7 +34,7 @@ export default function BulkQuoteList({ role }) {
     <div className="flex flex-col gap-5">
       <header>
         <h1 className="font-display text-3xl">{isSupplier ? 'Báo giá số lượng lớn' : t('bulkQuote.myTitle')}</h1>
-        <p className="mt-1 text-base-content/60">{isSupplier ? 'Khách doanh nghiệp gửi yêu cầu giá sỉ — báo giá trong 7 ngày, quá hạn yêu cầu tự hết hạn.' : t('bulkQuote.mySubtitle')}</p>
+        <p className="mt-1 text-base-content/70">{isSupplier ? 'Khách doanh nghiệp gửi yêu cầu giá sỉ — báo giá trong 7 ngày, quá hạn yêu cầu tự hết hạn.' : t('bulkQuote.mySubtitle')}</p>
       </header>
 
       <div className="overflow-x-auto">
@@ -53,8 +53,8 @@ export default function BulkQuoteList({ role }) {
         <p className="text-center text-error">{isSupplier ? 'Không tải được danh sách.' : t('notifications.loadError')} <button onClick={() => q.refetch()} className="link">↻</button></p>
       ) : !items.length ? (
         <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center">
-          <p className="text-base-content/60">{isSupplier ? 'Không có yêu cầu nào.' : t('bulkQuote.empty')}</p>
-          {!isSupplier && isBusiness && <p className="mt-1 text-xs text-base-content/60">{t('bulkQuote.emptyHint')}</p>}
+          <p className="text-base-content/70">{isSupplier ? 'Không có yêu cầu nào.' : t('bulkQuote.empty')}</p>
+          {!isSupplier && isBusiness && <p className="mt-1 text-xs text-base-content/70">{t('bulkQuote.emptyHint')}</p>}
           {!isSupplier && !isBusiness && (
             <p className="mt-1 text-sm text-base-content/70">
               {t('bulkQuote.individualHint')}{' '}
@@ -78,7 +78,7 @@ export default function BulkQuoteList({ role }) {
                       {b.vatRequested && <span className="rounded-full bg-base-200 px-2 py-0.5 text-xs">VAT</span>}
                     </div>
                     <p className="mt-1 truncate text-sm text-base-content/70">{(b.items ?? []).map((i) => `${i.productName} × ${i.quantity}`).join(', ')}</p>
-                    <p className="text-xs text-base-content/50">{formatDate(b.createdAt)} · {t('bulkQuote.items', { count: qtySum })}</p>
+                    <p className="text-xs text-base-content/70">{formatDate(b.createdAt)} · {t('bulkQuote.items', { count: qtySum })}</p>
                   </div>
                   {b.offer && <span className="shrink-0 text-lg font-semibold text-primary">{formatVnd(b.offer.totalAmount)}</span>}
                 </Link>

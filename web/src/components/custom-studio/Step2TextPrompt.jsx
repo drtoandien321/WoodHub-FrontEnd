@@ -20,7 +20,7 @@ export default function Step2TextPrompt({ onNext, onBack, pending }) {
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="font-display text-2xl">{t('custom.studio.text.title')}</h2>
-        <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.text.subtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('custom.studio.text.subtitle')}</p>
       </div>
 
       <label className="flex flex-col gap-1.5">
@@ -33,7 +33,7 @@ export default function Step2TextPrompt({ onNext, onBack, pending }) {
           placeholder={t('custom.studio.text.promptPlaceholder')}
           className="textarea textarea-bordered w-full text-sm"
         />
-        <span className="self-end text-xs text-base-content/45">{prompt.length}/{MAX_PROMPT}</span>
+        <span className="self-end text-xs text-base-content/70">{prompt.length}/{MAX_PROMPT}</span>
       </label>
 
       <div>
@@ -47,7 +47,7 @@ export default function Step2TextPrompt({ onNext, onBack, pending }) {
               className={`rounded-xl border p-3 text-left transition-colors ${artStyle === st ? 'border-primary bg-primary/10' : 'border-base-300 hover:border-primary/50'}`}
             >
               <span className={`block text-sm font-medium ${artStyle === st ? 'text-primary' : ''}`}>{t(`custom.studio.text.styles.${st}`)}</span>
-              <span className="block text-xs text-base-content/55">{t(`custom.studio.text.styles.${st}Hint`)}</span>
+              <span className="block text-xs text-base-content/70">{t(`custom.studio.text.styles.${st}Hint`)}</span>
             </button>
           ))}
         </div>
@@ -55,7 +55,7 @@ export default function Step2TextPrompt({ onNext, onBack, pending }) {
 
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">
-          {t('custom.studio.text.negativeLabel')} <span className="font-normal text-base-content/45">({t('custom.studio.text.optional')})</span>
+          {t('custom.studio.text.negativeLabel')} <span className="font-normal text-base-content/70">({t('custom.studio.text.optional')})</span>
         </span>
         <input
           value={negativePrompt}
@@ -66,7 +66,7 @@ export default function Step2TextPrompt({ onNext, onBack, pending }) {
         />
       </label>
 
-      <div className="rounded-xl bg-base-200/50 p-4 text-xs text-base-content/60">
+      <div className="rounded-xl bg-base-200/50 p-4 text-xs text-base-content/70">
         <p className="font-medium text-base-content/70">{t('custom.studio.text.tipsTitle')}</p>
         <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
           <li>{t('custom.studio.text.tip1')}</li>

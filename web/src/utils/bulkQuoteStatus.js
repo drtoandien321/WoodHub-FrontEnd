@@ -12,8 +12,8 @@ const CLS = {
   accepted: 'bg-success/15 text-success',
   rejected: 'bg-error/15 text-error',
   declined: 'bg-error/15 text-error',
-  cancelled: 'bg-base-300/60 text-base-content/60',
-  expired: 'bg-base-300/60 text-base-content/60',
+  cancelled: 'bg-base-300/60 text-base-content/70',
+  expired: 'bg-base-300/60 text-base-content/70',
 };
 
 export const BULK_QUOTE_TABS = ['', 'pending', 'offered', 'accepted', 'rejected', 'declined', 'cancelled', 'expired'];

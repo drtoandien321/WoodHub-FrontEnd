@@ -51,7 +51,7 @@ export default function PromotionManagement({ scope, title, subtitle }) {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">{title}</h1>
-          {subtitle && <p className="mt-1 text-base-content/60">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-base-content/70">{subtitle}</p>}
         </div>
         <button onClick={() => setModal('create')} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Thêm khuyến mãi</button>
       </header>
@@ -60,12 +60,12 @@ export default function PromotionManagement({ scope, title, subtitle }) {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Mã</th><th>Loại</th><th>Mức giảm</th><th>Thời gian</th><th>Đã dùng</th><th>Trạng thái</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {isError && (
                 <tr><td colSpan={7} className="py-10 text-center">
                   <span className="text-error">Không tải được danh sách. </span>
@@ -73,7 +73,7 @@ export default function PromotionManagement({ scope, title, subtitle }) {
                 </td></tr>
               )}
               {!isLoading && !isError && !items.length && (
-                <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Chưa có khuyến mãi nào.</td></tr>
+                <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Chưa có khuyến mãi nào.</td></tr>
               )}
               {items.map((p) => {
                 const st = effectiveStatus(p);
@@ -81,18 +81,18 @@ export default function PromotionManagement({ scope, title, subtitle }) {
                   <tr key={p.id} className="hover:bg-base-200/50">
                     <td>
                       <p className="font-mono font-semibold">{p.code}</p>
-                      <p className="text-xs text-base-content/55">{p.name}</p>
-                      {scope === 'admin' && p.supplierName && <p className="text-xs text-base-content/45">NCC: {p.supplierName}</p>}
+                      <p className="text-xs text-base-content/70">{p.name}</p>
+                      {scope === 'admin' && p.supplierName && <p className="text-xs text-base-content/70">NCC: {p.supplierName}</p>}
                     </td>
                     <td className="text-sm">
                       {p.type === 'shipping' ? 'Phí ship' : 'Sản phẩm'}
-                      {p.type === 'product' && <p className="text-xs text-base-content/50">{p.productIds?.length ?? 0} SP</p>}
+                      {p.type === 'product' && <p className="text-xs text-base-content/70">{p.productIds?.length ?? 0} SP</p>}
                     </td>
                     <td className="text-sm">
                       {discountText(p)}
-                      {p.minOrderAmount != null && <p className="text-xs text-base-content/50">Đơn từ {formatVnd(p.minOrderAmount)}</p>}
+                      {p.minOrderAmount != null && <p className="text-xs text-base-content/70">Đơn từ {formatVnd(p.minOrderAmount)}</p>}
                     </td>
-                    <td className="text-xs text-base-content/65">
+                    <td className="text-xs text-base-content/70">
                       {p.startsAt || p.endsAt ? <>{p.startsAt ? formatDate(p.startsAt) : '…'} → {p.endsAt ? formatDate(p.endsAt) : '…'}</> : 'Không giới hạn'}
                     </td>
                     <td className="text-sm tabular-nums">{p.usedCount}{p.usageLimit != null ? ` / ${p.usageLimit}` : ''}</td>

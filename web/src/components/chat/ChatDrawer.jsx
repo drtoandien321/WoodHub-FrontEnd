@@ -54,7 +54,7 @@ function MinimizedChatBubble({ supplier, unread, onRestore, onClose }) {
         type="button"
         onClick={onClose}
         aria-label={t('chat.close')}
-        className="absolute -left-2 -top-2 grid h-6 w-6 place-items-center rounded-full border border-base-300 bg-base-100 text-base-content/60 shadow transition-opacity hover:text-error sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+        className="absolute -left-2 -top-2 grid h-6 w-6 place-items-center rounded-full border border-base-300 bg-base-100 text-base-content/70 shadow transition-opacity hover:text-error sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
       >
         <X width={12} height={12} />
       </button>
@@ -155,7 +155,7 @@ export default function ChatDrawer() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2">
               {/* Empty state / gợi ý khi chưa có tin của khách */}
               {!hasUserMsg && (
-                <div className="mx-1 my-3 rounded-2xl border border-dashed border-base-300 bg-base-100/60 p-4 text-center text-sm text-base-content/60">
+                <div className="mx-1 my-3 rounded-2xl border border-dashed border-base-300 bg-base-100/60 p-4 text-center text-sm text-base-content/70">
                   <p className="font-medium text-base-content/75">
                     {t('chat.emptyTitle', { name: supplier?.name || t('chat.supplierFallback') })}
                   </p>
@@ -169,7 +169,7 @@ export default function ChatDrawer() {
                 ))}
 
                 {typing && (
-                  <div className="flex items-center gap-1.5 px-1 text-xs text-base-content/50">
+                  <div className="flex items-center gap-1.5 px-1 text-xs text-base-content/70">
                     <span className="flex gap-1">
                       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-base-content/40 [animation-delay:-200ms]" />
                       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-base-content/40 [animation-delay:-100ms]" />

@@ -19,7 +19,7 @@ export default function Step4Result({ model, onNext, onBack, canRefine, refined,
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="font-display text-2xl">{t('custom.studio.step4.title')}</h2>
-        <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.step4.subtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('custom.studio.step4.subtitle')}</p>
       </div>
 
       <div className="relative h-[50vh] min-h-[320px] overflow-hidden rounded-3xl border border-base-300 bg-gradient-to-b from-[#efe7d8] to-[#e0d3bc]">
@@ -46,7 +46,7 @@ export default function Step4Result({ model, onNext, onBack, canRefine, refined,
         <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 sm:mr-20 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="font-medium">{t('custom.studio.step4.refineTitle')}</p>
-            <p className="text-xs text-base-content/60">{t('custom.studio.step4.refineDesc')}</p>
+            <p className="text-xs text-base-content/70">{t('custom.studio.step4.refineDesc')}</p>
             {refineError && <p className="mt-1 text-xs text-error" role="alert">{apiErrorMessage(refineError, t('custom.ai.errors.generic'))}</p>}
           </div>
           <button onClick={onRefine} disabled={refinePending} className="btn btn-primary btn-sm shrink-0">

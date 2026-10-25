@@ -48,18 +48,18 @@ const REAL_ENDPOINTS = new Set([
    * shape khác nhau nữa.
    */
   'getProducts', 'getProduct',
-  // Module Room/Style (BE-7) — GET công khai, curl xác nhận hoạt động (mảng rỗng vì chưa seed, không phải lỗi)
-  'getRooms', 'getRoomBySlug', 'getRoomScenes', 'getRoomSceneDetail', 'getStyles',
+  // Module Style (BE-7). Shop by Room (/rooms, /room-scenes) để sau MVP — đã gỡ hàm FE 25/10 (QA OBS-01), lấy lại từ git khi làm
+  'getStyles',
   // Module AI Chat — đã curl xác nhận session/history hoạt động thật; sendMessage cũng REAL dù
   // hiện trả 502 (AI provider phía BE chưa nối) — đó là trạng thái thật cần UI xử lý, không phải lý do để mock.
   'createAiChatSession', 'getMyAiChatSessions', 'getAiChatMessages', 'sendAiChatMessage',
   // Module Product (Portal Nhà cung cấp tự quản lý — /portal/supplier/products)
   'createProduct', 'getMyProducts', 'getMyProductDetail', 'updateProduct', 'updateProductStatus', 'deleteProduct',
   'createVariant', 'getVariants', 'updateVariant', 'deleteVariant',
-  'uploadProductImage', 'getProductImages', 'setPrimaryImage', 'updateProductImage', 'deleteProductImage',
+  'uploadProductImage', 'setPrimaryImage', 'deleteProductImage',
   // Module Store + Store Inventory (Portal Nhà cung cấp tự quản lý chi nhánh) — đã xác nhận BE thật (curl local)
   'createStore', 'getMyStores', 'updateStore', 'deleteStore',
-  'getStoreInventory', 'addStock', 'adjustStock', 'deleteStock', 'getVariantInventory',
+  'getStoreInventory', 'addStock', 'adjustStock', 'deleteStock',
   // Module Chat (REST — lịch sử/khởi tạo hội thoại; tin realtime qua STOMP, xem services/chatSocket.js)
   'startConversation', 'getConversations', 'getMessages', 'sendMessage', 'markAsRead', 'getPresence',
   // Module Admin — Category CRUD (Portal Quản trị /admin/categories)
@@ -92,11 +92,9 @@ const REAL_ENDPOINTS = new Set([
   // BE-12 thông báo (chuông)
   'getNotifications', 'getUnreadNotificationCount', 'markNotificationRead', 'markAllNotificationsRead',
   'getMyPayout', 'saveMyPayout', 'getMyCapability', 'saveMyCapability', 'getNotificationSettings', 'updateNotificationSettings',
-  'updateSupplierMe', 'getMyPortfolio', 'addPortfolioItem', 'updatePortfolioItem', 'deletePortfolioItem',
-  // Module GPS/Vị trí — 3 API gợi ý gần (Pha 3 Checkout + Pha 4 Custom order)
-  'getNearbyStoresBySupplier', 'getNearestWorkshops', 'getWorkshopsWithinRadius',
+  'getMyPortfolio', 'addPortfolioItem', 'updatePortfolioItem', 'deletePortfolioItem',
   // Module Subscription — gói đăng ký (trang Pricing + "Gói của tôi")
-  'getSubscriptionPlans', 'subscribe', 'getMySubscription', 'getMySubscriptionHistory',
+  'getSubscriptionPlans', 'subscribe', 'getMySubscription',
   'cancelMySubscription',
   'createSubscriptionPayment', 'getPayment', 'getMyPayments',
   'getMyUsage',
@@ -112,7 +110,7 @@ const REAL_ENDPOINTS = new Set([
   // BE-04 admin mẫu 3D · gắn model cho SP · BE-05 retexture (áp dụng chất liệu)
   'getAdminModels3d', 'updateAdminModel3d', 'setAdminModel3dStatus', 'deleteAdminModel3d',
   'linkProductModel3d', 'unlinkProductModel3d', 'retextureModel', 'getModelVariants',
-  'getModels3d', 'getModel3d', 'getMyModels', 'renameModel', 'getGenTask', 'retryGenTask', 'cancelGenTask', 'getMyGenTasks',
+  'getModels3d', 'getModel3d', 'getMyModels', 'renameModel', 'getGenTask', 'retryGenTask', 'cancelGenTask',
   // Text-to-3D + nâng cấp texture (BE commit 40ece30, docs/custom-model-3d-fe.md mục 1b/1c)
   'generate3DFromText', 'refineGenTask',
   'createDesign', 'getDesignDetail', 'updateDesign', 'deleteDesign', 'getMyDesigns',
@@ -121,20 +119,20 @@ const REAL_ENDPOINTS = new Set([
   'getMyCustomOrders', 'getIncomingCustomOrders', 'getCustomOrderDetail', 'updateCustomOrderStatus',
   'createCustomOrderPayment', 'setCustomOrderAddress', // BE-01 đặt cọc / thanh toán / địa chỉ đơn custom
   // Module Cart — giỏ hàng lưu ở server (docs/cart-address-fe.md của BE, commit 40ece30)
-  'getCart', 'addCartItem', 'updateCartItem', 'removeCartItem', 'clearCart',
+  'getCart', 'addCartItem', 'updateCartItem', 'removeCartItem',
   // Module Sổ địa chỉ giao hàng (cùng doc cart-address-fe.md)
   'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
   // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
   'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'repayOrder', 'getAvailableVouchers', 'submitContact',
   // Đánh giá WoodHub web/app + tặng 5 lượt (BE PR #25, docs BE platform-feedback-fe.md)
-  'getMyPlatformFeedback', 'submitPlatformFeedback', 'getPlatformFeedbackSummary', 'getAdminFeedback', 'getAdminFeedbackSummary',
+  'getMyPlatformFeedback', 'submitPlatformFeedback', 'getPlatformFeedbackSummary', 'getAdminFeedback', 'getAdminFeedbackSummary', 'setFeedbackHidden',
   // BE-07 xem trước · BE-08 báo giá số lượng lớn + VAT
   'previewOrder', 'markVatIssued',
   'createBulkQuote', 'getMyBulkQuotes', 'getBulkQuote', 'acceptBulkQuote', 'rejectBulkQuote', 'cancelBulkQuote',
   'getSupplierBulkQuotes', 'offerBulkQuote', 'declineBulkQuote',
   // Xử lý đơn (supplier/admin) + CRUD khuyến mãi + cấu hình ship (docs/promotions-admin-fe.md)
   'getSupplierOrders', 'updateSupplierOrderStatus', 'getAdminOrders', 'updateAdminOrderStatus',
-  'getPromotions', 'getPromotion', 'createPromotion', 'updatePromotion', 'deletePromotion',
+  'getPromotions', 'createPromotion', 'updatePromotion', 'deletePromotion',
   'getShippingConfig', 'updateShippingConfig',
 ]);
 
@@ -486,25 +484,9 @@ export const api = {
   deleteMaterial: (id) => call(() => http.delete(`/materials/${id}`), 'deleteMaterial', id),
 
   /*
-   * ===== ROOM / STYLE (BE-7, mục 3.2 api-guide-fe.md) — bảng tham chiếu công khai, KHÔNG phân trang.
-   * Dùng cho filter "Phòng"/"Phong cách" ở Shop (FE-4) và trang Shop by Room (FE-5).
-   * ⚠️ Curl xác nhận (2026-07-19): 2 endpoint chạy đúng nhưng CHƯA có dữ liệu (BE chưa seed
-   * rooms/scenes — đúng như docs/be-0-to-be-8-summary.md BE-7 đã ghi chú) → mảng rỗng, KHÔNG
-   * phải lỗi FE. Sidebar Shop tự ẩn nhóm filter này khi danh sách rỗng thay vì hiện ô trống.
+   * ===== STYLE (BE-7, mục 3.2 api-guide-fe.md) — bảng tham chiếu công khai, KHÔNG phân trang.
+   * Shop by Room (GET /rooms, /rooms/:slug/scenes, /room-scenes/:id) để sau MVP — gỡ 4 hàm FE chưa ai gọi (QA OBS-01, 25/10).
    */
-  // GET /rooms → RoomResponse[] { id, name, slug, sortOrder }
-  getRooms: () => call(() => http.get('/rooms'), 'getRooms'),
-  // GET /rooms/:slug → RoomResponse — chi tiết 1 phòng (dùng cho breadcrumb/tiêu đề trang scene)
-  getRoomBySlug: (slug) => call(() => http.get(`/rooms/${slug}`), 'getRoomBySlug', slug),
-  // GET /rooms/:slug/scenes → RoomSceneSummaryResponse[] { id,name,slug,backgroundImageUrl,sortOrder }
-  getRoomScenes: (slug) => call(() => http.get(`/rooms/${slug}/scenes`), 'getRoomScenes', slug),
-  /*
-   * GET /room-scenes/:id → RoomSceneResponse (CHỈ scene đã publish; hotspot chỉ gồm SP đang bán):
-   * { id, room:{id,name,slug,sortOrder}, name, slug, backgroundImageUrl,
-   *   items: [{ id, xPercent, yPercent, displayOrder, product: ProductSummaryResponse }] }
-   * Hotspot toạ độ % (0..100) — đặt bằng CSS left/top, KHÔNG hardcode toạ độ ở FE (FE-5).
-   */
-  getRoomSceneDetail: (id) => call(() => http.get(`/room-scenes/${id}`), 'getRoomSceneDetail', id),
   // GET /styles → StyleResponse[] { id, name, slug, sortOrder }
   getStyles: () => call(() => http.get('/styles'), 'getStyles'),
 
@@ -554,12 +536,9 @@ export const api = {
     });
     return res.data;
   },
-  // GET /products/{productId}/images → ProductImageResponse[] đã sắp sẵn (primary trước, rồi sortOrder) — KHÔNG cần sort lại ở FE
-  getProductImages: (productId) => call(() => http.get(`/products/${productId}/images`), 'getProductImages', productId),
+  // Danh sách ảnh đi kèm ProductResponse.images (đã sắp primary trước) — không cần GET /products/{id}/images riêng
   // PATCH /images/{imageId}/primary — không có body
   setPrimaryImage: (imageId) => call(() => http.patch(`/images/${imageId}/primary`), 'setPrimaryImage', imageId),
-  // PUT /images/{imageId}  body: { url, sortOrder } — url bắt buộc, KHÔNG đổi được primary qua đây (dùng setPrimaryImage)
-  updateProductImage: ({ imageId, ...body }) => call(() => http.put(`/images/${imageId}`, body), 'updateProductImage', { imageId, ...body }),
   deleteProductImage: (imageId) => call(() => http.delete(`/images/${imageId}`), 'deleteProductImage', imageId),
 
   /*
@@ -593,8 +572,6 @@ export const api = {
   // DELETE /stores/{storeId}/inventory/{variantId}
   deleteStock: ({ storeId, variantId }) =>
     call(() => http.delete(`/stores/${storeId}/inventory/${variantId}`), 'deleteStock', { storeId, variantId }),
-  // GET /variants/{variantId}/inventory → VariantInventoryResponse { variantId, totalStock, stores: StoreInventoryResponse[] } (tổng hợp mọi chi nhánh)
-  getVariantInventory: (variantId) => call(() => http.get(`/variants/${variantId}/inventory`), 'getVariantInventory', variantId),
 
   /*
    * ===== CHAT (hội thoại khách hàng ↔ nhà cung cấp) =====
@@ -635,8 +612,6 @@ export const api = {
     call(() => http.put(`/cart/items/${itemId}`, { quantity }), 'updateCartItem', { itemId, quantity }),
   // DELETE /cart/items/:itemId — xoá 1 dòng
   removeCartItem: (itemId) => call(() => http.delete(`/cart/items/${itemId}`), 'removeCartItem', itemId),
-  // DELETE /cart — xoá sạch giỏ
-  clearCart: () => call(() => http.delete('/cart'), 'clearCart'),
 
   /*
    * ===== ADDRESSES — sổ địa chỉ giao hàng (/api/addresses, cần đăng nhập) =====
@@ -732,7 +707,6 @@ export const api = {
    * minOrderAmount?, startsAt?, endsAt?, isActive?, usageLimit?, usageLimitPerUser?, productIds? }
    */
   getPromotions: (params) => call(() => http.get('/promotions', { params }), 'getPromotions', params),
-  getPromotion: (id) => call(() => http.get(`/promotions/${id}`), 'getPromotion', id),
   createPromotion: (body) => call(() => http.post('/promotions', body), 'createPromotion', body),
   updatePromotion: ({ id, ...body }) => call(() => http.put(`/promotions/${id}`, body), 'updatePromotion', { id, ...body }),
   deletePromotion: (id) => call(() => http.delete(`/promotions/${id}`), 'deletePromotion', id),
@@ -897,9 +871,6 @@ export const api = {
       throw err;
     }
   },
-  // PUT /suppliers/me — GHI ĐÈ toàn bộ (BE set mọi field theo body, kể cả null) → FE phải gửi đủ
-  // { businessName*, taxCode, legalDocumentUrl, contactEmail, contactPhone, description }; 409 nếu trùng MST.
-  updateSupplierMe: (body) => call(() => http.put('/suppliers/me', body), 'updateSupplierMe', body),
   /*
    * PATCH /suppliers/me (BE-10) — CHỈ cập nhật field có gửi: không gửi / null = giữ, "" = xoá. Có thêm 4 field mới
    * logoUrl, coverUrl, hqAddress, contactName (PUT cũ không đụng tới 4 field này). businessName "" → 400.
@@ -953,23 +924,8 @@ export const api = {
   updatePortfolioItem: ({ id, ...body }) => call(() => http.put(`/suppliers/me/portfolio/${id}`, body), 'updatePortfolioItem', { id, ...body }),
   deletePortfolioItem: (id) => call(() => http.delete(`/suppliers/me/portfolio/${id}`), 'deletePortfolioItem', id),
 
-  /*
-   * ===== GỢI Ý VỊ TRÍ (GPS) — 3 API, đọc trực tiếp StoreController.java, KHÔNG suy đoán path =====
-   * Cả 3 đều yêu cầu đăng nhập (không whitelist trong SecurityConfig). Query param `lat`/`lng`
-   * (KHÁC tên `latitude`/`longitude` ở body Store — xem docs/API_CONTRACT.md mục 0).
-   * Response KHÔNG có toạ độ (NearbyStoreResponse cố tình bỏ) — chỉ list + distanceKm, không vẽ
-   * bản đồ ghim cho khách được.
-   */
-  // LUỒNG 1 (Pha 3, checkout): GET /stores/nearby/by-supplier/{supplierId}?lat=&lng=
-  // → NearbyStoreResponse[] — TẤT CẢ chi nhánh của 1 supplier cụ thể, gần→xa.
-  getNearbyStoresBySupplier: ({ supplierId, lat, lng }) =>
-    call(() => http.get(`/stores/nearby/by-supplier/${supplierId}`, { params: { lat, lng } }), 'getNearbyStoresBySupplier', { supplierId, lat, lng }),
-  // LUỒNG 2 (Pha 4, custom order) — top N xưởng gần nhất: GET /stores/nearby/workshops?lat=&lng=&limit=5
-  getNearestWorkshops: ({ lat, lng, limit }) =>
-    call(() => http.get('/stores/nearby/workshops', { params: { lat, lng, limit } }), 'getNearestWorkshops', { lat, lng, limit }),
-  // LUỒNG 2 biến thể bán kính: GET /stores/nearby/workshops/radius?lat=&lng=&radiusKm=
-  getWorkshopsWithinRadius: ({ lat, lng, radiusKm }) =>
-    call(() => http.get('/stores/nearby/workshops/radius', { params: { lat, lng, radiusKm } }), 'getWorkshopsWithinRadius', { lat, lng, radiusKm }),
+  // GỢI Ý VỊ TRÍ (GET /stores/nearby/by-supplier/{id}, /stores/nearby/workshops[/radius]) — BE có, FE chưa có UI ghép
+  // xưởng theo khoảng cách → đã gỡ 3 hàm chưa ai gọi (QA DEAD_CODE_AUDIT §3, 25/10). Path/shape: StoreController.java.
 
   /*
    * ===== AI 3D (BE-1→BE-4) — thư viện mẫu 3D + sinh model 3D bằng AI từ ảnh =====
@@ -1076,8 +1032,6 @@ export const api = {
   retryGenTask: (taskId) => call(() => http.post(`/custom/ai/tasks/${taskId}/retry`), 'retryGenTask', taskId),
   // POST /custom/ai/tasks/:taskId/cancel — chỉ khi task CHƯA terminal (đã kết thúc → 409)
   cancelGenTask: (taskId) => call(() => http.post(`/custom/ai/tasks/${taskId}/cancel`), 'cancelGenTask', taskId),
-  // GET /custom/ai/tasks/my?status=&page=&size= → Page<Ai3DTaskResponse> — để wizard tự resume task khi quay lại trang
-  getMyGenTasks: (params) => call(() => http.get('/custom/ai/tasks/my', { params }), 'getMyGenTasks', params),
 
   /*
    * ===== SUBSCRIPTION (gói đăng ký) — đọc trực tiếp SubscriptionPlanController/UserSubscription-
@@ -1090,8 +1044,6 @@ export const api = {
   subscribe: (planId) => call(() => http.post('/subscriptions', { planId }), 'subscribe', planId),
   // GET /subscriptions/me → UserSubscriptionResponse, BE trả 404 nếu chưa có gói active
   getMySubscription: () => call(() => http.get('/subscriptions/me'), 'getMySubscription'),
-  // GET /subscriptions/me/history → UserSubscriptionResponse[], mới nhất trước
-  getMySubscriptionHistory: () => call(() => http.get('/subscriptions/me/history'), 'getMySubscriptionHistory'),
   // (Gia hạn: KHÔNG còn POST /subscriptions/me/renew — BE trả 402 từ AUD-002. Gia hạn = tạo payment cho gói đang dùng,
   //  xem PaymentQrModal; webhook cộng dồn +1 tháng.)
   // POST /subscriptions/me/cancel → 204
@@ -1199,6 +1151,9 @@ export const api = {
   // GET /admin/feedback (Pageable + platform/rating/hidden/from/to) · GET /admin/feedback/summary (from/to)
   getAdminFeedback: (params) => call(() => http.get('/admin/feedback', { params }), 'getAdminFeedback', params),
   getAdminFeedbackSummary: (params) => call(() => http.get('/admin/feedback/summary', { params }), 'getAdminFeedbackSummary', params),
+  // PATCH /admin/feedback/:id/hidden { hidden } → AdminPlatformFeedbackResponse (ẩn khỏi landing, không thu hồi lượt)
+  setFeedbackHidden: ({ id, hidden }) =>
+    call(() => http.patch(`/admin/feedback/${id}/hidden`, { hidden }), 'setFeedbackHidden', { id, hidden }),
 };
 
 /*

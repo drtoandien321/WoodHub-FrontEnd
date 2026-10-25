@@ -71,7 +71,7 @@ export default function StatsReport({ basePath, showStores = false, linkProducts
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Báo cáo</h1>
-        <p className="mt-1 text-base-content/60">
+        <p className="mt-1 text-base-content/70">
           Doanh thu, đơn hàng và sản phẩm bán chạy{ws ? ', kèm hiệu quả báo giá và đơn custom của xưởng' : ''}.
         </p>
       </header>
@@ -124,9 +124,9 @@ export default function StatsReport({ basePath, showStores = false, linkProducts
         <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <h2 className="mb-3 font-display text-lg">Doanh thu theo thời gian</h2>
           {series.isLoading ? <div className="skeleton h-64 w-full rounded-xl" />
-            : chartEmpty ? <p className="grid h-64 place-items-center text-sm text-base-content/50">Chưa có đơn đã thanh toán trong kỳ này.</p>
+            : chartEmpty ? <p className="grid h-64 place-items-center text-sm text-base-content/70">Chưa có đơn đã thanh toán trong kỳ này.</p>
             : <RevenueChart data={chartData} ariaLabel="Biểu đồ doanh thu theo kỳ đã chọn" />}
-          <p className="mt-2 text-xs text-base-content/45">
+          <p className="mt-2 text-xs text-base-content/70">
             Chỉ tính đơn đã thanh toán (không tính chờ thanh toán, đã huỷ, đã hoàn tiền), theo ngày khách thanh toán (giờ Việt Nam).
             {granularity !== 'day' && ` Mỗi điểm là 1 ${granularity === 'week' ? 'tuần (từ thứ Hai)' : 'tháng'}.`}
           </p>
@@ -137,7 +137,7 @@ export default function StatsReport({ basePath, showStores = false, linkProducts
           <div className="flex items-center gap-3">
             <Star width={22} height={22} className="text-warning" />
             <p className="text-2xl font-semibold">{s?.rating != null ? Number(s.rating).toFixed(1) : '—'}</p>
-            <p className="text-sm text-base-content/55">
+            <p className="text-sm text-base-content/70">
               {s ? `${s.reviewCount} đánh giá · ${s.newReviews} mới trong kỳ` : ''}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function StatsReport({ basePath, showStores = false, linkProducts
                 </li>
               ))}
             </ul>
-          ) : s && <p className="text-sm text-base-content/55">Không có đơn chờ xử lý hay đánh giá cần phản hồi.</p>}
+          ) : s && <p className="text-sm text-base-content/70">Không có đơn chờ xử lý hay đánh giá cần phản hồi.</p>}
         </section>
       </div>
 
@@ -160,21 +160,21 @@ export default function StatsReport({ basePath, showStores = false, linkProducts
         <h2 className="mb-3 flex items-center gap-2 font-display text-lg"><TrendingUp width={18} height={18} className="text-primary" /> Sản phẩm bán chạy</h2>
         <div className="overflow-x-auto">
           <table className="table table-sm">
-            <thead><tr className="text-base-content/55"><th>Sản phẩm</th><th className="text-right">Đã bán</th><th className="text-right">Doanh thu (trước voucher)</th></tr></thead>
+            <thead><tr className="text-base-content/70"><th>Sản phẩm</th><th className="text-right">Đã bán</th><th className="text-right">Doanh thu (trước voucher)</th></tr></thead>
             <tbody>
               {(top.data ?? []).map((p, i) => (
                 <tr key={p.productId ?? `deleted-${i}`} className="hover:bg-base-200/50">
                   <td className="font-medium">
                     {p.productId && linkProducts
                       ? <Link to={`${basePath}/products/${p.productId}`} className="hover:text-primary">{p.name}</Link>
-                      : <>{p.name}{!p.productId && <span className="ml-1 text-xs font-normal text-base-content/45">(đã xoá)</span>}</>}
+                      : <>{p.name}{!p.productId && <span className="ml-1 text-xs font-normal text-base-content/70">(đã xoá)</span>}</>}
                   </td>
                   <td className="text-right">{p.sold}</td>
                   <td className="text-right">{formatVnd(p.revenue)}</td>
                 </tr>
               ))}
               {!top.isLoading && !top.data?.length && (
-                <tr><td colSpan={3} className="py-6 text-center text-base-content/50">Chưa bán được sản phẩm nào trong kỳ này.</td></tr>
+                <tr><td colSpan={3} className="py-6 text-center text-base-content/70">Chưa bán được sản phẩm nào trong kỳ này.</td></tr>
               )}
             </tbody>
           </table>

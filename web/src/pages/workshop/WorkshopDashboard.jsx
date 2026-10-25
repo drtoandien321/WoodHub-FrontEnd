@@ -39,9 +39,9 @@ export default function WorkshopDashboard() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Tổng quan</h1>
-        <p className="mt-1 text-base-content/60">Chào mừng trở lại! Đây là tình hình báo giá và sản xuất của xưởng.</p>
+        <p className="mt-1 text-base-content/70">Chào mừng trở lại! Đây là tình hình báo giá và sản xuất của xưởng.</p>
         {quoteTotal > quotes.length && (
-          <p className="mt-2 text-xs text-base-content/50">Số liệu tính trên {quotes.length} yêu cầu báo giá gần nhất (tổng {quoteTotal}).</p>
+          <p className="mt-2 text-xs text-base-content/70">Số liệu tính trên {quotes.length} yêu cầu báo giá gần nhất (tổng {quoteTotal}).</p>
         )}
       </header>
 
@@ -73,7 +73,7 @@ export default function WorkshopDashboard() {
           {loading ? (
             <div className="skeleton h-48 rounded-xl" />
           ) : valueStats.revenueInRange === 0 ? (
-            <p className="py-12 text-center text-sm text-base-content/50">Chưa có đơn custom nào được chốt trong 7 ngày qua.</p>
+            <p className="py-12 text-center text-sm text-base-content/70">Chưa có đơn custom nào được chốt trong 7 ngày qua.</p>
           ) : (
             <RevenueChart data={valueStats.revenueByDay} ariaLabel="Giá trị đơn custom 7 ngày" />
           )}
@@ -87,7 +87,7 @@ export default function WorkshopDashboard() {
           {loading ? (
             <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
           ) : !quotes.length ? (
-            <p className="py-6 text-center text-sm text-base-content/50">Chưa có yêu cầu báo giá nào.</p>
+            <p className="py-6 text-center text-sm text-base-content/70">Chưa có yêu cầu báo giá nào.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {quotes.slice(0, 3).map((q) => (
@@ -95,7 +95,7 @@ export default function WorkshopDashboard() {
                   <Link to={`/quotes/${q.id}`} className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-base-200">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{q.customerName} · SL {q.quantity}</p>
-                      <p className="truncate text-xs text-base-content/50">{formatDate(q.createdAt)}</p>
+                      <p className="truncate text-xs text-base-content/70">{formatDate(q.createdAt)}</p>
                     </div>
                     <StatusBadge meta={quoteMeta(q.status)} />
                   </Link>
@@ -117,11 +117,11 @@ export default function WorkshopDashboard() {
         {loading ? (
           <div className="skeleton h-24 rounded-xl" />
         ) : !needAction.length ? (
-          <p className="py-6 text-center text-sm text-base-content/50">Không có yêu cầu nào đang chờ bạn.</p>
+          <p className="py-6 text-center text-sm text-base-content/70">Không có yêu cầu nào đang chờ bạn.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="table">
-              <thead><tr className="text-base-content/55"><th>Khách hàng</th><th>Số lượng</th><th>Ngày gửi</th><th>Trạng thái</th><th className="text-right">Giá đề xuất gần nhất</th></tr></thead>
+              <thead><tr className="text-base-content/70"><th>Khách hàng</th><th>Số lượng</th><th>Ngày gửi</th><th>Trạng thái</th><th className="text-right">Giá đề xuất gần nhất</th></tr></thead>
               <tbody>
                 {needAction.map((q) => (
                   <tr key={q.id} className="hover:bg-base-200/50">
@@ -129,7 +129,7 @@ export default function WorkshopDashboard() {
                     <td>{q.quantity}</td>
                     <td className="text-sm text-base-content/70">{formatDate(q.createdAt)}</td>
                     <td><StatusBadge meta={quoteMeta(q.status)} /></td>
-                    <td className="text-right">{q.latestOfferPrice ? formatVnd(q.latestOfferPrice) : <span className="text-base-content/40">—</span>}</td>
+                    <td className="text-right">{q.latestOfferPrice ? formatVnd(q.latestOfferPrice) : <span className="text-base-content/70">—</span>}</td>
                   </tr>
                 ))}
               </tbody>

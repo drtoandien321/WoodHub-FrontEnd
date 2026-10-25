@@ -17,12 +17,12 @@ export default function StepIndicator({ step, source }) {
             <span
               aria-current={active ? 'step' : undefined}
               className={`flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-medium transition-colors ${
-                active ? 'bg-primary text-primary-content' : done ? 'bg-primary/15 text-primary' : 'bg-base-200 text-base-content/50'
+                active ? 'bg-primary text-primary-content' : done ? 'bg-primary/15 text-primary' : 'bg-base-200 text-base-content/70'
               }`}
             >
               {n}
             </span>
-            <span className={`hidden text-xs sm:inline ${active ? 'text-base-content' : 'text-base-content/45'}`}>
+            <span className={`hidden text-xs sm:inline ${active ? 'text-base-content' : 'text-base-content/70'}`}>
               {/* Nguồn text: bước 2 là "Mô tả" thay vì "Chuẩn bị ảnh" */}
               {source === 'text' && n === 2 ? t('custom.studio.stepLabelsText.2') : t(`custom.studio.stepLabels.${n}`)}
             </span>

@@ -20,7 +20,7 @@ export default function Privacy() {
       <header className="flex flex-col gap-3">
         <h1 className="font-display text-4xl md:text-5xl leading-[1.1]">{t('privacy.title')}</h1>
         <div className="w-16 h-px bg-primary/40" />
-        <p className="text-sm text-base-content/55">{t('privacy.updated')}</p>
+        <p className="text-sm text-base-content/70">{t('privacy.updated')}</p>
         <p className="text-base-content/80 leading-relaxed">{t('privacy.intro')}</p>
       </header>
 
@@ -42,7 +42,7 @@ export default function Privacy() {
         <dl className="card bg-base-200 border border-base-300 rounded-2xl p-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
           {contacts.map((c) => (
             <div key={c.label} className="contents">
-              <dt className="text-base-content/60">{c.label}</dt>
+              <dt className="text-base-content/70">{c.label}</dt>
               <dd className="font-medium break-all">{c.value}</dd>
             </div>
           ))}

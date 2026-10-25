@@ -27,7 +27,7 @@ export default function WorkshopProduction() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">{t('order.incomingTitle')}</h1>
-        <p className="mt-1 text-base-content/60">{t('order.incomingSubtitle')}</p>
+        <p className="mt-1 text-base-content/70">{t('order.incomingSubtitle')}</p>
       </header>
 
       <div className="overflow-x-auto">
@@ -54,7 +54,7 @@ export default function WorkshopProduction() {
               {readDesignSnapshot(o.designSnapshot).posterUrl && <img src={readDesignSnapshot(o.designSnapshot).posterUrl} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-mono text-xs text-base-content/50">{o.orderNumber}</p>
+                  <p className="font-mono text-xs text-base-content/70">{o.orderNumber}</p>
                   <StatusBadge meta={customOrderMeta(o.status)} />
                 </div>
                 <p className="mt-0.5 font-medium">{o.customerName}</p>
@@ -64,7 +64,7 @@ export default function WorkshopProduction() {
           ))}
         </div>
       ) : (
-        <p className="py-10 text-center text-base-content/50">{t('order.emptyIncoming')}</p>
+        <p className="py-10 text-center text-base-content/70">{t('order.emptyIncoming')}</p>
       )}
     </div>
   );

@@ -57,7 +57,7 @@ export default function Suppliers() {
       <section className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex-1">
           <h1 className="font-display text-3xl md:text-4xl">{t('suppliers.title')}</h1>
-          <p className="mt-2 max-w-xl text-base-content/60">{t('suppliers.subtitle')}</p>
+          <p className="mt-2 max-w-xl text-base-content/70">{t('suppliers.subtitle')}</p>
 
           <div className="relative mt-5 w-full max-w-xl">
             <input
@@ -68,7 +68,7 @@ export default function Suppliers() {
               aria-label={t('suppliers.searchPlaceholder')}
               className="input input-bordered h-12 w-full rounded-2xl border-base-300 bg-base-100 pr-12 shadow-sm focus:border-primary focus:outline-none"
             />
-            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-base-content/50">
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70">
               <Search width={20} height={20} />
             </span>
           </div>
@@ -99,7 +99,7 @@ export default function Suppliers() {
       ) : visible.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-base-300 bg-base-100 py-16 text-center">
           <p className="font-display text-xl">{t('suppliers.noResults')}</p>
-          <p className="mt-1 text-base-content/60">{t('suppliers.noResultsHint')}</p>
+          <p className="mt-1 text-base-content/70">{t('suppliers.noResultsHint')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">

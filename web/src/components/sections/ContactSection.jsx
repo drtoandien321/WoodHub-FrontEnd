@@ -66,7 +66,7 @@ export default function ContactSection({ standalone = false }) {
       {/* Cột trái: tiêu đề + form */}
       <div>
         <Title className="font-display text-3xl mb-2">{t('contact.title')}</Title>
-        <p className="text-sm text-base-content/60 mb-5 max-w-md">{t('contact.subtitle')}</p>
+        <p className="text-sm text-base-content/70 mb-5 max-w-md">{t('contact.subtitle')}</p>
 
         {success && (
           <div className="alert alert-success mb-4">
@@ -117,7 +117,7 @@ export default function ContactSection({ standalone = false }) {
       <div className="flex flex-col gap-4">
         {infoCards.map((c) => (
           <div key={c.label} className="card bg-base-200 border border-base-300 rounded-2xl px-5 py-4">
-            <p className="text-sm text-base-content/55">{c.label}</p>
+            <p className="text-sm text-base-content/70">{c.label}</p>
             <p className="font-medium mt-1">{c.value}</p>
           </div>
         ))}

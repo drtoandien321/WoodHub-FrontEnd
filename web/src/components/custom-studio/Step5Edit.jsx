@@ -25,7 +25,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="font-display text-2xl">{t('custom.studio.step5.title')}</h2>
-        <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.step5.subtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('custom.studio.step5.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
@@ -37,7 +37,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
           {onModelChange && <AiMaterialPanel model={model} onModelChange={onModelChange} />}
 
           {nothingEditable && (
-            <p className="rounded-xl bg-base-200/60 p-3 text-sm text-base-content/60">{t('custom.studio.step5.notEditable')}</p>
+            <p className="rounded-xl bg-base-200/60 p-3 text-sm text-base-content/70">{t('custom.studio.step5.notEditable')}</p>
           )}
 
           {hasMaterials && (
@@ -95,7 +95,7 @@ export default function Step5Edit({ model, configuration, onChange, onNext, onBa
                 const [min, max] = range;
                 return (
                   <div key={axis}>
-                    <div className="mb-1 flex items-center justify-between text-xs text-base-content/60">
+                    <div className="mb-1 flex items-center justify-between text-xs text-base-content/70">
                       <span>{t(`custom.${DIM_LABELS[axis]}`)}</span>
                       <span className="font-mono">{configuration.dimensions[axis]} cm</span>
                     </div>

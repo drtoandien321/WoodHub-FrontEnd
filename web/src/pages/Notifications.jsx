@@ -47,7 +47,7 @@ function OpenNotification({ id }) {
           </div>
         </>
       ) : (
-        <><span className="loading loading-spinner loading-md text-primary" /><p className="text-sm text-base-content/60">{t('notifications.opening')}</p></>
+        <><span className="loading loading-spinner loading-md text-primary" /><p className="text-sm text-base-content/70">{t('notifications.opening')}</p></>
       )}
     </div>
   );
@@ -87,16 +87,16 @@ function NotificationList() {
       ) : isError ? (
         <p className="text-center text-error">{t('notifications.loadError')} <button type="button" onClick={() => refetch()} className="link">↻</button></p>
       ) : !items.length ? (
-        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/55">{t('notifications.empty')}</p>
+        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/70">{t('notifications.empty')}</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((n) => (
             <li key={n.id}>
-              <button type="button" onClick={() => open(n)} className={`flex w-full gap-3 rounded-2xl border bg-base-100 p-4 text-left transition-colors hover:border-primary/50 ${n.read ? 'border-base-300 text-base-content/65' : 'border-primary/30'}`}>
+              <button type="button" onClick={() => open(n)} className={`flex w-full gap-3 rounded-2xl border bg-base-100 p-4 text-left transition-colors hover:border-primary/50 ${n.read ? 'border-base-300 text-base-content/70' : 'border-primary/30'}`}>
                 <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? 'bg-transparent' : 'bg-primary'}`} aria-hidden="true" />
                 <span className="min-w-0 flex-1">
                   <span className={`block text-sm ${n.read ? '' : 'font-medium'}`}>{notificationText(n)}</span>
-                  <span className="mt-0.5 block text-xs text-base-content/45">{formatDate(n.createdAt)}</span>
+                  <span className="mt-0.5 block text-xs text-base-content/70">{formatDate(n.createdAt)}</span>
                 </span>
               </button>
             </li>

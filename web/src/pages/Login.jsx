@@ -77,13 +77,13 @@ export default function Login() {
   return (
     <AuthLayout>
       <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.login.title')}</h1>
-      <p className="text-base-content/60 mb-7">{t('auth.login.subtitle')}</p>
+      <p className="text-base-content/70 mb-7">{t('auth.login.subtitle')}</p>
 
       {/* Demo (mock): gợi ý tài khoản test để đăng nhập supplier/admin khi chưa chạy BE */}
       {USE_MOCK && (
         <div className="text-xs bg-base-200 rounded-xl p-3 mb-5 text-base-content/70 flex flex-col gap-1">
           <p className="font-medium text-base-content/80">{t('auth.login.testAccountsTitle')}</p>
-          <p className="text-base-content/50">{t('auth.login.testAccountsHint')}</p>
+          <p className="text-base-content/70">{t('auth.login.testAccountsHint')}</p>
         </div>
       )}
 
@@ -112,12 +112,12 @@ export default function Login() {
       {/* Phân cách + Google */}
       <div className="flex items-center gap-3 my-5">
         <div className="flex-1 h-px bg-base-content/15" />
-        <span className="text-xs text-base-content/50">{t('auth.divider')}</span>
+        <span className="text-xs text-base-content/70">{t('auth.divider')}</span>
         <div className="flex-1 h-px bg-base-content/15" />
       </div>
       <GoogleAuthButton mode="login" />
 
-      <p className="text-sm text-center mt-5 text-base-content/60">
+      <p className="text-sm text-center mt-5 text-base-content/70">
         {t('auth.login.noAccount')} <Link to="/register" className="link link-primary font-medium">{t('auth.login.registerLink')}</Link>
       </p>
     </AuthLayout>

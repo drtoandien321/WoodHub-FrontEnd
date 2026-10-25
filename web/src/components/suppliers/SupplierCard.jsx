@@ -34,7 +34,7 @@ export default function SupplierCard({ supplier }) {
       )}
 
       {(supplier.contactEmail || supplier.contactPhone) && (
-        <div className="flex flex-col gap-1 text-xs text-base-content/55">
+        <div className="flex flex-col gap-1 text-xs text-base-content/70">
           {supplier.contactPhone && <span className="flex items-center gap-1.5"><Phone width={13} height={13} /> {supplier.contactPhone}</span>}
           {supplier.contactEmail && <span className="flex items-center gap-1.5 truncate"><Mail width={13} height={13} /> {supplier.contactEmail}</span>}
         </div>

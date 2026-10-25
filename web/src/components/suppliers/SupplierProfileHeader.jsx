@@ -37,10 +37,10 @@ export default function SupplierProfileHeader({ supplier, reviewSummary, onConta
                 <p className="mt-1.5 flex items-center gap-1.5 text-sm">
                   <Stars value={reviewSummary.average} size={14} />
                   <span className="font-medium">{reviewSummary.average.toFixed(1)}</span>
-                  <span className="text-base-content/50">{t('suppliers.reviewsCount', { count: reviewSummary.count })}</span>
+                  <span className="text-base-content/70">{t('suppliers.reviewsCount', { count: reviewSummary.count })}</span>
                 </p>
               )}
-              {supplier.hqAddress && <p className="mt-1 text-sm text-base-content/55">{supplier.hqAddress}</p>}
+              {supplier.hqAddress && <p className="mt-1 text-sm text-base-content/70">{supplier.hqAddress}</p>}
               {supplier.description && <p className="mt-2 max-w-2xl text-sm text-base-content/75">{supplier.description}</p>}
               <CapabilitySummary capability={supplier.capability} />
             </div>
@@ -67,14 +67,14 @@ function CapabilitySummary({ capability }) {
   return (
     <div className="mt-3 flex flex-col gap-1.5 text-xs text-base-content/70">
       {capability.productTypes?.length > 0 && (
-        <p className="flex flex-wrap items-center gap-1"><span className="text-base-content/50">{t('suppliers.capability.types')}:</span>
+        <p className="flex flex-wrap items-center gap-1"><span className="text-base-content/70">{t('suppliers.capability.types')}:</span>
           {capability.productTypes.map((x) => <span key={x} className="rounded-full bg-base-200 px-2 py-0.5">{x}</span>)}
         </p>
       )}
-      {capability.materials?.length > 0 && <p><span className="text-base-content/50">{t('suppliers.capability.materials')}:</span> {capability.materials.map((m) => m.name).join(', ')}</p>}
+      {capability.materials?.length > 0 && <p><span className="text-base-content/70">{t('suppliers.capability.materials')}:</span> {capability.materials.map((m) => m.name).join(', ')}</p>}
       <p className="flex flex-wrap gap-x-4">
-        {dims.length > 0 && <span><span className="text-base-content/50">{t('suppliers.capability.maxSize')}:</span> {dims.map(([k, v]) => k + ' ' + v).join(' × ')} cm</span>}
-        {capability.experienceYears != null && <span><span className="text-base-content/50">{t('suppliers.capability.experience')}:</span> {t('suppliers.capability.years', { count: capability.experienceYears })}</span>}
+        {dims.length > 0 && <span><span className="text-base-content/70">{t('suppliers.capability.maxSize')}:</span> {dims.map(([k, v]) => k + ' ' + v).join(' × ')} cm</span>}
+        {capability.experienceYears != null && <span><span className="text-base-content/70">{t('suppliers.capability.experience')}:</span> {t('suppliers.capability.years', { count: capability.experienceYears })}</span>}
       </p>
     </div>
   );

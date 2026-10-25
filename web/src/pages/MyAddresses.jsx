@@ -35,7 +35,7 @@ export default function MyAddresses() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">{t('address.pageTitle')}</h1>
-          <p className="mt-1 text-sm text-base-content/60">{t('address.pageHint')}</p>
+          <p className="mt-1 text-sm text-base-content/70">{t('address.pageHint')}</p>
         </div>
         <button onClick={() => setEditing('new')} className="btn btn-primary btn-sm gap-1.5">
           <Plus width={16} height={16} /> {t('address.add')}
@@ -55,7 +55,7 @@ export default function MyAddresses() {
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-base-300 bg-base-100 p-10 text-center">
           <span className="text-4xl" aria-hidden="true">📍</span>
           <p className="font-medium">{t('address.empty')}</p>
-          <p className="text-sm text-base-content/60">{t('address.emptyHint')}</p>
+          <p className="text-sm text-base-content/70">{t('address.emptyHint')}</p>
           <button onClick={() => setEditing('new')} className="btn btn-primary btn-sm mt-1">{t('address.add')}</button>
         </div>
       ) : (
@@ -100,7 +100,7 @@ export default function MyAddresses() {
                       onClick={() => setConfirmDeleteId(a.id)}
                       disabled={busy}
                       aria-label={`${t('address.delete')} ${a.recipientName}`}
-                      className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-error"
+                      className="btn btn-ghost btn-xs btn-circle text-base-content/70 hover:text-error"
                     >
                       <Trash width={14} height={14} />
                     </button>

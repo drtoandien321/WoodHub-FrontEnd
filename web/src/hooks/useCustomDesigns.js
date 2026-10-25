@@ -7,9 +7,6 @@ import { api } from '../api/client.js';
 export const useMyDesigns = (params) =>
   useQuery({ queryKey: ['myDesigns', params], queryFn: () => api.getMyDesigns(params) });
 
-export const useDesignDetail = (id) =>
-  useQuery({ queryKey: ['design', id], queryFn: () => api.getDesignDetail(id), enabled: !!id, retry: false });
-
 export const useCreateDesign = () => {
   const queryClient = useQueryClient();
   return useMutation({

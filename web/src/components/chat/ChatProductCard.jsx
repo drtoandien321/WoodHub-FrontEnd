@@ -27,14 +27,14 @@ export default function ChatProductCard({ product, onHide, onNavigate }) {
               type="button"
               onClick={onHide}
               aria-label={t('chat.hideProduct')}
-              className="btn btn-ghost btn-xs btn-circle -mt-1 -mr-1 text-base-content/45"
+              className="btn btn-ghost btn-xs btn-circle -mt-1 -mr-1 text-base-content/70"
             >
               <Pin width={14} height={14} />
             </button>
           </div>
           <p className="mt-0.5 font-semibold text-primary">{formatVnd(product.price)}</p>
           {product.supplierName && (
-            <p className="truncate text-xs text-base-content/55">{product.supplierName}</p>
+            <p className="truncate text-xs text-base-content/70">{product.supplierName}</p>
           )}
           <Link
             to={`/product/${product.id}`}

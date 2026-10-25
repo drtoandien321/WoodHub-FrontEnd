@@ -13,12 +13,12 @@ export default function QuotePricing({ quote, viewer = 'customer' }) {
   const m = quoteCardModel(quote);
 
   if (m.kind === 'empty') {
-    return <p className="mt-2 text-sm text-base-content/40">{t('quote.card.noQuote')}</p>;
+    return <p className="mt-2 text-sm text-base-content/70">{t('quote.card.noQuote')}</p>;
   }
 
-  const unit = <span className="text-xs font-normal text-base-content/55"> {t('quote.card.perUnit')}</span>;
+  const unit = <span className="text-xs font-normal text-base-content/70"> {t('quote.card.perUnit')}</span>;
   const totalLine = m.total !== null && (
-    <p className="text-xs text-base-content/60">
+    <p className="text-xs text-base-content/70">
       {t('quote.card.total')}: <span className="font-medium">{formatVnd(m.total)}</span> (×{m.quantity})
     </p>
   );
@@ -29,7 +29,7 @@ export default function QuotePricing({ quote, viewer = 'customer' }) {
         <p className="text-sm text-base-content/70">
           <span className="line-through">{formatVnd(m.price)}</span>{unit}
         </p>
-        <p className="text-xs text-base-content/50">{t('quote.card.lastPrice')}</p>
+        <p className="text-xs text-base-content/70">{t('quote.card.lastPrice')}</p>
       </div>
     );
   }
@@ -41,7 +41,7 @@ export default function QuotePricing({ quote, viewer = 'customer' }) {
           {formatVnd(m.price)}{unit}
         </p>
         {totalLine}
-        <p className="mt-0.5 text-xs text-base-content/60">
+        <p className="mt-0.5 text-xs text-base-content/70">
           {t('quote.card.agreedPrice')}
           {m.days !== null && ` · ${t('quote.card.aboutDays', { days: m.days })}`}
           {m.date && ` · ${t('quote.card.expectedBy', { date: formatDay(m.date, i18n.language) })}`}
@@ -60,7 +60,7 @@ export default function QuotePricing({ quote, viewer = 'customer' }) {
         {formatVnd(m.price)}{unit}
       </p>
       {totalLine}
-      <p className="mt-0.5 text-xs text-base-content/60">
+      <p className="mt-0.5 text-xs text-base-content/70">
         {byLabel}
         {m.rounds > 0 && ` · ${t('quote.card.rounds', { count: m.rounds })}`}
         {m.days !== null && ` · ${t('quote.card.aboutDays', { days: m.days })}`}

@@ -61,14 +61,14 @@ export default function AdminUserDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="flex items-center gap-1.5 text-sm text-base-content/55">
+      <nav className="flex items-center gap-1.5 text-sm text-base-content/70">
         <Link to="/admin/users" className="hover:text-primary">Người dùng</Link>
         <span>/</span><span className="font-medium text-base-content/80">Chi tiết</span>
       </nav>
 
       <header>
         <h1 className="font-display text-3xl">{user.email}</h1>
-        <p className="mt-1 text-base-content/60">{ROLE_LABEL[user.role] ?? user.role} · {CUSTOMER_TYPE_LABEL[user.customerType] ?? '—'}</p>
+        <p className="mt-1 text-base-content/70">{ROLE_LABEL[user.role] ?? user.role} · {CUSTOMER_TYPE_LABEL[user.customerType] ?? '—'}</p>
       </header>
 
       <section className="max-w-xl rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
@@ -142,7 +142,7 @@ function LockSection({ user }) {
         </label>
       )}
       {user.role === 'supplier' && !locked && (
-        <p className="mb-3 text-xs text-base-content/55">Khoá tài khoản không ẩn sản phẩm của NCC. Muốn ngừng bán, hãy đình chỉ NCC ở trang Nhà cung cấp.</p>
+        <p className="mb-3 text-xs text-base-content/70">Khoá tài khoản không ẩn sản phẩm của NCC. Muốn ngừng bán, hãy đình chỉ NCC ở trang Nhà cung cấp.</p>
       )}
       {err && <p className="mb-2 text-xs text-error">{err}</p>}
       <button onClick={submit} disabled={setStatus.isPending} className={`btn ${locked ? 'btn-primary' : 'btn-error btn-outline'}`}>

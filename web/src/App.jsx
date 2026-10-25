@@ -93,6 +93,7 @@ const NotificationSettingsRedirect = lazy(() => import('./pages/NotificationSett
 const Notifications = lazy(() => import('./pages/Notifications.jsx'));
 const AdminRefunds = lazy(() => import('./pages/admin/AdminRefunds.jsx'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews.jsx'));
+const AdminPlatformFeedback = lazy(() => import('./pages/admin/AdminPlatformFeedback.jsx'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts.jsx'));
 const AdminModels3d = lazy(() => import('./pages/admin/AdminModels3d.jsx'));
 const BulkQuotes = lazy(() => import('./pages/bulk/BulkQuotes.jsx'));
@@ -246,6 +247,7 @@ export default function App() {
             <Route path="credit-packs" element={<AdminCreditPacks />} />
             <Route path="refunds" element={<AdminRefunds />} />
             <Route path="reviews" element={<AdminReviews />} />
+            <Route path="feedback" element={<AdminPlatformFeedback />} />
             <Route path="contacts" element={<AdminContacts />} />
             <Route path="models3d" element={<AdminModels3d />} />
           </Route>

@@ -24,7 +24,7 @@ export default function WorkshopOrders() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">{t('quote.incomingTitle')}</h1>
-        <p className="mt-1 text-base-content/60">{t('quote.incomingSubtitle')}</p>
+        <p className="mt-1 text-base-content/70">{t('quote.incomingSubtitle')}</p>
       </header>
 
       <div className="overflow-x-auto">
@@ -54,13 +54,13 @@ export default function WorkshopOrders() {
                   <p className="font-medium">{q.customerName}</p>
                   <StatusBadge meta={quoteMeta(q.status)} />
                 </div>
-                <p className="mt-0.5 text-sm text-base-content/60">{t('quote.quantity')}: {q.quantity}{q.location ? ` · ${q.location}` : ''}</p>
+                <p className="mt-0.5 text-sm text-base-content/70">{t('quote.quantity')}: {q.quantity}{q.location ? ` · ${q.location}` : ''}</p>
               </div>
             </Link>
           ))}
         </div>
       ) : (
-        <p className="py-10 text-center text-base-content/50">{t('quote.emptyIncoming')}</p>
+        <p className="py-10 text-center text-base-content/70">{t('quote.emptyIncoming')}</p>
       )}
     </div>
   );

@@ -67,7 +67,7 @@ export default function Orders() {
                       <span className={`badge badge-sm ${orderStatusBadge(o.status)}`}>{t(`orders.status.${o.status}`)}</span>
                     </div>
                     <p className="mt-1 text-sm font-medium">{o.supplierName}</p>
-                    <p className="mt-0.5 text-xs text-base-content/60">
+                    <p className="mt-0.5 text-xs text-base-content/70">
                       {t('orders.date', { date: formatDate(o.placedAt ?? o.createdAt) })} · {t('orders.itemsCount', { count: o.items?.length ?? 0 })}
                     </p>
                     {o.status === 'pending_payment' && o.paymentStatus === 'pending' && (
@@ -76,7 +76,7 @@ export default function Orders() {
                     <OrderDeadlineNote order={o} compact />
                   </div>
                   <div className="flex flex-col sm:items-end">
-                    <span className="text-xs text-base-content/60">{t('checkout.orderTotal')}</span>
+                    <span className="text-xs text-base-content/70">{t('checkout.orderTotal')}</span>
                     <span className="text-lg font-semibold text-primary">{formatVnd(o.totalAmount)}</span>
                   </div>
                 </Link>

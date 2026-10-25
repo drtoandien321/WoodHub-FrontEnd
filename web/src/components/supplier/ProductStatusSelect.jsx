@@ -40,9 +40,9 @@ export default function ProductStatusSelect({ product, size = 'sm' }) {
         >
           {Object.entries(PRODUCT_STATUS).map(([v, m]) => <option key={v} value={v}>{m.option}</option>)}
         </select>
-        {updateStatus.isPending && <span className="loading loading-spinner loading-xs text-base-content/50" />}
+        {updateStatus.isPending && <span className="loading loading-spinner loading-xs text-base-content/70" />}
       </span>
-      {size !== 'sm' && <span className="text-xs text-base-content/50">{PRODUCT_STATUS[product.status]?.hint}</span>}
+      {size !== 'sm' && <span className="text-xs text-base-content/70">{PRODUCT_STATUS[product.status]?.hint}</span>}
       {error && <span className="max-w-xs text-xs text-error">{error}</span>}
     </div>
   );

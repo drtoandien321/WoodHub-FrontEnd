@@ -36,7 +36,7 @@ export default function AdminUsers() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Người dùng</h1>
-        <p className="mt-1 text-base-content/60">Xem, sửa, khoá và xoá tài khoản người dùng trên hệ thống.</p>
+        <p className="mt-1 text-base-content/70">Xem, sửa, khoá và xoá tài khoản người dùng trên hệ thống.</p>
       </header>
 
       <div className="inline-flex w-fit gap-1 rounded-2xl border border-base-300 bg-base-100 p-1 shadow-sm">
@@ -49,12 +49,12 @@ export default function AdminUsers() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Email</th><th>Họ tên</th><th>Vai trò</th><th>Loại KH</th><th>Ngày tạo</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={6} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={6} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!isLoading && items.map((u) => (
                 <tr key={u.id} className="hover:bg-base-200/50">
                   <td>
@@ -64,7 +64,7 @@ export default function AdminUsers() {
                   <td className="text-sm">{u.fullName}</td>
                   <td className="text-sm">{ROLE_LABEL[u.role] ?? u.role}</td>
                   <td className="text-sm">{CUSTOMER_TYPE_LABEL[u.customerType] ?? '—'}</td>
-                  <td className="text-sm text-base-content/60">{new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
+                  <td className="text-sm text-base-content/70">{new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <Link to={`/admin/users/${u.id}`} className="btn btn-ghost btn-xs btn-square" aria-label="Xem/Sửa"><Eye width={15} height={15} /></Link>
@@ -74,7 +74,7 @@ export default function AdminUsers() {
                 </tr>
               ))}
               {!isLoading && !items.length && (
-                <tr><td colSpan={6} className="py-10 text-center text-base-content/50">Không có người dùng nào.</td></tr>
+                <tr><td colSpan={6} className="py-10 text-center text-base-content/70">Không có người dùng nào.</td></tr>
               )}
             </tbody>
           </table>

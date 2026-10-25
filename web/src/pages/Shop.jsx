@@ -155,7 +155,7 @@ export default function Shop() {
           </span>
         </div>
         <input type="range" aria-label={t('shop.filterMaxPrice')} min={PRICE_MIN} max={PRICE_MAX} step="500000" value={priceDisplay} onChange={handlePriceChange} className="range range-primary range-sm" />
-        <div className="flex justify-between text-xs mt-2 text-base-content/60">
+        <div className="flex justify-between text-xs mt-2 text-base-content/70">
           <span>{t('shop.priceMin')}</span>
           <span>{t('shop.priceMax')}</span>
         </div>
@@ -258,7 +258,7 @@ export default function Shop() {
                   <button onClick={() => setParam('page', String(page - 1), { resetPage: false })} disabled={page <= 0} className="btn btn-outline btn-sm border-base-300">
                     {t('shop.prevPage')}
                   </button>
-                  <span className="text-sm text-base-content/55">{page + 1} / {pageInfo.totalPages}</span>
+                  <span className="text-sm text-base-content/70">{page + 1} / {pageInfo.totalPages}</span>
                   <button onClick={() => setParam('page', String(page + 1), { resetPage: false })} disabled={page + 1 >= pageInfo.totalPages} className="btn btn-outline btn-sm border-base-300">
                     {t('shop.nextPage')}
                   </button>

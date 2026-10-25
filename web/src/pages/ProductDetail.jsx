@@ -10,6 +10,7 @@ import RelatedProducts from '../components/product/RelatedProducts.jsx';
 import BulkQuoteRequestButton from '../components/bulk/BulkQuoteRequestButton.jsx';
 import ProductModel3dButton from '../components/product/ProductModel3dButton.jsx';
 import ReviewSection from '../components/reviews/ReviewSection.jsx';
+import { trackEvent } from '../services/analytics.js';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -60,6 +61,11 @@ export default function ProductDetail() {
       return false;
     }
     await addCartItem.mutateAsync({ variantId: variant.id, quantity: qty });
+    const price = Number(variant.price) || 0;
+    trackEvent('add_to_cart', {
+      currency: 'VND', value: price * qty,
+      items: [{ item_id: variant.id, item_name: product.name, item_brand: product.supplierName, price, quantity: qty }],
+    });
     return true;
   };
   const buyNow = async (qty, variant) => {
@@ -69,7 +75,7 @@ export default function ProductDetail() {
   return (
     <div className="flex flex-col gap-12">
       {/* Breadcrumb */}
-      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-base-content/55">
+      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-base-content/70">
         <Link to="/" className="hover:text-primary">{t('suppliers.breadcrumbHome')}</Link>
         <span>/</span>
         <Link to="/shop" className="hover:text-primary">{t('nav.shop')}</Link>

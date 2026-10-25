@@ -40,7 +40,7 @@ export default function ChatMessageBubble({ message, onRetry, onNavigate, own })
             isUser ? 'rounded-br-md' : 'rounded-bl-md'
           }`}
         >
-          <p className="text-[11px] font-medium uppercase tracking-wide text-base-content/45">{t('chat.productContext')}</p>
+          <p className="text-[11px] font-medium uppercase tracking-wide text-base-content/70">{t('chat.productContext')}</p>
           <p className="mt-0.5 font-medium leading-snug text-base-content">{message.text}</p>
           <Link
             to={`/product/${productId}`}
@@ -61,7 +61,7 @@ export default function ChatMessageBubble({ message, onRetry, onNavigate, own })
           {message.text}
         </div>
       )}
-      <div className="mt-1 flex items-center gap-1 px-1 text-[11px] text-base-content/45">
+      <div className="mt-1 flex items-center gap-1 px-1 text-[11px] text-base-content/70">
         <span>{fmtTime(message.at)}</span>
         {isUser && message.status === 'sending' && <span>· {t('chat.status.sending')}</span>}
         {isUser && message.status === 'sent' && <Check width={13} height={13} />}

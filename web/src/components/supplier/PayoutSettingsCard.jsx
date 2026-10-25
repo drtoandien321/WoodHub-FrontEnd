@@ -79,17 +79,17 @@ export default function PayoutSettingsCard() {
         <h2 className="font-display text-lg">Tài khoản nhận tiền</h2>
         {!editing && payout?.configured && <button type="button" onClick={startEdit} className="btn btn-outline btn-sm">Đổi tài khoản</button>}
       </div>
-      <p className="mb-4 text-xs text-base-content/55">WoodHub chuyển tiền bán hàng (sau hoa hồng) vào tài khoản này. Số tài khoản được mã hoá, chỉ hiển thị 4 số cuối.</p>
+      <p className="mb-4 text-xs text-base-content/70">WoodHub chuyển tiền bán hàng (sau hoa hồng) vào tài khoản này. Số tài khoản được mã hoá, chỉ hiển thị 4 số cuối.</p>
 
       {isError && <p className="mb-3 text-sm text-error">Không tải được thông tin nhận tiền.</p>}
 
       {!editing && payout?.configured && (
         <dl className="grid grid-cols-1 gap-3 rounded-xl bg-base-200/50 p-4 text-sm sm:grid-cols-2">
-          <div><dt className="text-xs text-base-content/55">Ngân hàng</dt><dd className="font-medium">{payout.bankName} ({payout.bankCode})</dd></div>
-          <div><dt className="text-xs text-base-content/55">Số tài khoản</dt><dd className="font-mono font-medium">{payout.accountNumberMasked}</dd></div>
-          <div><dt className="text-xs text-base-content/55">Chủ tài khoản</dt><dd className="font-medium">{payout.accountHolder}</dd></div>
-          <div><dt className="text-xs text-base-content/55">Chi nhánh</dt><dd className="font-medium">{payout.branch || '—'}</dd></div>
-          {payout.updatedAt && <p className="text-xs text-base-content/45 sm:col-span-2">Cập nhật {formatDate(payout.updatedAt)}</p>}
+          <div><dt className="text-xs text-base-content/70">Ngân hàng</dt><dd className="font-medium">{payout.bankName} ({payout.bankCode})</dd></div>
+          <div><dt className="text-xs text-base-content/70">Số tài khoản</dt><dd className="font-mono font-medium">{payout.accountNumberMasked}</dd></div>
+          <div><dt className="text-xs text-base-content/70">Chủ tài khoản</dt><dd className="font-medium">{payout.accountHolder}</dd></div>
+          <div><dt className="text-xs text-base-content/70">Chi nhánh</dt><dd className="font-medium">{payout.branch || '—'}</dd></div>
+          {payout.updatedAt && <p className="text-xs text-base-content/70 sm:col-span-2">Cập nhật {formatDate(payout.updatedAt)}</p>}
         </dl>
       )}
 
@@ -108,7 +108,7 @@ export default function PayoutSettingsCard() {
               <option value="">— Chọn ngân hàng —</option>
               {banks.map((b) => <option key={b.code} value={b.code}>{b.shortName} — {b.name}</option>)}
             </select>
-            {banksQuery.isError && <span className="text-xs text-base-content/45">Không tải được danh sách đầy đủ, đang hiện các ngân hàng phổ biến.</span>}
+            {banksQuery.isError && <span className="text-xs text-base-content/70">Không tải được danh sách đầy đủ, đang hiện các ngân hàng phổ biến.</span>}
             {errors.bankCode && <span className="text-xs text-error">{errors.bankCode}</span>}
           </label>
           <label className="flex flex-col gap-1.5">
@@ -125,7 +125,7 @@ export default function PayoutSettingsCard() {
             <span className="text-sm text-base-content/70">Chi nhánh</span>
             <input value={form.branch} onChange={set('branch')} className="input input-bordered w-full" placeholder="VD: Hà Nội" />
           </label>
-          {payout?.configured && <p className="text-xs text-base-content/55 sm:col-span-2">Vì lý do bảo mật, cần nhập lại đầy đủ số tài khoản khi thay đổi.</p>}
+          {payout?.configured && <p className="text-xs text-base-content/70 sm:col-span-2">Vì lý do bảo mật, cần nhập lại đầy đủ số tài khoản khi thay đổi.</p>}
           {submitError && <p className="text-sm text-error sm:col-span-2" role="alert">{submitError}</p>}
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button type="button" onClick={() => setEditing(false)} disabled={save.isPending} className="btn btn-ghost">Hủy</button>

@@ -44,8 +44,8 @@ export default function SupplierOverviewCard({ title = 'Tổng quan doanh nghi�
       <dl className="mt-5 flex flex-col divide-y divide-base-200">
         {rows.map((r) => (
           <div key={r.label} className="flex items-center justify-between gap-3 py-2.5">
-            <dt className="flex items-center gap-2 text-xs text-base-content/55"><r.icon width={14} height={14} className="text-base-content/40" />{r.label}</dt>
-            <dd className="min-w-0 truncate text-right text-sm font-medium">{r.value || <span className="text-base-content/35">Chưa có</span>}</dd>
+            <dt className="flex items-center gap-2 text-xs text-base-content/70"><r.icon width={14} height={14} className="text-base-content/70" />{r.label}</dt>
+            <dd className="min-w-0 truncate text-right text-sm font-medium">{r.value || <span className="text-base-content/70">Chưa có</span>}</dd>
           </div>
         ))}
       </dl>

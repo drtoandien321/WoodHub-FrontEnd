@@ -114,7 +114,7 @@ export default function PricingSection({ standalone = false }) {
                   ) : (
                     <>
                       <span className="font-display text-3xl text-primary">{formatVnd(plan.price)}</span>
-                      <span className="text-sm text-base-content/60">{t('pricing.perMonth')}</span>
+                      <span className="text-sm text-base-content/70">{t('pricing.perMonth')}</span>
                     </>
                   )}
                 </div>

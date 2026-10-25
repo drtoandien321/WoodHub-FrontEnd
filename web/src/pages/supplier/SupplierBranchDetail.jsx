@@ -79,14 +79,14 @@ export default function SupplierBranchDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="flex items-center gap-1.5 text-sm text-base-content/55">
+      <nav className="flex items-center gap-1.5 text-sm text-base-content/70">
         <Link to="/portal/supplier/branches" className="hover:text-primary">Chi nhánh</Link>
         <span>/</span><span className="font-medium text-base-content/80">Chi tiết chi nhánh</span>
       </nav>
       <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Chi tiết chi nhánh</h1>
-          <p className="mt-1 text-base-content/60">Xem thông tin và quản lý tồn kho của chi nhánh.</p>
+          <p className="mt-1 text-base-content/70">Xem thông tin và quản lý tồn kho của chi nhánh.</p>
         </div>
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-base-200 text-primary"><Store width={26} height={26} /></span>
       </header>
@@ -97,7 +97,7 @@ export default function SupplierBranchDetail() {
           <dl className="flex flex-col gap-3.5">
             {rows.map((r) => (
               <div key={r.label} className="flex gap-3">
-                <dt className="flex w-36 shrink-0 items-center gap-2 text-sm text-base-content/55"><r.icon width={15} height={15} className="text-base-content/40" />{r.label}</dt>
+                <dt className="flex w-36 shrink-0 items-center gap-2 text-sm text-base-content/70"><r.icon width={15} height={15} className="text-base-content/70" />{r.label}</dt>
                 <dd className="text-sm">{r.value}</dd>
               </div>
             ))}
@@ -111,7 +111,7 @@ export default function SupplierBranchDetail() {
         <section className="rounded-2xl border border-base-300 bg-base-100 p-3 shadow-sm">
           <div className="relative h-full min-h-64 overflow-hidden rounded-xl bg-[linear-gradient(135deg,#eef0e8_0%,#dfe5d4_60%,#cfe0e8_100%)]">
             <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-primary"><MapPin width={34} height={34} /></span>
-            <span className="absolute bottom-2 right-2 rounded-md bg-base-100/80 px-2 py-1 text-[11px] text-base-content/60">Bản đồ minh hoạ</span>
+            <span className="absolute bottom-2 right-2 rounded-md bg-base-100/80 px-2 py-1 text-[11px] text-base-content/70">Bản đồ minh hoạ</span>
           </div>
         </section>
       </div>
@@ -128,13 +128,13 @@ export default function SupplierBranchDetail() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Sản phẩm</th><th>SKU / Màu / Kích thước</th><th className="text-right">Giá</th>
                 <th className="text-right">Tồn kho</th><th>Điều chỉnh</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {loadingInventory && <tr><td colSpan={6} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {loadingInventory && <tr><td colSpan={6} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!loadingInventory && (inventory ?? []).map((inv) => (
                 <tr key={inv.variantId} className="hover:bg-base-200/50">
                   <td className="text-sm font-medium">{productNameById.get(inv.productId) ?? '—'}</td>
@@ -160,7 +160,7 @@ export default function SupplierBranchDetail() {
                 </tr>
               ))}
               {!loadingInventory && !inventory?.length && (
-                <tr><td colSpan={6} className="py-10 text-center text-base-content/50">Chưa có biến thể nào trong kho chi nhánh này.</td></tr>
+                <tr><td colSpan={6} className="py-10 text-center text-base-content/70">Chưa có biến thể nào trong kho chi nhánh này.</td></tr>
               )}
             </tbody>
           </table>

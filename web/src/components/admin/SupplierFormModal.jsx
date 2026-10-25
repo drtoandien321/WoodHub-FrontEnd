@@ -88,14 +88,14 @@ export default function SupplierFormModal({ open, onClose }) {
                   <input type="radio" name="type" value="retailer" checked={form.type === 'retailer'} onChange={set('type')} className="radio radio-sm radio-primary" />
                   Retailer
                 </span>
-                <span className="text-xs text-base-content/60">Doanh nghiệp nội thất, có thể có nhiều chi nhánh, bán sản phẩm sẵn (catalog).</span>
+                <span className="text-xs text-base-content/70">Doanh nghiệp nội thất, có thể có nhiều chi nhánh, bán sản phẩm sẵn (catalog).</span>
               </label>
               <label className={`flex cursor-pointer flex-col gap-1 rounded-xl border p-3 text-sm transition-colors ${form.type === 'workshop' ? 'border-primary bg-primary/5' : 'border-base-300'}`}>
                 <span className="flex items-center gap-2 font-medium">
                   <input type="radio" name="type" value="workshop" checked={form.type === 'workshop'} onChange={set('type')} className="radio radio-sm radio-primary" />
                   Workshop
                 </span>
-                <span className="text-xs text-base-content/60">Xưởng sản xuất, thường 1 địa chỉ, chỉ nhận đơn đặt làm theo yêu cầu (custom).</span>
+                <span className="text-xs text-base-content/70">Xưởng sản xuất, thường 1 địa chỉ, chỉ nhận đơn đặt làm theo yêu cầu (custom).</span>
               </label>
             </div>
           </fieldset>

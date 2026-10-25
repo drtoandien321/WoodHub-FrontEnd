@@ -70,14 +70,14 @@ export default function VoucherPicker({ vouchers, selectedIds, onChange, hasAddr
                     {v.recommended && v.eligible && <span className="badge badge-success badge-xs">{t('checkout.voucherRecommended')}</span>}
                     {shipping && <span className="badge badge-ghost badge-xs">{t('checkout.voucherShippingTag')}</span>}
                   </span>
-                  <span className="block text-xs text-base-content/55">
+                  <span className="block text-xs text-base-content/70">
                     {v.scope === 'shop' ? t('checkout.voucherShop', { shop: v.supplierName }) : t('checkout.voucherPlatform')}
                     {meta && ` · ${meta}`}
                   </span>
                   {v.eligible ? (
                     v.estimatedDiscount != null
                       ? <span className="mt-0.5 block text-xs font-medium text-success">{t('checkout.voucherSave', { amount: formatVnd(v.estimatedDiscount) })}</span>
-                      : shipping && !hasAddress && <span className="mt-0.5 block text-xs text-base-content/50">{t('checkout.voucherShipNeedAddress')}</span>
+                      : shipping && !hasAddress && <span className="mt-0.5 block text-xs text-base-content/70">{t('checkout.voucherShipNeedAddress')}</span>
                   ) : (
                     <span className="mt-0.5 block text-xs text-warning">{reasonText(v)}</span>
                   )}
@@ -101,7 +101,7 @@ export default function VoucherPicker({ vouchers, selectedIds, onChange, hasAddr
         </button>
       )}
       {selectedIds.length > 0 && (
-        <p className="flex items-center gap-1 text-xs text-base-content/60">
+        <p className="flex items-center gap-1 text-xs text-base-content/70">
           <Check width={12} height={12} className="text-success" /> {t('checkout.voucherSelectedCount', { count: selectedIds.length })}
         </p>
       )}

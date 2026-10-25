@@ -82,9 +82,9 @@ export default function AdminShippingConfig() {
       <span className="text-sm text-base-content/70">{label}</span>
       <div className="join w-full">
         <input type="number" min="0" value={form[k]} onChange={set(k)} className={`input input-bordered join-item w-full ${errors[k] ? 'input-error' : ''}`} />
-        <span className="join-item flex items-center border border-base-300 bg-base-200 px-3 text-sm text-base-content/60">{suffix}</span>
+        <span className="join-item flex items-center border border-base-300 bg-base-200 px-3 text-sm text-base-content/70">{suffix}</span>
       </div>
-      {errors[k] ? <span className="text-xs text-error">{errors[k]}</span> : hint && <span className="text-xs text-base-content/45">{hint}</span>}
+      {errors[k] ? <span className="text-xs text-error">{errors[k]}</span> : hint && <span className="text-xs text-base-content/70">{hint}</span>}
     </label>
   );
 
@@ -92,7 +92,7 @@ export default function AdminShippingConfig() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Phí vận chuyển</h1>
-        <p className="mt-1 text-base-content/60">Áp dụng cho mọi đơn B2C. Khoảng cách tính từ chi nhánh gần khách nhất của từng nhà cung cấp.</p>
+        <p className="mt-1 text-base-content/70">Áp dụng cho mọi đơn B2C. Khoảng cách tính từ chi nhánh gần khách nhất của từng nhà cung cấp.</p>
       </header>
 
       <div className="@container"><div className="grid items-start gap-6 @4xl:grid-cols-[1fr_320px]">
@@ -121,7 +121,7 @@ export default function AdminShippingConfig() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-base-200 pt-4">
-            <p className="text-xs text-base-content/50">{cfg?.updatedAt && `Cập nhật lần cuối: ${formatDate(cfg.updatedAt)}`}</p>
+            <p className="text-xs text-base-content/70">{cfg?.updatedAt && `Cập nhật lần cuối: ${formatDate(cfg.updatedAt)}`}</p>
             <div className="flex gap-2">
               <button onClick={() => { setForm(toForm(cfg)); setErrors({}); setMsg(null); }} disabled={update.isPending} className="btn btn-ghost">Hoàn tác</button>
               <button onClick={save} disabled={update.isPending} className="btn btn-primary">
@@ -147,7 +147,7 @@ export default function AdminShippingConfig() {
             <span className="text-sm">Phí ship</span>
             <span className="text-xl font-semibold text-primary">{fee == null ? '—' : fee === 0 ? 'Miễn phí' : formatVnd(fee)}</span>
           </div>
-          <p className="text-xs text-base-content/50">Xem trước theo số đang nhập. Phí thật do hệ thống tính lúc khách đặt hàng.</p>
+          <p className="text-xs text-base-content/70">Xem trước theo số đang nhập. Phí thật do hệ thống tính lúc khách đặt hàng.</p>
         </aside>
       </div></div>
     </div>

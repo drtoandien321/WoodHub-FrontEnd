@@ -21,7 +21,7 @@ export default function MyQuotes() {
     <div className="flex flex-col gap-6 max-w-4xl">
       <div>
         <h1 className="font-display text-3xl">{t('quote.myQuotesTitle')}</h1>
-        <p className="mt-1 text-sm text-base-content/60">{t('quote.myQuotesSubtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('quote.myQuotesSubtitle')}</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -52,7 +52,7 @@ export default function MyQuotes() {
                   {/* quoteMeta đã lấy nhãn từ i18n */}
                   <StatusBadge meta={quoteMeta(q.status)} />
                 </div>
-                <p className="mt-0.5 text-sm text-base-content/60">{t('quote.quantity')}: {q.quantity}{q.location ? ` · ${q.location}` : ''}</p>
+                <p className="mt-0.5 text-sm text-base-content/70">{t('quote.quantity')}: {q.quantity}{q.location ? ` · ${q.location}` : ''}</p>
                 <QuotePricing quote={q} viewer="customer" />
               </div>
             </Link>

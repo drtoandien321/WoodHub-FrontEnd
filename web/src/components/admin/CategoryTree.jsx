@@ -18,7 +18,7 @@ function TreeNode({ node, depth, onEdit, onDelete }) {
           </button>
         ) : <span className="w-6 shrink-0" />}
         <span className="flex-1 truncate text-sm font-medium">{node.name}</span>
-        <span className="hidden text-xs text-base-content/40 sm:inline">{node.slug}</span>
+        <span className="hidden text-xs text-base-content/70 sm:inline">{node.slug}</span>
         <button onClick={() => onEdit(node)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa"><Pencil width={14} height={14} /></button>
         <button onClick={() => onDelete(node)} className="btn btn-ghost btn-xs btn-square text-error" aria-label="Xóa"><Trash width={14} height={14} /></button>
       </div>
@@ -36,7 +36,7 @@ function TreeNode({ node, depth, onEdit, onDelete }) {
 export default function CategoryTree({ nodes, onEdit, onDelete }) {
   if (!nodes.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/50">
+      <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/70">
         Chưa có danh mục nào. Bấm "Thêm danh mục" để bắt đầu.
       </div>
     );

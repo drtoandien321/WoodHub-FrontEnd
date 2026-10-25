@@ -57,7 +57,7 @@ export default function NotificationSettingsCard() {
   return (
     <section id="notifications" className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <h2 className="mb-1 font-display text-lg">{t('notifSettings.title')}</h2>
-      <p className="mb-4 text-xs text-base-content/55">{t('notifSettings.subtitle')}</p>
+      <p className="mb-4 text-xs text-base-content/70">{t('notifSettings.subtitle')}</p>
       {isLoading ? (
         <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-12 rounded-xl" />)}</div>
       ) : isError ? (
@@ -68,7 +68,7 @@ export default function NotificationSettingsCard() {
             <li key={s.type} className="flex items-center justify-between gap-4 py-3">
               <span className="min-w-0 text-sm">
                 <span className="block font-medium">{t(`notifSettings.types.${s.type}.label`, { defaultValue: s.type })}</span>
-                <span className="block text-xs text-base-content/55">
+                <span className="block text-xs text-base-content/70">
                   {t(`notifSettings.types.${s.type}.desc`, { defaultValue: '' })}
                   {s.type === 'ORDER_PAID' && <span className="text-warning"> {t('notifSettings.orderPaidTip')}</span>}
                 </span>

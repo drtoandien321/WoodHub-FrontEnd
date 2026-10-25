@@ -107,7 +107,7 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
       <div className="flex flex-col items-center gap-2 text-center" role="status">
         <div className="text-4xl" aria-hidden="true">✅</div>
         <p className="font-medium">{t('payment.success')}</p>
-        <p className="text-sm text-base-content/60">{t('payment.successDesc', { plan: plan.displayName })}</p>
+        <p className="text-sm text-base-content/70">{t('payment.successDesc', { plan: plan.displayName })}</p>
         <button onClick={onClose} className="btn btn-primary mt-2 w-full">{t('payment.close')}</button>
       </div>
     );
@@ -132,9 +132,9 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
       <div className="flex flex-col items-center gap-2 text-center">
         <img src={payment.qrUrl} alt={t('payment.qrAlt')} className="h-52 w-52 rounded-xl border border-base-300 bg-white object-contain sm:h-56 sm:w-56" />
         <p className="font-display text-2xl text-primary">{formatVnd(payment.amount)}</p>
-        <p className="text-xs text-base-content/60">{t('payment.transferContent')}: <span className="font-mono font-medium">{payment.txnRef}</span></p>
-        <p className="text-xs text-base-content/60">{t('payment.scan')}</p>
-        <p className="text-xs text-base-content/45">{t('payment.qrExpiresAt', { time: formatDate(payment.expiresAt) })}</p>
+        <p className="text-xs text-base-content/70">{t('payment.transferContent')}: <span className="font-mono font-medium">{payment.txnRef}</span></p>
+        <p className="text-xs text-base-content/70">{t('payment.scan')}</p>
+        <p className="text-xs text-base-content/70">{t('payment.qrExpiresAt', { time: formatDate(payment.expiresAt) })}</p>
         <p className="mt-1 flex items-center gap-2 text-sm text-base-content/70" role="status">
           <span className="loading loading-dots loading-xs text-primary" aria-hidden="true" />
           {t('payment.waiting')}
@@ -143,7 +143,7 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
     );
   } else {
     body = (
-      <p className="flex items-center justify-center gap-2 py-8 text-sm text-base-content/60" role="status">
+      <p className="flex items-center justify-center gap-2 py-8 text-sm text-base-content/70" role="status">
         <span className="loading loading-spinner loading-md text-primary" aria-hidden="true" />
         {t('payment.creating')}
       </p>
@@ -171,7 +171,7 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
           <section aria-label={t('payment.receiveTitle')} className="rounded-2xl bg-base-200/60 p-4">
             <div className="flex items-baseline justify-between gap-3">
               <h3 className="text-sm font-semibold">{t('payment.receiveTitle')}</h3>
-              <p className="text-sm"><span className="font-semibold text-primary">{formatVnd(plan.price)}</span> <span className="text-base-content/55">{t('payment.perMonth')}</span></p>
+              <p className="text-sm"><span className="font-semibold text-primary">{formatVnd(plan.price)}</span> <span className="text-base-content/70">{t('payment.perMonth')}</span></p>
             </div>
             {highlights.length > 0 && (
               <>
@@ -185,7 +185,7 @@ export default function PaymentQrModal({ open, plan, subscription = null, onClos
             )}
             {/* Ẩn sau khi đã thanh toán: lúc đó gói vừa được kích hoạt nên "sẽ cộng dồn" sẽ sai nghĩa */}
             {validity && status !== 'paid' && (
-              <p className="mt-3 text-xs text-base-content/60">
+              <p className="mt-3 text-xs text-base-content/70">
                 {validity.stacked
                   ? t('payment.validityStacked', { current: formatDay(validity.currentEnd, lang), to: formatDay(validity.to, lang) })
                   : t('payment.validity', { from: formatDay(validity.from, lang), to: formatDay(validity.to, lang) })}

@@ -80,10 +80,11 @@ function RatingStatCard({ platform, reviews }) {
     reviews && `Sản phẩm & NCC ${fmtRating(reviews.avgRating)} (${reviews.count})`,
     !FEEDBACK_ENABLED && 'đánh giá web/app: chờ BE',
   ].filter(Boolean);
+  // Số chính là điểm web/app → bấm mở trang Đánh giá WoodHub; chưa có lượt nào thì mở kiểm duyệt đánh giá SP & NCC
   return (
     <StatCard icon={Star} label={hasPlatform ? `Đánh giá người dùng · ${platform.count} lượt` : 'Đánh giá người dùng'}
       value={hasPlatform ? fmtRating(platform.avgRating) : fmtRating(reviews?.avgRating)}
-      hint={parts.join(' · ') || 'Đang tải…'} to="/admin/reviews" iconWrap="bg-warning/10 text-warning" />
+      hint={parts.join(' · ') || 'Đang tải…'} to={hasPlatform ? '/admin/feedback' : '/admin/reviews'} iconWrap="bg-warning/10 text-warning" />
   );
 }
 
@@ -91,7 +92,7 @@ function ChartCard({ title, children, empty }) {
   return (
     <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <h2 className="mb-3 font-display text-lg">{title}</h2>
-      {empty ? <p className="py-10 text-center text-sm text-base-content/50">Chưa có dữ liệu trong khoảng này.</p> : children}
+      {empty ? <p className="py-10 text-center text-sm text-base-content/70">Chưa có dữ liệu trong khoảng này.</p> : children}
     </section>
   );
 }
@@ -121,8 +122,8 @@ function TrafficSection({ params, fromYmd, toYmdStr }) {
     <section className="flex flex-col gap-4 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="font-display text-lg">Lượt truy cập website {!params.from && <span className="text-sm font-normal text-base-content/50">(30 ngày gần nhất)</span>}</h2>
-          <p className="text-xs text-base-content/50">Nguồn Google Analytics 4 · gồm cả khách chưa đăng nhập · số liệu trễ 24–48 giờ (trừ "đang online")</p>
+          <h2 className="font-display text-lg">Lượt truy cập website {!params.from && <span className="text-sm font-normal text-base-content/70">(30 ngày gần nhất)</span>}</h2>
+          <p className="text-xs text-base-content/70">Nguồn Google Analytics 4 · gồm cả khách chưa đăng nhập · số liệu trễ 24–48 giờ (trừ "đang online")</p>
         </div>
         {t?.realtime && (
           <span className="flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
@@ -151,7 +152,7 @@ function TrafficSection({ params, fromYmd, toYmdStr }) {
               ['Thời gian / phiên', formatDuration(t.totals.avgSessionSeconds)],
             ].map(([label, value]) => (
               <div key={label} className="rounded-xl bg-base-200/50 px-3 py-2.5">
-                <p className="text-xs text-base-content/55">{label}</p>
+                <p className="text-xs text-base-content/70">{label}</p>
                 <p className="mt-0.5 text-lg font-semibold tabular-nums">{value}</p>
               </div>
             ))}
@@ -162,16 +163,16 @@ function TrafficSection({ params, fromYmd, toYmdStr }) {
               <h3 className="mb-2 text-sm font-medium">Người truy cập theo ngày</h3>
               {daySeries.some((d) => d.value > 0)
                 ? <DailyBarChart data={daySeries} ariaLabel="Người truy cập theo ngày" unit=" người" />
-                : <p className="py-10 text-center text-sm text-base-content/50">Chưa có dữ liệu trong khoảng này.</p>}
+                : <p className="py-10 text-center text-sm text-base-content/70">Chưa có dữ liệu trong khoảng này.</p>}
             </div>
             <div>
               <h3 className="mb-2 text-sm font-medium">Nguồn truy cập</h3>
-              {!t.bySource.length ? <p className="text-sm text-base-content/50">Chưa có dữ liệu.</p> : (
+              {!t.bySource.length ? <p className="text-sm text-base-content/70">Chưa có dữ liệu.</p> : (
                 <ul className="flex flex-col gap-2.5">
                   {t.bySource.map((s) => (
                     <li key={`${s.source}/${s.medium}`}>
                       <div className="flex justify-between gap-2 text-sm">
-                        <span className="truncate">{SOURCE_LABEL[s.source] ?? s.source} <span className="text-xs text-base-content/45">/ {s.medium}</span></span>
+                        <span className="truncate">{SOURCE_LABEL[s.source] ?? s.source} <span className="text-xs text-base-content/70">/ {s.medium}</span></span>
                         <span className="shrink-0 font-medium tabular-nums">{s.users.toLocaleString('vi-VN')}</span>
                       </div>
                       <progress className="progress progress-primary w-full" value={s.users} max={Math.max(t.totals.activeUsers, 1)} />
@@ -186,9 +187,9 @@ function TrafficSection({ params, fromYmd, toYmdStr }) {
             <h3 className="mb-2 text-sm font-medium">Trang được xem nhiều</h3>
             <div className="overflow-x-auto">
               <table className="table table-sm">
-                <thead><tr className="text-base-content/55"><th>Trang</th><th className="text-right">Lượt xem</th><th className="text-right">Người xem</th></tr></thead>
+                <thead><tr className="text-base-content/70"><th>Trang</th><th className="text-right">Lượt xem</th><th className="text-right">Người xem</th></tr></thead>
                 <tbody>
-                  {!t.topPages.length && <tr><td colSpan={3} className="text-center text-base-content/50">Chưa có dữ liệu</td></tr>}
+                  {!t.topPages.length && <tr><td colSpan={3} className="text-center text-base-content/70">Chưa có dữ liệu</td></tr>}
                   {t.topPages.map((p) => (
                     <tr key={p.path} className="hover:bg-base-200/50">
                       <td className="font-mono text-xs">{p.path}</td>
@@ -254,7 +255,7 @@ export default function AdminDashboard() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Tổng quan hệ thống</h1>
-          <p className="mt-1 text-base-content/60">Số liệu toàn sàn: người dùng, doanh thu, gói đăng ký, nhà cung cấp và AI.</p>
+          <p className="mt-1 text-base-content/70">Số liệu toàn sàn: người dùng, doanh thu, gói đăng ký, nhà cung cấp và AI.</p>
         </div>
         <select
           className="select select-bordered select-sm w-40"
@@ -346,12 +347,12 @@ export default function AdminDashboard() {
             <h2 className="mb-3 font-display text-lg">Gói bán chạy</h2>
             <div className="overflow-x-auto">
               <table className="table">
-                <thead><tr className="text-base-content/55"><th>#</th><th>Gói</th><th className="text-right">Lượt bán</th><th className="text-right">Doanh thu</th></tr></thead>
+                <thead><tr className="text-base-content/70"><th>#</th><th>Gói</th><th className="text-right">Lượt bán</th><th className="text-right">Doanh thu</th></tr></thead>
                 <tbody>
-                  {top.data.topPlans.length === 0 && <tr><td colSpan={4} className="text-center text-base-content/50">Chưa có dữ liệu</td></tr>}
+                  {top.data.topPlans.length === 0 && <tr><td colSpan={4} className="text-center text-base-content/70">Chưa có dữ liệu</td></tr>}
                   {top.data.topPlans.map((p, i) => (
                     <tr key={p.planName} className="hover:bg-base-200/50">
-                      <td className="text-base-content/50">{i + 1}</td><td className="font-medium">{p.planName}</td>
+                      <td className="text-base-content/70">{i + 1}</td><td className="font-medium">{p.planName}</td>
                       <td className="text-right">{p.sales}</td><td className="text-right font-medium">{formatVnd(p.revenue)}</td>
                     </tr>
                   ))}
@@ -364,12 +365,12 @@ export default function AdminDashboard() {
             <h2 className="mb-3 font-display text-lg">Xưởng doanh thu cao</h2>
             <div className="overflow-x-auto">
               <table className="table">
-                <thead><tr className="text-base-content/55"><th>#</th><th>Xưởng</th><th className="text-right">Đơn</th><th className="text-right">Doanh thu</th></tr></thead>
+                <thead><tr className="text-base-content/70"><th>#</th><th>Xưởng</th><th className="text-right">Đơn</th><th className="text-right">Doanh thu</th></tr></thead>
                 <tbody>
-                  {top.data.topSuppliers.length === 0 && <tr><td colSpan={4} className="text-center text-base-content/50">Chưa có dữ liệu</td></tr>}
+                  {top.data.topSuppliers.length === 0 && <tr><td colSpan={4} className="text-center text-base-content/70">Chưa có dữ liệu</td></tr>}
                   {top.data.topSuppliers.map((p, i) => (
                     <tr key={p.supplierId} className="hover:bg-base-200/50">
-                      <td className="text-base-content/50">{i + 1}</td>
+                      <td className="text-base-content/70">{i + 1}</td>
                       <td><Link to={`/admin/suppliers/${p.supplierId}`} className="font-medium hover:text-primary">{p.name}</Link></td>
                       <td className="text-right">{p.orderCount}</td><td className="text-right font-medium">{formatVnd(p.revenue)}</td>
                     </tr>

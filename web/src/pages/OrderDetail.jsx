@@ -64,11 +64,11 @@ export default function OrderDetail() {
             <span className={`badge badge-sm ${order.vat.issued ? 'badge-success' : 'badge-warning'}`}>{t(order.vat.issued ? 'orders.vat.issued' : 'orders.vat.pending')}</span>
           </div>
           <p className="text-base-content/70">{order.vat.companyInfo?.companyName} · {t('orders.vat.taxCode')} {order.vat.companyInfo?.taxCode}</p>
-          {order.vat.companyInfo?.companyAddress && <p className="text-xs text-base-content/55">{order.vat.companyInfo.companyAddress}</p>}
+          {order.vat.companyInfo?.companyAddress && <p className="text-xs text-base-content/70">{order.vat.companyInfo.companyAddress}</p>}
           {order.vat.issued && (
             <p className="mt-2">
               {t('orders.vat.number')} <span className="font-mono font-medium">{order.vat.invoiceNumber}</span>
-              {order.vat.issuedAt && <span className="text-base-content/55"> · {formatDate(order.vat.issuedAt)}</span>}
+              {order.vat.issuedAt && <span className="text-base-content/70"> · {formatDate(order.vat.issuedAt)}</span>}
               {order.vat.invoiceUrl && <> · <a href={order.vat.invoiceUrl} target="_blank" rel="noreferrer" className="link link-primary">{t('orders.vat.download')}</a></>}
             </p>
           )}
@@ -93,7 +93,7 @@ export default function OrderDetail() {
               <h2 className="mb-1 text-base font-medium">{t('orders.shippingInfo')}</h2>
               <p>{order.recipientName} · {order.recipientPhone}</p>
               <p className="text-base-content/70">{[order.shippingAddress, order.ward, order.district, order.city].filter(Boolean).join(', ')}</p>
-              {order.distanceKm != null && <p className="text-xs text-base-content/55">{t('orders.distance', { km: order.distanceKm })}</p>}
+              {order.distanceKm != null && <p className="text-xs text-base-content/70">{t('orders.distance', { km: order.distanceKm })}</p>}
             </div>
             <div className="flex flex-col gap-1.5">
               <h2 className="mb-1 text-base font-medium">{t('orders.supplierInfo')}</h2>
@@ -104,7 +104,7 @@ export default function OrderDetail() {
           </div>
 
           {order.note && (
-            <p className="rounded-xl bg-base-200/60 px-4 py-2 text-sm"><span className="text-base-content/60">{t('checkout.note')}:</span> {order.note}</p>
+            <p className="rounded-xl bg-base-200/60 px-4 py-2 text-sm"><span className="text-base-content/70">{t('checkout.note')}:</span> {order.note}</p>
           )}
 
           <div>
@@ -114,7 +114,7 @@ export default function OrderDetail() {
                 <li key={i.id} className="flex gap-3 text-sm">
                   <div className="min-w-0 flex-1">
                     <span className="line-clamp-1">{i.productName}</span>
-                    <span className="text-xs text-base-content/55">
+                    <span className="text-xs text-base-content/70">
                       {[i.color, i.dimensions].filter(Boolean).join(' · ')}{(i.color || i.dimensions) ? ' · ' : ''}{formatVnd(i.unitPrice)} × {i.quantity}
                     </span>
                   </div>
@@ -132,7 +132,7 @@ export default function OrderDetail() {
             </dl>
             <div className="divider my-2" />
             <div className="flex justify-between text-lg font-semibold"><span>{t('checkout.orderTotal')}</span><span className="text-primary">{formatVnd(order.totalAmount)}</span></div>
-            <p className="mt-2 text-xs text-base-content/50">{t('orders.placedAt', { date: formatDate(order.placedAt ?? order.createdAt) })}</p>
+            <p className="mt-2 text-xs text-base-content/70">{t('orders.placedAt', { date: formatDate(order.placedAt ?? order.createdAt) })}</p>
           </div>
         </div>
 

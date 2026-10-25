@@ -89,10 +89,6 @@ export function disconnect() {
   client = null;
 }
 
-export function isConnected() {
-  return !!client?.connected;
-}
-
 /**
  * Gửi tin qua STOMP. Trả về true nếu đã publish (không đảm bảo BE đã lưu — tin thật quay về
  * qua onMessage), false nếu socket chưa sẵn sàng → bên gọi tự fallback sang REST (api.sendMessage).

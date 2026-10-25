@@ -54,7 +54,7 @@ export default function SupplierProfile() {
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-base-content/55">
+      <nav className="flex flex-wrap items-center gap-1.5 text-sm text-base-content/70">
         <Link to="/" className="hover:text-primary">{t('suppliers.breadcrumbHome')}</Link>
         <span>/</span>
         <Link to="/suppliers" className="hover:text-primary">{t('suppliers.title')}</Link>

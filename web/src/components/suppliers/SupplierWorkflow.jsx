@@ -27,7 +27,7 @@ export default function SupplierWorkflow() {
                 <span className="text-primary"><Icon width={18} height={18} /></span>
               </div>
               <p className="text-sm font-semibold">{step.title}</p>
-              <p className="text-xs leading-relaxed text-base-content/65">{step.desc}</p>
+              <p className="text-xs leading-relaxed text-base-content/70">{step.desc}</p>
             </li>
           );
         })}

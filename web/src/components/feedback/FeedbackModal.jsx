@@ -119,7 +119,7 @@ export default function FeedbackModal() {
               </button>
             ))}
           </div>
-          <p className="h-5 text-sm text-base-content/60">{(hover || rating) ? t(`feedback.ratingText.${hover || rating}`) : ''}</p>
+          <p className="h-5 text-sm text-base-content/70">{(hover || rating) ? t(`feedback.ratingText.${hover || rating}`) : ''}</p>
         </div>
 
         <label className="flex flex-col gap-1.5">
@@ -131,7 +131,7 @@ export default function FeedbackModal() {
             placeholder={t('feedback.commentPlaceholder')}
             className="textarea textarea-bordered w-full rounded-xl"
           />
-          <span className={`text-xs ${comment && tooShort ? 'text-warning' : 'text-base-content/45'}`}>
+          <span className={`text-xs ${comment && tooShort ? 'text-warning' : 'text-base-content/70'}`}>
             {tooShort ? t('feedback.minChars', { count: FEEDBACK_MIN_COMMENT }) : `${length}/${FEEDBACK_MAX_COMMENT}`}
           </span>
         </label>

@@ -31,7 +31,7 @@ export default function AdminCategories() {
       <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Danh mục</h1>
-          <p className="mt-1 text-base-content/60">Quản lý danh mục sản phẩm theo cấu trúc cây (cha - con).</p>
+          <p className="mt-1 text-base-content/70">Quản lý danh mục sản phẩm theo cấu trúc cây (cha - con).</p>
         </div>
         <button onClick={() => setModalMode('create')} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Thêm danh mục</button>
       </header>

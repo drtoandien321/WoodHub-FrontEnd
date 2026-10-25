@@ -44,7 +44,7 @@ export default function ReviewsView({ subtitle, withProducts = false }) {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Đánh giá khách hàng</h1>
-        <p className="mt-1 text-base-content/60">{subtitle}</p>
+        <p className="mt-1 text-base-content/70">{subtitle}</p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -73,19 +73,19 @@ export default function ReviewsView({ subtitle, withProducts = false }) {
         <section className="h-fit rounded-2xl border border-base-300 bg-base-100 p-5 text-center shadow-sm lg:sticky lg:top-24">
           <p className="font-display text-5xl text-primary">{summary?.rating != null ? Number(summary.rating).toFixed(1) : '—'}</p>
           <Stars value={summary?.rating ?? 0} size={18} />
-          <p className="mt-1 text-sm text-base-content/55">{summary?.reviewCount ?? 0} đánh giá · {summary?.unrepliedReviews ?? 0} chưa phản hồi</p>
+          <p className="mt-1 text-sm text-base-content/70">{summary?.reviewCount ?? 0} đánh giá · {summary?.unrepliedReviews ?? 0} chưa phản hồi</p>
           {reviews.length > 0 && (
             <>
               <ul className="mt-4 flex flex-col gap-2 text-left">
                 {distribution.map((d) => (
                   <li key={d.star} className="flex items-center gap-2 text-xs">
-                    <span className="flex w-8 items-center gap-0.5 text-base-content/60">{d.star}<Star width={11} height={11} className="text-warning" /></span>
+                    <span className="flex w-8 items-center gap-0.5 text-base-content/70">{d.star}<Star width={11} height={11} className="text-warning" /></span>
                     <progress className="progress progress-warning flex-1" value={d.count} max={Math.max(reviews.length, 1)} />
-                    <span className="w-8 text-right text-base-content/50">{d.count}</span>
+                    <span className="w-8 text-right text-base-content/70">{d.count}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-xs text-base-content/45">Phân bố tính trên {reviews.length} đánh giá đang hiển thị</p>
+              <p className="mt-2 text-xs text-base-content/70">Phân bố tính trên {reviews.length} đánh giá đang hiển thị</p>
             </>
           )}
         </section>
@@ -99,7 +99,7 @@ export default function ReviewsView({ subtitle, withProducts = false }) {
               <button onClick={() => refetch()} className="btn btn-outline btn-sm mt-2">Thử lại</button>
             </div>
           ) : !reviews.length ? (
-            <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-10 text-center text-base-content/55">
+            <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-10 text-center text-base-content/70">
               {replied === 'false' ? 'Không còn đánh giá nào cần phản hồi.' : 'Chưa có đánh giá nào.'}
             </p>
           ) : (
@@ -149,15 +149,15 @@ function ReviewCard({ review: r }) {
           </div>
         </div>
         <div className="text-right">
-          <time className="text-xs text-base-content/45">{formatDate(r.createdAt)}</time>
+          <time className="text-xs text-base-content/70">{formatDate(r.createdAt)}</time>
           {r.targetName && (
-            <p className="mt-0.5 max-w-[220px] truncate text-xs text-base-content/55">
+            <p className="mt-0.5 max-w-[220px] truncate text-xs text-base-content/70">
               {r.targetType === 'supplier' ? 'Cửa hàng' : 'SP'}: <span className="font-medium">{r.targetName}</span>
             </p>
           )}
         </div>
       </div>
-      {r.comment ? <p className="mt-2.5 whitespace-pre-line text-sm leading-relaxed text-base-content/75">{r.comment}</p> : <p className="mt-2.5 text-xs italic text-base-content/45">Không có nhận xét</p>}
+      {r.comment ? <p className="mt-2.5 whitespace-pre-line text-sm leading-relaxed text-base-content/75">{r.comment}</p> : <p className="mt-2.5 text-xs italic text-base-content/70">Không có nhận xét</p>}
 
       {/* Phản hồi của NCC */}
       {editing ? (
@@ -171,7 +171,7 @@ function ReviewCard({ review: r }) {
             className="textarea textarea-bordered w-full text-sm"
           />
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs text-base-content/45">{text.length}/{REPLY_MAX} · Phản hồi hiển thị công khai dưới đánh giá</span>
+            <span className="text-xs text-base-content/70">{text.length}/{REPLY_MAX} · Phản hồi hiển thị công khai dưới đánh giá</span>
             <span className="flex gap-2">
               <button type="button" onClick={() => setEditing(false)} disabled={reply.isPending} className="btn btn-ghost btn-sm">Hủy</button>
               <button type="button" onClick={save} disabled={reply.isPending} className="btn btn-primary btn-sm">
@@ -182,7 +182,7 @@ function ReviewCard({ review: r }) {
         </div>
       ) : r.reply ? (
         <div className="mt-3 rounded-xl border-l-4 border-primary/40 bg-base-200/50 p-3 text-sm">
-          <p className="mb-1 text-xs font-medium text-base-content/60">Phản hồi của bạn · {formatDate(r.reply.createdAt)}</p>
+          <p className="mb-1 text-xs font-medium text-base-content/70">Phản hồi của bạn · {formatDate(r.reply.createdAt)}</p>
           <p className="whitespace-pre-line text-base-content/75">{r.reply.content}</p>
           <div className="mt-2 flex justify-end gap-1">
             <button type="button" onClick={startEdit} className="btn btn-ghost btn-xs">Sửa</button>

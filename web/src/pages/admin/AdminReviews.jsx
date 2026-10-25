@@ -31,7 +31,7 @@ export default function AdminReviews() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Kiểm duyệt đánh giá</h1>
-        <p className="mt-1 text-base-content/60">Ẩn đánh giá vi phạm (spam, quảng cáo, ngôn từ xấu). Đánh giá bị ẩn không hiện công khai và không tính điểm.</p>
+        <p className="mt-1 text-base-content/70">Ẩn đánh giá vi phạm (spam, quảng cáo, ngôn từ xấu). Đánh giá bị ẩn không hiện công khai và không tính điểm.</p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -56,7 +56,7 @@ export default function AdminReviews() {
       ) : isError ? (
         <p className="text-center text-error">Không tải được đánh giá. <button onClick={() => refetch()} className="link">Thử lại</button></p>
       ) : !items.length ? (
-        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/55">Không có đánh giá nào.</p>
+        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/70">Không có đánh giá nào.</p>
       ) : (
         <div className="flex flex-col gap-3">{items.map((r) => <ReviewRow key={r.id} review={r} />)}</div>
       )}
@@ -88,11 +88,11 @@ function ReviewRow({ review: r }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <Stars value={r.rating} size={13} />
-            <span className="text-xs text-base-content/50">{r.targetType === 'product' ? 'Sản phẩm' : 'Nhà cung cấp'}:</span>
-            {r.targetName ? <Link to={targetLink} className="text-sm font-medium hover:text-primary">{r.targetName}</Link> : <span className="text-sm text-base-content/50">(đã xoá)</span>}
+            <span className="text-xs text-base-content/70">{r.targetType === 'product' ? 'Sản phẩm' : 'Nhà cung cấp'}:</span>
+            {r.targetName ? <Link to={targetLink} className="text-sm font-medium hover:text-primary">{r.targetName}</Link> : <span className="text-sm text-base-content/70">(đã xoá)</span>}
             {r.hidden && <span className="rounded-full bg-warning/20 px-2 py-0.5 text-xs font-medium text-warning">Đã ẩn</span>}
           </div>
-          <p className="mt-1 text-xs text-base-content/55">
+          <p className="mt-1 text-xs text-base-content/70">
             {r.author?.id ? <Link to={`/admin/users/${r.author.id}`} className="font-medium hover:text-primary">{r.author.fullName}</Link> : r.author?.fullName}
             {r.author?.email && ` · ${r.author.email}`}{r.anonymous && ' · đăng ẩn danh'} · {formatDate(r.createdAt)}
           </p>
@@ -104,7 +104,7 @@ function ReviewRow({ review: r }) {
           <button onClick={del} disabled={remove.isPending} className="btn btn-ghost btn-xs text-error">Xoá</button>
         </div>
       </div>
-      {r.comment ? <p className="mt-2 whitespace-pre-line text-sm text-base-content/75">{r.comment}</p> : <p className="mt-2 text-xs italic text-base-content/45">Không có nhận xét</p>}
+      {r.comment ? <p className="mt-2 whitespace-pre-line text-sm text-base-content/75">{r.comment}</p> : <p className="mt-2 text-xs italic text-base-content/70">Không có nhận xét</p>}
       {r.hidden && r.hiddenReason && <p className="mt-2 text-xs text-warning">Lý do ẩn: {r.hiddenReason}{r.hiddenAt ? ` · ${formatDate(r.hiddenAt)}` : ''}</p>}
       {hiding && (
         <div className="mt-3 flex flex-wrap gap-2">

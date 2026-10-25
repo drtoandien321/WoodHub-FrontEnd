@@ -17,7 +17,7 @@ export default function AuthField({ icon: Icon, type = 'text', password = false,
   return (
     <div className="relative">
       {Icon && (
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/45 pointer-events-none">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/70 pointer-events-none">
           <Icon className="w-5 h-5" />
         </span>
       )}
@@ -32,7 +32,7 @@ export default function AuthField({ icon: Icon, type = 'text', password = false,
           type="button"
           onClick={() => setShow((v) => !v)}
           aria-label={show ? t('common.hidePassword') : t('common.showPassword')}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/45 hover:text-base-content/80 transition-colors cursor-pointer"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-base-content/80 transition-colors cursor-pointer"
         >
           {show ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
         </button>

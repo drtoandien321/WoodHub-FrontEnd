@@ -24,7 +24,7 @@ export default function LandingFeedbackSection() {
       <div className="flex flex-col items-start gap-5 rounded-3xl border border-base-300 bg-base-200/60 p-6 md:flex-row md:items-center md:justify-between md:p-8">
         <div className="max-w-xl">
           <h2 className="font-display text-3xl">{t('feedback.landingTitle')}</h2>
-          <p className="mt-2 text-base-content/65">
+          <p className="mt-2 text-base-content/70">
             {reviewed ? t('feedback.landingThanks') : t('feedback.landingBody', { count: FEEDBACK_REWARD })}
           </p>
           {s?.count > 0 && (

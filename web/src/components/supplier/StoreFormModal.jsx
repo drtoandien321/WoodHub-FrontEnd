@@ -106,7 +106,7 @@ export default function StoreFormModal({ open, onClose, initial = null }) {
               <span className="text-sm text-base-content/70">Địa chỉ<span className="text-error"> *</span></span>
               <input value={form.address} onChange={set('address')} className="input input-bordered w-full" placeholder="Số nhà, tên đường, phường, quận, tỉnh…" />
               {err && <span className="text-xs text-error">{err}</span>}
-              <span className="text-xs text-base-content/45">Gõ càng đủ càng tốt rồi bấm "Định vị từ địa chỉ" bên dưới — Phường/Quận/Tỉnh sẽ tự điền, không cần gõ tay từng ô.</span>
+              <span className="text-xs text-base-content/70">Gõ càng đủ càng tốt rồi bấm "Định vị từ địa chỉ" bên dưới — Phường/Quận/Tỉnh sẽ tự điền, không cần gõ tay từng ô.</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5">
@@ -137,7 +137,7 @@ export default function StoreFormModal({ open, onClose, initial = null }) {
                 </button>
               </div>
               <StoreMapPicker latitude={latitude} longitude={longitude} onChange={(lat, lng) => { setLatitude(lat); setLongitude(lng); setGeocodeErr(''); }} />
-              <p className="text-xs text-base-content/45">
+              <p className="text-xs text-base-content/70">
                 {latitude != null && longitude != null
                   ? `Vị trí đã chọn: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} — có thể kéo ghim để tinh chỉnh hoặc bấm thẳng lên bản đồ.`
                   : 'Bấm "Định vị từ địa chỉ" rồi kéo ghim để tinh chỉnh, hoặc bấm trực tiếp lên bản đồ để đặt vị trí thủ công.'}

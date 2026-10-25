@@ -40,9 +40,9 @@ export default function ModelCard({ model, onClick }) {
       <div className="flex flex-1 flex-col gap-1.5 p-4">
         <h2 className="font-display text-lg leading-tight">{model.name}</h2>
         {materialNames.length > 0 && (
-          <p className="text-xs text-base-content/55">{materialNames.join(', ')}{opt.materials.length > 2 ? '…' : ''}</p>
+          <p className="text-xs text-base-content/70">{materialNames.join(', ')}{opt.materials.length > 2 ? '…' : ''}</p>
         )}
-        <span className={`mt-auto inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${editable ? 'bg-success/15 text-success' : 'bg-base-300/60 text-base-content/50'}`}>
+        <span className={`mt-auto inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${editable ? 'bg-success/15 text-success' : 'bg-base-300/60 text-base-content/70'}`}>
           {editable ? t('custom.studio.gallery.editable') : t('custom.studio.gallery.notEditable')}
         </span>
       </div>

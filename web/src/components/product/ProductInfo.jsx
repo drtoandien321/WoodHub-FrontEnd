@@ -56,7 +56,7 @@ export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, ca
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <h1 className="font-display text-3xl leading-tight md:text-4xl">{product.name}</h1>
-        <p className="text-sm text-base-content/60">
+        <p className="text-sm text-base-content/70">
           {t('product.suppliedBy')} <span className="font-medium text-base-content">{product.supplierName}</span>
         </p>
       </div>
@@ -68,7 +68,7 @@ export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, ca
       {/* Thuộc tính nhanh */}
       {product.materialName && (
         <div className="flex gap-3 text-sm">
-          <span className="w-24 shrink-0 text-base-content/55">{t('product.material')}</span>
+          <span className="w-24 shrink-0 text-base-content/70">{t('product.material')}</span>
           <span className="font-medium">{product.materialName}</span>
         </div>
       )}
@@ -87,7 +87,7 @@ export default function ProductInfo({ product, onAddToCart, onBuyNow, onChat, ca
       )}
 
       <div className="flex items-center gap-3">
-        <span className="text-sm text-base-content/55">{t('product.quantity')}</span>
+        <span className="text-sm text-base-content/70">{t('product.quantity')}</span>
         {/* Tối đa theo BE (999/lần thêm giỏ) — trước đây FE tự đặt cứng 20 */}
         <QuantitySelector value={qty} onChange={setQty} />
       </div>

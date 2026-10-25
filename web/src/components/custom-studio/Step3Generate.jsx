@@ -20,7 +20,7 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
     return (
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-10 text-center">
         <p className="font-display text-xl text-error">{t('custom.ai.failedTitle')}</p>
-        <p className="text-sm text-base-content/60">{t(ai3dErrorKey(taskError))}</p>
+        <p className="text-sm text-base-content/70">{t(ai3dErrorKey(taskError))}</p>
         <div className="flex flex-wrap justify-center gap-2">
           {outOfCredits && <Link to="/account/subscription" className="btn btn-primary btn-sm">{t('custom.studio.step3.buyCredits')}</Link>}
           {onChangeImage && <button type="button" onClick={onChangeImage} className="btn btn-ghost btn-sm">{t('custom.studio.back')}</button>}
@@ -49,7 +49,7 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
       {status === 'failed' ? (
         <>
           <p className="font-display text-xl text-error">{t('custom.ai.failedTitle')}</p>
-          <p className="max-w-sm text-sm text-base-content/60">{task?.errorMessage || t('custom.ai.errors.generic')}</p>
+          <p className="max-w-sm text-sm text-base-content/70">{task?.errorMessage || t('custom.ai.errors.generic')}</p>
           <div className="flex gap-2">
             <button onClick={onChangeImage} className="btn btn-ghost btn-sm">{changeLabel}</button>
             <button onClick={onRetry} disabled={retryPending} className="btn btn-primary btn-sm">
@@ -67,10 +67,10 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
           <span className="loading loading-spinner loading-lg text-primary" aria-hidden="true" />
           <div className="w-full max-w-xs">
             <progress className="progress progress-primary w-full" value={progress} max="100" />
-            <p className="mt-1 text-sm text-base-content/55">{progress}%</p>
+            <p className="mt-1 text-sm text-base-content/70">{progress}%</p>
           </div>
           <p className="font-display text-lg">{stageMessage}</p>
-          <p className="max-w-sm text-xs text-base-content/50">{t('custom.studio.step3.leaveHint')}</p>
+          <p className="max-w-sm text-xs text-base-content/70">{t('custom.studio.step3.leaveHint')}</p>
           <button onClick={onCancel} disabled={cancelPending} className="btn btn-ghost btn-sm">{t('custom.ai.cancel')}</button>
         </>
       )}

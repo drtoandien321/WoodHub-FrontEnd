@@ -25,7 +25,7 @@ export default function BulkQuoteRequestButton({ product }) {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="btn btn-outline gap-2">{t('bulkQuote.cta')}</button>
-      <p className="-mt-1 text-xs text-base-content/50">{t('bulkQuote.ctaHint')}</p>
+      <p className="-mt-1 text-xs text-base-content/70">{t('bulkQuote.ctaHint')}</p>
       {open && <RequestModal product={product} onClose={() => setOpen(false)} />}
     </>
   );
@@ -80,9 +80,9 @@ function RequestModal({ product, onClose }) {
         <p className="py-6 text-center text-sm text-success">{t('bulkQuote.sent')}</p>
       ) : (
         <div className="flex flex-col gap-4 text-sm">
-          <p className="font-medium">{product.name} <span className="font-normal text-base-content/55">· {product.supplierName}</span></p>
+          <p className="font-medium">{product.name} <span className="font-normal text-base-content/70">· {product.supplierName}</span></p>
           <table className="table table-sm">
-            <thead><tr className="text-base-content/55"><th>{t('bulkQuote.variant')}</th><th className="text-right">{t('bulkQuote.listPrice')}</th><th className="w-28">{t('bulkQuote.quantity')}</th></tr></thead>
+            <thead><tr className="text-base-content/70"><th>{t('bulkQuote.variant')}</th><th className="text-right">{t('bulkQuote.listPrice')}</th><th className="w-28">{t('bulkQuote.quantity')}</th></tr></thead>
             <tbody>
               {product.variants.map((v) => (
                 <tr key={v.id}>

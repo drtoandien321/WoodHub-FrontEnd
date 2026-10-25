@@ -39,7 +39,7 @@ export default function ImageUploadField({ label, purpose, value, onChange, shap
       <div className={`flex gap-3 ${shape === 'wide' ? 'flex-col' : 'items-center'}`}>
         <div className={`${frame} relative shrink-0 overflow-hidden rounded-xl border border-dashed border-base-300 bg-base-200`}>
           {value ? <img src={value} alt="" className="h-full w-full object-cover" /> : (
-            <span className="grid h-full w-full place-items-center text-xs text-base-content/40">Chưa có ảnh</span>
+            <span className="grid h-full w-full place-items-center text-xs text-base-content/70">Chưa có ảnh</span>
           )}
           {upload.isPending && <span className="absolute inset-0 grid place-items-center bg-base-100/70"><span className="loading loading-spinner loading-sm" /></span>}
         </div>
@@ -50,7 +50,7 @@ export default function ImageUploadField({ label, purpose, value, onChange, shap
             </button>
             {value && <button type="button" onClick={() => onChange('')} disabled={busy} className="btn btn-ghost btn-sm text-error">Gỡ ảnh</button>}
           </span>
-          <span className="text-xs text-base-content/45">{hint ?? `JPEG/PNG/WEBP/GIF, tối đa ${MAX_MB}MB.`}</span>
+          <span className="text-xs text-base-content/70">{hint ?? `JPEG/PNG/WEBP/GIF, tối đa ${MAX_MB}MB.`}</span>
         </div>
       </div>
       <input ref={inputRef} type="file" accept={ACCEPT} hidden onChange={pick} />
