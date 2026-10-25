@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useLogout } from '../../hooks/useLogout.js';
 import { redirectPathForRole } from '../../utils/auth.js';
 import ShopMegaMenu from './ShopMegaMenu.jsx';
+import { MenuIcon } from '../ui/icons.jsx';
 
 // Icon inline (chevron) thay vì cài lucide-react — đỡ 1 dependency
 export const ArrowUpRight = ({ className }) => (
@@ -36,6 +38,29 @@ export default function HeroNavbar() {
   // Mega menu "Cửa hàng": mở khi hover item shop, đóng khi rời <nav> (panel là CON
   // của nav nên rê chuột trong panel không kích hoạt mouseleave).
   const [shopOpen, setShopOpen] = useState(false);
+  // Menu ☰ cho màn < md: trước đây mobile chỉ có chữ "WoodHub" → không có đường đăng nhập/đơn hàng/portal (QA BUG-023).
+  // Hành vi giống Header.jsx: đóng khi đổi route, bấm ra ngoài hoặc Esc.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  const panelRef = useRef(null);
+  const { pathname } = useLocation();
+  useEffect(() => setMenuOpen(false), [pathname]);
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onDown = (e) => { if (!menuRef.current?.contains(e.target) && !panelRef.current?.contains(e.target)) setMenuOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    // panel là fixed (portal) nên cuộn trang thì đóng, tránh panel "trôi" khỏi navbar
+    const onScroll = () => setMenuOpen(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [menuOpen]);
+  const mobileLink = 'block rounded-lg px-3 py-2 text-sm hover:bg-base-200';
 
   return (
     <nav
@@ -77,9 +102,49 @@ export default function HeroNavbar() {
         ))}
       </ul>
 
-      {/* Mobile: chỉ hiển thị logo ở giữa */}
+      {/* Mobile: logo ở giữa + nút ☰ bên phải (ô trống bên trái cùng cỡ để logo vẫn nằm giữa) */}
+      <div className="md:hidden w-9" aria-hidden="true" />
       <div className="md:hidden flex-1 flex justify-center">
         <span className="font-display tracking-tighter text-xl text-hero-ink/95">WoodHub</span>
+      </div>
+      <div ref={menuRef} className="md:hidden relative">
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label={t('common.toggleMenu')}
+          aria-expanded={menuOpen}
+          aria-controls="hero-menu"
+          className="btn btn-ghost btn-sm btn-circle text-hero-ink"
+        >
+          <MenuIcon className="w-5 h-5" />
+        </button>
+        {/* Portal ra <body>: khung hero có z-10 tạo stacking context riêng → panel nằm DƯỚI cột nút nổi bên phải (fixed z-40) */}
+        {menuOpen && createPortal(
+          <div ref={panelRef} id="hero-menu" className="fixed right-4 top-[4.75rem] z-50 w-60 rounded-box border border-base-300 bg-base-100 p-2 text-base-content shadow-lg">
+            <nav className="flex flex-col">
+              {MENU.map((item) => (
+                <Link key={item.key} to={item.to} className={mobileLink}>{t(`nav.${item.key}`)}</Link>
+              ))}
+            </nav>
+            <div className="mt-2 flex flex-col border-t border-base-300 pt-2">
+              {user ? (
+                <>
+                  <p className="px-3 py-1 text-xs opacity-70 truncate">{t('nav.greeting', { name: user.name })}</p>
+                  <Link to={roleArea.to} className={mobileLink}>{roleArea.label}</Link>
+                  {user.role === 'customer' && <Link to="/account/subscription" className={mobileLink}>{t('nav.subscription')}</Link>}
+                  <Link to="/profile" className={mobileLink}>{t('nav.profile')}</Link>
+                  <button type="button" onClick={logout} className={`${mobileLink} text-left`}>{t('nav.logout')}</button>
+                </>
+              ) : (
+                <div className="flex gap-2 px-1 py-1">
+                  <Link to="/login" className="btn btn-sm btn-outline flex-1">{t('nav.login')}</Link>
+                  <Link to="/register" className="btn btn-sm btn-primary flex-1">{t('nav.register')}</Link>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
       </div>
 
       {/* Bên phải: Sign In / Sign Up (khách) hoặc lời chào + đăng xuất (đã đăng nhập) */}

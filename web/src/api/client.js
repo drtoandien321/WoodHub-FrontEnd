@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore.js';
-import { mockAdapter } from './mock/mockAdapter.js';
 import { isUserLocked, markAccountLocked } from '../utils/accountLock.js';
 
 /*
@@ -291,9 +290,17 @@ http.interceptors.response.use(
  * api: object mà toàn bộ app gọi. Mỗi hàm map 1-1 với 1 endpoint của BE.
  * USE_MOCK=true → trả dữ liệu giả (có delay giả lập mạng); false → gọi BE thật.
  */
+/*
+ * mockAdapter (~200 KB, kèm data.js + models3dData.js + chatbot advisor) nạp LƯỜI bằng import() → Vite tách thành chunk
+ * riêng, production chỉ tải khi thật sự gọi tới 1 key chưa có BE (QA BUG-004). Trước đây import tĩnh nên mock nằm
+ * luôn trong bundle chính của mọi người dùng. Promise được nhớ lại → chỉ tải 1 lần, mọi lần gọi dùng chung 1 instance.
+ */
+let mockPromise;
+const loadMock = () => (mockPromise ??= import('./mock/mockAdapter.js').then((m) => m.mockAdapter));
+
 async function call(realCall, mockKey, ...args) {
   // Dùng mock nếu bật cờ mock, HOẶC endpoint này chưa có BE thật (xem REAL_ENDPOINTS)
-  if (USE_MOCK || !REAL_ENDPOINTS.has(mockKey)) return mockAdapter[mockKey](...args);
+  if (USE_MOCK || !REAL_ENDPOINTS.has(mockKey)) return (await loadMock())[mockKey](...args);
   const res = await realCall(...args);
   return res.data;
 }
@@ -309,7 +316,7 @@ export const api = {
    * phải qua verifyOtp mới có token.
    */
   register: async (body) => {
-    if (USE_MOCK) return mockAdapter.register(body);
+    if (USE_MOCK) return loadMock().then((m) => m.register(body));
     const res = await http.post('/auth/register', {
       email: body.email,
       password: body.password,
@@ -327,13 +334,13 @@ export const api = {
    * Xác thực email thành công → BE trả { token, userId, email, fullName, role } → đổi về { token, user }.
    */
   verifyOtp: async (body) => {
-    if (USE_MOCK) return mockAdapter.verifyOtp(body);
+    if (USE_MOCK) return loadMock().then((m) => m.verifyOtp(body));
     const res = await http.post('/auth/verify-otp', { email: body.email, code: body.code });
     return toAuthResult(res.data);
   },
   // POST /auth/resend-otp  body: { email } → { message } (BE giới hạn gửi lại mỗi 60s)
   resendOtp: async (body) => {
-    if (USE_MOCK) return mockAdapter.resendOtp(body);
+    if (USE_MOCK) return loadMock().then((m) => m.resendOtp(body));
     const res = await http.post('/auth/resend-otp', { email: body.email });
     return res.data;
   },
@@ -343,7 +350,7 @@ export const api = {
    * BE chặn nếu email chưa xác thực (403) — FE bắt lỗi này để chuyển sang màn nhập OTP.
    */
   login: async (body) => {
-    if (USE_MOCK) return mockAdapter.login(body);
+    if (USE_MOCK) return loadMock().then((m) => m.login(body));
     const res = await http.post('/auth/login', { email: body.email, password: body.password });
     return toAuthResult(res.data);
   },
@@ -352,19 +359,19 @@ export const api = {
    * BE verify token, tạo/liên kết tài khoản → trả { token, userId, email, fullName, role }.
    */
   loginWithGoogle: async (body) => {
-    if (USE_MOCK) return mockAdapter.loginWithGoogle(body);
+    if (USE_MOCK) return loadMock().then((m) => m.loginWithGoogle(body));
     const res = await http.post('/auth/google', { idToken: body.idToken });
     return toAuthResult(res.data);
   },
   // POST /auth/forgot-password  body: { email } → { message } (gửi OTP đặt lại mật khẩu về email)
   forgotPassword: async (body) => {
-    if (USE_MOCK) return mockAdapter.forgotPassword(body);
+    if (USE_MOCK) return loadMock().then((m) => m.forgotPassword(body));
     const res = await http.post('/auth/forgot-password', { email: body.email });
     return res.data;
   },
   // POST /auth/reset-password  body: { email, code, newPassword } → { message }
   resetPassword: async (body) => {
-    if (USE_MOCK) return mockAdapter.resetPassword(body);
+    if (USE_MOCK) return loadMock().then((m) => m.resetPassword(body));
     const res = await http.post('/auth/reset-password', { email: body.email, code: body.code, newPassword: body.newPassword });
     return res.data;
   },
@@ -374,7 +381,7 @@ export const api = {
    * thành công (xoá state local) dù request BE có lỗi mạng hay không.
    */
   logout: async (body) => {
-    if (USE_MOCK) return mockAdapter.logout(body);
+    if (USE_MOCK) return loadMock().then((m) => m.logout(body));
     const res = await http.post('/auth/logout', { refreshToken: body.refreshToken });
     return res.data;
   },
@@ -384,7 +391,7 @@ export const api = {
    * buộc" khi mustChangePassword=true (tài khoản supplier do admin tạo) — xem ChangePasswordRequired.jsx.
    */
   changePassword: async ({ id, ...body }) => {
-    if (USE_MOCK) return mockAdapter.changePassword({ id, ...body });
+    if (USE_MOCK) return loadMock().then((m) => m.changePassword({ id, ...body }));
     await http.put(`/users/${id}/password`, { currentPassword: body.currentPassword, newPassword: body.newPassword });
     return { message: 'ok' };
   },
@@ -537,7 +544,7 @@ export const api = {
    *  c) sortOrder bỏ trống → BE tự đẩy xuống cuối (max hiện tại + 1).
    */
   uploadProductImage: async ({ productId, file, primary, sortOrder }) => {
-    if (USE_MOCK) return mockAdapter.uploadProductImage({ productId, file, primary, sortOrder });
+    if (USE_MOCK) return loadMock().then((m) => m.uploadProductImage({ productId, file, primary, sortOrder }));
     const form = new FormData();
     form.append('file', file);
     if (primary != null) form.append('primary', String(primary));
@@ -878,7 +885,7 @@ export const api = {
    * để apiErrorMessage() đọc được errorCode như mọi lỗi khác.
    */
   exportSupplierStats: async (params) => {
-    if (USE_MOCK) return mockAdapter.exportSupplierStats(params);
+    if (USE_MOCK) return loadMock().then((m) => m.exportSupplierStats(params));
     try {
       const res = await http.get('/supplier/stats/export', { params: { ...params, format: 'csv' }, responseType: 'blob' });
       return res.data;
@@ -1038,7 +1045,7 @@ export const api = {
    * không giới hạn như lúc mock — mỗi lần gọi tốn 1 lượt design + chi phí Meshy thật phía BE.
    */
   generate3D: async ({ image, templateId, removeBackground, quality }) => {
-    if (USE_MOCK || !REAL_ENDPOINTS.has('getGenTask')) return mockAdapter.generate3D({ image, templateId, removeBackground, quality });
+    if (USE_MOCK || !REAL_ENDPOINTS.has('getGenTask')) return loadMock().then((m) => m.generate3D({ image, templateId, removeBackground, quality }));
     const form = new FormData();
     form.append('image', image);
     if (templateId != null) form.append('templateId', templateId);
