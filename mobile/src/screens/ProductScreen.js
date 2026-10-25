@@ -2,33 +2,25 @@ import React, { useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Screen, T, Button, Card, Photo, Skeleton, ErrorState, Row, AppBar, Tag3D } from '../components/ui.js';
-import RequestQuoteSheet from '../components/RequestQuoteSheet.js';
 import Icon from '../components/Icon.js';
 import { useTheme, fonts } from '../theme/theme.js';
 import { api } from '../api/client.js';
-import { useModels } from '../hooks/data.js';
 import { useStudio } from '../store/studio.js';
 import { formatVnd } from '../utils/format.js';
-import { defaultConfig } from '../utils/woods.js';
-import { saveDesign } from '../utils/design.js';
 
-// BE chưa liên kết sản phẩm ↔ mô hình 3D, nên chọn mẫu 3D tham khảo theo loại (từ tên danh mục/sản phẩm)
-const GUESS = [['sofa', /sofa|ghế sofa/i], ['chair', /ghế|chair/i], ['table', /bàn|table/i], ['cabinet', /tủ|cabinet/i], ['shelf', /kệ|shelf/i], ['bed', /giường|bed/i]];
-function guessModel(product, models) {
-  if (!models?.length) return null;
-  const text = `${product?.categoryName || ''} ${product?.name || ''}`;
-  const t = GUESS.find(([, re]) => re.test(text))?.[0];
-  return (t && models.find((m) => String(m.productType).toLowerCase() === t)) || models[0];
-}
+/*
+ * Trang sản phẩm. Mô hình 3D/AR lấy từ ProductResponse.model3d (admin gắn mẫu cho SP — giống web ProductModel3dButton);
+ * SP chưa gắn mẫu thì KHÔNG hiện 3D/AR. Bản cũ tự đoán "mẫu 3D tham khảo" theo tên danh mục (thời BE chưa liên kết) → ghế
+ * mở ra mô hình chậu than, và nút "Yêu cầu báo giá" tạo thiết kế từ mẫu đó gửi cho xưởng — luồng web không có (hàng bán
+ * sẵn mua qua giỏ hàng; khách doanh nghiệp dùng báo giá số lượng lớn) → đã bỏ, đợt 3 thay bằng giỏ hàng.
+ */
 
 export default function ProductScreen({ navigation, route }) {
   const { c } = useTheme();
   const { id } = route.params;
   const q = useQuery({ queryKey: ['product', id], queryFn: () => api.getProduct(id) });
-  const models = useModels();
   const openModel = useStudio((s) => s.openModel);
   const [img, setImg] = useState(0);
-  const [sheet, setSheet] = useState(false);
 
   const p = q.data;
   const variants = p?.variants?.length ? p.variants : [];
@@ -36,19 +28,12 @@ export default function ProductScreen({ navigation, route }) {
   const price = variants[vi]?.price ?? p?.priceFrom;
   const images = (p?.images || []).map((i) => i.url || i).filter(Boolean);
   if (!images.length && p?.primaryImageUrl) images.push(p.primaryImageUrl);
-  const model = guessModel(p, models.data);
+  const model = p?.model3d?.modelGlbUrl ? p.model3d : null;
 
   const view3d = (ar) => {
     if (!model) return;
     openModel(model, { mode: 'product', base: price, productName: p.name });
     navigation.navigate(ar ? 'ArPerm' : 'Viewer');
-  };
-
-  // Gửi báo giá cần 1 thiết kế: tạo từ mẫu 3D tham khảo với tên = tên sản phẩm
-  const ensureDesignId = async () => {
-    const cfg = defaultConfig(model);
-    const saved = await saveDesign({ model, cfg, name: p.name });
-    return saved.id;
   };
 
   if (q.isError) return <Screen><AppBar title="" onBack={() => navigation.goBack()} /><ErrorState offline={!q.error?.response} onRetry={q.refetch} /></Screen>;
@@ -103,20 +88,17 @@ export default function ProductScreen({ navigation, route }) {
                 <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: c.surf2, alignItems: 'center', justifyContent: 'center' }}><Icon name="store" size={24} color={c.pri} /></View>
                 <View style={{ flex: 1 }}><T v="small" mute>Cung cấp bởi</T><T v="semi">{p.supplierName}</T></View>
               </Card>
-              {model ? <Row style={{ gap: 8 }}><Tag3D label="Mẫu 3D tham khảo" /><T v="small" mute style={{ flex: 1 }}>Mô hình 3D minh hoạ theo loại sản phẩm.</T></Row> : null}
+              {model ? <Row style={{ gap: 8 }}><Tag3D label="3D · AR" /><T v="small" mute style={{ flex: 1 }}>Xoay xem 3D hoặc đặt thử vào phòng bằng AR.</T></Row> : null}
             </>
           )}
         </View>
       </ScrollView>
 
-      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, flexDirection: 'row', gap: 10, backgroundColor: c.surf, borderTopWidth: 1, borderTopColor: c.line }}>
-        <Button title="Xem 3D" kind="outline" icon="cube" style={{ flex: 1 }} onPress={() => view3d(false)} disabled={!model} />
-        <Button title="Yêu cầu báo giá" icon="quote" style={{ flex: 1.4 }} onPress={() => setSheet(true)} disabled={!model || !p} />
-      </View>
-
-      {p && model ? (
-        <RequestQuoteSheet visible={sheet} onClose={() => setSheet(false)} designName={p.name} ensureDesignId={ensureDesignId}
-          onSent={(quote) => { setSheet(false); navigation.navigate('QuoteDetail', { id: quote.id }); }} />
+      {model ? (
+        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, flexDirection: 'row', gap: 10, backgroundColor: c.surf, borderTopWidth: 1, borderTopColor: c.line }}>
+          <Button title="Xem 3D" kind="outline" icon="cube" style={{ flex: 1 }} onPress={() => view3d(false)} />
+          <Button title="Đặt thử AR" kind="gold" icon="ar" style={{ flex: 1 }} onPress={() => view3d(true)} />
+        </View>
       ) : null}
     </Screen>
   );

@@ -45,6 +45,7 @@ export default function BuildingScreen({ navigation }) {
           const model = await api.getModel3d(t.modelSlug);
           qc.invalidateQueries({ queryKey: ['models3d'] });
           qc.invalidateQueries({ queryKey: ['my-models'] }); // model AI vừa được BE tự lưu
+          qc.invalidateQueries({ queryKey: ['usage'] }); // vừa trừ 1 lượt design
           openModel(model, { mode: 'result' });
           setTaskId(null);
           navigation.replace('Viewer');

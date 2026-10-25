@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, Pressable, ScrollView } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { Screen, AppBar, T, Button, Card, Row, useToast, BottomSheet } from '../components/ui.js';
 import Icon from '../components/Icon.js';
@@ -15,6 +16,13 @@ export default function PhotoScreen({ navigation }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [denied, setDenied] = useState(false);
+  /*
+   * Lượt thiết kế còn dùng được = hạn mức tháng còn lại + lượt đã mua/được tặng (giống web usableCount): BE chỉ trả 429
+   * khi CẢ HAI cạn. Hiện trước khi bấm để khách biết lần dựng này tốn 1 lượt; hết lượt → dẫn sang Gói dịch vụ.
+   */
+  const usage = useQuery({ queryKey: ['usage'], queryFn: api.getMyUsage });
+  const du = (usage.data || []).find((u) => u.feature === 'design');
+  const left = du ? (du.unlimited ? Infinity : (du.remaining ?? 0) + (du.purchasedRemaining ?? 0)) : null;
 
   const pick = async (fromCamera) => {
     const perm = fromCamera ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -65,7 +73,13 @@ export default function PhotoScreen({ navigation }) {
           <T v="small" mute>• Chụp thẳng, đủ sáng, thấy toàn bộ món đồ{'\n'}• Một món đồ trong ảnh, ít vật khác{'\n'}• Việc dựng 3D mất khoảng 1–3 phút và tính vào lượt thiết kế</T>
         </Card>
         {err ? <T color={c.err}>{err}</T> : null}
-        <Button title="Tạo mô hình 3D" icon="sparkle" onPress={start} disabled={!photo} loading={busy} />
+        {left != null ? (
+          <Row style={{ justifyContent: 'space-between' }}>
+            <T v="small" mute>{left === Infinity ? 'Lượt thiết kế: không giới hạn' : `Còn ${left} lượt thiết kế · lần dựng này dùng 1 lượt`}</T>
+            {left !== Infinity && left <= 1 ? <Pressable onPress={() => navigation.navigate('Plans')} style={{ height: 44, justifyContent: 'center' }}><T v="semi" color={c.pri}>Mua thêm</T></Pressable> : null}
+          </Row>
+        ) : null}
+        <Button title={left === 0 ? 'Hết lượt thiết kế' : 'Tạo mô hình 3D'} icon="sparkle" onPress={start} disabled={!photo || left === 0} loading={busy} />
       </ScrollView>
 
       <BottomSheet visible={denied} onClose={() => setDenied(false)} title="Cần quyền truy cập"

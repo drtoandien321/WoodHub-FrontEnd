@@ -12,7 +12,8 @@ import { formatVnd, formatDate } from '../utils/format.js';
 import { sortPlans, planHighlights, planValidity } from '../utils/planFeatures.js';
 import { formatDay } from '../utils/quoteSummary.js';
 
-const FEATURE = { design: 'Thiết kế 3D / tháng', ai_chat: 'Chat trợ lý AI / tháng' };
+// Nhãn giống web (mySub.features); thiếu nhãn trước đây hiện mã thô "export", "retexture"
+const FEATURE = { design: 'Thiết kế 3D / tháng', ai_chat: 'Chat trợ lý AI / tháng', export: 'Xuất file / tháng', retexture: 'Đổi chất liệu AI / tháng' };
 const label = (h) => (h.type === 'text' ? h.text : `${FEATURE[h.key] || h.key}: ${h.kind === 'unlimited' ? 'không giới hạn' : h.count}`);
 
 /*
@@ -144,7 +145,9 @@ export default function PlansScreen({ navigation }) {
                   <T v="small">{FEATURE[u.feature]?.replace(' / tháng', '') || u.feature}</T>
                   <T v="small" mute>{u.unlimited ? 'Không giới hạn' : `${u.used}/${u.limit} (còn ${u.remaining})`}</T>
                 </Row>
-                {!u.unlimited && u.limit > 0 ? <ProgressBar pct={(u.used / u.limit) * 100} color={u.remaining === 0 ? c.err : c.pri} /> : null}
+                {/* Lượt mua thêm / được tặng (credit pack, đánh giá WoodHub) — không reset theo tháng, dùng sau khi hết hạn mức */}
+                {u.purchasedRemaining > 0 ? <T v="small" color={c.forest}>+{u.purchasedRemaining} lượt đã mua / được tặng</T> : null}
+                {!u.unlimited && u.limit > 0 ? <ProgressBar pct={(u.used / u.limit) * 100} color={u.remaining === 0 && !(u.purchasedRemaining > 0) ? c.err : c.pri} /> : null}
               </View>
             ))}
           </Card>

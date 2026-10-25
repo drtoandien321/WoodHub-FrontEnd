@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
-import { Screen, T, Card, Photo, Badge, Skeleton, EmptyState, Row } from '../components/ui.js';
+import { Screen, T, Card, Photo, Badge, Skeleton, EmptyState, Row, useToast } from '../components/ui.js';
 import { Grid2 } from '../components/cards.js';
 import Icon from '../components/Icon.js';
 import { useTheme } from '../theme/theme.js';
@@ -15,10 +15,14 @@ export default function DesignScreen({ navigation }) {
   const models = useModels();
   const mine = useMyModels();
   const studio = useStudio();
+  const toast = useToast();
 
+  // Mô hình gốc của thiết kế: mẫu thư viện HOẶC model AI của chính khách (trước đây chỉ tìm trong mẫu thư viện →
+  // bấm thiết kế dựng từ model AI không có phản ứng gì)
+  const modelOf = (d) => (models.data || []).find((x) => x.id === d.modelId) || (mine.data || []).find((x) => x.id === d.modelId);
   const open = (d) => {
-    const m = (models.data || []).find((x) => x.id === d.modelId);
-    if (!m) return;
+    const m = modelOf(d);
+    if (!m) { toast('Không tìm thấy mô hình gốc của thiết kế này (có thể đã bị gỡ).'); return; }
     studio.openModel(m, { mode: 'template' });
     const cf = d.configuration || {};
     const base = defaultConfig(m);
@@ -63,7 +67,7 @@ export default function DesignScreen({ navigation }) {
         ) : (
           <Grid2 items={list} render={(d) => (
             <Pressable key={d.id} onPress={() => open(d)} style={{ flex: 1 }}>
-              <Photo uri={d.thumbnailUrl} label={d.name} style={{ width: '100%', aspectRatio: 1 }} radius={20} />
+              <Photo uri={d.thumbnailUrl || modelOf(d)?.posterUrl} label={d.name} style={{ width: '100%', aspectRatio: 1 }} radius={20} />
               <T v="semi" numberOfLines={1} style={{ marginTop: 8 }}>{d.name}</T>
               <Badge kind={d.status === 'completed' ? 'closed' : 'pending'} label={d.status === 'completed' ? 'Đã lưu' : 'Bản nháp'} style={{ marginTop: 4 }} />
             </Pressable>
