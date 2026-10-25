@@ -142,6 +142,7 @@ export default function OrderDetail() {
             {order.paymentId && (
               <OrderPaymentPanel
                 paymentId={order.paymentId}
+                orderId={order.id}
                 fallback={{ status: order.paymentStatus, qrUrl: order.paymentQrUrl, txnRef: order.paymentTxnRef, expiresAt: order.paymentExpiresAt }}
               />
             )}

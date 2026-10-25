@@ -1420,7 +1420,9 @@
     "failed": "Payment failed.",
     "reorderHint": "You can cancel this order and order again to get a new QR code.",
     "pollError": "Couldn't check the payment status, retrying automatically.",
-    "expiredStillValid": "The QR display time has passed, but you can still scan this code to pay — we'll record it as soon as the money arrives."
+    "expiredStillValid": "The QR display time has passed, but you can still scan this code to pay — we'll record it as soon as the money arrives.",
+    "repay": "Get a new QR code",
+    "repayError": "Couldn't get a new QR code, please try again."
   },
   "reviews": {
     "title": "Reviews",
@@ -1721,7 +1723,9 @@
       "declined": "Declined by seller",
       "cancelled": "Cancelled",
       "expired": "Expired"
-    }
+    },
+    "individualHint": "Bulk quotes are for business customers.",
+    "createProfile": "Create a business profile"
   },
   "feedback": {
     "title": "How would you rate WoodHub?",

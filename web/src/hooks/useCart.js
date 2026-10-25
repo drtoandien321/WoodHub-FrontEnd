@@ -17,9 +17,11 @@ import { useAuthStore } from '../stores/authStore.js';
  */
 export const CART_QUERY_KEY = ['cart'];
 
+// Chỉ customer có giỏ hàng — NCC/admin đăng nhập không gọi /cart (Header dùng hook này với mọi role, QA BUG-022)
 export const useCart = () => {
   const token = useAuthStore((s) => s.token);
-  return useQuery({ queryKey: CART_QUERY_KEY, queryFn: api.getCart, enabled: !!token });
+  const isCustomer = useAuthStore((s) => s.user?.role) === 'customer';
+  return useQuery({ queryKey: CART_QUERY_KEY, queryFn: api.getCart, enabled: !!token && isCustomer });
 };
 
 // Dùng chung cho mọi mutation: response của BE chính là giỏ mới nhất → ghi thẳng vào cache

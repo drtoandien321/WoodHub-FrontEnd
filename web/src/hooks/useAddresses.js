@@ -15,9 +15,10 @@ import { useAuthStore } from '../stores/authStore.js';
  */
 export const ADDRESSES_QUERY_KEY = ['addresses'];
 
-export const useAddresses = () => {
+// enabled: tắt khi không cần sổ địa chỉ (vd xưởng xem đơn custom — QA BUG-022)
+export const useAddresses = ({ enabled = true } = {}) => {
   const token = useAuthStore((s) => s.token);
-  return useQuery({ queryKey: ADDRESSES_QUERY_KEY, queryFn: api.getAddresses, enabled: !!token });
+  return useQuery({ queryKey: ADDRESSES_QUERY_KEY, queryFn: api.getAddresses, enabled: !!token && enabled });
 };
 
 const useAddressMutation = (mutationFn) => {

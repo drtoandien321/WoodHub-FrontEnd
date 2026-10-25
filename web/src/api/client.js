@@ -126,7 +126,7 @@ const REAL_ENDPOINTS = new Set([
   // Module Sổ địa chỉ giao hàng (cùng doc cart-address-fe.md)
   'getAddresses', 'createAddress', 'updateAddress', 'deleteAddress', 'setDefaultAddress',
   // Module Order + Checkout (docs/order-checkout-fe.md) + tra cứu coupon (promotions-admin-fe.md)
-  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'getAvailableVouchers', 'submitContact',
+  'checkout', 'getOrders', 'getOrder', 'cancelOrder', 'repayOrder', 'getAvailableVouchers', 'submitContact',
   // Đánh giá WoodHub web/app + tặng 5 lượt (BE PR #25, docs BE platform-feedback-fe.md)
   'getMyPlatformFeedback', 'submitPlatformFeedback', 'getPlatformFeedbackSummary', 'getAdminFeedback', 'getAdminFeedbackSummary',
   // BE-07 xem trước · BE-08 báo giá số lượng lớn + VAT
@@ -691,6 +691,9 @@ export const api = {
   getOrder: (id) => call(() => http.get(`/orders/${id}`), 'getOrder', id),
   // POST /orders/:id/cancel — chỉ khi đơn đang pending_payment, sai trạng thái → 409
   cancelOrder: (id) => call(() => http.post(`/orders/${id}/cancel`), 'cancelOrder', id),
+  // POST /orders/:id/payment (BE-03) — không body. QR còn hạn → trả lại QR cũ; hết hạn → gia hạn CÙNG payment (+15 phút),
+  // txnRef giữ nguyên, amount = tổng các đơn còn chờ trong nhóm. 404 không phải đơn của tôi · 409 đơn/payment không còn chờ.
+  repayOrder: (id) => call(() => http.post(`/orders/${id}/payment`), 'repayOrder', id),
   /*
    * GET /vouchers/available?addressId= → VoucherResponse[] (docs BE vouchers-fe.md) — thay cho nhập mã tay
    * (/promotions/lookup đã bị BE xoá, gửi couponCodes khi checkout → 400 COUPON_CODE_UNSUPPORTED).
