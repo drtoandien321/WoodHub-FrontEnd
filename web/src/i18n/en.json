@@ -860,7 +860,8 @@
         "conflict": "This action isn't valid in the current state. Please reload the page.",
         "providerError": "The AI service is having issues. Please try again later.",
         "serverError": "A server error occurred. Please try again later.",
-        "generic": "Something went wrong. Please try again."
+        "generic": "Something went wrong. Please try again.",
+        "timeout": "Processing took too long. Tap Retry (no extra credit used)."
       }
     },
     "dimensions": "Dimensions (cm)",
@@ -1412,7 +1413,8 @@
     "DESIGN_INVALID_DIMENSION": "Dimension \"{{key}}\" is invalid.",
     "AUTH_EMAIL_NOT_VERIFIED": "Please verify your email before continuing.",
     "FEEDBACK_NOT_FOUND": "You haven't reviewed WoodHub yet.",
-    "FEEDBACK_RATE_LIMITED": "You've edited your review too many times today, please try again later."
+    "FEEDBACK_RATE_LIMITED": "You've edited your review too many times today, please try again later.",
+    "SUPPLIER_TYPE_NOT_ALLOWED": "Workshops only take custom design orders and can’t use this feature."
   },
   "mySub": {
     "title": "My plan",
@@ -1536,6 +1538,14 @@
       "ORDER_REFUNDED": {
         "label": "Refund sent",
         "desc": "Money for a cancelled order was refunded."
+      },
+      "CUSTOM_ORDER_REFUNDED": {
+        "label": "Custom order refunded",
+        "desc": "Admin refunded your cancelled custom order."
+      },
+      "ADMIN_REFUND_REQUIRED": {
+        "label": "Refund needed",
+        "desc": "Payment received for a cancelled order."
       }
     }
   },
@@ -1574,7 +1584,9 @@
       "BULK_QUOTE_OFFERED": "{{supplierName}} quoted {{totalAmount}}",
       "BULK_QUOTE_ACCEPTED": "{{customerName}} accepted the quote — order #{{orderCode}}",
       "BULK_QUOTE_REJECTED": "{{byName}} rejected the bulk quote",
-      "ORDER_VAT_ISSUED": "Order #{{orderCode}} now has VAT invoice {{invoiceNumber}}"
+      "ORDER_VAT_ISSUED": "Order #{{orderCode}} now has VAT invoice {{invoiceNumber}}",
+      "CUSTOM_ORDER_REFUNDED": "Order {{orderNumber}} was refunded {{amount}}",
+      "ADMIN_REFUND_REQUIRED": "Refund needed: order {{code}} was cancelled but received {{amount}}"
     }
   },
   "bulkQuote": {
