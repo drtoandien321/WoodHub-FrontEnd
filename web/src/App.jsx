@@ -156,32 +156,37 @@ export default function App() {
 
           {/* ProtectedRoute: chưa login thì đẩy về /login (xem routes/ProtectedRoute.jsx) */}
           <Route element={<ProtectedRoute />}>
-            {/* Giỏ hàng lưu ở server (/api/cart cần JWT) → phải đăng nhập mới xem được */}
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+            {/* ---- Dùng chung mọi vai đã đăng nhập ---- */}
             <Route path="/profile" element={<Profile />} />
             {/* Link "tắt email" trong email thông báo (BE-14) → chuyển tới đúng trang cài đặt theo vai trò */}
             <Route path="/settings/notifications" element={<NotificationSettingsRedirect />} />
             {/* Thông báo (BE-12): danh sách + link /notifications/:id trong email (đánh dấu đọc rồi chuyển trang) */}
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/notifications/:id" element={<Notifications />} />
-            <Route path="/account/subscription" element={<MySubscription />} />
-            <Route path="/account/addresses" element={<MyAddresses />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/orders/:id" element={<OrderDetail />} />
-            {/* Custom Studio (FE-2): wizard 6 bước, cần đăng nhập vì generate/lưu thiết kế tính vào hạn mức `design` */}
-            <Route path="/custom/studio" element={<CustomStudio />} />
-            <Route path="/custom/designs" element={<CustomDesigns />} />
-            <Route path="/custom/my-models" element={<MyModels />} />
             {/* Quote & Order (FE-6, BE-8) — DÙNG CHUNG customer/workshop, allow không giới hạn role
                 (chỉ cần đăng nhập) vì QuoteDetail/CustomOrderDetail tự nhận diện vai qua customerId */}
             <Route path="/quotes" element={<MyQuotes />} />
             <Route path="/quotes/:id" element={<QuoteDetail />} />
             <Route path="/custom-orders" element={<MyCustomOrders />} />
             <Route path="/custom-orders/:id" element={<CustomOrderDetail />} />
-            {/* Báo giá số lượng lớn của khách doanh nghiệp (BE-08) */}
-            <Route path="/bulk-quotes" element={<BulkQuotes />} />
-            <Route path="/bulk-quotes/:id" element={<BulkQuoteDetail />} />
+
+            {/* ---- Chỉ khách hàng (QA OBS-10): NCC/admin mở → về portal/admin của mình ---- */}
+            <Route element={<ProtectedRoute customerOnly />}>
+              {/* Giỏ hàng lưu ở server (/api/cart cần JWT) → phải đăng nhập mới xem được */}
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/account/subscription" element={<MySubscription />} />
+              <Route path="/account/addresses" element={<MyAddresses />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/orders/:id" element={<OrderDetail />} />
+              {/* Custom Studio (FE-2): wizard 6 bước, cần đăng nhập vì generate/lưu thiết kế tính vào hạn mức `design` */}
+              <Route path="/custom/studio" element={<CustomStudio />} />
+              <Route path="/custom/designs" element={<CustomDesigns />} />
+              <Route path="/custom/my-models" element={<MyModels />} />
+              {/* Báo giá số lượng lớn của khách doanh nghiệp (BE-08) */}
+              <Route path="/bulk-quotes" element={<BulkQuotes />} />
+              <Route path="/bulk-quotes/:id" element={<BulkQuoteDetail />} />
+            </Route>
           </Route>
 
           <Route path="/403" element={<Forbidden />} />
