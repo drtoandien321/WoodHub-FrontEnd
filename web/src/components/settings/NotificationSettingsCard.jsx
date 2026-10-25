@@ -28,6 +28,8 @@ const AUDIENCE = {
   ORDER_VAT_ISSUED: ['business'],
   BULK_QUOTE_REJECTED: ['retailer', 'business'],
   ORDER_REFUNDED: ['customer'],
+  CUSTOM_ORDER_REFUNDED: ['customer'],
+  ADMIN_REFUND_REQUIRED: ['admin'], // card này không dùng cho admin → không hiện cho NCC / khách
 };
 
 // Vai trò "hiển thị" của tài khoản: NCC bán lẻ | xưởng | khách (khách doanh nghiệp thấy thêm loại business)

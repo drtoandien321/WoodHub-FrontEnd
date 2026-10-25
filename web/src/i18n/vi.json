@@ -856,7 +856,8 @@
         "conflict": "Thao tác không hợp lệ ở trạng thái hiện tại. Vui lòng tải lại trang.",
         "providerError": "Dịch vụ AI đang gặp sự cố. Vui lòng thử lại sau.",
         "serverError": "Có lỗi ở máy chủ. Vui lòng thử lại sau.",
-        "generic": "Có lỗi xảy ra. Vui lòng thử lại."
+        "generic": "Có lỗi xảy ra. Vui lòng thử lại.",
+        "timeout": "Quá thời gian xử lý. Bấm Thử lại (không mất thêm lượt)."
       }
     },
     "dimensions": "Kích thước (cm)",
@@ -1406,7 +1407,8 @@
     "DESIGN_INVALID_DIMENSION": "Kích thước \"{{key}}\" không hợp lệ.",
     "AUTH_EMAIL_NOT_VERIFIED": "Vui lòng xác thực email trước khi tiếp tục.",
     "FEEDBACK_NOT_FOUND": "Bạn chưa đánh giá WoodHub.",
-    "FEEDBACK_RATE_LIMITED": "Bạn đã sửa đánh giá quá nhiều lần hôm nay, vui lòng thử lại sau."
+    "FEEDBACK_RATE_LIMITED": "Bạn đã sửa đánh giá quá nhiều lần hôm nay, vui lòng thử lại sau.",
+    "SUPPLIER_TYPE_NOT_ALLOWED": "Xưởng gia công chỉ nhận đơn thiết kế riêng, không dùng được chức năng này."
   },
   "mySub": {
     "title": "Gói của tôi",
@@ -1529,6 +1531,14 @@
       "ORDER_REFUNDED": {
         "label": "Đã hoàn tiền",
         "desc": "Tiền của đơn bị huỷ đã được hoàn."
+      },
+      "CUSTOM_ORDER_REFUNDED": {
+        "label": "Đơn custom đã hoàn tiền",
+        "desc": "Admin đã hoàn tiền cho đơn custom bị huỷ."
+      },
+      "ADMIN_REFUND_REQUIRED": {
+        "label": "Cần hoàn tiền",
+        "desc": "Tiền vào cho đơn đã huỷ."
       }
     }
   },
@@ -1567,7 +1577,9 @@
       "BULK_QUOTE_OFFERED": "{{supplierName}} đã báo giá {{totalAmount}}",
       "BULK_QUOTE_ACCEPTED": "{{customerName}} đã chấp nhận báo giá — đơn #{{orderCode}}",
       "BULK_QUOTE_REJECTED": "{{byName}} đã từ chối báo giá số lượng lớn",
-      "ORDER_VAT_ISSUED": "Đơn #{{orderCode}} đã có hoá đơn VAT {{invoiceNumber}}"
+      "ORDER_VAT_ISSUED": "Đơn #{{orderCode}} đã có hoá đơn VAT {{invoiceNumber}}",
+      "CUSTOM_ORDER_REFUNDED": "Đơn {{orderNumber}} đã được hoàn {{amount}}",
+      "ADMIN_REFUND_REQUIRED": "Cần hoàn tiền: đơn {{code}} đã huỷ nhưng nhận {{amount}}"
     }
   },
   "bulkQuote": {

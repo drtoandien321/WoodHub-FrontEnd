@@ -49,7 +49,7 @@ export default function Step3Generate({ task, taskError, onRetry, onCancel, onCh
       {status === 'failed' ? (
         <>
           <p className="font-display text-xl text-error">{t('custom.ai.failedTitle')}</p>
-          <p className="max-w-sm text-sm text-base-content/70">{task?.errorMessage || t('custom.ai.errors.generic')}</p>
+          <p className="max-w-sm text-sm text-base-content/70">{task?.errorCode === 'TIMEOUT' ? t('custom.ai.errors.timeout') : task?.errorMessage || t('custom.ai.errors.generic')}</p>
           <div className="flex gap-2">
             <button onClick={onChangeImage} className="btn btn-ghost btn-sm">{changeLabel}</button>
             <button onClick={onRetry} disabled={retryPending} className="btn btn-primary btn-sm">

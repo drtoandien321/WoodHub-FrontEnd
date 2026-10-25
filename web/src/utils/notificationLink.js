@@ -8,8 +8,11 @@ import { formatVnd } from './format.js';
  *  - quote:        /quotes/:id (dùng chung)
  *  - bulk_quote:   NCC → /portal/supplier/bulk-quotes/:id · khách → /bulk-quotes/:id (BE-08)
  *  - review:       NCC/xưởng → trang Đánh giá của portal · khách → trang SP / NCC được đánh giá
+ *  - ADMIN_REFUND_REQUIRED (tiền vào cho đơn đã huỷ, targetType order | custom_order): mở trang Hoàn tiền của admin,
+ *    không phải trang đơn của khách. Đơn custom chưa có màn hoàn tiền riêng → cũng về /admin/refunds.
  */
 export function notificationLink(n, user) {
+  if (n?.type === 'ADMIN_REFUND_REQUIRED') return '/admin/refunds';
   const portal = user?.role === 'supplier' ? (user.supplierType === 'workshop' ? '/portal/workshop' : '/portal/supplier') : null;
   switch (n?.targetType) {
     case 'order':
@@ -37,6 +40,8 @@ export function notificationLink(n, user) {
 export function notificationText(n) {
   const p = { ...(n.params ?? {}) };
   for (const k of ['totalAmount', 'amount', 'price']) if (typeof p[k] === 'number') p[k] = formatVnd(p[k]);
+  // ADMIN_REFUND_REQUIRED: đơn thường có orderCode (#…), đơn custom có orderNumber → gộp về 1 chỗ hiển thị
+  if (n.type === 'ADMIN_REFUND_REQUIRED') p.code = p.orderCode ? `#${p.orderCode}` : p.orderNumber ?? '';
   if (p.status) p.status = i18n.t(`orders.status.${p.status}`, { defaultValue: i18n.t(`order.status.${p.status}`, { defaultValue: p.status }) });
   if (p.paymentType) p.paymentType = i18n.t(`notifications.paymentType.${p.paymentType}`, { defaultValue: p.paymentType });
   const key = `notifications.types.${n.type}`;

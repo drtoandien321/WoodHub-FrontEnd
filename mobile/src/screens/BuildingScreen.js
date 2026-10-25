@@ -13,7 +13,8 @@ import { useQueryClient } from '@tanstack/react-query';
  * Lỗi mạng tạm thời khi hỏi KHÔNG coi là thất bại — chỉ thử lại ở vòng sau.
  */
 const MSG = {
-  RATE_LIMIT: 'Bạn đã hết lượt dựng 3D trong tháng này.', default: 'Không dựng được mô hình từ ảnh này. Hãy thử ảnh khác rõ hơn.',
+  RATE_LIMIT: 'Bạn đã hết lượt dựng 3D trong tháng này.',
+  TIMEOUT: 'Quá thời gian xử lý. Bấm Thử lại (không mất thêm lượt).', // BE OBS-09: task quá 2 giờ → failed default: 'Không dựng được mô hình từ ảnh này. Hãy thử ảnh khác rõ hơn.',
 };
 
 export default function BuildingScreen({ navigation }) {
