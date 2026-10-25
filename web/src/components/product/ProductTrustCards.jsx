@@ -1,13 +1,18 @@
 import { useTranslation } from 'react-i18next';
-import { Shield, Tool, Truck } from '../suppliers/icons.jsx';
+import { RefreshCw, Shield, Truck } from '../suppliers/icons.jsx';
 
 /*
- * ProductTrustCards — 3 thẻ cam kết (bảo hành / lắp đặt / giao hàng).
- * Nội dung chung cho mọi SP nên để i18n tĩnh; icon line-style, nền cream, border nhẹ.
+ * ProductTrustCards — 3 thẻ cam kết CHUNG CỦA SÀN (giống nhau cho mọi SP nên để i18n tĩnh).
+ * Chỉ ghi điều BE thật sự làm (QA BUG-008 — trước đây ghi "Bảo hành 24 tháng / Lắp đặt tận nơi / Giao 3–7 ngày"
+ * mà DB không có dữ liệu nào như vậy):
+ *  - payment : thanh toán QR chuyển khoản SePay, đơn tự cập nhật khi tiền vào
+ *  - refund  : đơn đã thanh toán bị huỷ → hoàn tiền trong 48 giờ (OrderServiceImpl, mốc cancelled_at)
+ *  - shipping: phí ship tính theo khoảng cách tới chi nhánh (orders.distance_km, /orders/preview)
+ * Khi NCC tự khai bảo hành/lắp đặt (cần field BE) thì thêm thẻ theo dữ liệu, KHÔNG ghi cứng.
  */
 const ITEMS = [
-  { key: 'warranty', Icon: Shield },
-  { key: 'install', Icon: Tool },
+  { key: 'payment', Icon: Shield },
+  { key: 'refund', Icon: RefreshCw },
   { key: 'shipping', Icon: Truck },
 ];
 
@@ -22,7 +27,7 @@ export default function ProductTrustCards() {
           </span>
           <div className="min-w-0">
             <p className="text-sm font-medium leading-tight">{t(`product.trust.${key}.title`)}</p>
-            <p className="mt-0.5 text-xs text-base-content/55">{t(`product.trust.${key}.desc`)}</p>
+            <p className="mt-0.5 text-xs text-base-content/70">{t(`product.trust.${key}.desc`)}</p>
           </div>
         </div>
       ))}

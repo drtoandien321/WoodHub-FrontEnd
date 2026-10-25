@@ -23,7 +23,7 @@ export default function PortfolioManager({ allowProducts = false }) {
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg">Portfolio</h2>
-          <p className="text-xs text-base-content/55">Ảnh hiển thị ở hồ sơ công khai để khách tham khảo.</p>
+          <p className="text-xs text-base-content/70">Ảnh hiển thị ở hồ sơ công khai để khách tham khảo.</p>
         </div>
         <button onClick={() => setEditing({})} className="btn btn-primary btn-sm">+ Thêm ảnh</button>
       </div>
@@ -35,7 +35,7 @@ export default function PortfolioManager({ allowProducts = false }) {
       ) : isError ? (
         <p className="rounded-xl bg-error/10 p-4 text-sm text-error">Không tải được portfolio.</p>
       ) : !items.length ? (
-        <p className="rounded-xl border border-dashed border-base-300 p-8 text-center text-sm text-base-content/55">
+        <p className="rounded-xl border border-dashed border-base-300 p-8 text-center text-sm text-base-content/70">
           Chưa có ảnh nào. Thêm vài công trình tiêu biểu để khách tin tưởng hơn.
         </p>
       ) : (
@@ -45,7 +45,7 @@ export default function PortfolioManager({ allowProducts = false }) {
               <img src={it.imageUrl} alt={it.title || ''} loading="lazy" className="aspect-[4/3] w-full object-cover" />
               <figcaption className="p-2.5">
                 <p className="truncate text-sm font-medium">{it.title || it.productName || 'Không có tiêu đề'}</p>
-                {it.productName && <p className="truncate text-xs text-base-content/50">SP: {it.productName}</p>}
+                {it.productName && <p className="truncate text-xs text-base-content/70">SP: {it.productName}</p>}
               </figcaption>
               <button
                 onClick={() => setEditing(it)}
@@ -136,7 +136,7 @@ function PortfolioItemModal({ item, allowProducts, nextOrder, onClose }) {
               <option value="">— Không gắn —</option>
               {(products.data?.content ?? []).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
-            <span className="text-xs text-base-content/50">Bỏ trống link ảnh thì hệ thống tự lấy ảnh của sản phẩm.</span>
+            <span className="text-xs text-base-content/70">Bỏ trống link ảnh thì hệ thống tự lấy ảnh của sản phẩm.</span>
           </label>
         )}
 

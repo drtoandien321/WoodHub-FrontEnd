@@ -70,7 +70,7 @@ export default function CustomSelect() {
             <li key={i} className="relative rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-primary text-sm font-bold text-primary-content">{i + 1}</span>
               <h3 className="mt-3 font-display text-lg">{step.title}</h3>
-              <p className="mt-1 text-sm text-base-content/65">{step.desc}</p>
+              <p className="mt-1 text-sm text-base-content/70">{step.desc}</p>
             </li>
           ))}
         </ol>

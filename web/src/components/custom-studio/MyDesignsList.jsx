@@ -37,7 +37,7 @@ export default function MyDesignsList() {
 
   const items = data?.content ?? [];
   if (!items.length) {
-    return <p className="rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-base-content/55">{t('custom.studio.designs.empty')}</p>;
+    return <p className="rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-base-content/70">{t('custom.studio.designs.empty')}</p>;
   }
 
   return (
@@ -50,7 +50,7 @@ export default function MyDesignsList() {
             </div>
             <div className="p-2.5">
               <p className="truncate text-sm font-medium">{d.name}</p>
-              <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] ${d.status === 'completed' ? 'bg-success/15 text-success' : 'bg-base-300/60 text-base-content/60'}`}>
+              <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] ${d.status === 'completed' ? 'bg-success/15 text-success' : 'bg-base-300/60 text-base-content/70'}`}>
                 {t(STATUS_LABEL[d.status] ?? d.status)}
               </span>
               {d.status === 'completed' && (
@@ -63,7 +63,7 @@ export default function MyDesignsList() {
               onClick={() => deleteDesign.mutate(d.id)}
               aria-label={t('custom.studio.designs.delete')}
               title={t('custom.studio.designs.delete')}
-              className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-base-100/85 text-base-content/60 opacity-0 backdrop-blur-sm transition hover:text-error group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-base-100/85 text-base-content/70 opacity-0 backdrop-blur-sm transition hover:text-error group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>

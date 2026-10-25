@@ -47,16 +47,4 @@ export async function geocodeAddress(address) {
     ...parseAddressComponents(first.address_components),
   };
 }
-
-/**
- * Reverse geocode toạ độ → chuỗi địa chỉ đọc được, hoặc null nếu không có kết quả.
- * Không throw khi không tìm thấy kết quả — chỉ throw khi request thật sự lỗi (dùng cho UI
- * hiển thị tham khảo, không phải luồng bắt buộc nên fail êm cũng được).
- */
-export async function reverseGeocode(latitude, longitude) {
-  const url = `${BASE_URL}/geocode?latlng=${latitude},${longitude}&api_key=${API_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Goong reverse geocode HTTP ${res.status}`);
-  const data = await res.json();
-  return data?.results?.[0]?.formatted_address ?? null;
-}
+// (reverseGeocode toạ độ → địa chỉ đã gỡ 25/10 vì chưa nơi nào dùng — Goong: GET {BASE_URL}/geocode?latlng=lat,lng)

@@ -79,7 +79,7 @@ export default function VerifyOtp() {
   return (
     <AuthLayout>
       <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.otp.title')}</h1>
-      <p className="text-sm text-base-content/60 mb-6">{t('auth.otp.subtitle', { email })}</p>
+      <p className="text-sm text-base-content/70 mb-6">{t('auth.otp.subtitle', { email })}</p>
 
       {info && <div className="alert alert-success mb-4"><span>{info}</span></div>}
 

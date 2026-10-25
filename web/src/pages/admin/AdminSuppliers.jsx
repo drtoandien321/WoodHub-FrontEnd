@@ -41,7 +41,7 @@ export default function AdminSuppliers() {
       <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Nhà cung cấp</h1>
-          <p className="mt-1 text-base-content/60">Quản lý tài khoản nhà cung cấp — tạo mới, duyệt, khoá.</p>
+          <p className="mt-1 text-base-content/70">Quản lý tài khoản nhà cung cấp — tạo mới, duyệt, khoá.</p>
         </div>
         <button onClick={() => setModalOpen(true)} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Tạo nhà cung cấp</button>
       </header>
@@ -71,18 +71,18 @@ export default function AdminSuppliers() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Tên doanh nghiệp</th><th>Loại</th><th>Trạng thái</th><th>Ngày tạo</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={5} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={5} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!isLoading && items.map((s) => (
                 <tr key={s.id} className="hover:bg-base-200/50">
                   <td><Link to={`/admin/suppliers/${s.id}`} className="font-medium hover:text-primary">{s.businessName}</Link></td>
                   <td className="text-sm">{SUPPLIER_TYPE_LABEL[s.type] ?? s.type}</td>
                   <td><StatusBadge meta={supplierAdminMeta(s.status)} /></td>
-                  <td className="text-sm text-base-content/60">{new Date(s.createdAt).toLocaleDateString('vi-VN')}</td>
+                  <td className="text-sm text-base-content/70">{new Date(s.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td>
                     <div className="flex items-center justify-end">
                       <Link to={`/admin/suppliers/${s.id}`} className="btn btn-ghost btn-xs btn-square" aria-label="Xem chi tiết"><Eye width={15} height={15} /></Link>
@@ -91,7 +91,7 @@ export default function AdminSuppliers() {
                 </tr>
               ))}
               {!isLoading && !items.length && (
-                <tr><td colSpan={5} className="py-10 text-center text-base-content/50">Không có nhà cung cấp nào phù hợp.</td></tr>
+                <tr><td colSpan={5} className="py-10 text-center text-base-content/70">Không có nhà cung cấp nào phù hợp.</td></tr>
               )}
             </tbody>
           </table>

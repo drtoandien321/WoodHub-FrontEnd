@@ -67,7 +67,7 @@ export default function QuoteDetail() {
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div>
-        <Link to={myRole === 'customer' ? '/quotes' : '/portal/workshop/orders'} className="text-sm text-base-content/55 hover:text-primary">← {t(myRole === 'customer' ? 'quote.myQuotesTitle' : 'quote.backToIncoming')}</Link>
+        <Link to={myRole === 'customer' ? '/quotes' : '/portal/workshop/orders'} className="text-sm text-base-content/70 hover:text-primary">← {t(myRole === 'customer' ? 'quote.myQuotesTitle' : 'quote.backToIncoming')}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="font-display text-3xl">{otherPartyName}</h1>
           <StatusBadge meta={quoteMeta(quote.status)} />
@@ -76,8 +76,8 @@ export default function QuoteDetail() {
 
       {/* Thiết kế khách yêu cầu (designSnapshot) + số lượng, địa điểm, ghi chú */}
       <DesignSnapshotCard snapshot={quote.designSnapshot} quantity={quote.quantity} viewerRole={myRole}>
-        {quote.location && <div className="col-span-2"><p className="text-base-content/50">{t('quote.location')}</p><p className="font-medium">{quote.location}</p></div>}
-        {quote.note && <div className="col-span-full"><p className="text-base-content/50">{t('quote.note')}</p><p className="whitespace-pre-line text-base-content/80">{quote.note}</p></div>}
+        {quote.location && <div className="col-span-2"><p className="text-base-content/70">{t('quote.location')}</p><p className="font-medium">{quote.location}</p></div>}
+        {quote.note && <div className="col-span-full"><p className="text-base-content/70">{t('quote.note')}</p><p className="whitespace-pre-line text-base-content/80">{quote.note}</p></div>}
       </DesignSnapshotCard>
 
       {quote.status === 'accepted' && (
@@ -90,7 +90,7 @@ export default function QuoteDetail() {
       <div>
         <h2 className="mb-3 font-display text-xl">{t('quote.offersTitle')}</h2>
         {offers.length === 0 ? (
-          <p className="text-sm text-base-content/55">{t('quote.noOffers')}</p>
+          <p className="text-sm text-base-content/70">{t('quote.noOffers')}</p>
         ) : (
           <ol className="flex flex-col gap-3">
             {offers.map((o) => (
@@ -100,7 +100,7 @@ export default function QuoteDetail() {
                   <StatusBadge meta={offerMeta(o.status)} />
                 </div>
                 <p className="mt-1 text-2xl font-semibold text-primary">{formatVnd(o.price)}</p>
-                <p className="text-sm text-base-content/60">{t('quote.leadTime', { days: o.leadTimeDays })}</p>
+                <p className="text-sm text-base-content/70">{t('quote.leadTime', { days: o.leadTimeDays })}</p>
                 {o.note && <p className="mt-1 text-sm text-base-content/70">{o.note}</p>}
               </li>
             ))}

@@ -76,7 +76,7 @@ export default function StoreMapPicker({ latitude, longitude, onChange }) {
 
   if (!MAPTILES_KEY) {
     return (
-      <div className="flex h-72 w-full items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-200 text-center text-sm text-base-content/50">
+      <div className="flex h-72 w-full items-center justify-center rounded-xl border border-dashed border-base-300 bg-base-200 text-center text-sm text-base-content/70">
         Chưa cấu hình VITE_GOONG_MAPTILES_KEY — không thể hiển thị bản đồ.
       </div>
     );

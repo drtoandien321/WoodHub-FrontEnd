@@ -43,7 +43,7 @@ export default function CustomModelViewer() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link to="/custom/models" className="text-sm text-base-content/55 hover:text-primary">{t('custom.ai.backToGallery')}</Link>
+      <Link to="/custom/models" className="text-sm text-base-content/70 hover:text-primary">{t('custom.ai.backToGallery')}</Link>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
         {/* Khung 3D/AR */}
@@ -54,7 +54,7 @@ export default function CustomModelViewer() {
         {/* Panel tuỳ chỉnh */}
         <aside className="flex flex-col gap-5 rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <div>
-            {model.productType && <span className="text-xs font-medium text-base-content/50">{model.productType}</span>}
+            {model.productType && <span className="text-xs font-medium text-base-content/70">{model.productType}</span>}
             <h1 className="font-display text-2xl">{model.name}</h1>
           </div>
 

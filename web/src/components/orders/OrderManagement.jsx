@@ -87,7 +87,7 @@ export default function OrderManagement({ scope, title, subtitle }) {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">{title}</h1>
-        {subtitle && <p className="mt-1 text-base-content/60">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-base-content/70">{subtitle}</p>}
       </header>
 
       <div className="overflow-x-auto">
@@ -112,7 +112,7 @@ export default function OrderManagement({ scope, title, subtitle }) {
           <button onClick={() => refetch()} className="btn btn-outline btn-sm">Thử lại</button>
         </div>
       ) : !orders.length ? (
-        <p className="py-10 text-center text-base-content/50">Không có đơn hàng ở trạng thái này.</p>
+        <p className="py-10 text-center text-base-content/70">Không có đơn hàng ở trạng thái này.</p>
       ) : (
         <div className={`flex flex-col gap-4 ${isFetching ? 'opacity-70' : ''}`}>
           {orders.map((o) => {
@@ -125,21 +125,21 @@ export default function OrderManagement({ scope, title, subtitle }) {
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
                   <div className="lg:col-span-3">
                     <p className="font-mono text-sm font-semibold">{o.orderCode}</p>
-                    <p className="mt-1 flex items-center gap-1 text-xs text-base-content/50"><Calendar width={13} height={13} />{formatDate(o.placedAt ?? o.createdAt)}</p>
+                    <p className="mt-1 flex items-center gap-1 text-xs text-base-content/70"><Calendar width={13} height={13} />{formatDate(o.placedAt ?? o.createdAt)}</p>
                     {scope === 'admin' && <p className="mt-1 text-xs text-base-content/70">NCC: <span className="font-medium">{o.supplierName}</span></p>}
                   </div>
                   <div className="lg:col-span-3">
-                    <p className="text-xs text-base-content/45">Khách nhận</p>
+                    <p className="text-xs text-base-content/70">Khách nhận</p>
                     <p className="text-sm font-medium">{o.recipientName}</p>
-                    <p className="flex items-center gap-1 text-xs text-base-content/55"><Phone width={12} height={12} />{o.recipientPhone}</p>
+                    <p className="flex items-center gap-1 text-xs text-base-content/70"><Phone width={12} height={12} />{o.recipientPhone}</p>
                   </div>
                   <div className="lg:col-span-3">
-                    <p className="text-xs text-base-content/45">Sản phẩm</p>
+                    <p className="text-xs text-base-content/70">Sản phẩm</p>
                     <p className="truncate text-sm">{o.items?.[0]?.productName}{o.items?.length > 1 ? ` +${o.items.length - 1} SP khác` : ''}</p>
-                    <p className="text-xs text-base-content/50">{o.items?.reduce((n, i) => n + i.quantity, 0)} sản phẩm · {o.distanceKm} km</p>
+                    <p className="text-xs text-base-content/70">{o.items?.reduce((n, i) => n + i.quantity, 0)} sản phẩm · {o.distanceKm} km</p>
                   </div>
                   <div className="lg:col-span-3 lg:text-right">
-                    <p className="text-xs text-base-content/45">Tổng đơn</p>
+                    <p className="text-xs text-base-content/70">Tổng đơn</p>
                     <p className="text-sm font-semibold">{formatVnd(o.totalAmount)}</p>
                     <span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE[o.status] ?? ''}`}>{ORDER_STATUS_LABEL[o.status] ?? o.status}</span>
                     {o.vat && (
@@ -173,15 +173,15 @@ export default function OrderManagement({ scope, title, subtitle }) {
                     <div>
                       <p className="mb-1 font-medium">Giao đến</p>
                       <p className="text-base-content/70">{[o.shippingAddress, o.ward, o.district, o.city].filter(Boolean).join(', ')}</p>
-                      <p className="mt-1 text-xs text-base-content/55">Từ chi nhánh: {[o.storeAddress, o.storeCity].filter(Boolean).join(', ') || '—'}</p>
-                      {o.note && <p className="mt-2 text-xs"><span className="text-base-content/55">Ghi chú của khách:</span> {o.note}</p>}
+                      <p className="mt-1 text-xs text-base-content/70">Từ chi nhánh: {[o.storeAddress, o.storeCity].filter(Boolean).join(', ') || '—'}</p>
+                      {o.note && <p className="mt-2 text-xs"><span className="text-base-content/70">Ghi chú của khách:</span> {o.note}</p>}
                       {o.vat && <VatBlock order={o} canEdit={scope === 'supplier'} />}
                     </div>
                     <div>
                       <ul className="flex flex-col gap-1">
                         {o.items?.map((i) => (
                           <li key={i.id} className="flex justify-between gap-3">
-                            <span className="min-w-0 truncate">{i.productName} <span className="text-base-content/50">× {i.quantity}</span></span>
+                            <span className="min-w-0 truncate">{i.productName} <span className="text-base-content/70">× {i.quantity}</span></span>
                             <span className="shrink-0">{formatVnd(i.lineTotal)}</span>
                           </li>
                         ))}
@@ -199,7 +199,7 @@ export default function OrderManagement({ scope, title, subtitle }) {
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-base-200 pt-3">
                   <button onClick={() => setExpanded(open ? null : o.id)} className="btn btn-ghost btn-sm">{open ? 'Thu gọn' : 'Xem chi tiết'}</button>
                   <div className="flex flex-wrap items-center gap-2">
-                    {o.status === 'pending_payment' && <span className="text-xs text-base-content/50">Đơn tự chuyển "Đã thanh toán" khi khách chuyển khoản</span>}
+                    {o.status === 'pending_payment' && <span className="text-xs text-base-content/70">Đơn tự chuyển "Đã thanh toán" khi khách chuyển khoản</span>}
                     {negative.map((s) => (
                       <button key={s} onClick={() => openAction(o, s)} className="btn btn-outline btn-error btn-sm">{actionLabel(o.status, s)}</button>
                     ))}
@@ -293,13 +293,13 @@ function VatBlock({ order: o, canEdit }) {
     <div className="mt-3 rounded-lg border border-base-300 bg-base-100 p-3 text-xs">
       <p className="mb-1 font-medium">Hoá đơn VAT {o.vat.issued ? <span className="text-success">· đã xuất {o.vat.invoiceNumber}</span> : <span className="text-warning">· chưa xuất</span>}</p>
       <p>{c.companyName} · MST <span className="font-mono">{c.taxCode}</span></p>
-      {c.companyAddress && <p className="text-base-content/60">{c.companyAddress}</p>}
-      {c.email && <p className="text-base-content/60">Email nhận hoá đơn: {c.email}</p>}
+      {c.companyAddress && <p className="text-base-content/70">{c.companyAddress}</p>}
+      {c.email && <p className="text-base-content/70">Email nhận hoá đơn: {c.email}</p>}
       {o.vat.invoiceUrl && <a href={o.vat.invoiceUrl} target="_blank" rel="noreferrer" className="link link-primary">Xem hoá đơn</a>}
       {canEdit && payable && !editing && (
         <button type="button" onClick={() => setEditing(true)} className="btn btn-outline btn-xs mt-2">{o.vat.issued ? 'Sửa thông tin hoá đơn' : 'Đã xuất hoá đơn VAT'}</button>
       )}
-      {canEdit && !payable && !o.vat.issued && <p className="mt-1 text-base-content/50">Xuất hoá đơn sau khi khách thanh toán.</p>}
+      {canEdit && !payable && !o.vat.issued && <p className="mt-1 text-base-content/70">Xuất hoá đơn sau khi khách thanh toán.</p>}
       {editing && (
         <div className="mt-2 flex flex-col gap-2">
           <input value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Số hoá đơn, VD: HD001" className="input input-bordered input-xs w-full font-mono" />

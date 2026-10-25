@@ -43,7 +43,7 @@ export default function AdminRefunds() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Hoàn tiền &amp; xác nhận chậm</h1>
-        <p className="mt-1 text-base-content/60">Theo dõi đơn NCC chưa xác nhận sau 24 giờ và đơn đã thanh toán bị huỷ cần hoàn tiền trong 48 giờ.</p>
+        <p className="mt-1 text-base-content/70">Theo dõi đơn NCC chưa xác nhận sau 24 giờ và đơn đã thanh toán bị huỷ cần hoàn tiền trong 48 giờ.</p>
       </header>
 
       <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
@@ -51,17 +51,17 @@ export default function AdminRefunds() {
           Đơn quá hạn xác nhận {overdue.length > 0 && <span className="badge badge-error">{overdue.length}</span>}
         </h2>
         {paid.isLoading ? <div className="skeleton h-16 rounded-xl" /> : !overdue.length ? (
-          <p className="text-sm text-base-content/55">Không có đơn nào quá hạn xác nhận.</p>
+          <p className="text-sm text-base-content/70">Không có đơn nào quá hạn xác nhận.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="table table-sm">
-              <thead><tr className="text-base-content/55"><th>Mã đơn</th><th>NCC</th><th>Khách</th><th className="text-right">Tổng</th><th>Quá hạn</th><th className="text-right">Thao tác</th></tr></thead>
+              <thead><tr className="text-base-content/70"><th>Mã đơn</th><th>NCC</th><th>Khách</th><th className="text-right">Tổng</th><th>Quá hạn</th><th className="text-right">Thao tác</th></tr></thead>
               <tbody>
                 {overdue.map((o) => (
                   <tr key={o.id}>
                     <td className="font-mono text-xs">{o.orderCode}</td>
                     <td className="text-sm">{o.supplierName}</td>
-                    <td className="text-sm">{o.recipientName}<span className="block text-xs text-base-content/50">{o.recipientPhone}</span></td>
+                    <td className="text-sm">{o.recipientName}<span className="block text-xs text-base-content/70">{o.recipientPhone}</span></td>
                     <td className="text-right text-sm font-medium">{formatVnd(o.totalAmount)}</td>
                     <td className="text-xs text-error">{o.confirmDeadline ? formatRemaining(now - new Date(o.confirmDeadline)) : '—'}</td>
                     <td className="text-right"><button onClick={() => cancelForSupplier(o)} disabled={cancelOrder.isPending} className="btn btn-outline btn-error btn-xs">Huỷ thay NCC</button></td>
@@ -80,18 +80,18 @@ export default function AdminRefunds() {
         {refunds.isLoading ? <div className="skeleton h-24 rounded-xl" /> : refunds.isError ? (
           <p className="text-sm text-error">Không tải được danh sách. <button onClick={() => refunds.refetch()} className="link">Thử lại</button></p>
         ) : !items.length ? (
-          <p className="text-sm text-base-content/55">Không có đơn nào đang chờ hoàn tiền.</p>
+          <p className="text-sm text-base-content/70">Không có đơn nào đang chờ hoàn tiền.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="table table-sm">
-              <thead><tr className="text-base-content/55"><th>Mã đơn</th><th>Khách</th><th>NCC</th><th className="text-right">Số tiền</th><th>Hạn hoàn</th><th className="text-right">Thao tác</th></tr></thead>
+              <thead><tr className="text-base-content/70"><th>Mã đơn</th><th>Khách</th><th>NCC</th><th className="text-right">Số tiền</th><th>Hạn hoàn</th><th className="text-right">Thao tác</th></tr></thead>
               <tbody>
                 {items.map((o) => {
                   const late = o.refundOverdue || (o.refundDeadline && new Date(o.refundDeadline) < now);
                   return (
                     <tr key={o.id} className={late ? 'bg-error/5' : ''}>
                       <td className="font-mono text-xs">{o.orderCode}</td>
-                      <td className="text-sm">{o.recipientName}<span className="block text-xs text-base-content/50">{o.recipientPhone}</span></td>
+                      <td className="text-sm">{o.recipientName}<span className="block text-xs text-base-content/70">{o.recipientPhone}</span></td>
                       <td className="text-sm">{o.supplierName}</td>
                       <td className="text-right text-sm font-semibold">{formatVnd(o.totalAmount)}</td>
                       <td className={`text-xs ${late ? 'font-medium text-error' : 'text-base-content/70'}`}>
@@ -153,7 +153,7 @@ function RefundModal({ order, onClose }) {
         </label>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Số tiền hoàn (₫)</span>
           <input type="number" min="1" max={order.totalAmount} value={amount} onChange={(e) => setAmount(e.target.value)} className="input input-bordered w-full" />
-          <span className="text-xs text-base-content/50">Mặc định hoàn toàn bộ {formatVnd(order.totalAmount)}.</span>
+          <span className="text-xs text-base-content/70">Mặc định hoàn toàn bộ {formatVnd(order.totalAmount)}.</span>
         </label>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Ghi chú</span>
           <textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 1000))} rows={2} placeholder="VD: Đã CK qua MB Bank" className="textarea textarea-bordered w-full" />

@@ -51,11 +51,11 @@ export default function DesignSnapshotCard({ snapshot, quantity, children, viewe
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div>
-            <p className="text-xs uppercase tracking-wide text-base-content/50">{t('quote.design.title')}</p>
+            <p className="text-xs uppercase tracking-wide text-base-content/70">{t('quote.design.title')}</p>
             {hasDesign
               ? <p className="font-display text-xl">{d.name || t('quote.design.untitled')}</p>
-              : <p className="text-sm text-base-content/55">{t(viewerRole === 'customer' ? 'quote.design.noSnapshotCustomer' : 'quote.design.noSnapshotWorkshop')}</p>}
-            {d.sourceType && <p className="text-xs text-base-content/55">{t(`quote.design.source.${d.sourceType}`, { defaultValue: d.sourceType })}</p>}
+              : <p className="text-sm text-base-content/70">{t(viewerRole === 'customer' ? 'quote.design.noSnapshotCustomer' : 'quote.design.noSnapshotWorkshop')}</p>}
+            {d.sourceType && <p className="text-xs text-base-content/70">{t(`quote.design.source.${d.sourceType}`, { defaultValue: d.sourceType })}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
@@ -82,7 +82,7 @@ export default function DesignSnapshotCard({ snapshot, quantity, children, viewe
 
           {d.prompt && (
             <div className="rounded-xl bg-base-200/60 p-3 text-sm">
-              <p className="text-xs text-base-content/50">{t('quote.design.prompt')}</p>
+              <p className="text-xs text-base-content/70">{t('quote.design.prompt')}</p>
               <p className="mt-0.5 text-base-content/80">“{d.prompt}”</p>
             </div>
           )}
@@ -101,7 +101,7 @@ export default function DesignSnapshotCard({ snapshot, quantity, children, viewe
           <div className="h-[60vh] w-full overflow-hidden rounded-xl bg-base-200">
             <ModelViewer src={d.glbUrl} poster={d.posterUrl ?? undefined} alt={d.name ?? ''} color={tint} showControls />
           </div>
-          <p className="mt-2 text-xs text-base-content/55">{t('quote.design.view3dHint')}</p>
+          <p className="mt-2 text-xs text-base-content/70">{t('quote.design.view3dHint')}</p>
         </ModalShell>
       )}
     </div>
@@ -111,9 +111,9 @@ export default function DesignSnapshotCard({ snapshot, quantity, children, viewe
 function Field({ label, value, hint }) {
   return (
     <div>
-      <p className="text-base-content/50">{label}</p>
+      <p className="text-base-content/70">{label}</p>
       <p className="font-medium">{value}</p>
-      {hint && <p className="text-xs text-base-content/45">{hint}</p>}
+      {hint && <p className="text-xs text-base-content/70">{hint}</p>}
     </div>
   );
 }

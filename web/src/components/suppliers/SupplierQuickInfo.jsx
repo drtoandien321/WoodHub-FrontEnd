@@ -37,7 +37,7 @@ export default function SupplierQuickInfo({ supplier }) {
             </ul>
           </div>
         ) : (
-          <p className="text-sm text-base-content/55">{t('suppliers.noContact')}</p>
+          <p className="text-sm text-base-content/70">{t('suppliers.noContact')}</p>
         )}
       </div>
     </aside>

@@ -3017,7 +3017,18 @@ export const mockAdapter = {
     let list = storage.getItem(FEEDBACK_KEY, []);
     if (params.platform) list = list.filter((f) => f.platform === params.platform);
     if (params.rating) list = list.filter((f) => f.rating === Number(params.rating));
+    if (params.hidden !== undefined && params.hidden !== '') list = list.filter((f) => f.hidden === (String(params.hidden) === 'true'));
     return toSpringPage(list, params);
+  },
+  async setFeedbackHidden({ id, hidden }) {
+    await delay(200);
+    const all = storage.getItem(FEEDBACK_KEY, []);
+    const fb = all.find((f) => f.id === id);
+    if (!fb) throw Object.assign(new Error('FEEDBACK_NOT_FOUND'), { response: { status: 404, data: { errorCode: 'FEEDBACK_NOT_FOUND' } } });
+    fb.hidden = !!hidden;
+    fb.updatedAt = new Date().toISOString();
+    storage.setItem(FEEDBACK_KEY, all);
+    return fb;
   },
   async getAdminFeedbackSummary() {
     await delay(250);

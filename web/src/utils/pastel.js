@@ -8,5 +8,5 @@ export const PASTEL = {
   error: 'bg-error/15 text-error',
   info: 'bg-info/15 text-info',
   primary: 'bg-primary/15 text-primary',
-  neutral: 'bg-base-300/60 text-base-content/60',
+  neutral: 'bg-base-300/60 text-base-content/70',
 };

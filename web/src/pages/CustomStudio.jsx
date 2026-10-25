@@ -175,7 +175,7 @@ export default function CustomStudio() {
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center gap-4 rounded-2xl border border-base-300 bg-base-100 p-8 text-center shadow-sm">
         <h1 className="font-display text-2xl">{t('custom.studio.resume.title')}</h1>
-        <p className="text-sm text-base-content/65">
+        <p className="text-sm text-base-content/70">
           {t('custom.studio.resume.desc', { step: s.step, label: t(`custom.studio.stepLabels.${s.step}`) })}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -190,7 +190,7 @@ export default function CustomStudio() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Link to="/custom" className="text-sm text-base-content/55 hover:text-primary">← {t('nav.custom')}</Link>
+          <Link to="/custom" className="text-sm text-base-content/70 hover:text-primary">← {t('nav.custom')}</Link>
           <h1 className="mt-1 font-display text-3xl">{t('custom.studio.title')}</h1>
         </div>
         <StepIndicator step={s.step} source={s.source} />
@@ -202,7 +202,7 @@ export default function CustomStudio() {
         </div>
       ) : !hasModelForStep ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-base-300 p-10 text-center">
-          <p className="text-base-content/60">{t('custom.studio.resumeError')}</p>
+          <p className="text-base-content/70">{t('custom.studio.resumeError')}</p>
           <button onClick={handleStartNew} className="btn btn-primary btn-sm">{t('custom.studio.step6.newDesign')}</button>
         </div>
       ) : (

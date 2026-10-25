@@ -75,7 +75,7 @@ function ProductPicker({ scope, value, onChange }) {
       )}
       <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm sản phẩm theo tên…" className="input input-bordered input-sm w-full" />
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span className="text-base-content/60">Đã chọn <b className="text-base-content">{value.length}</b> sản phẩm</span>
+        <span className="text-base-content/70">Đã chọn <b className="text-base-content">{value.length}</b> sản phẩm</span>
         <span className="flex gap-1">
           <button type="button" onClick={selectAll} disabled={!listIds.length || allListSelected} className="btn btn-outline btn-primary btn-xs">
             {keyword.trim() ? `Chọn tất cả kết quả (${listIds.length})` : `Chọn tất cả (${listIds.length})`}
@@ -89,15 +89,15 @@ function ProductPicker({ scope, value, onChange }) {
       </div>
       <div className="max-h-44 overflow-y-auto rounded-xl border border-base-300">
         {source.isLoading ? (
-          <p className="p-3 text-center text-xs text-base-content/50">Đang tải…</p>
+          <p className="p-3 text-center text-xs text-base-content/70">Đang tải…</p>
         ) : !list.length ? (
-          <p className="p-3 text-center text-xs text-base-content/50">Không có sản phẩm phù hợp.</p>
+          <p className="p-3 text-center text-xs text-base-content/70">Không có sản phẩm phù hợp.</p>
         ) : (
           list.map((p) => (
             <label key={p.id} className="flex cursor-pointer items-center gap-2 border-b border-base-200 px-3 py-2 text-sm last:border-b-0 hover:bg-base-200/50">
               <input type="checkbox" className="checkbox checkbox-primary checkbox-xs" checked={value.includes(p.id)} onChange={() => toggle(p.id)} />
               <span className="min-w-0 flex-1 truncate">{p.name}</span>
-              {scope === 'admin' && p.supplierName && <span className="shrink-0 text-xs text-base-content/45">{p.supplierName}</span>}
+              {scope === 'admin' && p.supplierName && <span className="shrink-0 text-xs text-base-content/70">{p.supplierName}</span>}
             </label>
           ))
         )}

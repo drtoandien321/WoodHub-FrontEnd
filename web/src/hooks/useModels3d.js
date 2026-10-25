@@ -49,10 +49,6 @@ export const useGenTask = (taskId) =>
     refetchInterval: (query) => (TERMINAL_STATUSES.has(query.state.data?.status) ? false : 2000),
   });
 
-// GET /custom/ai/tasks/my — để wizard tự resume task đang chạy khi user quay lại trang (FE-2 bước 3)
-export const useMyGenTasks = (params) =>
-  useQuery({ queryKey: ['myGenTasks', params], queryFn: () => api.getMyGenTasks(params) });
-
 export const useRetryGenTask = () => {
   const queryClient = useQueryClient();
   return useMutation({

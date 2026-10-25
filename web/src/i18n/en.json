@@ -8,7 +8,8 @@
     "notifications": "Notifications",
     "noNotifications": "No notifications yet",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "close": "Close"
   },
   "nav": {
     "home": "Home",
@@ -541,21 +542,6 @@
     },
     "sortLabel": "Sort by"
   },
-  "rooms": {
-    "title": "Rooms",
-    "subtitle": "See furniture styled in real spaces — tap any item to view details or add it to your cart.",
-    "loadError": "Couldn't load room data.",
-    "noRooms": "No rooms yet.",
-    "roomNotFound": "Room not found",
-    "backToRooms": "Back to Rooms",
-    "noScenes": "This room doesn't have any scenes yet.",
-    "sceneNotFound": "Scene not found",
-    "imageError": "Couldn't load the room image — showing the product list instead.",
-    "noProducts": "No products linked to this scene yet.",
-    "hotspotLabel": "View product: {{name}}",
-    "viewDetail": "View details",
-    "close": "Close"
-  },
   "product": {
     "suppliedBy": "Supplied by",
     "material": "Material",
@@ -579,17 +565,17 @@
     "chatSupplier": "Chat with supplier",
     "bestseller": "Best seller",
     "trust": {
-      "warranty": {
-        "title": "24-month warranty",
-        "desc": "Replace on technical faults"
+      "payment": {
+        "title": "Secure QR payment",
+        "desc": "Bank transfer, confirmed automatically"
       },
-      "install": {
-        "title": "Installation support",
-        "desc": "On-site within the city"
+      "refund": {
+        "title": "Refund within 48 hours",
+        "desc": "If a paid order is cancelled"
       },
       "shipping": {
-        "title": "Nationwide shipping",
-        "desc": "Delivery in 3–7 days"
+        "title": "Transparent shipping fee",
+        "desc": "Based on distance to the branch"
       }
     },
     "view3d": "View in 3D / AR",

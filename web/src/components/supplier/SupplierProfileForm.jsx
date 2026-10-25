@@ -61,7 +61,7 @@ export default function SupplierProfileForm({ nameLabel = 'Tên doanh nghiệp',
     <>
       <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
         <h2 className="mb-1 font-display text-lg">Hình ảnh thương hiệu</h2>
-        <p className="mb-4 text-xs text-base-content/55">Hiện ở trang công khai của bạn và danh sách nhà cung cấp. Tải lên là lưu ngay.</p>
+        <p className="mb-4 text-xs text-base-content/70">Hiện ở trang công khai của bạn và danh sách nhà cung cấp. Tải lên là lưu ngay.</p>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-[auto_1fr]">
           <ImageUploadField label="Logo" purpose="logo" value={data?.logoUrl ?? ''} onChange={saveImage('logoUrl')} disabled={patchImage.isPending} hint="Ảnh vuông, nên ≥ 256×256px." />
           <ImageUploadField label="Ảnh bìa" purpose="cover" shape="wide" value={data?.coverUrl ?? ''} onChange={saveImage('coverUrl')} disabled={patchImage.isPending} hint="Tỉ lệ khoảng 3:1, nên ≥ 1200×400px." />
@@ -103,7 +103,7 @@ function Field({ label, children, full, hint }) {
   return (
     <label className={`flex flex-col gap-1.5 ${full ? 'sm:col-span-2' : ''}`}>
       <span className="text-sm text-base-content/70">{label}</span>{children}
-      {hint && <span className="text-xs text-base-content/45">{hint}</span>}
+      {hint && <span className="text-xs text-base-content/70">{hint}</span>}
     </label>
   );
 }

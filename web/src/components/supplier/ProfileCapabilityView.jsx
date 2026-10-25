@@ -19,7 +19,7 @@ export default function ProfileCapabilityView({ subtitle, settingsPath, allowPro
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Hồ sơ &amp; Portfolio</h1>
-        <p className="mt-1 text-base-content/60">{subtitle}</p>
+        <p className="mt-1 text-base-content/70">{subtitle}</p>
       </header>
 
       <section className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
@@ -33,7 +33,7 @@ export default function ProfileCapabilityView({ subtitle, settingsPath, allowPro
             {data?.logoUrl && <img src={data.logoUrl} alt="" className="-mt-12 h-20 w-20 rounded-2xl border-4 border-base-100 object-cover shadow" />}
             <div>
               <h2 className="font-display text-2xl">{brand.name}</h2>
-              {data?.hqAddress && <p className="text-sm text-base-content/55">{data.hqAddress}</p>}
+              {data?.hqAddress && <p className="text-sm text-base-content/70">{data.hqAddress}</p>}
             </div>
           </div>
           <Link to={settingsPath} className="btn btn-outline btn-sm gap-2"><Pencil width={15} height={15} /> Chỉnh sửa</Link>
@@ -43,12 +43,12 @@ export default function ProfileCapabilityView({ subtitle, settingsPath, allowPro
         ) : data?.description ? (
           <p className="mt-2 max-w-3xl whitespace-pre-line leading-relaxed text-base-content/75">{data.description}</p>
         ) : (
-          <p className="mt-2 text-sm text-base-content/50">
+          <p className="mt-2 text-sm text-base-content/70">
             Chưa có phần giới thiệu. <Link to={settingsPath} className="text-primary hover:underline">Thêm mô tả</Link> để khách hiểu hơn về bạn.
           </p>
         )}
         {!isLoading && (!data?.logoUrl || !data?.coverUrl) && (
-          <p className="mt-3 text-xs text-base-content/50">Chưa có {!data?.logoUrl && 'logo'}{!data?.logoUrl && !data?.coverUrl && ' và '}{!data?.coverUrl && 'ảnh bìa'}. <Link to={settingsPath} className="text-primary hover:underline">Tải ảnh lên</Link> để hồ sơ chuyên nghiệp hơn.</p>
+          <p className="mt-3 text-xs text-base-content/70">Chưa có {!data?.logoUrl && 'logo'}{!data?.logoUrl && !data?.coverUrl && ' và '}{!data?.coverUrl && 'ảnh bìa'}. <Link to={settingsPath} className="text-primary hover:underline">Tải ảnh lên</Link> để hồ sơ chuyên nghiệp hơn.</p>
         )}
         </div>
       </section>

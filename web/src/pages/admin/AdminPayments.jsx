@@ -60,7 +60,7 @@ const fillDays = (daily = [], fromYmd, toYmdStr) => {
 function DetailRow({ label, children }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2 text-sm">
-      <span className="shrink-0 text-base-content/55">{label}</span>
+      <span className="shrink-0 text-base-content/70">{label}</span>
       <span className="min-w-0 break-all text-right font-medium">{children ?? '—'}</span>
     </div>
   );
@@ -83,7 +83,7 @@ function PaymentDetailModal({ id, onClose }) {
           <button onClick={onClose} className="btn btn-ghost btn-sm btn-square" aria-label="Đóng"><X width={16} height={16} /></button>
         </div>
 
-        {isLoading && <p className="py-8 text-center text-base-content/50">Đang tải…</p>}
+        {isLoading && <p className="py-8 text-center text-base-content/70">Đang tải…</p>}
         {isError && <p className="py-8 text-center text-error">{error?.response?.status === 404 ? 'Không tìm thấy giao dịch.' : errorText(error)}</p>}
         {p && (
           <div className="mt-3 divide-y divide-base-200">
@@ -149,7 +149,7 @@ export default function AdminPayments() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Thanh toán</h1>
-        <p className="mt-1 text-base-content/60">Theo dõi giao dịch và doanh thu trên hệ thống (chỉ xem).</p>
+        <p className="mt-1 text-base-content/70">Theo dõi giao dịch và doanh thu trên hệ thống (chỉ xem).</p>
       </header>
 
       {/* Thống kê */}
@@ -165,16 +165,16 @@ export default function AdminPayments() {
             <StatCard icon={CheckCircle} label="Đã thanh toán" value={s?.paidCount ?? 0} iconWrap="bg-success/10 text-success" />
             <StatCard icon={Clock} label="Chờ thanh toán" value={s?.pendingCount ?? 0} iconWrap="bg-warning/10 text-warning" />
             <StatCard icon={X} label="Thất bại" value={s?.failedCount ?? 0} iconWrap="bg-error/10 text-error" />
-            <StatCard icon={Clock} label="Hết hạn" value={s?.expiredCount ?? 0} iconWrap="bg-base-200 text-base-content/60" />
+            <StatCard icon={Clock} label="Hết hạn" value={s?.expiredCount ?? 0} iconWrap="bg-base-200 text-base-content/70" />
           </section>
 
           <section className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm md:p-5">
             <h2 className="font-semibold">Doanh thu theo ngày</h2>
-            <p className="mb-2 text-xs text-base-content/55">Chỉ tính giao dịch đã thanh toán, theo ngày thanh toán (paidAt). Ngày không có giao dịch hiển thị 0.</p>
+            <p className="mb-2 text-xs text-base-content/70">Chỉ tính giao dịch đã thanh toán, theo ngày thanh toán (paidAt). Ngày không có giao dịch hiển thị 0.</p>
             {chartData.length ? (
               <RevenueChart data={chartData} ariaLabel="Biểu đồ doanh thu theo ngày" />
             ) : (
-              <p className="py-10 text-center text-sm text-base-content/50">{stats.isLoading ? 'Đang tải…' : 'Chưa có doanh thu trong khoảng này.'}</p>
+              <p className="py-10 text-center text-sm text-base-content/70">{stats.isLoading ? 'Đang tải…' : 'Chưa có doanh thu trong khoảng này.'}</p>
             )}
           </section>
         </>
@@ -184,29 +184,29 @@ export default function AdminPayments() {
       <section className="rounded-2xl border border-base-300 bg-base-100 p-2 shadow-sm md:p-4">
         <div className="flex flex-wrap items-end gap-3 p-2">
           <label className="form-control w-full sm:w-56">
-            <span className="mb-1 text-xs text-base-content/60">Tìm (mã GD / email / tên)</span>
+            <span className="mb-1 text-xs text-base-content/70">Tìm (mã GD / email / tên)</span>
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="vd: nguyen, SUB…" className="input input-bordered input-sm w-full" />
           </label>
           <label className="form-control">
-            <span className="mb-1 text-xs text-base-content/60">Trạng thái</span>
+            <span className="mb-1 text-xs text-base-content/70">Trạng thái</span>
             <select value={status} onChange={resetPage(setStatus)} className="select select-bordered select-sm">
               <option value="">Tất cả</option>
               {Object.entries(STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </label>
           <label className="form-control">
-            <span className="mb-1 text-xs text-base-content/60">Mục đích</span>
+            <span className="mb-1 text-xs text-base-content/70">Mục đích</span>
             <select value={purpose} onChange={resetPage(setPurpose)} className="select select-bordered select-sm">
               <option value="">Tất cả</option>
               {Object.entries(PURPOSE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </label>
           <label className="form-control">
-            <span className="mb-1 text-xs text-base-content/60">Từ ngày</span>
+            <span className="mb-1 text-xs text-base-content/70">Từ ngày</span>
             <input type="date" value={fromDate} max={toDate || undefined} onChange={resetPage(setFromDate)} className="input input-bordered input-sm" />
           </label>
           <label className="form-control">
-            <span className="mb-1 text-xs text-base-content/60">Đến ngày</span>
+            <span className="mb-1 text-xs text-base-content/70">Đến ngày</span>
             <input type="date" value={toDate} min={fromDate || undefined} onChange={resetPage(setToDate)} className="input input-bordered input-sm" />
           </label>
           {hasFilter && <button onClick={clearFilters} className="btn btn-ghost btn-sm">Xoá bộ lọc</button>}
@@ -217,33 +217,33 @@ export default function AdminPayments() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Mã GD</th><th>Người mua</th><th>Mục đích</th><th className="text-right">Số tiền</th><th>Trạng thái</th><th>Ngày tạo</th><th className="text-right">Chi tiết</th>
               </tr>
             </thead>
             <tbody>
-              {list.isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {list.isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!list.isLoading && items.map((p) => (
                 <tr key={p.id} className="cursor-pointer hover:bg-base-200/50" onClick={() => setSelectedId(p.id)}>
                   <td className="font-mono text-xs">{p.txnRef}</td>
                   <td className="text-sm">
                     <div className="font-medium">{p.userFullName}</div>
-                    <div className="text-xs text-base-content/55">{p.userEmail}</div>
+                    <div className="text-xs text-base-content/70">{p.userEmail}</div>
                   </td>
-                  <td className="text-sm">{PURPOSE_LABEL[p.purpose] ?? p.purpose}{p.planName ? <div className="text-xs text-base-content/55">{p.planName}</div> : null}</td>
+                  <td className="text-sm">{PURPOSE_LABEL[p.purpose] ?? p.purpose}{p.planName ? <div className="text-xs text-base-content/70">{p.planName}</div> : null}</td>
                   <td className="text-right text-sm">
                     {formatVnd(p.paidAmount ?? p.amount)}
                     {p.paidAmount != null && p.paidAmount !== p.amount && <div className="text-xs text-warning">yêu cầu {formatVnd(p.amount)}</div>}
                   </td>
                   <td><span className={`badge badge-sm ${STATUS_BADGE[p.status] ?? 'badge-ghost'}`}>{STATUS_LABEL[p.status] ?? p.status}</span></td>
-                  <td className="text-sm text-base-content/60">{formatDate(p.createdAt)}</td>
+                  <td className="text-sm text-base-content/70">{formatDate(p.createdAt)}</td>
                   <td className="text-right">
                     <button onClick={(e) => { e.stopPropagation(); setSelectedId(p.id); }} className="btn btn-ghost btn-xs btn-square" aria-label="Xem chi tiết"><Eye width={15} height={15} /></button>
                   </td>
                 </tr>
               ))}
               {!list.isLoading && !list.isError && !items.length && (
-                <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Không có giao dịch nào.</td></tr>
+                <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Không có giao dịch nào.</td></tr>
               )}
             </tbody>
           </table>

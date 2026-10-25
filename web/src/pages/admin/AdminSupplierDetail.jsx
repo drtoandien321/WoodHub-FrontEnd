@@ -56,7 +56,7 @@ export default function AdminSupplierDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="flex items-center gap-1.5 text-sm text-base-content/55">
+      <nav className="flex items-center gap-1.5 text-sm text-base-content/70">
         <Link to="/admin/suppliers" className="hover:text-primary">Nhà cung cấp</Link>
         <span>/</span><span className="font-medium text-base-content/80">Chi tiết</span>
       </nav>
@@ -74,7 +74,7 @@ export default function AdminSupplierDetail() {
           <dl className="flex flex-col gap-3.5">
             {rows.map((r) => (
               <div key={r.label} className="flex gap-3">
-                <dt className="flex w-36 shrink-0 items-center gap-2 text-sm text-base-content/55"><r.icon width={15} height={15} className="text-base-content/40" />{r.label}</dt>
+                <dt className="flex w-36 shrink-0 items-center gap-2 text-sm text-base-content/70"><r.icon width={15} height={15} className="text-base-content/70" />{r.label}</dt>
                 <dd className="text-sm">{r.value}</dd>
               </div>
             ))}
@@ -92,7 +92,7 @@ export default function AdminSupplierDetail() {
                 <option value="active">Đang hoạt động</option>
                 <option value="suspended">Đã khoá</option>
               </select>
-              <span className="text-xs text-base-content/45">Chuyển sang "Đã khoá" sẽ hạ quyền tài khoản về customer; "Đang hoạt động" nâng lại thành supplier.</span>
+              <span className="text-xs text-base-content/70">Chuyển sang "Đã khoá" sẽ hạ quyền tài khoản về customer; "Đang hoạt động" nâng lại thành supplier.</span>
             </label>
             <label className="flex flex-col gap-1.5">
               <span className="text-sm text-base-content/70">Hoa hồng (%)</span>
@@ -123,21 +123,21 @@ function PayoutSection({ supplierId }) {
   return (
     <section className="max-w-xl rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <h2 className="mb-1 font-display text-lg">Tài khoản nhận tiền</h2>
-      <p className="mb-3 text-xs text-base-content/55">Số tài khoản được mã hoá. Mỗi lần hiện số đầy đủ, hệ thống ghi nhật ký người xem.</p>
+      <p className="mb-3 text-xs text-base-content/70">Số tài khoản được mã hoá. Mỗi lần hiện số đầy đủ, hệ thống ghi nhật ký người xem.</p>
       {!reveal ? (
         <button onClick={() => setReveal(true)} className="btn btn-outline btn-sm">Hiện số tài khoản</button>
       ) : isFetching ? (
         <div className="skeleton h-16 rounded-xl" />
       ) : notConfigured ? (
-        <p className="text-sm text-base-content/60">NCC chưa khai báo tài khoản nhận tiền.</p>
+        <p className="text-sm text-base-content/70">NCC chưa khai báo tài khoản nhận tiền.</p>
       ) : isError ? (
         <p className="text-sm text-error">{apiErrorMessage(error, 'Không tải được tài khoản nhận tiền.')}</p>
       ) : data && (
         <dl className="grid grid-cols-1 gap-3 rounded-xl bg-base-200/50 p-4 text-sm sm:grid-cols-2">
-          <div><dt className="text-xs text-base-content/55">Ngân hàng</dt><dd className="font-medium">{data.bankName} ({data.bankCode})</dd></div>
-          <div><dt className="text-xs text-base-content/55">Số tài khoản</dt><dd className="font-mono font-medium">{data.accountNumber}</dd></div>
-          <div><dt className="text-xs text-base-content/55">Chủ tài khoản</dt><dd className="font-medium">{data.accountHolder}</dd></div>
-          <div><dt className="text-xs text-base-content/55">Chi nhánh</dt><dd className="font-medium">{data.branch || '—'}</dd></div>
+          <div><dt className="text-xs text-base-content/70">Ngân hàng</dt><dd className="font-medium">{data.bankName} ({data.bankCode})</dd></div>
+          <div><dt className="text-xs text-base-content/70">Số tài khoản</dt><dd className="font-mono font-medium">{data.accountNumber}</dd></div>
+          <div><dt className="text-xs text-base-content/70">Chủ tài khoản</dt><dd className="font-medium">{data.accountHolder}</dd></div>
+          <div><dt className="text-xs text-base-content/70">Chi nhánh</dt><dd className="font-medium">{data.branch || '—'}</dd></div>
           <button onClick={() => setReveal(false)} className="btn btn-ghost btn-xs justify-self-start">Ẩn lại</button>
         </dl>
       )}

@@ -20,12 +20,12 @@ function RatingLine({ product }) {
   const average = hasBeFields ? product.averageRating : data?.average;
 
   if (count == null) return <span className="h-4" aria-hidden="true" />; // đang tải → giữ chỗ, không nhảy layout
-  if (!count) return <span className="text-xs text-base-content/40">{t('reviews.none')}</span>;
+  if (!count) return <span className="text-xs text-base-content/70">{t('reviews.none')}</span>;
   return (
     <span className="flex items-center gap-1 text-xs text-base-content/70" aria-label={t('reviews.cardAria', { avg: average.toFixed(1), count })}>
       <Star width={13} height={13} className="text-accent" filled />
       <span className="font-medium">{average.toFixed(1)}</span>
-      <span className="text-base-content/50">({t('reviews.count', { count })})</span>
+      <span className="text-base-content/70">({t('reviews.count', { count })})</span>
     </span>
   );
 }
@@ -58,8 +58,8 @@ export default function ProductCard({ product }) {
       </figure>
       <div className="card-body p-4 gap-1">
         <h2 className="font-medium leading-snug line-clamp-2">{product.name}</h2>
-        <p className="text-xs text-base-content/60">{product.supplierName}</p>
-        {product.materialName && <p className="text-xs text-base-content/50">{product.materialName}</p>}
+        <p className="text-xs text-base-content/70">{product.supplierName}</p>
+        {product.materialName && <p className="text-xs text-base-content/70">{product.materialName}</p>}
         <RatingLine product={product} />
         <span className="text-primary font-semibold mt-1">{formatVnd(product.priceFrom)}</span>
       </div>

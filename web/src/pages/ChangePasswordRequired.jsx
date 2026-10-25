@@ -50,7 +50,7 @@ export default function ChangePasswordRequired() {
   return (
     <AuthLayout>
       <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.changePasswordRequired.title')}</h1>
-      <p className="text-base-content/60 mb-7">{t('auth.changePasswordRequired.subtitle')}</p>
+      <p className="text-base-content/70 mb-7">{t('auth.changePasswordRequired.subtitle')}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <AuthField
@@ -77,7 +77,7 @@ export default function ChangePasswordRequired() {
         </button>
       </form>
 
-      <p className="text-sm text-center mt-5 text-base-content/60">
+      <p className="text-sm text-center mt-5 text-base-content/70">
         <button type="button" onClick={logout} className="link link-primary font-medium">
           {t('auth.changePasswordRequired.logout')}
         </button>

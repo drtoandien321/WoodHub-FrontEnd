@@ -35,7 +35,7 @@ export const ORDER_STATUS_LABEL = {
 export const ORDER_STATUS_BADGE = {
   pending_payment: 'bg-warning/15 text-warning', paid: 'bg-info/15 text-info', confirmed: 'bg-info/15 text-info',
   processing: 'bg-primary/15 text-primary', shipping: 'bg-primary/15 text-primary', delivered: 'bg-success/15 text-success',
-  completed: 'bg-success/15 text-success', cancelled: 'bg-base-300/60 text-base-content/60', refunded: 'bg-error/15 text-error',
+  completed: 'bg-success/15 text-success', cancelled: 'bg-base-300/60 text-base-content/70', refunded: 'bg-error/15 text-error',
 };
 
 // Nhãn NÚT hành động theo trạng thái đích (động từ, để người bấm hiểu việc mình sắp làm)

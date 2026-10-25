@@ -51,3 +51,24 @@ export const useAdminFeedbackSummary = (params) =>
     enabled: FEEDBACK_ENABLED,
     placeholderData: keepPreviousData,
   });
+
+// Trang /admin/feedback (QA OBS-03): danh sách có lọc + ẩn/hiện đánh giá spam.
+export const useAdminFeedbackList = (params) =>
+  useQuery({
+    queryKey: ['adminFeedback', params],
+    queryFn: () => api.getAdminFeedback(params),
+    enabled: FEEDBACK_ENABLED,
+    placeholderData: keepPreviousData,
+  });
+
+// Ẩn chỉ gỡ khỏi landing — điểm TB admin vẫn tính, KHÔNG thu hồi lượt đã tặng (BE-platform-feedback §5.4)
+export function useSetFeedbackHidden() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.setFeedbackHidden,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['adminFeedback'] });
+      qc.invalidateQueries({ queryKey: ['platformFeedbackSummary'] });
+    },
+  });
+}

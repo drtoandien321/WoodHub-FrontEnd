@@ -57,7 +57,7 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-success/40 bg-success/5 p-6 text-center" role="status">
         <div className="text-4xl" aria-hidden="true">✅</div>
         <p className="font-medium">{t('orderPayment.paid')}</p>
-        <p className="text-sm text-base-content/60">{t('orderPayment.paidDesc')}</p>
+        <p className="text-sm text-base-content/70">{t('orderPayment.paidDesc')}</p>
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
     return (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-warning/40 bg-warning/5 p-6 text-center" role="alert">
         <p className="font-medium text-warning">{t('orderPayment.failed')}</p>
-        <p className="text-sm text-base-content/60">{t('orderPayment.reorderHint')}</p>
+        <p className="text-sm text-base-content/70">{t('orderPayment.reorderHint')}</p>
       </div>
     );
   }
@@ -82,11 +82,11 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
       )}
       {amount != null && <p className="font-display text-2xl text-primary">{formatVnd(amount)}</p>}
       {txnRef && (
-        <p className="text-xs text-base-content/60">
+        <p className="text-xs text-base-content/70">
           {t('payment.transferContent')}: <span className="font-mono font-medium">{txnRef}</span>
         </p>
       )}
-      <p className="text-xs text-base-content/60">{t('payment.scan')}</p>
+      <p className="text-xs text-base-content/70">{t('payment.scan')}</p>
       {qrExpired ? (
         <div className="flex flex-col items-center gap-2">
           <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-base-content/70">{t('orderPayment.expiredStillValid')}</p>
@@ -98,7 +98,7 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
           {repay.isError && <p role="alert" className="text-xs text-error">{apiErrorMessage(repay.error, t('orderPayment.repayError'))}</p>}
         </div>
       ) : (
-        expiresAt && <p className="text-xs text-base-content/45">{t('payment.qrExpiresAt', { time: formatDate(expiresAt) })}</p>
+        expiresAt && <p className="text-xs text-base-content/70">{t('payment.qrExpiresAt', { time: formatDate(expiresAt) })}</p>
       )}
       {isError ? (
         <p className="text-xs text-error">{t('orderPayment.pollError')}</p>

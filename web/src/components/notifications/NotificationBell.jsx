@@ -84,16 +84,16 @@ export default function NotificationBell({ buttonClassName = 'btn btn-ghost btn-
             ) : isError ? (
               <p className="p-4 text-center text-sm text-error">{t('notifications.loadError')} <button type="button" onClick={() => refetch()} className="link">↻</button></p>
             ) : !items.length ? (
-              <p className="py-8 text-center text-sm text-base-content/50">{t('notifications.empty')}</p>
+              <p className="py-8 text-center text-sm text-base-content/70">{t('notifications.empty')}</p>
             ) : (
               <ul>
                 {items.map((n) => (
                   <li key={n.id}>
-                    <button type="button" onClick={() => openItem(n)} className={`flex w-full gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-base-200 ${n.read ? 'text-base-content/60' : 'text-base-content'}`}>
+                    <button type="button" onClick={() => openItem(n)} className={`flex w-full gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-base-200 ${n.read ? 'text-base-content/70' : 'text-base-content'}`}>
                       <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.read ? 'bg-transparent' : 'bg-primary'}`} aria-hidden="true" />
                       <span className="min-w-0 flex-1">
                         <span className={`block leading-snug ${n.read ? '' : 'font-medium'}`}>{notificationText(n)}</span>
-                        <span className="mt-0.5 block text-xs text-base-content/45">{formatDate(n.createdAt)}</span>
+                        <span className="mt-0.5 block text-xs text-base-content/70">{formatDate(n.createdAt)}</span>
                       </span>
                     </button>
                   </li>

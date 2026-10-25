@@ -50,7 +50,7 @@ export default function CreditPackPaymentModal({ pack, onClose }) {
       <div className="flex flex-col items-center gap-2 text-center" role="status">
         <div className="text-4xl" aria-hidden="true">✅</div>
         <p className="font-medium">Đã cộng {pack.credits} lượt thiết kế!</p>
-        <p className="text-sm text-base-content/60">Lượt đã mua không hết hạn theo tháng — dùng sau khi hết hạn mức của gói.</p>
+        <p className="text-sm text-base-content/70">Lượt đã mua không hết hạn theo tháng — dùng sau khi hết hạn mức của gói.</p>
       </div>
     );
   } else if (status === 'expired' || status === 'failed') {
@@ -73,15 +73,15 @@ export default function CreditPackPaymentModal({ pack, onClose }) {
       <div className="flex flex-col items-center gap-2 text-center">
         <img src={p.qrUrl} alt="Mã QR thanh toán" className="h-52 w-52 rounded-xl border border-base-300 bg-white object-contain" />
         <p className="font-display text-2xl text-primary">{formatVnd(p.amount)}</p>
-        <p className="text-xs text-base-content/60">Nội dung chuyển khoản: <span className="font-mono font-medium">{p.txnRef}</span></p>
-        <p className="text-xs text-base-content/45">QR hết hạn lúc {formatDate(p.expiresAt)}</p>
+        <p className="text-xs text-base-content/70">Nội dung chuyển khoản: <span className="font-mono font-medium">{p.txnRef}</span></p>
+        <p className="text-xs text-base-content/70">QR hết hạn lúc {formatDate(p.expiresAt)}</p>
         <p className="mt-1 flex items-center gap-2 text-sm text-base-content/70" role="status">
           <span className="loading loading-dots loading-xs text-primary" aria-hidden="true" /> Đang chờ thanh toán…
         </p>
       </div>
     );
   } else {
-    body = <p className="flex items-center justify-center gap-2 py-8 text-sm text-base-content/60"><span className="loading loading-spinner loading-md text-primary" /> Đang tạo mã QR…</p>;
+    body = <p className="flex items-center justify-center gap-2 py-8 text-sm text-base-content/70"><span className="loading loading-spinner loading-md text-primary" /> Đang tạo mã QR…</p>;
   }
 
   return (

@@ -59,7 +59,7 @@ export default function PortalChatDrawer() {
                   <Avatar text={active.initials} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium leading-tight">{active.name}</p>
-                    <p className="flex items-center gap-1.5 text-xs text-base-content/55">
+                    <p className="flex items-center gap-1.5 text-xs text-base-content/70">
                       <span className={`inline-block h-2 w-2 rounded-full ${active.online ? 'bg-success' : 'bg-base-content/30'}`} />
                       {active.online ? t('portal.chat.online') : t('portal.chat.offline')}
                     </p>
@@ -85,7 +85,7 @@ export default function PortalChatDrawer() {
                       <ChatMessageBubble key={m.id} message={m} own={m.sender === 'me'} onRetry={retry} onNavigate={close} />
                     ))}
                     {typing && (
-                      <div className="flex items-center gap-1.5 px-1 text-xs text-base-content/50">
+                      <div className="flex items-center gap-1.5 px-1 text-xs text-base-content/70">
                         <span className="flex gap-1">
                           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-base-content/40 [animation-delay:-200ms]" />
                           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-base-content/40 [animation-delay:-100ms]" />
@@ -110,9 +110,9 @@ export default function PortalChatDrawer() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <span className="truncate font-medium">{th.name}</span>
-                          <span className="shrink-0 text-[11px] text-base-content/45">{th.at}</span>
+                          <span className="shrink-0 text-[11px] text-base-content/70">{th.at}</span>
                         </div>
-                        <p className="truncate text-sm text-base-content/55">{th.snippet}</p>
+                        <p className="truncate text-sm text-base-content/70">{th.snippet}</p>
                       </div>
                       {th.unread > 0 && (
                         <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-primary px-1.5 text-[11px] font-medium text-primary-content">

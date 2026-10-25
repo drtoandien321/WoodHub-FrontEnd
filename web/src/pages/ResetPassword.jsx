@@ -57,7 +57,7 @@ export default function ResetPassword() {
   return (
     <AuthLayout>
       <h1 className="font-display text-4xl md:text-5xl mb-2">{t('auth.resetPassword.title')}</h1>
-      <p className="text-sm text-base-content/60 mb-6">{t('auth.resetPassword.subtitle', { email })}</p>
+      <p className="text-sm text-base-content/70 mb-6">{t('auth.resetPassword.subtitle', { email })}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input

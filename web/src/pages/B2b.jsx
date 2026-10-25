@@ -30,7 +30,7 @@ function B2bCta({ className }) {
   }
   return (
     <div className={`flex flex-col items-center gap-2 ${className}`}>
-      <p className="text-sm text-base-content/60">{t('b2b.individualNote')}</p>
+      <p className="text-sm text-base-content/70">{t('b2b.individualNote')}</p>
       <Link to="/profile#business" className="btn btn-primary">{t('b2b.ctaUpgrade')}</Link>
     </div>
   );

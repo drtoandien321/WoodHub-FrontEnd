@@ -38,12 +38,12 @@ export default function SupplierBranches() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-3xl">Chi nhánh</h1>
-        <p className="text-base-content/60">Quản lý các chi nhánh (cửa hàng) của bạn trên WoodHub.</p>
+        <p className="text-base-content/70">Quản lý các chi nhánh (cửa hàng) của bạn trên WoodHub.</p>
       </header>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm lg:flex-row lg:items-center">
         <label className="input input-bordered flex flex-1 items-center gap-2">
-          <Search width={16} height={16} className="text-base-content/40" />
+          <Search width={16} height={16} className="text-base-content/70" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm kiếm theo địa chỉ, quận…" className="grow" />
         </label>
         <div className="tooltip tooltip-left" data-tip={isWorkshopLimited ? 'Xưởng sản xuất chỉ được đăng ký 1 địa chỉ' : undefined}>
@@ -57,12 +57,12 @@ export default function SupplierBranches() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Địa chỉ</th><th>Quận/Huyện</th><th>Tỉnh/Thành</th><th>SĐT</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={5} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={5} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!isLoading && list.map((s) => (
                 <tr key={s.id} className="hover:bg-base-200/50">
                   <td>
@@ -73,7 +73,7 @@ export default function SupplierBranches() {
                   </td>
                   <td className="text-sm">{s.district || '—'}</td>
                   <td className="text-sm">{s.city || '—'}</td>
-                  <td><span className="flex items-center gap-1 text-sm text-base-content/70">{s.phone ? <><Phone width={14} height={14} className="text-base-content/40" />{s.phone}</> : '—'}</span></td>
+                  <td><span className="flex items-center gap-1 text-sm text-base-content/70">{s.phone ? <><Phone width={14} height={14} className="text-base-content/70" />{s.phone}</> : '—'}</span></td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <Link to={`/portal/supplier/branches/${s.id}`} className="btn btn-ghost btn-xs btn-square" aria-label="Xem chi tiết"><Eye width={15} height={15} /></Link>
@@ -84,7 +84,7 @@ export default function SupplierBranches() {
                 </tr>
               ))}
               {!isLoading && !list.length && (
-                <tr><td colSpan={5} className="py-10 text-center text-base-content/50">Chưa có chi nhánh nào. Bấm "Thêm chi nhánh" để bắt đầu.</td></tr>
+                <tr><td colSpan={5} className="py-10 text-center text-base-content/70">Chưa có chi nhánh nào. Bấm "Thêm chi nhánh" để bắt đầu.</td></tr>
               )}
             </tbody>
           </table>

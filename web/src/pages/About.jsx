@@ -44,7 +44,7 @@ export default function About() {
                     {m.year.split('/')[0]}
                   </span>
                   <span className="font-medium text-sm">{m.year}</span>
-                  <span className="text-xs text-base-content/60 leading-snug">{m.label}</span>
+                  <span className="text-xs text-base-content/70 leading-snug">{m.label}</span>
                 </div>
               </Fragment>
             ))}

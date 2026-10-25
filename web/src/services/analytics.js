@@ -11,8 +11,6 @@
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
 let started = false;
 
-export const isAnalyticsEnabled = () => Boolean(GA_ID);
-
 export function initAnalytics() {
   if (!GA_ID || started || typeof document === 'undefined') return;
   started = true;
@@ -37,7 +35,11 @@ export function trackPageView(path) {
   });
 }
 
-// Sự kiện tuỳ chọn (vd: 'sign_up', 'add_to_cart', 'generate_lead') để đo chuyển đổi
+/*
+ * Sự kiện chuyển đổi theo tên chuẩn ecommerce của GA4 (để báo cáo "Monetization" tự nhận):
+ *  add_to_cart (ProductInfo) → begin_checkout (Checkout mở) → purchase (Checkout đặt đơn thành công).
+ * params: { currency: 'VND', value, items: [{ item_id, item_name, price, quantity }] } — value là SỐ (VND, không định dạng).
+ */
 export function trackEvent(name, params = {}) {
   if (!GA_ID || !window.gtag) return;
   window.gtag('event', name, params);

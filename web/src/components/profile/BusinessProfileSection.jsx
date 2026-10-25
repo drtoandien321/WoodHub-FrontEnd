@@ -52,7 +52,7 @@ export default function BusinessProfileSection({ customerType }) {
     <section id="business" className="card scroll-mt-24 bg-base-200 border border-base-300 p-5 flex flex-col gap-4">
       <div>
         <h2 className="font-display text-xl">{t('profile.business.title')}</h2>
-        <p className="text-sm text-base-content/60">{t('profile.business.subtitle')}</p>
+        <p className="text-sm text-base-content/70">{t('profile.business.subtitle')}</p>
       </div>
 
       {isLoading ? (
@@ -67,16 +67,16 @@ export default function BusinessProfileSection({ customerType }) {
             <p className="rounded-xl border border-info/30 bg-info/10 p-3 text-sm">{t('profile.business.upgradeNote')}</p>
           )}
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm text-base-content/60">{t('profile.business.companyName')} *</span>
+            <span className="text-sm text-base-content/70">{t('profile.business.companyName')} *</span>
             <input value={form.companyName} onChange={set('companyName')} maxLength={255} className="input input-bordered w-full" />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm text-base-content/60">{t('profile.business.taxCode')} *</span>
+            <span className="text-sm text-base-content/70">{t('profile.business.taxCode')} *</span>
             <input value={form.taxCode} onChange={set('taxCode')} maxLength={20} inputMode="numeric" placeholder="0123456789" className="input input-bordered w-full" />
-            <span className="text-xs text-base-content/45">{t('profile.business.taxCodeHint')}</span>
+            <span className="text-xs text-base-content/70">{t('profile.business.taxCodeHint')}</span>
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm text-base-content/60">{t('profile.business.companyAddress')} *</span>
+            <span className="text-sm text-base-content/70">{t('profile.business.companyAddress')} *</span>
             <textarea value={form.companyAddress} onChange={set('companyAddress')} rows={2} className="textarea textarea-bordered w-full" />
           </label>
 

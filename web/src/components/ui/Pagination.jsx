@@ -11,7 +11,7 @@ export default function Pagination({ pageInfo, onChange, unit, className = '' })
   const go = (n) => onChange(Math.min(Math.max(0, n), totalPages - 1));
 
   return (
-    <div className={`flex items-center justify-between gap-3 text-sm text-base-content/60 ${className}`}>
+    <div className={`flex items-center justify-between gap-3 text-sm text-base-content/70 ${className}`}>
       <span>
         Trang {number + 1} / {totalPages}
         {unit && totalElements != null && <> — {totalElements} {unit}</>}

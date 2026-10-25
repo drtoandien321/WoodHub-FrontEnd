@@ -68,7 +68,7 @@ function ProfileForm({ me, onSave }) {
   return (
     <form onSubmit={handleSubmit} className="card bg-base-200 border border-base-300 p-5 flex flex-col gap-4">
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm text-base-content/60">{t('profile.name')}</span>
+        <span className="text-sm text-base-content/70">{t('profile.name')}</span>
         <input
           required
           value={fullName}
@@ -77,7 +77,7 @@ function ProfileForm({ me, onSave }) {
         />
       </label>
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm text-base-content/60">{t('profile.phone')}</span>
+        <span className="text-sm text-base-content/70">{t('profile.phone')}</span>
         <input
           type="tel"
           value={phone}
@@ -87,11 +87,11 @@ function ProfileForm({ me, onSave }) {
       </label>
       {/* Email/role chỉ đọc — BE không cho đổi email qua PUT /users/{id} */}
       <div className="flex items-center justify-between gap-4 pt-1">
-        <span className="text-sm text-base-content/60">{t('profile.email')}</span>
+        <span className="text-sm text-base-content/70">{t('profile.email')}</span>
         <span className="font-medium text-sm">{me.email}</span>
       </div>
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-base-content/60">{t('profile.role')}</span>
+        <span className="text-sm text-base-content/70">{t('profile.role')}</span>
         <span className="font-medium text-sm">{t(`auth.roles.${me.role}`)}</span>
       </div>
 

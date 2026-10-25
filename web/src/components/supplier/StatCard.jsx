@@ -19,7 +19,7 @@ export default function StatCard({
     <div className="group h-full rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md md:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-base-content/60">{label}</p>
+          <p className="text-sm text-base-content/70">{label}</p>
           <p className="mt-1 truncate text-2xl font-semibold text-base-content">{display}</p>
         </div>
         {Icon && (
@@ -32,12 +32,12 @@ export default function StatCard({
       {delta != null && (
         <p className={`mt-2 inline-flex items-center gap-1 text-xs font-medium ${positive ? 'text-success' : 'text-error'}`}>
           <TrendingUp width={13} height={13} className={positive ? '' : 'rotate-180'} />
-          {positive ? '+' : ''}{delta}% <span className="font-normal text-base-content/45">so với 7 ngày trước</span>
+          {positive ? '+' : ''}{delta}% <span className="font-normal text-base-content/70">so với 7 ngày trước</span>
         </p>
       )}
-      {hint && !to && <p className="mt-2 text-xs text-base-content/55">{hint}</p>}
+      {hint && !to && <p className="mt-2 text-xs text-base-content/70">{hint}</p>}
       {hint && to && (
-        <p className="mt-2 flex items-center justify-between text-xs text-base-content/55">
+        <p className="mt-2 flex items-center justify-between text-xs text-base-content/70">
           {hint}
           <span className="inline-flex items-center gap-0.5 font-medium text-primary transition-all group-hover:gap-1.5">
             <ChevronRight width={13} height={13} />

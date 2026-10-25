@@ -19,7 +19,7 @@ export default function LanguageSwitcher() {
             type="button"
             onClick={() => i18n.changeLanguage(lang.code)}
             aria-label={`${t('common.switchLanguage')}: ${lang.label}`}
-            className={`px-1 transition-colors ${current === lang.code ? 'font-semibold text-primary' : 'text-base-content/50 hover:text-base-content'}`}
+            className={`px-1 transition-colors ${current === lang.code ? 'font-semibold text-primary' : 'text-base-content/70 hover:text-base-content'}`}
           >
             {lang.label}
           </button>

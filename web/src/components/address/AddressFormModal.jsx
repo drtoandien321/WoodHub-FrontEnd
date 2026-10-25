@@ -173,7 +173,7 @@ export default function AddressFormModal({ initial = null, onClose, onSaved, req
             longitude={coords?.longitude ?? null}
             onChange={(latitude, longitude) => { setCoords({ latitude, longitude }); setLocateErr(''); }}
           />
-          <p className="text-xs text-base-content/50">
+          <p className="text-xs text-base-content/70">
             {coords
               ? t('address.coordsPicked', { lat: coords.latitude.toFixed(5), lng: coords.longitude.toFixed(5) })
               : t('address.coordsHint')}

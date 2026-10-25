@@ -36,7 +36,7 @@ export default function PortalSettings({ subtitle, profileTabLabel, nameLabel, d
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Cài đặt</h1>
-        <p className="mt-1 text-base-content/60">{subtitle}</p>
+        <p className="mt-1 text-base-content/70">{subtitle}</p>
       </header>
 
       {/* 3 cột chỉ từ 2xl (≥1536px): ở laptop 1280–1440px, sidebar portal + menu tab + thẻ tổng quan chiếm hết → cột form

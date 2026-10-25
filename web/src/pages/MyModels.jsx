@@ -24,7 +24,7 @@ export default function MyModels() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link to="/custom/designs" className="text-sm text-base-content/55 hover:text-primary">← {t('custom.studio.designs.title')}</Link>
+        <Link to="/custom/designs" className="text-sm text-base-content/70 hover:text-primary">← {t('custom.studio.designs.title')}</Link>
         <h1 className="mt-1 font-display text-3xl">{t('custom.studio.myModels.title')}</h1>
       </div>
 
@@ -36,7 +36,7 @@ export default function MyModels() {
         </div>
       )}
       {!isLoading && !isError && items.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-base-300 p-10 text-center text-base-content/60">
+        <div className="rounded-2xl border border-dashed border-base-300 p-10 text-center text-base-content/70">
           <p>{t('custom.studio.myModels.empty')}</p>
           <Link to="/custom/studio" className="btn btn-primary btn-sm mt-3">{t('custom.studio.title')}</Link>
         </div>
@@ -62,7 +62,7 @@ export default function MyModels() {
                 <div className="min-w-0">
                   <p className="truncate font-display text-lg">{m.name}</p>
                   {/* Ngày tạo giúp phân biệt các model còn mang tên mặc định trùng nhau */}
-                  {m.createdAt && <p className="text-xs text-base-content/50">{t('custom.studio.myModels.createdAt', { date: new Date(m.createdAt).toLocaleString('vi-VN') })}</p>}
+                  {m.createdAt && <p className="text-xs text-base-content/70">{t('custom.studio.myModels.createdAt', { date: new Date(m.createdAt).toLocaleString('vi-VN') })}</p>}
                 </div>
               )}
               <div className="mt-auto flex gap-2">

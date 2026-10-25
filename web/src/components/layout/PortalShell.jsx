@@ -33,7 +33,7 @@ export default function PortalShell({ nav, brandName, brandInitials, home, title
     <div className="flex h-full flex-col p-4">
       <Link to={home} onClick={onNavigate} className="mb-6 flex flex-col px-2 leading-none">
         <span className="font-display text-2xl tracking-tight text-primary">WOODHUB</span>
-        <span className="mt-1 text-[10px] tracking-[0.3em] text-base-content/45">FURNITURE &amp; CRAFT</span>
+        <span className="mt-1 text-[10px] tracking-[0.3em] text-base-content/70">FURNITURE &amp; CRAFT</span>
       </Link>
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto">
         {nav.map((item) => (

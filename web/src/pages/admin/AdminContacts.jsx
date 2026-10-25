@@ -5,7 +5,7 @@ import Pagination from '../../components/ui/Pagination.jsx';
 
 const PAGE_SIZE = 20;
 const TABS = [['new', 'Mới'], ['handled', 'Đã xử lý'], ['spam', 'Spam'], ['', 'Tất cả']];
-const STATUS_BADGE = { new: 'bg-info/15 text-info', handled: 'bg-success/15 text-success', spam: 'bg-base-300/60 text-base-content/60' };
+const STATUS_BADGE = { new: 'bg-info/15 text-info', handled: 'bg-success/15 text-success', spam: 'bg-base-300/60 text-base-content/70' };
 const STATUS_LABEL = { new: 'Mới', handled: 'Đã xử lý', spam: 'Spam' };
 
 /*
@@ -28,7 +28,7 @@ export default function AdminContacts() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Liên hệ</h1>
-        <p className="mt-1 text-base-content/60">Tin nhắn khách gửi từ trang Liên hệ. Trả lời qua email rồi đánh dấu đã xử lý.</p>
+        <p className="mt-1 text-base-content/70">Tin nhắn khách gửi từ trang Liên hệ. Trả lời qua email rồi đánh dấu đã xử lý.</p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -50,7 +50,7 @@ export default function AdminContacts() {
       ) : isError ? (
         <p className="text-center text-error">Không tải được liên hệ. <button onClick={() => refetch()} className="link">Thử lại</button></p>
       ) : !items.length ? (
-        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/55">Không có liên hệ nào.</p>
+        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/70">Không có liên hệ nào.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((c) => (
@@ -58,7 +58,7 @@ export default function AdminContacts() {
               <button type="button" onClick={() => setOpen(open === c.id ? null : c.id)} className="flex w-full flex-wrap items-start justify-between gap-3 text-left">
                 <span className="min-w-0">
                   <span className="block font-medium">{c.subject}</span>
-                  <span className="block text-xs text-base-content/55">{c.name} · {c.email}{c.phone ? ` · ${c.phone}` : ''} · {formatDate(c.createdAt)}</span>
+                  <span className="block text-xs text-base-content/70">{c.name} · {c.email}{c.phone ? ` · ${c.phone}` : ''} · {formatDate(c.createdAt)}</span>
                 </span>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[c.status] ?? ''}`}>{STATUS_LABEL[c.status] ?? c.status}</span>
               </button>

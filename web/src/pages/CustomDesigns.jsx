@@ -9,7 +9,7 @@ export default function CustomDesigns() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link to="/custom" className="text-sm text-base-content/55 hover:text-primary">← {t('nav.custom')}</Link>
+          <Link to="/custom" className="text-sm text-base-content/70 hover:text-primary">← {t('nav.custom')}</Link>
           <h1 className="mt-1 font-display text-3xl">{t('custom.studio.designs.title')}</h1>
         </div>
         <div className="flex gap-2">

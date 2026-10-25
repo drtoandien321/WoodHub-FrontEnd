@@ -8,7 +8,7 @@ export default function ProductOptions({ label, options = [], value, onChange })
 
   return (
     <div>
-      <p className="mb-2 text-sm text-base-content/60">{label}</p>
+      <p className="mb-2 text-sm text-base-content/70">{label}</p>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const active = opt === value;

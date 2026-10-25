@@ -14,7 +14,7 @@ export default function Step6Save({ designName, onNameChange, onSave, saving, sa
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="font-display text-2xl">{t('custom.studio.step6.title')}</h2>
-        <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.step6.subtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('custom.studio.step6.subtitle')}</p>
       </div>
 
       {saved ? (

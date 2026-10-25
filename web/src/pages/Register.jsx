@@ -94,7 +94,7 @@ export default function Register() {
       <h1 className="font-display text-4xl md:text-5xl mb-2">
         {isBusiness ? t('auth.register.businessTitle') : t('auth.register.title')}
       </h1>
-      <p className="text-base-content/60 mb-5">
+      <p className="text-base-content/70 mb-5">
         {isBusiness ? t('auth.register.businessSubtitle') : t('auth.register.subtitle')}
       </p>
 
@@ -130,7 +130,7 @@ export default function Register() {
         {/* Chỉ hiện khi đăng ký doanh nghiệp (?type=business) — gửi kèm customerType='business' */}
         {isBusiness && (
           <>
-            <div className="divider my-0 text-xs text-base-content/40">{t('auth.register.businessSectionTitle')}</div>
+            <div className="divider my-0 text-xs text-base-content/70">{t('auth.register.businessSectionTitle')}</div>
             <AuthField icon={BuildingIcon} required placeholder={t('auth.register.companyNamePlaceholder')} value={form.companyName} onChange={set('companyName')} />
             <AuthField icon={BuildingIcon} required inputMode="numeric" maxLength={14} placeholder={t('auth.register.taxCodePlaceholder')} value={form.taxCode} onChange={set('taxCode')} />
             <AuthField icon={BuildingIcon} required placeholder={t('auth.register.companyAddressPlaceholder')} value={form.companyAddress} onChange={set('companyAddress')} />
@@ -149,12 +149,12 @@ export default function Register() {
       {/* Phân cách + Google */}
       <div className="flex items-center gap-3 my-5">
         <div className="flex-1 h-px bg-base-content/15" />
-        <span className="text-xs text-base-content/50">{t('auth.divider')}</span>
+        <span className="text-xs text-base-content/70">{t('auth.divider')}</span>
         <div className="flex-1 h-px bg-base-content/15" />
       </div>
       <GoogleAuthButton mode="register" />
 
-      <p className="text-sm text-center mt-5 text-base-content/60">
+      <p className="text-sm text-center mt-5 text-base-content/70">
         {t('auth.register.haveAccount')} <Link to="/login" className="link link-primary font-medium">{t('auth.register.loginLink')}</Link>
       </p>
     </AuthLayout>

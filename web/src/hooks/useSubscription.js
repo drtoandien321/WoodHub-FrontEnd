@@ -35,9 +35,6 @@ export const useMySubscription = (options = {}) =>
     ...options,
   });
 
-export const useMySubscriptionHistory = (options = {}) =>
-  useQuery({ queryKey: ['mySubscriptionHistory'], queryFn: api.getMySubscriptionHistory, ...options });
-
 // POST /subscriptions — CHỈ dùng cho gói FREE (price === 0). Gọi cho gói trả phí → BE trả 400.
 export const useSubscribe = () => {
   const qc = useQueryClient();

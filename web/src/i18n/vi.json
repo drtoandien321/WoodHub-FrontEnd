@@ -8,7 +8,8 @@
     "notifications": "Thông báo",
     "noNotifications": "Chưa có thông báo",
     "showPassword": "Hiện mật khẩu",
-    "hidePassword": "Ẩn mật khẩu"
+    "hidePassword": "Ẩn mật khẩu",
+    "close": "Đóng"
   },
   "nav": {
     "home": "Trang chủ",
@@ -541,21 +542,6 @@
     },
     "sortLabel": "Sắp xếp theo"
   },
-  "rooms": {
-    "title": "Không gian",
-    "subtitle": "Xem nội thất được sắp đặt trong không gian thật — bấm vào từng món để xem chi tiết hoặc thêm vào giỏ.",
-    "loadError": "Không tải được dữ liệu không gian.",
-    "noRooms": "Chưa có không gian nào.",
-    "roomNotFound": "Không tìm thấy không gian này",
-    "backToRooms": "Về trang Không gian",
-    "noScenes": "Phòng này chưa có ảnh không gian nào.",
-    "sceneNotFound": "Không tìm thấy cảnh không gian này",
-    "imageError": "Không tải được ảnh không gian — hiển thị danh sách sản phẩm thay thế.",
-    "noProducts": "Chưa có sản phẩm nào gắn với không gian này.",
-    "hotspotLabel": "Xem sản phẩm: {{name}}",
-    "viewDetail": "Xem chi tiết",
-    "close": "Đóng"
-  },
   "product": {
     "suppliedBy": "Cung cấp bởi",
     "material": "Chất liệu",
@@ -579,17 +565,17 @@
     "chatSupplier": "Chat với nhà cung cấp",
     "bestseller": "Bán chạy",
     "trust": {
-      "warranty": {
-        "title": "Bảo hành 24 tháng",
-        "desc": "Lỗi kỹ thuật đổi mới"
+      "payment": {
+        "title": "Thanh toán QR an toàn",
+        "desc": "Chuyển khoản, đơn tự xác nhận khi tiền vào"
       },
-      "install": {
-        "title": "Hỗ trợ lắp đặt",
-        "desc": "Tận nơi nội thành"
+      "refund": {
+        "title": "Hoàn tiền trong 48 giờ",
+        "desc": "Nếu đơn đã thanh toán bị huỷ"
       },
       "shipping": {
-        "title": "Giao hàng toàn quốc",
-        "desc": "Nhận hàng 3–7 ngày"
+        "title": "Phí ship rõ ràng",
+        "desc": "Tính theo khoảng cách tới chi nhánh"
       }
     },
     "view3d": "Xem 3D / AR",

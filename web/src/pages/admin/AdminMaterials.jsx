@@ -33,13 +33,13 @@ export default function AdminMaterials() {
       <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Vật liệu</h1>
-          <p className="mt-1 text-base-content/60">Quản lý danh sách vật liệu gỗ dùng cho sản phẩm.</p>
+          <p className="mt-1 text-base-content/70">Quản lý danh sách vật liệu gỗ dùng cho sản phẩm.</p>
         </div>
         <button onClick={() => setModalMode('create')} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Thêm vật liệu</button>
       </header>
 
       <label className="input input-bordered flex max-w-sm items-center gap-2">
-        <Search width={16} height={16} className="text-base-content/40" />
+        <Search width={16} height={16} className="text-base-content/70" />
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm kiếm vật liệu…" className="grow" />
       </label>
 
@@ -47,17 +47,17 @@ export default function AdminMaterials() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Tên vật liệu</th><th>AI đổi chất liệu</th><th>Ngày tạo</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={4} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={4} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!isLoading && list.map((m) => (
                 <tr key={m.id} className="hover:bg-base-200/50">
                   <td className="font-medium">{m.name}</td>
-                  <td className="max-w-xs truncate text-xs text-base-content/60" title={m.retexturePrompt ?? ''}>{m.retexturePrompt || <span className="text-base-content/35">Chưa có</span>}</td>
-                  <td className="text-sm text-base-content/60">{new Date(m.createdAt).toLocaleDateString('vi-VN')}</td>
+                  <td className="max-w-xs truncate text-xs text-base-content/70" title={m.retexturePrompt ?? ''}>{m.retexturePrompt || <span className="text-base-content/70">Chưa có</span>}</td>
+                  <td className="text-sm text-base-content/70">{new Date(m.createdAt).toLocaleDateString('vi-VN')}</td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => setModalMode(m)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa"><Pencil width={15} height={15} /></button>
@@ -67,7 +67,7 @@ export default function AdminMaterials() {
                 </tr>
               ))}
               {!isLoading && !list.length && (
-                <tr><td colSpan={4} className="py-10 text-center text-base-content/50">Không tìm thấy vật liệu phù hợp.</td></tr>
+                <tr><td colSpan={4} className="py-10 text-center text-base-content/70">Không tìm thấy vật liệu phù hợp.</td></tr>
               )}
             </tbody>
           </table>

@@ -19,7 +19,7 @@ export default function SupplierListStats({ stats = [] }) {
             </span>
             <div className="min-w-0">
               <p className="text-xl font-bold leading-tight text-primary">{s.value}</p>
-              <p className="truncate text-sm text-base-content/60">{s.label}</p>
+              <p className="truncate text-sm text-base-content/70">{s.label}</p>
             </div>
           </div>
         );

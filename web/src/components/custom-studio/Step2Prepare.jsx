@@ -50,7 +50,7 @@ export default function Step2Prepare({ onNext, onBack, pending }) {
     <div className="flex flex-col gap-6">
       <div>
         <h2 className="font-display text-2xl">{t('custom.studio.step2.title')}</h2>
-        <p className="mt-1 text-sm text-base-content/60">{t('custom.studio.step2.subtitle')}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('custom.studio.step2.subtitle')}</p>
       </div>
 
       {/* Dropzone / preview */}
@@ -74,7 +74,7 @@ export default function Step2Prepare({ onNext, onBack, pending }) {
           className={`flex min-h-52 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary ${dragOver ? 'border-primary bg-primary/5' : 'border-base-300 bg-base-200/40 hover:border-primary/60'}`}
         >
           <p className="font-medium">{t('custom.studio.step2.dropTitle')}</p>
-          <p className="text-xs text-base-content/55">{t('custom.studio.step2.dropHint')}</p>
+          <p className="text-xs text-base-content/70">{t('custom.studio.step2.dropHint')}</p>
         </div>
       )}
       <input
@@ -84,7 +84,7 @@ export default function Step2Prepare({ onNext, onBack, pending }) {
       {fileError && <p className="text-sm text-error" role="alert">{fileError}</p>}
 
       {/* Yêu cầu ảnh */}
-      <div className="rounded-xl bg-base-200/50 p-4 text-xs text-base-content/60">
+      <div className="rounded-xl bg-base-200/50 p-4 text-xs text-base-content/70">
         <p className="font-medium text-base-content/70">{t('custom.studio.step2.requirementsTitle')}</p>
         <ul className="mt-1.5 list-disc space-y-0.5 pl-4">
           <li>{t('custom.studio.step2.reqFormat')}</li>
@@ -113,7 +113,7 @@ export default function Step2Prepare({ onNext, onBack, pending }) {
       <label className="flex cursor-pointer items-center justify-between rounded-xl border border-base-300 p-3">
         <span className="text-sm">
           {t('custom.studio.step2.removeBg')}
-          <span className="block text-xs text-base-content/50">{t('custom.studio.step2.removeBgHint')}</span>
+          <span className="block text-xs text-base-content/70">{t('custom.studio.step2.removeBgHint')}</span>
         </span>
         <input type="checkbox" className="toggle toggle-primary" checked={removeBackground} onChange={(e) => setRemoveBackground(e.target.checked)} />
       </label>

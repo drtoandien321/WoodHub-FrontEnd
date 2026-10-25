@@ -74,7 +74,7 @@ function CreditPackFormModal({ initial, onClose }) {
           <label className="flex flex-col gap-1.5">
             <span className="text-sm text-base-content/70">Giá (đ) *</span>
             <input type="number" min="0" value={form.price} onChange={set('price')} className="input input-bordered w-full" />
-            {perCredit && <span className="text-xs text-base-content/50">≈ {formatVnd(perCredit)} / lượt</span>}
+            {perCredit && <span className="text-xs text-base-content/70">≈ {formatVnd(perCredit)} / lượt</span>}
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-sm text-base-content/70">Thứ tự hiển thị</span>
@@ -110,7 +110,7 @@ export default function AdminCreditPacks() {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Gói lượt thiết kế</h1>
-          <p className="mt-1 text-base-content/60">Lượt thiết kế 3D bán thêm khi khách hết hạn mức tháng. Lượt mua không hết hạn.</p>
+          <p className="mt-1 text-base-content/70">Lượt thiết kế 3D bán thêm khi khách hết hạn mức tháng. Lượt mua không hết hạn.</p>
         </div>
         <button onClick={() => setModal('create')} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Thêm gói</button>
       </header>
@@ -119,20 +119,20 @@ export default function AdminCreditPacks() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55"><th>Gói</th><th>Số lượt</th><th>Giá</th><th>Giá / lượt</th><th>Trạng thái</th><th>Thứ tự</th><th className="text-right">Thao tác</th></tr>
+              <tr className="text-base-content/70"><th>Gói</th><th>Số lượt</th><th>Giá</th><th>Giá / lượt</th><th>Trạng thái</th><th>Thứ tự</th><th className="text-right">Thao tác</th></tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {isError && <tr><td colSpan={7} className="py-10 text-center"><span className="text-error">Không tải được danh sách. </span><button onClick={() => refetch()} className="link link-primary">Thử lại</button></td></tr>}
-              {!isLoading && !isError && !packs.length && <tr><td colSpan={7} className="py-10 text-center text-base-content/50">Chưa có gói lượt nào.</td></tr>}
+              {!isLoading && !isError && !packs.length && <tr><td colSpan={7} className="py-10 text-center text-base-content/70">Chưa có gói lượt nào.</td></tr>}
               {packs.map((p) => (
                 <tr key={p.id} className="hover:bg-base-200/50">
-                  <td><p className="font-medium">{p.displayName}</p><p className="font-mono text-xs text-base-content/50">{p.name}</p></td>
+                  <td><p className="font-medium">{p.displayName}</p><p className="font-mono text-xs text-base-content/70">{p.name}</p></td>
                   <td className="text-sm tabular-nums">{p.credits}</td>
                   <td className="text-sm">{formatVnd(p.price)}</td>
-                  <td className="text-sm text-base-content/60">{formatVnd(Math.round(p.price / p.credits))}</td>
+                  <td className="text-sm text-base-content/70">{formatVnd(Math.round(p.price / p.credits))}</td>
                   <td><span className={`badge badge-sm ${p.isActive ? 'badge-success' : 'badge-ghost'}`}>{p.isActive ? 'Đang bán' : 'Đã tắt'}</span></td>
-                  <td className="text-sm text-base-content/60">{p.sortOrder}</td>
+                  <td className="text-sm text-base-content/70">{p.sortOrder}</td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => setModal(p)} className="btn btn-ghost btn-sm btn-square" aria-label={`Sửa ${p.displayName}`}><Pencil width={15} height={15} /></button>

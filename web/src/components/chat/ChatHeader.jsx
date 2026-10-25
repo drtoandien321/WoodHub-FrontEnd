@@ -20,7 +20,7 @@ export default function ChatHeader({ supplier, onClose, onMinimize }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium leading-tight">{name}</p>
-        <p className="flex items-center gap-1.5 text-xs text-base-content/55">
+        <p className="flex items-center gap-1.5 text-xs text-base-content/70">
           <span className="inline-block h-2 w-2 rounded-full bg-success" />
           {t('chat.online')} · {t('chat.subtitle')}
         </p>

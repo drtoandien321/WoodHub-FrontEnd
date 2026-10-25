@@ -29,7 +29,7 @@ export default function AdminSubscriptionPlans() {
       <header className="flex items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Gói đăng ký</h1>
-          <p className="mt-1 text-base-content/60">Quản lý các gói subscription hiển thị ở trang Pricing.</p>
+          <p className="mt-1 text-base-content/70">Quản lý các gói subscription hiển thị ở trang Pricing.</p>
         </div>
         <button onClick={() => setModalMode('create')} className="btn btn-primary gap-2"><Plus width={16} height={16} /> Thêm gói</button>
       </header>
@@ -38,17 +38,17 @@ export default function AdminSubscriptionPlans() {
         <div className="overflow-x-auto">
           <table className="table">
             <thead>
-              <tr className="text-base-content/55">
+              <tr className="text-base-content/70">
                 <th>Gói</th><th>Giá</th><th>Trạng thái</th><th>Thứ tự</th><th className="text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={5} className="py-10 text-center text-base-content/50">Đang tải…</td></tr>}
+              {isLoading && <tr><td colSpan={5} className="py-10 text-center text-base-content/70">Đang tải…</td></tr>}
               {!isLoading && items.map((p) => (
                 <tr key={p.id} className="hover:bg-base-200/50">
                   <td>
                     <p className="font-medium">{p.displayName}</p>
-                    <p className="text-xs text-base-content/50">{p.name}</p>
+                    <p className="text-xs text-base-content/70">{p.name}</p>
                   </td>
                   <td className="text-sm">{p.price === 0 ? 'Miễn phí' : formatVnd(p.price)}</td>
                   <td>
@@ -56,7 +56,7 @@ export default function AdminSubscriptionPlans() {
                       {p.isActive ? 'Đang bán' : 'Đã tắt'}
                     </span>
                   </td>
-                  <td className="text-sm text-base-content/60">{p.sortOrder}</td>
+                  <td className="text-sm text-base-content/70">{p.sortOrder}</td>
                   <td>
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => setModalMode(p)} className="btn btn-ghost btn-xs btn-square" aria-label="Sửa"><Pencil width={15} height={15} /></button>
@@ -66,7 +66,7 @@ export default function AdminSubscriptionPlans() {
                 </tr>
               ))}
               {!isLoading && !items.length && (
-                <tr><td colSpan={5} className="py-10 text-center text-base-content/50">Chưa có gói nào.</td></tr>
+                <tr><td colSpan={5} className="py-10 text-center text-base-content/70">Chưa có gói nào.</td></tr>
               )}
             </tbody>
           </table>

@@ -57,7 +57,7 @@ export default function MySubscription() {
         <div className="skeleton h-40 rounded-2xl" />
       ) : !mySub ? (
         <div className="rounded-2xl border border-base-300 bg-base-100 p-6 text-center">
-          <p className="text-base-content/60 mb-3">{t('mySub.noPlan')}</p>
+          <p className="text-base-content/70 mb-3">{t('mySub.noPlan')}</p>
           <Link to="/pricing" className="btn btn-primary btn-sm">{t('mySub.choosePlan')}</Link>
         </div>
       ) : (
@@ -65,7 +65,7 @@ export default function MySubscription() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-display text-xl">{mySub.plan.displayName}</h2>
-              <p className="text-sm text-base-content/60 mt-1">
+              <p className="text-sm text-base-content/70 mt-1">
                 {mySub.plan.price === 0 ? t('mySub.free') : t('mySub.perMonth', { price: formatVnd(mySub.plan.price) })}
               </p>
             </div>
@@ -119,7 +119,7 @@ export default function MySubscription() {
                 </div>
               );
             })}
-            <p className="mt-1 text-xs text-base-content/50">{t('mySub.usageNote')}</p>
+            <p className="mt-1 text-xs text-base-content/70">{t('mySub.usageNote')}</p>
           </div>
         )}
       </div>
@@ -128,12 +128,12 @@ export default function MySubscription() {
       {creditPacks.length > 0 && (
         <div className="rounded-2xl border border-base-300 bg-base-100 p-6">
           <h2 className="font-display text-lg">{t('mySub.buyCreditsTitle')}</h2>
-          <p className="mt-1 mb-4 text-sm text-base-content/60">{t('mySub.buyCreditsDesc')}</p>
+          <p className="mt-1 mb-4 text-sm text-base-content/70">{t('mySub.buyCreditsDesc')}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {creditPacks.map((pack) => (
               <div key={pack.id} className="flex flex-col gap-2 rounded-xl border border-base-300 p-4">
                 <p className="font-medium">{pack.displayName}</p>
-                <p className="text-sm text-base-content/60">
+                <p className="text-sm text-base-content/70">
                   {t('mySub.packLine', { credits: pack.credits, unit: formatVnd(Math.round(pack.price / pack.credits)) })}
                 </p>
                 <div className="mt-auto flex items-center justify-between gap-2">
@@ -157,7 +157,7 @@ export default function MySubscription() {
                 <div key={p.id} className="flex items-center justify-between text-sm border-b border-base-200 last:border-0 pb-2 last:pb-0">
                   <div>
                     <p className="font-medium">{paymentLabel(p, t)}</p>
-                    <p className="text-xs text-base-content/50">{formatDate(p.createdAt)}</p>
+                    <p className="text-xs text-base-content/70">{formatDate(p.createdAt)}</p>
                   </div>
                   <div className="text-right">
                     <p>{formatVnd(p.amount)}</p>

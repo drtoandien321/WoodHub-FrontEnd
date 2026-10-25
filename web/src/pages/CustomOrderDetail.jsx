@@ -65,12 +65,12 @@ export default function CustomOrderDetail() {
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
       <div>
-        <Link to={myRole === 'customer' ? '/custom-orders' : '/portal/workshop/production'} className="text-sm text-base-content/55 hover:text-primary">← {t(myRole === 'customer' ? 'order.myOrdersTitle' : 'order.backToProduction')}</Link>
+        <Link to={myRole === 'customer' ? '/custom-orders' : '/portal/workshop/production'} className="text-sm text-base-content/70 hover:text-primary">← {t(myRole === 'customer' ? 'order.myOrdersTitle' : 'order.backToProduction')}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="font-display text-3xl">{otherPartyName}</h1>
           <StatusBadge meta={customOrderMeta(order.status)} />
         </div>
-        <p className="mt-1 font-mono text-sm text-base-content/50">{order.orderNumber}</p>
+        <p className="mt-1 font-mono text-sm text-base-content/70">{order.orderNumber}</p>
       </div>
 
       <DesignSnapshotCard snapshot={order.designSnapshot} quantity={order.quantity} viewerRole={myRole} />
@@ -78,10 +78,10 @@ export default function CustomOrderDetail() {
       <div className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           <div className="grid flex-1 grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-            <div><p className="text-base-content/50">{t('quote.price')}</p><p className="font-medium">{formatVnd(order.unitPrice)}</p></div>
-            <div><p className="text-base-content/50">{t('order.total')}</p><p className="font-semibold text-primary">{formatVnd(order.totalAmount)}</p></div>
-            <div><p className="text-base-content/50">{t('quote.leadTimeDays')}</p><p className="font-medium">{order.leadTimeDays}</p></div>
-            {order.location && <div><p className="text-base-content/50">{t('quote.location')}</p><p className="font-medium">{order.location}</p></div>}
+            <div><p className="text-base-content/70">{t('quote.price')}</p><p className="font-medium">{formatVnd(order.unitPrice)}</p></div>
+            <div><p className="text-base-content/70">{t('order.total')}</p><p className="font-semibold text-primary">{formatVnd(order.totalAmount)}</p></div>
+            <div><p className="text-base-content/70">{t('quote.leadTimeDays')}</p><p className="font-medium">{order.leadTimeDays}</p></div>
+            {order.location && <div><p className="text-base-content/70">{t('quote.location')}</p><p className="font-medium">{order.location}</p></div>}
           </div>
         </div>
         {order.note && <p className="mt-3 rounded-xl bg-base-200/60 p-3 text-sm text-base-content/70">{order.note}</p>}
@@ -128,8 +128,8 @@ export default function CustomOrderDetail() {
           <ul className="flex flex-col gap-2">
             {order.payments.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-3 rounded-xl border border-base-300 bg-base-100 p-3 text-sm">
-                <span>{t(`order.payments.${p.purpose}`, { defaultValue: p.purpose })}{p.paidAt && <span className="text-base-content/50"> · {new Date(p.paidAt).toLocaleString('vi-VN')}</span>}</span>
-                <span className={`font-medium ${p.status === 'paid' ? 'text-success' : 'text-base-content/60'}`}>{formatVnd(p.amount)}</span>
+                <span>{t(`order.payments.${p.purpose}`, { defaultValue: p.purpose })}{p.paidAt && <span className="text-base-content/70"> · {new Date(p.paidAt).toLocaleString('vi-VN')}</span>}</span>
+                <span className={`font-medium ${p.status === 'paid' ? 'text-success' : 'text-base-content/70'}`}>{formatVnd(p.amount)}</span>
               </li>
             ))}
           </ul>
@@ -144,7 +144,7 @@ export default function CustomOrderDetail() {
             <li key={h.id} className="flex items-start gap-3 rounded-xl border border-base-300 bg-base-100 p-3 text-sm">
               <StatusBadge meta={customOrderMeta(h.toStatus)} />
               <div className="min-w-0 flex-1">
-                <p className="text-base-content/60">{new Date(h.createdAt).toLocaleString('vi-VN')} · {t(`order.role.${h.changedByRole}`, { defaultValue: h.changedByRole })}</p>
+                <p className="text-base-content/70">{new Date(h.createdAt).toLocaleString('vi-VN')} · {t(`order.role.${h.changedByRole}`, { defaultValue: h.changedByRole })}</p>
                 {h.note && <p className="mt-0.5">{h.note}</p>}
               </div>
             </li>
@@ -161,7 +161,7 @@ function MoneySummary({ order }) {
   if (order.paidAmount == null && order.depositAmount == null) return null; // đơn rất cũ, BE chưa trả các field này
   const shipKnown = order.shippingFee != null;
   const row = (label, value, cls = '') => (
-    <div className={`flex justify-between gap-3 ${cls}`}><dt className="text-base-content/60">{label}</dt><dd>{value}</dd></div>
+    <div className={`flex justify-between gap-3 ${cls}`}><dt className="text-base-content/70">{label}</dt><dd>{value}</dd></div>
   );
   return (
     <section className="rounded-3xl border border-base-300 bg-base-100 p-5 shadow-sm">
@@ -208,18 +208,18 @@ function AddressBlock({ order, isCustomer }) {
         )}
       </div>
       {!editing && <p className="text-sm text-base-content/75">{order.shippingAddress || t('order.address.none')}</p>}
-      {isCustomer && !editable && order.shippingAddress && <p className="mt-1 text-xs text-base-content/50">{t('order.address.locked')}</p>}
+      {isCustomer && !editable && order.shippingAddress && <p className="mt-1 text-xs text-base-content/70">{t('order.address.locked')}</p>}
 
       {editing && (
         <div className="flex flex-col gap-2">
           {isLoading ? <div className="skeleton h-14 rounded-xl" /> : !addresses.length ? (
-            <p className="text-sm text-base-content/60">{t('order.address.empty')} <Link to="/profile" className="link link-primary">{t('order.address.manage')}</Link></p>
+            <p className="text-sm text-base-content/70">{t('order.address.empty')} <Link to="/profile" className="link link-primary">{t('order.address.manage')}</Link></p>
           ) : (
             addresses.map((a) => (
               <label key={a.id} className={`flex gap-3 rounded-xl border p-3 text-sm ${!a.hasCoordinates ? 'border-dashed border-base-300 opacity-70' : picked === a.id ? 'cursor-pointer border-primary bg-primary/5' : 'cursor-pointer border-base-300'}`}>
                 <input type="radio" name="co-address" className="radio radio-primary radio-sm mt-0.5" checked={picked === a.id} disabled={!a.hasCoordinates} onChange={() => setPicked(a.id)} />
                 <span className="min-w-0 flex-1">
-                  <span className="font-medium">{a.recipientName}</span> <span className="text-base-content/60">{a.recipientPhone}</span>
+                  <span className="font-medium">{a.recipientName}</span> <span className="text-base-content/70">{a.recipientPhone}</span>
                   <span className="block text-base-content/70">{formatAddressLine(a)}</span>
                   {!a.hasCoordinates && <span className="block text-xs text-warning">{t('order.address.needPin')}</span>}
                 </span>

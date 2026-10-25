@@ -30,7 +30,7 @@ export default function PlanFeatureList({ items, collapsedCount = Infinity, expa
         const hideClass = hidden ? (collapseOnlyOnMobile ? 'hidden md:flex' : 'hidden') : 'flex';
         const none = it.type === 'row' && it.kind === 'none';
         return (
-          <li key={it.type === 'row' ? it.key : `t-${it.text}`} className={`${hideClass} items-start gap-2 text-sm ${none ? 'text-base-content/45' : ''}`}>
+          <li key={it.type === 'row' ? it.key : `t-${it.text}`} className={`${hideClass} items-start gap-2 text-sm ${none ? 'text-base-content/70' : ''}`}>
             {none ? <Cross /> : <Check />}
             {it.type === 'row' ? (
               <span>

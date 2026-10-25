@@ -1,5 +1,6 @@
 import PortalShell from './PortalShell.jsx';
-import { Users, Briefcase, Layers, Tree, CreditCard, Wallet, BarChart, ShoppingBag, Tag, Truck, Bolt, Clock, Star, Mail, Package } from '../suppliers/icons.jsx';
+import { Users, Briefcase, Layers, Tree, CreditCard, Wallet, BarChart, ShoppingBag, Tag, Truck, Bolt, Clock, Star, Mail, Package, Smile } from '../suppliers/icons.jsx';
+import { FEEDBACK_ENABLED } from '../../hooks/usePlatformFeedback.js';
 
 /*
  * AdminPortalLayout — Portal Quản trị viên. Tái dùng nguyên PortalShell (giống
@@ -18,6 +19,8 @@ const NAV = [
   { to: '/admin/orders', label: 'Đơn hàng', icon: ShoppingBag },
   { to: '/admin/refunds', label: 'Hoàn tiền & xác nhận chậm', icon: Clock },
   { to: '/admin/reviews', label: 'Kiểm duyệt đánh giá', icon: Star },
+  // Đánh giá WoodHub (web/app) — chỉ hiện khi tính năng đã có BE (FEEDBACK_ENABLED)
+  ...(FEEDBACK_ENABLED ? [{ to: '/admin/feedback', label: 'Đánh giá WoodHub', icon: Smile }] : []),
   { to: '/admin/contacts', label: 'Liên hệ', icon: Mail },
   { to: '/admin/promotions', label: 'Khuyến mãi', icon: Tag },
   { to: '/admin/shipping-config', label: 'Phí vận chuyển', icon: Truck },

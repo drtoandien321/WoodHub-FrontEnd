@@ -92,7 +92,7 @@ export default function Cart() {
     <div className="mx-auto max-w-6xl">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-2">
         <h1 className="font-display text-3xl">{t('cart.title')}</h1>
-        <p className="text-sm text-base-content/60">{t('cart.itemsCount', { count: cart.totalQuantity })}</p>
+        <p className="text-sm text-base-content/70">{t('cart.itemsCount', { count: cart.totalQuantity })}</p>
       </header>
 
       <div className="grid items-start gap-8 lg:grid-cols-[1fr_360px]">
@@ -138,7 +138,7 @@ export default function Cart() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <Link to={`/product/${item.productId}`} className="line-clamp-2 font-medium leading-snug hover:text-primary">{item.productName}</Link>
-                        {variantText && <p className="mt-0.5 truncate text-xs text-base-content/55">{variantText}</p>}
+                        {variantText && <p className="mt-0.5 truncate text-xs text-base-content/70">{variantText}</p>}
                         {unavailable && <span className="badge badge-warning badge-sm mt-1.5">{unavailableLabel(item)}</span>}
                         {!unavailable && priceChanged && (
                           <p className="mt-1 text-xs text-warning">
@@ -151,7 +151,7 @@ export default function Cart() {
                         onClick={() => remove(item)}
                         disabled={busy}
                         aria-label={`${t('cart.remove')} ${item.productName}`}
-                        className="btn btn-ghost btn-sm btn-circle shrink-0 text-base-content/50 hover:text-error"
+                        className="btn btn-ghost btn-sm btn-circle shrink-0 text-base-content/70 hover:text-error"
                       >
                         <Trash width={16} height={16} />
                       </button>
@@ -160,8 +160,8 @@ export default function Cart() {
                     {unavailable ? (
                       // Ngừng bán: BE chặn đổi số lượng (409) → ẩn bộ +/-, gạch giá (không tính vào tạm tính)
                       <div className="flex items-center justify-between gap-3 text-sm">
-                        <span className="text-base-content/50">× {item.quantity}</span>
-                        <span className="text-base-content/40 line-through">{formatVnd(item.lineTotal)}</span>
+                        <span className="text-base-content/70">× {item.quantity}</span>
+                        <span className="text-base-content/70 line-through">{formatVnd(item.lineTotal)}</span>
                       </div>
                     ) : (
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -189,7 +189,7 @@ export default function Cart() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-primary">{formatVnd(item.lineTotal)}</p>
-                        {item.quantity > 1 && <p className="text-xs text-base-content/50">{formatVnd(item.unitPrice)} / {t('cart.each')}</p>}
+                        {item.quantity > 1 && <p className="text-xs text-base-content/70">{formatVnd(item.unitPrice)} / {t('cart.each')}</p>}
                       </div>
                     </div>
                     )}
@@ -205,7 +205,7 @@ export default function Cart() {
         <aside className="sticky top-24 flex flex-col gap-3 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
           <h2 className="font-display text-xl">{t('cart.summary')}</h2>
           <div className="flex justify-between text-sm"><span>{t('cart.productsLabel')} ({cart.totalQuantity})</span><span>{formatVnd(cart.subtotal)}</span></div>
-          <div className="flex justify-between text-sm text-base-content/60"><span>{t('checkout.shippingFee')}</span><span>{t('cart.shippingTbd')}</span></div>
+          <div className="flex justify-between text-sm text-base-content/70"><span>{t('checkout.shippingFee')}</span><span>{t('cart.shippingTbd')}</span></div>
           <div className="divider my-0" />
           <div className="flex items-baseline justify-between">
             <span className="font-medium">{t('cart.total')}</span>
@@ -213,7 +213,7 @@ export default function Cart() {
           </div>
           <button onClick={() => navigate('/checkout')} disabled={!!busyItemId || unavailableCount > 0 || !cart.totalQuantity} className="btn btn-primary btn-lg mt-1 w-full">{t('cart.checkout')}</button>
           {unavailableCount > 0 && <p className="text-xs text-warning">{t('cart.unavailableBanner', { count: unavailableCount })}</p>}
-          <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-base-content/55">
+          <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-base-content/70">
             <Shield width={14} height={14} /> {t('cart.secure')}
           </p>
         </aside>

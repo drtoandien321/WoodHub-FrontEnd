@@ -61,7 +61,7 @@ export default function SupplierDashboard() {
     <div className="flex flex-col gap-6">
       <header>
         <h1 className="font-display text-3xl">Tổng quan</h1>
-        <p className="mt-1 text-base-content/60">Chào mừng trở lại! Đây là tổng quan hoạt động kinh doanh 30 ngày qua.</p>
+        <p className="mt-1 text-base-content/70">Chào mừng trở lại! Đây là tổng quan hoạt động kinh doanh 30 ngày qua.</p>
       </header>
 
       {summary.isError && (
@@ -101,7 +101,7 @@ export default function SupplierDashboard() {
           {series.isLoading ? (
             <div className="skeleton h-48 rounded-xl" />
           ) : revenue7d === 0 ? (
-            <p className="py-12 text-center text-sm text-base-content/50">Chưa có đơn đã thanh toán trong 7 ngày qua.</p>
+            <p className="py-12 text-center text-sm text-base-content/70">Chưa có đơn đã thanh toán trong 7 ngày qua.</p>
           ) : (
             <RevenueChart data={chartData} />
           )}
@@ -115,7 +115,7 @@ export default function SupplierDashboard() {
           {recent.isLoading ? (
             <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
           ) : !recentList.length ? (
-            <p className="py-6 text-center text-sm text-base-content/50">Chưa có đơn hàng nào.</p>
+            <p className="py-6 text-center text-sm text-base-content/70">Chưa có đơn hàng nào.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {recentList.map((o) => (
@@ -125,7 +125,7 @@ export default function SupplierDashboard() {
                       <p className="truncate text-sm font-medium">
                         <span className="font-mono">{o.orderCode}</span> · {o.items?.[0]?.productName}{o.items?.length > 1 ? ` +${o.items.length - 1}` : ''}
                       </p>
-                      <p className="truncate text-xs text-base-content/50">{o.recipientName} · {formatDate(o.placedAt ?? o.createdAt)}</p>
+                      <p className="truncate text-xs text-base-content/70">{o.recipientName} · {formatDate(o.placedAt ?? o.createdAt)}</p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1">
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ORDER_STATUS_BADGE[o.status] ?? ''}`}>
@@ -154,22 +154,22 @@ export default function SupplierDashboard() {
         {stores.isLoading ? (
           <div className="skeleton h-24 rounded-xl" />
         ) : !branches.length ? (
-          <p className="py-6 text-center text-sm text-base-content/50">Chưa có chi nhánh. <Link to="/portal/supplier/branches" className="link link-primary">Thêm chi nhánh</Link></p>
+          <p className="py-6 text-center text-sm text-base-content/70">Chưa có chi nhánh. <Link to="/portal/supplier/branches" className="link link-primary">Thêm chi nhánh</Link></p>
         ) : (
           <div className="overflow-x-auto">
             <table className="table">
               <thead>
-                <tr className="text-base-content/55">
+                <tr className="text-base-content/70">
                   <th>#</th><th>Chi nhánh</th><th className="text-right">Doanh thu</th><th className="text-right">Đơn đã thanh toán</th><th className="text-right">Giá trị TB</th>
                 </tr>
               </thead>
               <tbody>
                 {branches.map(({ store: b, stats, loading }, i) => (
                   <tr key={b.id} className="hover:bg-base-200/50">
-                    <td className="text-base-content/50">{i + 1}</td>
+                    <td className="text-base-content/70">{i + 1}</td>
                     <td>
                       <Link to={`/portal/supplier/branches/${b.id}`} className="font-medium hover:text-primary">{b.address}</Link>
-                      <p className="text-xs text-base-content/45">{[b.district, b.city].filter(Boolean).join(', ')}</p>
+                      <p className="text-xs text-base-content/70">{[b.district, b.city].filter(Boolean).join(', ')}</p>
                     </td>
                     <td className="text-right font-medium">{loading ? '…' : formatVnd(stats?.revenue ?? 0)}</td>
                     <td className="text-right">{loading ? '…' : stats?.orderCount ?? 0}</td>

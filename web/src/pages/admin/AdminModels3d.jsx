@@ -47,7 +47,7 @@ export default function AdminModels3d() {
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl">Mẫu 3D</h1>
-          <p className="mt-1 text-base-content/60">Thư viện mẫu cho Custom Studio và nút Xem 3D / AR ở trang sản phẩm.</p>
+          <p className="mt-1 text-base-content/70">Thư viện mẫu cho Custom Studio và nút Xem 3D / AR ở trang sản phẩm.</p>
         </div>
         <button onClick={() => setModal({ kind: 'create' })} className="btn btn-primary">+ Thêm mẫu 3D</button>
       </header>
@@ -71,7 +71,7 @@ export default function AdminModels3d() {
       ) : isError ? (
         <p className="text-center text-error">Không tải được mẫu 3D. <button onClick={() => refetch()} className="link">Thử lại</button></p>
       ) : !items.length ? (
-        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/55">Chưa có mẫu nào.</p>
+        <p className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center text-base-content/70">Chưa có mẫu nào.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((m) => <ModelCard key={m.id} model={m} onEdit={() => setModal({ kind: 'edit', model: m })} onLink={() => setModal({ kind: 'link', model: m })} />)}
@@ -106,14 +106,14 @@ function ModelCard({ model: m, onEdit, onLink }) {
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <p className="font-medium leading-snug">{m.name}</p>
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${hidden ? 'bg-base-300/60 text-base-content/60' : 'bg-success/15 text-success'}`}>{hidden ? 'Đã ẩn' : 'Đang hiện'}</span>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${hidden ? 'bg-base-300/60 text-base-content/70' : 'bg-success/15 text-success'}`}>{hidden ? 'Đã ẩn' : 'Đang hiện'}</span>
         </div>
-        <p className="text-xs text-base-content/55">{typeLabel(m.productType)}{m.modelUsdzUrl ? ' · có USDZ (AR iOS)' : ''}</p>
-        {Object.keys(m.editableOptions ?? {}).length > 0 && <p className="text-xs text-base-content/55">Tuỳ chọn: {Object.keys(m.editableOptions).join(', ')}</p>}
+        <p className="text-xs text-base-content/70">{typeLabel(m.productType)}{m.modelUsdzUrl ? ' · có USDZ (AR iOS)' : ''}</p>
+        {Object.keys(m.editableOptions ?? {}).length > 0 && <p className="text-xs text-base-content/70">Tuỳ chọn: {Object.keys(m.editableOptions).join(', ')}</p>}
         <p className="text-xs">
           {m.productId
             ? <>Đang gắn cho <Link to={`/product/${m.productId}`} className="link link-primary">sản phẩm</Link> · <button type="button" onClick={() => unlink.mutate(m.productId, { onError: (e) => setErr(apiErrorMessage(e, 'Gỡ chưa được.')) })} disabled={unlink.isPending} className="link text-error">Gỡ</button></>
-            : <span className="text-base-content/45">Chưa gắn sản phẩm</span>}
+            : <span className="text-base-content/70">Chưa gắn sản phẩm</span>}
         </p>
         {err && <p className="text-xs text-error">{err}</p>}
         <div className="mt-auto flex flex-wrap gap-1 pt-2">
@@ -184,7 +184,7 @@ function ModelFormModal({ model, onClose }) {
           <textarea value={options} onChange={(e) => setOptions(e.target.value)} rows={3} placeholder={'color: oak, walnut, cherry\nmaterial: wood'} className="textarea textarea-bordered w-full font-mono text-xs" />
         </label>
         {isEdit ? (
-          <p className="text-xs text-base-content/55">Không đổi được file của mẫu đã tạo. Muốn thay mô hình: tạo mẫu mới rồi ẩn mẫu này.</p>
+          <p className="text-xs text-base-content/70">Không đổi được file của mẫu đã tạo. Muốn thay mô hình: tạo mẫu mới rồi ẩn mẫu này.</p>
         ) : (
           <>
             <label className="flex flex-col gap-1"><span className="text-base-content/70">File mô hình .glb * (≤ 50MB)</span><input type="file" accept=".glb,model/gltf-binary" onChange={pick('glb')} className="file-input file-input-bordered file-input-sm w-full" /></label>
@@ -219,13 +219,13 @@ function LinkProductModal({ model, onClose }) {
     <ModalShell open onClose={onClose} title={`Gắn "${model.name}" cho sản phẩm`} maxWidth="max-w-lg" footer={<button onClick={onClose} className="btn btn-ghost">Đóng</button>}>
       <div className="flex flex-col gap-3 text-sm">
         <input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="Tìm sản phẩm theo tên…" className="input input-bordered input-sm w-full" />
-        <p className="text-xs text-base-content/55">Sản phẩm đã có mẫu khác sẽ được thay bằng mẫu này.</p>
+        <p className="text-xs text-base-content/70">Sản phẩm đã có mẫu khác sẽ được thay bằng mẫu này.</p>
         <ul className="max-h-72 overflow-y-auto rounded-xl border border-base-300">
-          {products.isLoading ? <li className="p-3 text-center text-xs text-base-content/50">Đang tải…</li> : !list.length ? <li className="p-3 text-center text-xs text-base-content/50">Không có sản phẩm phù hợp.</li> : list.map((p) => (
+          {products.isLoading ? <li className="p-3 text-center text-xs text-base-content/70">Đang tải…</li> : !list.length ? <li className="p-3 text-center text-xs text-base-content/70">Không có sản phẩm phù hợp.</li> : list.map((p) => (
             <li key={p.id}>
               <button type="button" onClick={() => choose(p)} disabled={link.isPending} className="flex w-full items-center gap-3 border-b border-base-200 px-3 py-2 text-left last:border-b-0 hover:bg-base-200/50">
                 {p.primaryImageUrl ? <img src={p.primaryImageUrl} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <span className="h-10 w-10 rounded-lg bg-base-200" />}
-                <span className="min-w-0 flex-1"><span className="block truncate">{p.name}</span><span className="block text-xs text-base-content/50">{p.supplierName}{p.has3d ? ' · đã có 3D' : ''}</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate">{p.name}</span><span className="block text-xs text-base-content/70">{p.supplierName}{p.has3d ? ' · đã có 3D' : ''}</span></span>
               </button>
             </li>
           ))}

@@ -44,7 +44,7 @@ export default function BottomRightCorner() {
       {/* Text — dùng base-content thay vì hero-ink cố định (Phương án C) */}
       <div className="flex flex-col">
         <span className="text-[13px] sm:text-[16px] md:text-[20px] font-normal text-base-content/95 leading-tight">{t('hero.exploreCollection')}</span>
-        <Link to="/shop" className="flex items-center gap-1 text-base-content/60 cursor-pointer hover:text-base-content/80 transition-colors">
+        <Link to="/shop" className="flex items-center gap-1 text-base-content/70 cursor-pointer hover:text-base-content/80 transition-colors">
           <span className="text-[11px] sm:text-[12px] md:text-[15px] font-normal">{t('hero.viewShop')}</span>
           <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
         </Link>

@@ -20,7 +20,7 @@ export default function StarInput({ value, onChange, label, size = 28, labels = 
           </span>
         </label>
       ))}
-      {shown > 0 && labels[shown - 1] && <span className="ml-2 text-sm text-base-content/60">{labels[shown - 1]}</span>}
+      {shown > 0 && labels[shown - 1] && <span className="ml-2 text-sm text-base-content/70">{labels[shown - 1]}</span>}
     </div>
   );
 }

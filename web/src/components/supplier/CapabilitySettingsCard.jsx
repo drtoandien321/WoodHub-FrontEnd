@@ -69,7 +69,7 @@ export default function CapabilitySettingsCard() {
     <form onSubmit={submit} className="flex flex-col gap-5 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <div>
         <h2 className="font-display text-lg">Năng lực gia công</h2>
-        <p className="text-xs text-base-content/55">Hiện trên hồ sơ công khai của xưởng để khách biết bạn nhận làm gì.{data?.updatedAt ? ` Cập nhật ${formatDate(data.updatedAt)}.` : ''}</p>
+        <p className="text-xs text-base-content/70">Hiện trên hồ sơ công khai của xưởng để khách biết bạn nhận làm gì.{data?.updatedAt ? ` Cập nhật ${formatDate(data.updatedAt)}.` : ''}</p>
       </div>
 
       <fieldset className="flex flex-col gap-2">
@@ -90,7 +90,7 @@ export default function CapabilitySettingsCard() {
         <div className="grid grid-cols-3 gap-3">
           {[['maxLengthCm', 'Dài'], ['maxWidthCm', 'Rộng'], ['maxHeightCm', 'Cao']].map(([k, l]) => (
             <label key={k} className="flex flex-col gap-1">
-              <span className="text-xs text-base-content/55">{l}</span>
+              <span className="text-xs text-base-content/70">{l}</span>
               <input type="number" min="1" max="10000" value={form[k]} onChange={setNum(k)} className="input input-bordered input-sm w-full" />
             </label>
           ))}

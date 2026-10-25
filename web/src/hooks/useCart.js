@@ -36,7 +36,6 @@ export const useAddCartItem = () => useCartMutation(api.addCartItem);
 export const useUpdateCartItem = () => useCartMutation(api.updateCartItem);
 // itemId
 export const useRemoveCartItem = () => useCartMutation(api.removeCartItem);
-export const useClearCart = () => useCartMutation(api.clearCart);
 
 /*
  * Lấy câu báo lỗi dễ hiểu từ lỗi API giỏ hàng. BE trả lỗi chuẩn Spring { status, message, ... };

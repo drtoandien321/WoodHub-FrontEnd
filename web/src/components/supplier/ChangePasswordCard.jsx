@@ -36,7 +36,7 @@ export default function ChangePasswordCard() {
   return (
     <form onSubmit={handleSubmit} className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
       <h2 className="font-display text-lg">Đổi mật khẩu</h2>
-      <p className="mb-4 text-xs text-base-content/55">Nên dùng mật khẩu mạnh, khác với mật khẩu ở các trang khác.</p>
+      <p className="mb-4 text-xs text-base-content/70">Nên dùng mật khẩu mạnh, khác với mật khẩu ở các trang khác.</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <PasswordField label="Mật khẩu hiện tại" value={form.currentPassword} onChange={set('currentPassword')} autoComplete="current-password" />
         <PasswordField label="Mật khẩu mới" value={form.newPassword} onChange={set('newPassword')} autoComplete="new-password" />

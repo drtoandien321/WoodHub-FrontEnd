@@ -80,9 +80,9 @@ export default function CustomModels() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <Link to="/custom" className="text-sm text-base-content/55 hover:text-primary">← {t('nav.custom')}</Link>
+        <Link to="/custom" className="text-sm text-base-content/70 hover:text-primary">← {t('nav.custom')}</Link>
         <h1 className="mt-1 font-display text-3xl md:text-4xl">{t('custom.ai.galleryTitle')}</h1>
-        <p className="mt-2 max-w-2xl text-base-content/65">{t('custom.ai.gallerySubtitle')}</p>
+        <p className="mt-2 max-w-2xl text-base-content/70">{t('custom.ai.gallerySubtitle')}</p>
       </div>
 
       {/* CTA sang wizard — luồng upload ảnh giờ nằm trọn ở Custom Studio (FE-2), gallery chỉ để duyệt/chọn */}
@@ -92,7 +92,7 @@ export default function CustomModels() {
       >
         <div>
           <p className="font-display text-lg">{t('custom.ai.uploadTitle')}</p>
-          <p className="text-sm text-base-content/60">{t('custom.ai.uploadDesc')}</p>
+          <p className="text-sm text-base-content/70">{t('custom.ai.uploadDesc')}</p>
         </div>
         <span className="btn btn-primary btn-sm shrink-0">{t('custom.studio.title')}</span>
       </Link>
@@ -100,7 +100,7 @@ export default function CustomModels() {
       {/* Tìm kiếm + lọc */}
       <div className="flex flex-col gap-3">
         <div className="relative">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/70">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
           <input
@@ -173,7 +173,7 @@ export default function CustomModels() {
 
           {!isLoading && items.length === 0 && (
             <div className="rounded-2xl border border-dashed border-base-300 p-10 text-center">
-              <p className="text-base-content/60">{hasFilters ? t('custom.studio.gallery.noResults') : t('custom.studio.step1.templateEmpty')}</p>
+              <p className="text-base-content/70">{hasFilters ? t('custom.studio.gallery.noResults') : t('custom.studio.step1.templateEmpty')}</p>
               {hasFilters && <button onClick={clearFilters} className="btn btn-ghost btn-sm mt-3">{t('custom.studio.gallery.clearFilters')}</button>}
             </div>
           )}
@@ -187,7 +187,7 @@ export default function CustomModels() {
               >
                 {t('custom.studio.gallery.prevPage')}
               </button>
-              <span className="text-sm text-base-content/55">{page + 1} / {pageInfo.totalPages}</span>
+              <span className="text-sm text-base-content/70">{page + 1} / {pageInfo.totalPages}</span>
               <button
                 onClick={() => setParam('page', String(page + 1), { resetPage: false })}
                 disabled={page + 1 >= pageInfo.totalPages}

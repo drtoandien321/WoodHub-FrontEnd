@@ -78,9 +78,9 @@ export default function AiMaterialPanel({ model, onModelChange }) {
     <section className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
       <div className="mb-1 flex items-center justify-between gap-2">
         <h3 className="font-medium">{t('custom.retexture.title')}</h3>
-        {left != null && <span className="text-xs text-base-content/60">{left === Infinity ? t('custom.retexture.unlimited') : t('custom.retexture.left', { count: left })}</span>}
+        {left != null && <span className="text-xs text-base-content/70">{left === Infinity ? t('custom.retexture.unlimited') : t('custom.retexture.left', { count: left })}</span>}
       </div>
-      <p className="mb-3 text-xs text-base-content/60">{t('custom.retexture.hint')}</p>
+      <p className="mb-3 text-xs text-base-content/70">{t('custom.retexture.hint')}</p>
       <div className="flex flex-wrap gap-2">
         {materials.map((m) => {
           const active = activeMaterial === m.id;
@@ -97,7 +97,7 @@ export default function AiMaterialPanel({ model, onModelChange }) {
       {running && (
         <div className="mt-3 flex flex-col gap-1">
           <progress className="progress progress-primary w-full" value={task.data?.progress ?? 0} max="100" />
-          <p className="text-xs text-base-content/60">{t('custom.retexture.processing', { progress: task.data?.progress ?? 0 })}</p>
+          <p className="text-xs text-base-content/70">{t('custom.retexture.processing', { progress: task.data?.progress ?? 0 })}</p>
         </div>
       )}
       {failed && (

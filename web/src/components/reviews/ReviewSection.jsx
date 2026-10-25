@@ -59,14 +59,14 @@ function ReviewForm({ targetType, targetId, existing, onDone }) {
           placeholder={t('reviews.commentPlaceholder')}
           className="textarea textarea-bordered w-full"
         />
-        <span className="self-end text-xs text-base-content/45">{comment.length}/{COMMENT_MAX}</span>
+        <span className="self-end text-xs text-base-content/70">{comment.length}/{COMMENT_MAX}</span>
       </label>
       {/* Checkbox cũ (viền base-content/20) gần như tàng hình trên nền be của form → đổi sang hàng có viền + toggle,
           bật thì cả hàng đổi màu để khách thấy rõ đang ẩn tên */}
       <label className={`flex cursor-pointer items-center justify-between gap-3 rounded-xl border p-3 text-sm transition-colors ${anonymous ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-100'}`}>
         <span>
           <span className="font-medium">{t('reviews.anonymousLabel')}</span>
-          <span className="block text-xs text-base-content/60">{t('reviews.anonymousHint')}</span>
+          <span className="block text-xs text-base-content/70">{t('reviews.anonymousHint')}</span>
         </span>
         <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} className="toggle toggle-primary shrink-0" />
       </label>
@@ -129,14 +129,14 @@ export default function ReviewSection({ targetType, targetId, title }) {
           <div className="text-center">
             <p className="font-display text-4xl text-primary">{summary.average.toFixed(1)}</p>
             <Stars value={summary.average} size={16} />
-            <p className="mt-1 text-xs text-base-content/55">{t('reviews.count', { count: total })}</p>
+            <p className="mt-1 text-xs text-base-content/70">{t('reviews.count', { count: total })}</p>
           </div>
           <ul className="flex flex-col gap-1.5">
             {distribution.map((d) => (
               <li key={d.star} className="flex items-center gap-2 text-xs">
-                <span className="flex w-7 items-center gap-0.5 text-base-content/60">{d.star}<Star width={11} height={11} className="text-accent" filled /></span>
+                <span className="flex w-7 items-center gap-0.5 text-base-content/70">{d.star}<Star width={11} height={11} className="text-accent" filled /></span>
                 <progress className="progress progress-accent flex-1" value={d.count} max={Math.max(reviews.length, 1)} />
-                <span className="w-6 text-right text-base-content/50">{d.count}</span>
+                <span className="w-6 text-right text-base-content/70">{d.count}</span>
               </li>
             ))}
           </ul>
@@ -150,7 +150,7 @@ export default function ReviewSection({ targetType, targetId, title }) {
       {isLoading ? (
         <div className="flex flex-col gap-3">{[0, 1].map((i) => <div key={i} className="skeleton h-24 rounded-2xl" />)}</div>
       ) : !reviews.length ? (
-        !editing && <p className="py-6 text-center text-sm text-base-content/55">{canWrite ? t('reviews.emptyCta') : t('reviews.empty')}</p>
+        !editing && <p className="py-6 text-center text-sm text-base-content/70">{canWrite ? t('reviews.emptyCta') : t('reviews.empty')}</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {reviews.map((r) => {
@@ -168,11 +168,11 @@ export default function ReviewSection({ targetType, targetId, title }) {
                         {isMine && <span className="ml-1.5 badge badge-primary badge-xs">{t('reviews.yours')}</span>}
                       </p>
                       {/* Chỉ chủ đánh giá thấy dòng này → yên tâm là tên đã được ẩn với người khác */}
-                      {isMine && r.anonymous && <p className="text-xs text-base-content/50">{t('reviews.anonymousOwnerNote')}</p>}
+                      {isMine && r.anonymous && <p className="text-xs text-base-content/70">{t('reviews.anonymousOwnerNote')}</p>}
                       <Stars value={r.rating} size={13} />
                     </div>
                   </div>
-                  <time className="shrink-0 text-xs text-base-content/45">
+                  <time className="shrink-0 text-xs text-base-content/70">
                     {formatDate(r.createdAt)}{r.updatedAt && r.updatedAt !== r.createdAt ? ` · ${t('reviews.edited')}` : ''}
                   </time>
                 </div>
@@ -180,7 +180,7 @@ export default function ReviewSection({ targetType, targetId, title }) {
                 {/* Phản hồi của NCC (BE-12 §2) — hiện công khai dưới đánh giá */}
                 {r.reply && (
                   <div className="rounded-xl border-l-4 border-primary/40 bg-base-200/50 px-3 py-2 text-sm">
-                    <p className="mb-0.5 text-xs font-medium text-base-content/60">{t('reviews.sellerReply')}</p>
+                    <p className="mb-0.5 text-xs font-medium text-base-content/70">{t('reviews.sellerReply')}</p>
                     <p className="whitespace-pre-line text-base-content/75">{r.reply.content}</p>
                   </div>
                 )}
@@ -188,7 +188,7 @@ export default function ReviewSection({ targetType, targetId, title }) {
                   <div className="flex items-center justify-end gap-2">
                     {confirmDelete ? (
                       <>
-                        <span className="text-xs text-base-content/60">{t('reviews.deleteConfirm')}</span>
+                        <span className="text-xs text-base-content/70">{t('reviews.deleteConfirm')}</span>
                         <button onClick={remove} disabled={deleteReview.isPending} className="btn btn-error btn-xs">
                           {deleteReview.isPending ? <span className="loading loading-spinner loading-xs" /> : t('reviews.delete')}
                         </button>

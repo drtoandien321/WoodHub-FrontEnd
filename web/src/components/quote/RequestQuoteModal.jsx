@@ -59,9 +59,9 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
   return (
     <div className="modal modal-open" role="dialog" aria-modal="true">
       <div className="modal-box max-w-md rounded-3xl">
-        <button onClick={onClose} aria-label={t('rooms.close')} className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3">✕</button>
+        <button onClick={onClose} aria-label={t('common.close')} className="btn btn-ghost btn-sm btn-circle absolute right-3 top-3">✕</button>
         <h3 className="font-display text-xl">{t('quote.requestTitle')}</h3>
-        <p className="mt-1 text-sm text-base-content/60">{t('quote.requestSubtitle', { name: design.name })}</p>
+        <p className="mt-1 text-sm text-base-content/70">{t('quote.requestSubtitle', { name: design.name })}</p>
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
@@ -74,7 +74,7 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
                 {workshops.map((w) => <option key={w.id} value={w.id}>{w.businessName}</option>)}
               </select>
             ) : (
-              <p className="text-sm text-base-content/50">{t('quote.noWorkshops')}</p>
+              <p className="text-sm text-base-content/70">{t('quote.noWorkshops')}</p>
             )}
           </label>
 
@@ -112,7 +112,7 @@ export default function RequestQuoteModal({ design, onClose, onSuccess }) {
           {createQuote.isError && <p className="text-sm text-error" role="alert">{apiErrorMessage(createQuote.error, t('order.genericError'))}</p>}
 
           <div className="mt-1 flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="btn btn-ghost">{t('rooms.close')}</button>
+            <button type="button" onClick={onClose} className="btn btn-ghost">{t('common.close')}</button>
             <button type="submit" disabled={!workshopId || createQuote.isPending} className="btn btn-primary">
               {createQuote.isPending ? <span className="loading loading-spinner loading-sm" /> : t('quote.send')}
             </button>

@@ -136,7 +136,7 @@ export default function SubscriptionPlanFormModal({ open, onClose, initial = nul
           <div className="grid grid-cols-2 gap-3 mt-1.5">
             {FEATURES.map((f) => (
               <label key={f.key} className="flex flex-col gap-1.5">
-                <span className="text-xs text-base-content/60">{f.label}</span>
+                <span className="text-xs text-base-content/70">{f.label}</span>
                 <input type="number" value={limits[f.key]} onChange={setLimit(f.key)} className="input input-bordered input-sm w-full" />
               </label>
             ))}
