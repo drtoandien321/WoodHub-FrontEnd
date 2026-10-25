@@ -48,8 +48,6 @@
     "badge": "Thiết kế 3D · Xem AR tại nhà",
     "title": "Gỗ thật, thiết kế của bạn",
     "subtitle": "Mua nội thất có sẵn, đặt số lượng lớn cho doanh nghiệp, hoặc tự thiết kế sản phẩm 3D và ghép với xưởng mộc phù hợp — tất cả trên WoodHub.",
-    "partnersCount": "120+",
-    "partnersLabel": "Xưởng mộc đối tác",
     "designNow": "Thiết kế ngay",
     "exploreCollection": "Khám phá bộ sưu tập",
     "viewShop": "Xem cửa hàng"
@@ -1290,12 +1288,6 @@
     }
   },
   "portal": {
-    "nav": {
-      "dashboard": "Tổng quan",
-      "store": "Gian hàng",
-      "products": "Sản phẩm",
-      "orders": "Đơn hàng"
-    },
     "chat": {
       "openLabel": "Chat với khách hàng",
       "title": "Tin nhắn khách hàng",
@@ -1304,65 +1296,6 @@
       "typing": "Khách đang nhập…",
       "back": "Danh sách",
       "close": "Đóng"
-    },
-    "dashboard": {
-      "title": "Tổng quan",
-      "newOrders": "Đơn mới",
-      "monthlyRevenue": "Doanh thu (tổng đơn)",
-      "pendingQuotes": "Thiết kế chờ báo giá",
-      "topProducts": "Sản phẩm bán chạy",
-      "recentOrders": "Đơn hàng gần đây",
-      "soldCount": "Đã bán {{count}}",
-      "noOrders": "Chưa có đơn hàng nào"
-    },
-    "store": {
-      "title": "Gian hàng",
-      "name": "Tên gian hàng",
-      "description": "Giới thiệu",
-      "logoUrl": "Ảnh logo (URL)",
-      "coverUrl": "Ảnh bìa (URL)",
-      "logoPreview": "Xem trước logo",
-      "coverPreview": "Xem trước ảnh bìa",
-      "save": "Lưu thay đổi",
-      "saved": "Đã lưu thông tin gian hàng ✓"
-    },
-    "products": {
-      "title": "Sản phẩm",
-      "add": "Thêm sản phẩm",
-      "edit": "Sửa sản phẩm",
-      "newProduct": "Sản phẩm mới",
-      "delete": "Xóa",
-      "confirmDelete": "Xóa sản phẩm \"{{name}}\"? Hành động này không thể hoàn tác.",
-      "empty": "Chưa có sản phẩm nào",
-      "table": {
-        "image": "Ảnh",
-        "name": "Tên",
-        "price": "Giá",
-        "material": "Chất liệu",
-        "stock": "Tồn kho",
-        "actions": "Thao tác"
-      },
-      "form": {
-        "nameVi": "Tên (Tiếng Việt)",
-        "nameEn": "Tên (English)",
-        "price": "Giá (VND)",
-        "material": "Chất liệu",
-        "stock": "Tồn kho",
-        "image": "Ảnh sản phẩm (URL)",
-        "imagePreview": "Xem trước ảnh",
-        "imageNote": "V1: tải ảnh thật qua BE — demo dùng URL ảnh.",
-        "descriptionVi": "Mô tả (Tiếng Việt)",
-        "descriptionEn": "Mô tả (English)",
-        "save": "Lưu",
-        "cancel": "Hủy"
-      }
-    },
-    "orders": {
-      "title": "Đơn hàng",
-      "empty": "Chưa có đơn hàng nào",
-      "customer": "Khách hàng",
-      "updateStatus": "Chuyển sang \"{{status}}\"",
-      "completed": "Đơn đã hoàn tất"
     }
   },
   "address": {
