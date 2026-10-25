@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore.js';
+import { redirectPathForRole } from '../utils/auth.js';
 
 /*
  * Protected Route — "cổng" kiểm tra đăng nhập + (tùy chọn) đúng role phía FE.
@@ -10,8 +11,12 @@ import { useAuthStore } from '../stores/authStore.js';
  * allow: mảng role được phép, ví dụ allow={['supplier']}.
  * Không truyền allow → chỉ cần đăng nhập (không phân biệt role) — giữ nguyên hành vi cũ
  * cho /checkout, /orders, /custom/match.
+ *
+ * supplierPortal: 'retailer' | 'workshop' — portal riêng của từng loại NCC. Supplier vào nhầm portal → đưa về portal
+ * đúng loại (không 403, để link cũ vẫn dùng được). Trước đây chỉ xét role → xưởng gõ /portal/supplier/products vẫn
+ * vào được trang sản phẩm bán sẵn (QA BUG-021). Quy ước loại giống redirectPathForRole: chỉ 'workshop' là xưởng.
  */
-export default function ProtectedRoute({ allow }) {
+export default function ProtectedRoute({ allow, supplierPortal }) {
   const { token, user } = useAuthStore();
   const location = useLocation();
 
@@ -30,6 +35,12 @@ export default function ProtectedRoute({ allow }) {
   }
   if (allow && !allow.includes(user?.role)) {
     return <Navigate to="/403" replace />;
+  }
+  if (supplierPortal && user?.role === 'supplier') {
+    const isWorkshop = user.supplierType === 'workshop';
+    if ((supplierPortal === 'workshop') !== isWorkshop) {
+      return <Navigate to={redirectPathForRole('supplier', undefined, user.supplierType)} replace />;
+    }
   }
   return <Outlet />;
 }

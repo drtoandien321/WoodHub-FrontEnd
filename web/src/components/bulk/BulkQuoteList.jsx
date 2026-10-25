@@ -5,6 +5,7 @@ import { useMyBulkQuotes, useSupplierBulkQuotes } from '../../hooks/useBulkQuote
 import { bulkQuoteMeta, BULK_QUOTE_TABS } from '../../utils/bulkQuoteStatus.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
 import Pagination from '../ui/Pagination.jsx';
+import { useAuthStore } from '../../stores/authStore.js';
 
 const PAGE_SIZE = 20;
 
@@ -16,6 +17,9 @@ const PAGE_SIZE = 20;
 export default function BulkQuoteList({ role }) {
   const { t } = useTranslation();
   const isSupplier = role === 'supplier';
+  // Khách cá nhân vào bằng URL: nút "Yêu cầu báo giá số lượng lớn" ở trang SP chỉ hiện cho doanh nghiệp → mời tạo hồ sơ DN
+  // thay vì gợi ý bấm nút họ không thấy (QA BUG-020)
+  const isBusiness = useAuthStore((s) => s.user?.customerType) === 'business';
   const [status, setStatus] = useState(isSupplier ? 'pending' : '');
   const [page, setPage] = useState(0);
   const params = { status: status || undefined, page, size: PAGE_SIZE };
@@ -50,7 +54,13 @@ export default function BulkQuoteList({ role }) {
       ) : !items.length ? (
         <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 py-12 text-center">
           <p className="text-base-content/60">{isSupplier ? 'Không có yêu cầu nào.' : t('bulkQuote.empty')}</p>
-          {!isSupplier && <p className="mt-1 text-xs text-base-content/45">{t('bulkQuote.emptyHint')}</p>}
+          {!isSupplier && isBusiness && <p className="mt-1 text-xs text-base-content/60">{t('bulkQuote.emptyHint')}</p>}
+          {!isSupplier && !isBusiness && (
+            <p className="mt-1 text-sm text-base-content/70">
+              {t('bulkQuote.individualHint')}{' '}
+              <Link to="/profile#business" className="link link-primary font-medium">{t('bulkQuote.createProfile')}</Link>
+            </p>
+          )}
         </div>
       ) : (
         <ul className="flex flex-col gap-3">

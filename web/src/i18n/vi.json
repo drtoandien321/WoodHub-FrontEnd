@@ -1416,7 +1416,9 @@
     "failed": "Thanh toán thất bại.",
     "reorderHint": "Bạn có thể hủy đơn này và đặt lại để nhận mã QR mới.",
     "pollError": "Không kiểm tra được trạng thái thanh toán, trang sẽ tự thử lại.",
-    "expiredStillValid": "Đã quá giờ hiển thị của mã QR, nhưng bạn vẫn quét mã này để thanh toán được — hệ thống tự ghi nhận khi tiền vào."
+    "expiredStillValid": "Đã quá giờ hiển thị của mã QR, nhưng bạn vẫn quét mã này để thanh toán được — hệ thống tự ghi nhận khi tiền vào.",
+    "repay": "Lấy mã QR mới",
+    "repayError": "Chưa lấy được mã QR mới, vui lòng thử lại."
   },
   "reviews": {
     "title": "Đánh giá",
@@ -1714,7 +1716,9 @@
       "declined": "NCC từ chối",
       "cancelled": "Đã huỷ",
       "expired": "Hết hạn"
-    }
+    },
+    "individualHint": "Báo giá số lượng lớn dành cho khách doanh nghiệp.",
+    "createProfile": "Tạo hồ sơ doanh nghiệp"
   },
   "feedback": {
     "title": "Bạn chấm WoodHub mấy sao?",

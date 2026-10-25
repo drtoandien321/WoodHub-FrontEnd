@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { usePayment } from '../../hooks/useSubscription.js';
-import { ORDERS_QUERY_KEY } from '../../hooks/useOrders.js';
+import { ORDERS_QUERY_KEY, useRepayOrder } from '../../hooks/useOrders.js';
+import { apiErrorMessage } from '../../utils/apiError.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
 
 /*
@@ -15,9 +16,10 @@ import { formatVnd, formatDate } from '../../utils/format.js';
  *
  * `fallback` = thông tin QR đã có sẵn (CheckoutResponse.payment hoặc các field payment* của OrderResponse)
  * để hiện QR ngay, không phải chờ lượt poll đầu.
- * Mã hết hạn: BE chưa có API tạo lại QR cho đơn → hướng dẫn khách hủy đơn và đặt lại.
+ * Mã hết hạn: nút "Lấy mã QR mới" gọi POST /orders/{orderId}/payment (BE-03) — gia hạn CÙNG payment, txnRef giữ nguyên nên QR
+ * cũ vẫn được ghi nhận. Cần `orderId` (bất kỳ đơn nào trong nhóm checkout). Trước đây chú thích ghi BE chưa có API (QA BUG-003).
  */
-export default function OrderPaymentPanel({ paymentId, fallback = {}, onPaid }) {
+export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, onPaid }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: payment, isError } = usePayment(paymentId);
@@ -27,6 +29,20 @@ export default function OrderPaymentPanel({ paymentId, fallback = {}, onPaid }) 
   const amount = payment?.amount ?? fallback.amount;
   const txnRef = payment?.txnRef ?? fallback.txnRef;
   const expiresAt = payment?.expiresAt ?? fallback.expiresAt;
+  const repay = useRepayOrder();
+  // Hết hạn: BE trả 'expired', hoặc vẫn 'pending' nhưng đã quá expiresAt (chưa tới lượt BE cập nhật)
+  const qrExpired = status === 'expired' || (status === 'pending' && expiresAt && new Date(expiresAt) <= new Date());
+  const handleRepay = () => {
+    repay.mutate(orderId, {
+      onError: (err) => {
+        if (err?.response?.status === 409) {
+          qc.invalidateQueries({ queryKey: ['payment', paymentId] });
+          qc.invalidateQueries({ queryKey: ['order'] });
+          qc.invalidateQueries({ queryKey: ORDERS_QUERY_KEY });
+        }
+      },
+    });
+  };
 
   useEffect(() => {
     if (status !== 'paid') return;
@@ -71,8 +87,16 @@ export default function OrderPaymentPanel({ paymentId, fallback = {}, onPaid }) 
         </p>
       )}
       <p className="text-xs text-base-content/60">{t('payment.scan')}</p>
-      {status === 'expired' ? (
-        <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-base-content/70">{t('orderPayment.expiredStillValid')}</p>
+      {qrExpired ? (
+        <div className="flex flex-col items-center gap-2">
+          <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-base-content/70">{t('orderPayment.expiredStillValid')}</p>
+          {orderId && (
+            <button type="button" onClick={handleRepay} disabled={repay.isPending} className="btn btn-primary btn-sm">
+              {repay.isPending ? <span className="loading loading-spinner loading-xs" /> : t('orderPayment.repay')}
+            </button>
+          )}
+          {repay.isError && <p role="alert" className="text-xs text-error">{apiErrorMessage(repay.error, t('orderPayment.repayError'))}</p>}
+        </div>
       ) : (
         expiresAt && <p className="text-xs text-base-content/45">{t('payment.qrExpiresAt', { time: formatDate(expiresAt) })}</p>
       )}

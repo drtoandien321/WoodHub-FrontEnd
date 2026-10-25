@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import SiteLayout from './components/layout/SiteLayout.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
+import { useAuthStore } from './stores/authStore.js';
+import { redirectPathForRole } from './utils/auth.js';
 import Landing from './pages/Landing.jsx';
 import PageLoader from './components/ui/PageLoader.jsx';
 import ScrollToTop from './components/ScrollToTop.jsx';
@@ -188,9 +190,10 @@ export default function App() {
         {/* Supplier Portal: layout riêng (sidebar + topbar), chỉ role supplier.
             /portal trần (portal cũ đã xoá) → đưa về portal nhà cung cấp cho link cũ khỏi 404. */}
         <Route element={<ProtectedRoute allow={['supplier']} />}>
-          <Route path="/portal" element={<Navigate to="/portal/supplier/dashboard" replace />} />
+          <Route path="/portal" element={<PortalHome />} />
 
-          {/* Portal Nhà cung cấp (manufacturer): /portal/supplier/* */}
+          {/* Portal Nhà cung cấp (manufacturer): /portal/supplier/* — xưởng vào nhầm được đưa về portal xưởng (BUG-021) */}
+          <Route element={<ProtectedRoute allow={['supplier']} supplierPortal="retailer" />}>
           <Route path="/portal/supplier" element={<SupplierPortalLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<SupplierDashboard />} />
@@ -207,8 +210,10 @@ export default function App() {
             <Route path="reports" element={<SupplierReports />} />
             <Route path="settings" element={<SupplierSettings />} />
           </Route>
+          </Route>
 
-          {/* Portal Xưởng mộc (workshop): /portal/workshop/* */}
+          {/* Portal Xưởng mộc (workshop): /portal/workshop/* — NCC bán hàng vào nhầm được đưa về portal NCC */}
+          <Route element={<ProtectedRoute allow={['supplier']} supplierPortal="workshop" />}>
           <Route path="/portal/workshop" element={<WorkshopPortalLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<WorkshopDashboard />} />
@@ -218,6 +223,7 @@ export default function App() {
             <Route path="reviews" element={<WorkshopReviews />} />
             <Route path="reports" element={<WorkshopReports />} />
             <Route path="settings" element={<WorkshopSettings />} />
+          </Route>
           </Route>
         </Route>
 
@@ -247,4 +253,10 @@ export default function App() {
       </Routes>
     </Suspense>
   );
+}
+
+// /portal trần (link cũ) → portal đúng loại NCC (xưởng → /portal/workshop, còn lại → /portal/supplier)
+function PortalHome() {
+  const supplierType = useAuthStore((st) => st.user?.supplierType);
+  return <Navigate to={redirectPathForRole('supplier', undefined, supplierType)} replace />;
 }

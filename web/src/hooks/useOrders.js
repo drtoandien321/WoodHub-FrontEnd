@@ -41,6 +41,18 @@ export const useCheckout = () => {
   });
 };
 
+/*
+ * Thanh toán lại (BE-03): response là PaymentResponse cùng id → ghi thẳng vào cache ['payment', id] để OrderPaymentPanel hiện
+ * QR mới ngay và tiếp tục poll. 409 (đơn/payment không còn chờ) → nơi gọi tải lại đơn.
+ */
+export const useRepayOrder = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.repayOrder,
+    onSuccess: (payment) => { if (payment?.id) qc.setQueryData(['payment', payment.id], payment); },
+  });
+};
+
 export const useCancelOrder = () => {
   const qc = useQueryClient();
   return useMutation({

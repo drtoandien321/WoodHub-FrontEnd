@@ -188,7 +188,7 @@ export default function Checkout() {
               <span className="text-sm">{t('checkout.grandTotal')}</span>
               <span className="text-xl font-semibold text-primary">{formatVnd(result.grandTotal)}</span>
             </div>
-            <OrderPaymentPanel paymentId={result.payment.id} fallback={result.payment} onPaid={() => setPaid(true)} />
+            <OrderPaymentPanel paymentId={result.payment.id} orderId={result.orders[0]?.id} fallback={result.payment} onPaid={() => setPaid(true)} />
           </aside>
         </div>
       </div>

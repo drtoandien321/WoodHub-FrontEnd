@@ -187,7 +187,8 @@ function MoneySummary({ order }) {
 function AddressBlock({ order, isCustomer }) {
   const { t } = useTranslation();
   const editable = isCustomer && ADDRESS_EDITABLE_STATUSES.has(order.status);
-  const { data: addresses = [], isLoading } = useAddresses();
+  // Sổ địa chỉ chỉ cần khi khách được chọn/đổi địa chỉ; xưởng / đơn đã khoá không tải (QA BUG-022)
+  const { data: addresses = [], isLoading } = useAddresses({ enabled: editable });
   const setAddress = useSetCustomOrderAddress();
   const [editing, setEditing] = useState(false);
   const [picked, setPicked] = useState(order.addressId ?? '');

@@ -1663,6 +1663,22 @@ export const mockAdapter = {
     return withPaymentInfo(order);
   },
 
+  async repayOrder(id) {
+    await delay(300);
+    const order = memoryDb.orders.get(id);
+    if (!order) throw orderError(404, 'Không tìm thấy đơn hàng');
+    if (order.status !== 'pending_payment') throw orderError(409, 'Đơn không còn chờ thanh toán');
+    const payment = mockPayments.find((p) => p.id === order.paymentId);
+    if (!payment) throw orderError(404, 'Không tìm thấy giao dịch');
+    if (payment.status === 'paid') throw orderError(409, 'Giao dịch đã được thanh toán');
+    if (payment.status !== 'pending' || new Date(payment.expiresAt) <= new Date()) {
+      payment.status = 'pending';
+      payment.expiresAt = new Date(Date.now() + 15 * 60_000).toISOString();
+      persistMockPayments();
+    }
+    return { ...payment };
+  },
+
   async cancelOrder(id) {
     await delay(300);
     const order = memoryDb.orders.get(id);
