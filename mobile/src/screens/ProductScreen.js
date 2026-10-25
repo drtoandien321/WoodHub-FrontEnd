@@ -8,6 +8,7 @@ import { useAddCartItem, cartErrMsg } from '../hooks/shop.js';
 import { useTheme, fonts } from '../theme/theme.js';
 import { api } from '../api/client.js';
 import { useStudio } from '../store/studio.js';
+import { useAuth } from '../store/auth.js';
 import { formatVnd } from '../utils/format.js';
 
 /*
@@ -28,6 +29,7 @@ export default function ProductScreen({ navigation, route }) {
   const [cartErr, setCartErr] = useState('');
   const add = useAddCartItem();
   const toast = useToast();
+  const business = useAuth((s) => s.user?.customerType) === 'business';
 
   const p = q.data;
   const variants = p?.variants?.length ? p.variants : [];
@@ -122,6 +124,12 @@ export default function ProductScreen({ navigation, route }) {
                 </Row>
               ) : null}
               {cartErr ? <T color={c.err}>{cartErr}</T> : null}
+              {business && variants.length ? (
+                <View style={{ gap: 4 }}>
+                  <Button title="Yêu cầu báo giá số lượng lớn" kind="outline" icon="quote" onPress={() => navigation.navigate('BulkQuoteRequest', { productId: p.id })} />
+                  <T v="small" mute>Dành cho khách doanh nghiệp — nhà cung cấp gửi giá sỉ trong 7 ngày.</T>
+                </View>
+              ) : null}
             </>
           )}
         </View>

@@ -64,7 +64,7 @@ src/utils/                  giá ước tính, định dạng, logic hiển th�
 1. **AR chỉ hiển thị mô hình gốc** — màu/kích thước chỉnh trong app chưa mang sang AR (giới hạn của Scene Viewer). Cần máy hỗ trợ ARCore + ứng dụng Google; máy không hỗ trợ sẽ thấy màn "Thiết bị chưa hỗ trợ AR".
 2. **Sản phẩm ↔ mô hình 3D chưa được BE liên kết**: ở trang sản phẩm, app chọn mẫu 3D tham khảo theo loại (Sofa/Ghế/Bàn…) và ghi rõ "Mẫu 3D tham khảo". Khi BE thêm liên kết, chỉ cần sửa `guessModel` ở `ProductScreen.js`.
 3. **Giá trong trình xem 3D là ước tính** (công thức theo chất liệu + thể tích, `utils/woods.js`); giá chính thức do xưởng báo.
-4. **Đăng nhập Google chưa làm** (nút hiện thông báo) — dùng email + OTP.
+4. **Đăng nhập Google tạm ẩn** (cờ `GOOGLE_ENABLED` trong `src/screens/AuthScreens.js`) — dùng email + OTP. Để bật: (1) tạo OAuth client **Android** (package + SHA-1 của keystore EAS) và **iOS** trên Google Cloud; (2) BE `GoogleTokenVerifier` nhận thêm các client ID đó làm audience (hiện chỉ nhận web client ID); (3) app lấy idToken bằng `expo-auth-session` hoặc `@react-native-google-signin/google-signin` (cần dev build, không chạy trong Expo Go) rồi gọi `POST /auth/google` như web.
 5. Chưa có giỏ hàng/đặt mua (ngoài phạm vi bản này); luồng chính là thiết kế → báo giá.
 6. Chưa test trên thiết bị thật trong môi trường dev này (đã kiểm tra bundle Android + chạy bản web). Cần test AR, camera, vị trí, thanh toán trên máy thật trước khi phát hành.
 7. BE trên Render free có thể "ngủ": lần gọi đầu có thể chậm 30–60 giây (app đã đặt timeout 60 giây).

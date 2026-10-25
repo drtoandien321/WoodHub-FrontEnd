@@ -155,6 +155,27 @@ export const api = {
   cancelOrder: (id) => d(http.post(`/orders/${id}/cancel`)), // chỉ khi pending_payment, sai → 409
   repayOrder: (id) => d(http.post(`/orders/${id}/payment`)), // QR hết hạn → gia hạn CÙNG payment (txnRef giữ nguyên)
 
+  /*
+   * ----- Tài khoản (đợt 4, cùng hợp đồng web) -----
+   * PUT /users/{id} chỉ nhận { fullName, phone } (không đổi email). Đổi mật khẩu: PUT /users/{id}/password → 204.
+   * Hồ sơ DN: GET 404 khi chưa có; POST tạo + BE tự nâng customerType → business (409 nếu đã có); PUT ghi đè 3 field.
+   */
+  updateUser: ({ id, fullName, phone }) => d(http.put(`/users/${id}`, { fullName, phone })),
+  changePassword: ({ id, currentPassword, newPassword }) => d(http.put(`/users/${id}/password`, { currentPassword, newPassword })),
+  getBusinessProfile: () => d(http.get('/users/me/business-profile')).catch((e) => (e?.response?.status === 404 ? null : Promise.reject(e))),
+  createBusinessProfile: (b) => d(http.post('/users/me/business-profile', b)),
+  updateBusinessProfile: (b) => d(http.put('/users/me/business-profile', b)),
+  // Gói lượt thiết kế mua thêm (credit pack): dùng đến hết, không reset theo tháng; thanh toán QR như gói đăng ký
+  getCreditPacks: () => d(http.get('/credit-packs')),
+  createCreditPackPayment: (packId) => d(http.post('/payments/credit-pack', { packId })),
+  // Báo giá số lượng lớn (BE-08) — chỉ khách doanh nghiệp. accept → giống checkout { orders, payment, grandTotal }
+  createBulkQuote: (b) => d(http.post('/bulk-quotes', b)), // { items:[{variantId, quantity}], addressId, vatInvoice, note? }
+  getMyBulkQuotes: (params) => d(http.get('/bulk-quotes', { params })),
+  getBulkQuote: (id) => d(http.get(`/bulk-quotes/${id}`)),
+  acceptBulkQuote: ({ id, offerId }) => d(http.post(`/bulk-quotes/${id}/accept`, { offerId })),
+  rejectBulkQuote: (id) => d(http.post(`/bulk-quotes/${id}/reject`)),
+  cancelBulkQuote: (id) => d(http.post(`/bulk-quotes/${id}/cancel`)),
+
   // ----- Trợ lý AI -----
   createAiSession: (b) => d(http.post('/ai-chat/sessions', b ?? {})),
   getAiSessions: () => d(http.get('/ai-chat/sessions')),

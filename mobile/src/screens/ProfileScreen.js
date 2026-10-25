@@ -38,6 +38,10 @@ export default function ProfileScreen({ navigation }) {
           <View style={{ flex: 1 }}><T v="h2" numberOfLines={1}>{user?.name || 'Khách hàng'}</T><T mute numberOfLines={1}>{user?.email}</T></View>
         </Row>
         <Card pad={8}>
+          <Item icon="user" title="Hồ sơ của tôi" hint="Thông tin cá nhân, mật khẩu, hồ sơ doanh nghiệp" onPress={() => navigation.navigate('Account')} />
+          {user?.customerType === 'business' ? <Item icon="quote" title="Báo giá số lượng lớn" hint="Yêu cầu giá sỉ gửi nhà cung cấp" onPress={() => navigation.navigate('BulkQuotes')} /> : null}
+        </Card>
+        <Card pad={8}>
           <Item icon="package" title="Đơn hàng của tôi" hint="Theo dõi, thanh toán, huỷ đơn" onPress={() => navigation.navigate('Orders')} />
           <Item icon="cart" title="Giỏ hàng" hint="Sản phẩm bạn đã chọn" onPress={() => navigation.navigate('Cart')} />
           <Item icon="pin" title="Sổ địa chỉ" hint="Địa chỉ nhận hàng có ghim vị trí" onPress={() => navigation.navigate('Addresses')} />
