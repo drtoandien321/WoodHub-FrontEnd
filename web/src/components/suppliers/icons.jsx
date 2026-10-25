@@ -16,9 +16,6 @@ export const Calendar = (p) => (
 export const CheckCircle = (p) => (
   <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="m9 12 2 2 4-4" /></svg>
 );
-export const Heart = ({ filled, ...p }) => (
-  <svg {...base} fill={filled ? 'currentColor' : 'none'} {...p}><path d="M19 14c1.5-1.5 3-3.3 3-5.5A4.5 4.5 0 0 0 12 5 4.5 4.5 0 0 0 2 8.5C2 12 5 14 12 21c2-2 4-3.5 5.5-5z" /></svg>
-);
 export const Search = (p) => (
   <svg {...base} {...p}><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
 );
@@ -40,23 +37,11 @@ export const ChevronRight = (p) => (
 export const Send = (p) => (
   <svg {...base} {...p}><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z" /></svg>
 );
-export const Bookmark = (p) => (
-  <svg {...base} {...p}><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
-);
 export const MessageCircle = (p) => (
   <svg {...base} {...p}><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-4-.9L3 21l1.9-4.9A8.4 8.4 0 1 1 21 11.5z" /></svg>
 );
-export const Award = (p) => (
-  <svg {...base} {...p}><circle cx="12" cy="8" r="6" /><path d="M8.2 13.3 7 22l5-3 5 3-1.2-8.7" /></svg>
-);
 export const Bolt = (p) => (
   <svg {...base} {...p}><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" /></svg>
-);
-export const Sofa = (p) => (
-  <svg {...base} {...p}><path d="M4 11V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" /><path d="M2 13a2 2 0 0 1 4 0v3h12v-3a2 2 0 0 1 4 0v5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" /><path d="M6 16h12" /></svg>
-);
-export const Cabinet = (p) => (
-  <svg {...base} {...p}><rect x="5" y="3" width="14" height="18" rx="1" /><path d="M12 3v18M8 7h.5M15.5 7h.5M8 15h.5M15.5 15h.5" /></svg>
 );
 export const Tree = (p) => (
   <svg {...base} {...p}><path d="M12 2 7 9h3l-4 6h5v5h2v-5h5l-4-6h3z" /></svg>
@@ -105,9 +90,6 @@ export const Tag = (p) => (
 export const Tool = (p) => (
   <svg {...base} {...p}><path d="M14.7 6.3a4 4 0 0 1-5.3 5.3L3 18v3h3l6.4-6.4a4 4 0 0 1 5.3-5.3l-2.8 2.8-2-2 2.5-2.8z" /></svg>
 );
-export const Ruler = (p) => (
-  <svg {...base} {...p}><rect x="2" y="8" width="20" height="8" rx="1" transform="rotate(0)" /><path d="M6 8v3M10 8v4M14 8v3M18 8v4" /></svg>
-);
 export const Pin = (p) => (
   <svg {...base} {...p}><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z" /></svg>
 );
@@ -116,9 +98,6 @@ export const Paperclip = (p) => (
 );
 export const Smile = (p) => (
   <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" /></svg>
-);
-export const MoreVertical = (p) => (
-  <svg {...base} {...p}><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>
 );
 export const Check = (p) => (
   <svg {...base} {...p}><path d="M20 6 9 17l-5-5" /></svg>
@@ -167,9 +146,6 @@ export const Trash = (p) => (
 export const Eye = (p) => (
   <svg {...base} {...p}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
 );
-export const EyeOff = (p) => (
-  <svg {...base} {...p}><path d="M9.9 4.2A10.5 10.5 0 0 1 12 4c6.5 0 10 8 10 8a18 18 0 0 1-3 4M6.6 6.6A18 18 0 0 0 2 12s3.5 8 10 8a10.5 10.5 0 0 0 5.4-1.5M3 3l18 18M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
-);
 export const BarChart = (p) => (
   <svg {...base} {...p}><path d="M3 3v18h18" /><rect x="7" y="11" width="3" height="6" /><rect x="12" y="7" width="3" height="10" /><rect x="17" y="13" width="3" height="4" /></svg>
 );
@@ -184,13 +160,4 @@ export const Download = (p) => (
 );
 export const CreditCard = (p) => (
   <svg {...base} {...p}><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20M6 15h4" /></svg>
-);
-export const Filter = (p) => (
-  <svg {...base} {...p}><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>
-);
-export const Globe = (p) => (
-  <svg {...base} {...p}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18z" /></svg>
-);
-export const DollarSign = (p) => (
-  <svg {...base} {...p}><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
 );

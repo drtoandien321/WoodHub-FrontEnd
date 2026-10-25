@@ -6,16 +6,25 @@
  * kind:
  *  - 'empty'  : chưa có báo giá → "Chưa có báo giá" (mờ)
  *  - 'offer'  : đang thương lượng → giá đề xuất gần nhất + bên đề xuất + số vòng (+ "~X ngày")
- *  - 'final'  : đã chốt → giá chốt nổi bật (+ "~X ngày · dự kiến dd/MM/yyyy")
+ *  - 'final'  : đã chốt → giá chốt nổi bật (+ "~X ngày · dự kiến dd/MM/yyyy" — chỉ khi ngày dự kiến CHƯA qua: BE tính ngày này từ lúc
+ *               tạo đơn kể cả khi khách chưa đặt cọc, nên đơn chưa sản xuất sẽ hiện ngày đã qua — QA BUG-017)
  *  - 'dim'    : đã từ chối / hết hạn / đã hủy → giá cuối cùng, mờ + gạch ngang, ẩn thời gian
  */
 const toNumber = (v) => (v === null || v === undefined || v === '' || Number.isNaN(Number(v)) ? null : Number(v));
+// Ngày 'YYYY-MM-DD' còn hiệu lực (≥ hôm nay theo giờ địa phương) → giữ; đã qua hoặc sai định dạng → null
+const notPast = (isoDate, today) => {
+  if (typeof isoDate !== 'string' || !/^\d{4}-\d{2}-\d{2}/.test(isoDate)) return null;
+  const [y, m, d] = isoDate.slice(0, 10).split('-').map(Number);
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return new Date(y, m - 1, d) >= startOfToday ? isoDate : null;
+};
 const positiveInt = (v) => {
   const n = toNumber(v);
   return n !== null && n > 0 ? Math.round(n) : null;
 };
 
-export function quoteCardModel(q) {
+// today: tham số để test cố định ngày; mặc định hôm nay (giờ địa phương)
+export function quoteCardModel(q, today = new Date()) {
   const quantity = positiveInt(q?.quantity) ?? 1;
   const latestPrice = toNumber(q?.latestOfferPrice);
   const total = (unit) => (unit !== null && quantity > 1 ? unit * quantity : null);
@@ -34,7 +43,7 @@ export function quoteCardModel(q) {
       if (final === null) return { kind: 'empty' };
       return {
         kind: 'final', price: final, total: toNumber(q.finalTotal) ?? total(final), quantity,
-        days: positiveInt(q.estimatedDays), date: typeof q.estimatedCompletionDate === 'string' ? q.estimatedCompletionDate : null,
+        days: positiveInt(q.estimatedDays), date: notPast(q.estimatedCompletionDate, today),
       };
     }
     case 'rejected':

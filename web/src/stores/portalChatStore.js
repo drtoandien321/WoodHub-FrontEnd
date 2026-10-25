@@ -123,6 +123,15 @@ export const usePortalChatStore = create((set, get) => ({
   // Tổng số tin chưa đọc → badge trên nút.
   totalUnread: () => get().threads.reduce((n, t) => n + (t.unread || 0), 0),
 
+  // Gửi lại tin bị lỗi: bỏ bubble lỗi rồi gửi lại nội dung (QA BUG-014)
+  retry: (messageId) => {
+    const id = get().activeThreadId;
+    const failed = (get().messages[id] ?? []).find((m) => m.id === messageId);
+    if (!id || !failed) return;
+    set((s) => ({ messages: { ...s.messages, [id]: (s.messages[id] ?? []).filter((m) => m.id !== messageId) } }));
+    get().send(failed.text);
+  },
+
   // NCC gửi tin cho khách.
   send: (text) => {
     const body = (text || '').trim();
@@ -135,6 +144,10 @@ export const usePortalChatStore = create((set, get) => ({
         api.sendMessage({ conversationId: id, content: body }).then((m) => {
           const myUserId = useAuthStore.getState().user?.id;
           set((s) => ({ messages: pushMsgDedup(s.messages, id, toUiMessage(m, myUserId)) }));
+        }).catch(() => {
+          // Socket lẫn REST đều lỗi → giữ tin ở trạng thái 'error' để bấm gửi lại (QA BUG-014)
+          const failed = { id: nextId(), sender: 'me', text: body, at: new Date().toISOString(), status: 'error' };
+          set((s) => ({ messages: { ...s.messages, [id]: [...(s.messages[id] ?? []), failed] } }));
         });
       }
       return;

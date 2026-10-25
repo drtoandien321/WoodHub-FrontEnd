@@ -142,6 +142,10 @@ export const useSupplierChatStore = create((set, get) => ({
         api.sendMessage({ conversationId, content: body }).then((m) => {
           const myUserId = useAuthStore.getState().user?.id;
           set((s) => ({ conversations: pushMsgDedup(s.conversations, supplierId, toUiMessage(m, myUserId)) }));
+        }).catch(() => {
+          // Socket lẫn REST đều lỗi → giữ tin ở trạng thái 'error' (bubble có nút gửi lại) thay vì để tin biến mất (QA BUG-014)
+          const failed = { id: nextId(), sender: 'user', text: body, at: new Date().toISOString(), status: 'error' };
+          set((s) => ({ conversations: pushMsg(s.conversations, supplierId, failed) }));
         });
       }
       return;
@@ -168,6 +172,14 @@ export const useSupplierChatStore = create((set, get) => ({
   retry: (messageId) => {
     const supplierId = get().context?.supplier?.id;
     if (!supplierId) return;
+    if (!USE_MOCK) {
+      // Thật: bỏ bubble lỗi rồi gửi lại nội dung đó (thành công → tin thật quay về qua socket/REST)
+      const failed = (get().conversations[supplierId] ?? []).find((m) => m.id === messageId);
+      if (!failed) return;
+      set((s) => ({ conversations: { ...s.conversations, [supplierId]: (s.conversations[supplierId] ?? []).filter((m) => m.id !== messageId) } }));
+      get().send(failed.text);
+      return;
+    }
     set((s) => ({ conversations: patchMsg(s.conversations, supplierId, messageId, { status: 'sent' }) }));
   },
 }));

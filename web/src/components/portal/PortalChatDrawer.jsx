@@ -15,7 +15,7 @@ export default function PortalChatDrawer() {
   const { t } = useTranslation();
   const {
     isOpen, activeThreadId, threads, messages, typing,
-    close, selectThread, backToList, send,
+    close, selectThread, backToList, send, retry,
   } = usePortalChatStore();
 
   const active = threads.find((th) => th.id === activeThreadId) || null;
@@ -82,7 +82,7 @@ export default function PortalChatDrawer() {
                 <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-2">
                   <div className="flex flex-col gap-3 py-1">
                     {list.map((m) => (
-                      <ChatMessageBubble key={m.id} message={m} own={m.sender === 'me'} onNavigate={close} />
+                      <ChatMessageBubble key={m.id} message={m} own={m.sender === 'me'} onRetry={retry} onNavigate={close} />
                     ))}
                     {typing && (
                       <div className="flex items-center gap-1.5 px-1 text-xs text-base-content/50">
