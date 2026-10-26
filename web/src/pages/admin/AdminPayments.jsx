@@ -140,9 +140,13 @@ export default function AdminPayments() {
   const q = useDebounced(search.trim());
 
   const range = useMemo(() => ({ from: startOfDayIso(fromDate), to: endOfDayIso(toDate) }), [fromDate, toDate]);
+  /*
+   * needsRefund LUÔN gửi true/false, không bỏ trống: BE (OBS-08) bỏ trống → tham số null → Postgres báo
+   * "cannot cast type bytea to boolean" → 500 cho cả danh sách. Gửi false = không lọc, chạy được cả khi BE chưa vá.
+   */
   const listParams = {
     page, size: PAGE_SIZE, sort: 'createdAt,desc',
-    status: status || undefined, purpose: purpose || undefined, q: q || undefined, needsRefund: needsRefund || undefined, ...range,
+    status: status || undefined, purpose: purpose || undefined, q: q || undefined, needsRefund, ...range,
   };
 
   const list = useAdminPayments(listParams);
