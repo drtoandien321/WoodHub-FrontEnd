@@ -210,7 +210,8 @@ function TrafficSection({ params, fromYmd, toYmdStr }) {
 }
 
 export default function AdminDashboard() {
-  const [rangeKey, setRangeKey] = useState('30d');
+  // Mặc định "Toàn bộ" (chốt của chủ dự án): mentor cần thấy tổng doanh thu ngay; muốn xem theo kỳ thì tự chọn bộ lọc
+  const [rangeKey, setRangeKey] = useState('all');
   const days = RANGES.find((r) => r.key === rangeKey).days;
 
   // useMemo để params ổn định giữa các lần render → không bắn request lặp
