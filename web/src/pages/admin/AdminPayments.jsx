@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAdminPayments, useAdminPaymentDetail, useAdminPaymentStats } from '../../hooks/useAdminPayments.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
@@ -126,13 +126,19 @@ function PaymentDetailModal({ id, onClose }) {
  * dưới: bộ lọc + bảng phân trang; bấm 1 dòng → modal chi tiết.
  * Thống kê dùng CÙNG khoảng ngày (from/to) với bảng, nhưng KHÔNG theo status/purpose/q
  * (BE /stats chỉ nhận from/to).
+ * Bộ lọc ban đầu đọc từ URL (?from=YYYY-MM-DD&to=…&status=&purpose=) — Dashboard mở trang này với CÙNG kỳ đang xem.
+ * Giá trị sai định dạng / không có trong danh sách thì bỏ qua.
  */
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/;
+const pickParam = (sp, key, ok) => { const v = sp.get(key) ?? ''; return ok(v) ? v : ''; };
+
 export default function AdminPayments() {
+  const [sp] = useSearchParams();
   const [page, setPage] = useState(0);
-  const [status, setStatus] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [fromDate, setFromDate] = useState(''); // 'YYYY-MM-DD'
-  const [toDate, setToDate] = useState('');
+  const [status, setStatus] = useState(() => pickParam(sp, 'status', (v) => v in STATUS_LABEL));
+  const [purpose, setPurpose] = useState(() => pickParam(sp, 'purpose', (v) => v in PURPOSE_LABEL));
+  const [fromDate, setFromDate] = useState(() => pickParam(sp, 'from', (v) => YMD_RE.test(v))); // 'YYYY-MM-DD'
+  const [toDate, setToDate] = useState(() => pickParam(sp, 'to', (v) => YMD_RE.test(v)));
   const [search, setSearch] = useState('');
   // Chỉ giao dịch đã nhận tiền mà đơn (thường / custom) đã huỷ và chưa hoàn — GET /admin/payments?needsRefund=true (OBS-08)
   const [needsRefund, setNeedsRefund] = useState(false);
