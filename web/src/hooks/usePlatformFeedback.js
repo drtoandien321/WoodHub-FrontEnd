@@ -15,16 +15,22 @@ export const FEEDBACK_MAX_COMMENT = 1000;
 // String.length đếm theo UTF-16 (emoji = 2) → '😀' × 5 qua được FE nhưng bị BE trả VALIDATION_FAILED.
 export const commentLength = (s = '') => [...s.trim()].length;
 
-// Đánh giá web của tôi. 404 = chưa đánh giá → trả null (không coi là lỗi) để popup biết còn được mời.
-export function useMyPlatformFeedback() {
+/*
+ * Đánh giá web của tôi. 404 = chưa đánh giá → trả null (không coi là lỗi) để popup biết còn được mời.
+ * Trình duyệt vẫn in dòng 404 đỏ ở console (JS không chặn được) → chỉ gọi khi cần:
+ *  - Bỏ qua admin: admin quản lý đánh giá ở /admin/feedback, không tự đánh giá sàn.
+ *  - `enabled: false` từ nơi gọi (vd popup chỉ hỏi khi đang mở) — trước đây popup gắn ở App gọi trên MỌI trang.
+ */
+export function useMyPlatformFeedback({ enabled = true } = {}) {
   const userId = useAuthStore((s) => s.user?.id);
+  const isAdmin = useAuthStore((s) => s.user?.role) === 'admin';
   return useQuery({
     queryKey: ['myPlatformFeedback', userId],
     queryFn: () => api.getMyPlatformFeedback({ platform: 'web' }).catch((e) => {
       if (e?.response?.status === 404) return null;
       throw e;
     }),
-    enabled: FEEDBACK_ENABLED && !!userId,
+    enabled: FEEDBACK_ENABLED && !!userId && !isAdmin && enabled,
     staleTime: 5 * 60_000,
   });
 }

@@ -19,7 +19,7 @@ export default function FeedbackModal() {
   const location = useLocation();
   const { open, context, close } = useFeedbackStore();
   const user = useAuthStore((s) => s.user);
-  const mine = useMyPlatformFeedback();
+  const mine = useMyPlatformFeedback({ enabled: open }); // chỉ hỏi BE khi popup mở
   const submit = useSubmitPlatformFeedback();
 
   const [rating, setRating] = useState(0);
