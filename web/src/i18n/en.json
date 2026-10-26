@@ -1100,7 +1100,8 @@
       "rounds_one": "{{count}} round",
       "rounds_other": "{{count}} rounds",
       "aboutDays": "~{{days}} days",
-      "expectedBy": "expected {{date}}"
+      "expectedBy": "expected {{date}}",
+      "daysAfterDeposit": "~{{days}} days after deposit"
     },
     "offersTitle": "Offer history",
     "noOffers": "No offers yet.",
@@ -1233,7 +1234,15 @@
       "custom_deposit": "Deposit",
       "custom_final": "Final payment"
     },
-    "genericError": "Something went wrong, please try again."
+    "genericError": "Something went wrong, please try again.",
+    "eta": {
+      "label": "Estimated completion",
+      "afterDeposit": "Estimated completion {{days}} days after your deposit"
+    },
+    "refund": {
+      "done": "Refunded {{amount}} at {{date}} (transaction {{reference}}).",
+      "pending": "Order cancelled — WoodHub will refund the {{amount}} you paid."
+    }
   },
   "forbidden": {
     "title": "403 — Access denied",
@@ -1342,7 +1351,9 @@
     "pollError": "Couldn't check the payment status, retrying automatically.",
     "expiredStillValid": "The QR display time has passed, but you can still scan this code to pay — we'll record it as soon as the money arrives.",
     "repay": "Get a new QR code",
-    "repayError": "Couldn't get a new QR code, please try again."
+    "repayError": "Couldn't get a new QR code, please try again.",
+    "allCancelled": "Order cancelled — no payment needed",
+    "allCancelledDesc": "This QR code can no longer be used. If you already transferred money, WoodHub will contact you to refund it."
   },
   "reviews": {
     "title": "Reviews",

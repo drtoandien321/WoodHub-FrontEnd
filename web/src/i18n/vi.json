@@ -1096,7 +1096,8 @@
       "rounds_one": "{{count}} vòng",
       "rounds_other": "{{count}} vòng",
       "aboutDays": "~{{days}} ngày",
-      "expectedBy": "dự kiến {{date}}"
+      "expectedBy": "dự kiến {{date}}",
+      "daysAfterDeposit": "~{{days}} ngày sau khi đặt cọc"
     },
     "offersTitle": "Lịch sử trao đổi giá",
     "noOffers": "Chưa có lượt ra giá nào.",
@@ -1229,7 +1230,15 @@
       "custom_deposit": "Tiền cọc",
       "custom_final": "Phần còn lại"
     },
-    "genericError": "Thao tác chưa thành công, vui lòng thử lại."
+    "genericError": "Thao tác chưa thành công, vui lòng thử lại.",
+    "eta": {
+      "label": "Dự kiến hoàn thành",
+      "afterDeposit": "Dự kiến hoàn thành sau {{days}} ngày kể từ khi đặt cọc"
+    },
+    "refund": {
+      "done": "Đã hoàn {{amount}} lúc {{date}} (mã GD {{reference}}).",
+      "pending": "Đơn đã huỷ — WoodHub sẽ hoàn lại {{amount}} bạn đã thanh toán."
+    }
   },
   "forbidden": {
     "title": "403 — Không có quyền truy cập",
@@ -1338,7 +1347,9 @@
     "pollError": "Không kiểm tra được trạng thái thanh toán, trang sẽ tự thử lại.",
     "expiredStillValid": "Đã quá giờ hiển thị của mã QR, nhưng bạn vẫn quét mã này để thanh toán được — hệ thống tự ghi nhận khi tiền vào.",
     "repay": "Lấy mã QR mới",
-    "repayError": "Chưa lấy được mã QR mới, vui lòng thử lại."
+    "repayError": "Chưa lấy được mã QR mới, vui lòng thử lại.",
+    "allCancelled": "Đơn đã huỷ — không cần thanh toán",
+    "allCancelledDesc": "Mã QR này không còn dùng để thanh toán. Nếu bạn đã lỡ chuyển khoản, WoodHub sẽ liên hệ để hoàn tiền."
   },
   "reviews": {
     "title": "Đánh giá",

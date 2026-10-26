@@ -2462,6 +2462,23 @@ export const mockAdapter = {
     return o;
   },
 
+  // Đơn custom đã huỷ + đã có tiền + chưa hoàn (§5.3)
+  async getPendingCustomRefunds(params = {}) {
+    await delay(250);
+    const list = Array.from(memoryDb.customOrders.values()).filter((o) => o.status === 'cancelled' && Number(o.paidAmount) > 0 && !o.refundedAt);
+    return toSpringPage(list, params);
+  },
+
+  async confirmCustomRefund({ id, reference, amount }) {
+    await delay(300);
+    const o = memoryDb.customOrders.get(id);
+    if (!o) throw Object.assign(new Error('Not found'), { response: { status: 404, data: { errorCode: 'CUSTOM_ORDER_NOT_FOUND' } } });
+    if (o.refundedAt) throw Object.assign(new Error('ALREADY'), { response: { status: 409, data: { errorCode: 'ORDER_ALREADY_REFUNDED' } } });
+    Object.assign(o, { refundedAt: new Date().toISOString(), refundAmount: amount ?? o.paidAmount, refundReference: reference, needsRefund: false });
+    persistCustomOrders();
+    return o;
+  },
+
   async getAdminContacts(params = {}) {
     await delay(250);
     let list = storage.getItem('woodhub-mock-contacts', []);
@@ -2648,9 +2665,10 @@ export const mockAdapter = {
    * ===== PAYMENTS quản trị (Portal Quản trị /admin/payments) — trả đúng shape Spring Page phẳng =====
    * Dữ liệu sinh 1 lần từ seed cố định (không random mỗi lần gọi) để lọc/phân trang ổn định.
    */
-  async getAdminPayments({ status, purpose, from, to, q, page = 0, size = 20 } = {}) {
+  async getAdminPayments({ status, purpose, from, to, q, needsRefund, page = 0, size = 20 } = {}) {
     await delay(300);
-    const list = filterMockPayments({ status, purpose, from, to, q });
+    // Mock không liên kết payment ↔ đơn đã huỷ → lọc "cần hoàn tiền" luôn rỗng
+    const list = needsRefund ? [] : filterMockPayments({ status, purpose, from, to, q });
     const total = list.length;
     const content = list.slice(page * size, page * size + size);
     const totalPages = Math.ceil(total / size);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { usePendingRefunds, useConfirmRefund } from '../../hooks/useAdminOps.js';
+import { Link } from 'react-router-dom';
+import { usePendingRefunds, useConfirmRefund, usePendingCustomRefunds, useConfirmCustomRefund } from '../../hooks/useAdminOps.js';
 import { useManagedOrders, useUpdateOrderStatus } from '../../hooks/useOrderManagement.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
 import { formatVnd, formatDate } from '../../utils/format.js';
@@ -17,6 +18,9 @@ const OVERDUE_PARAMS = { status: 'paid', page: 0, size: 100 };
  *  2. Đơn CẦN HOÀN TIỀN: GET /admin/orders/refunds/pending (đã trả tiền + bị huỷ + chưa hoàn, huỷ sớm nhất trước).
  *     Admin chuyển khoản THỦ CÔNG cho khách (SePay không tự hoàn) trong 48h rồi ghi nhận POST /admin/orders/{id}/refund
  *     với mã giao dịch ngân hàng (để đối soát khi khách khiếu nại). Khách nhận thông báo ORDER_REFUNDED.
+ *  3. Đơn CUSTOM CẦN HOÀN TIỀN (OBS-08, §5.3): GET /admin/custom-orders/refunds/pending — đơn custom đã huỷ mà đã có tiền
+ *     (xưởng huỷ sau khi nhận cọc, hoặc tiền vào sau khi huỷ). Không có hạn 48h trên API; số tiền mặc định = paidAmount.
+ *     Ghi nhận POST /admin/custom-orders/{id}/refund → khách nhận thông báo CUSTOM_ORDER_REFUNDED.
  * BE không lưu số tài khoản của khách → admin lấy từ trao đổi với khách (chat / email / SĐT trên đơn).
  */
 export default function AdminRefunds() {
@@ -26,6 +30,11 @@ export default function AdminRefunds() {
   const paid = useManagedOrders('admin', OVERDUE_PARAMS);
   const cancelOrder = useUpdateOrderStatus('admin');
   const [refunding, setRefunding] = useState(null);
+  const [customPage, setCustomPage] = useState(0);
+  const customRefunds = usePendingCustomRefunds({ page: customPage, size: PAGE_SIZE });
+  const [refundingCustom, setRefundingCustom] = useState(null);
+  const customItems = customRefunds.data?.content ?? [];
+  const customPageInfo = customRefunds.data?.page ?? { number: 0, totalPages: 1, totalElements: 0 };
 
   const overdue = (paid.data?.content ?? []).filter((o) => o.confirmOverdue || (o.confirmDeadline && new Date(o.confirmDeadline) < now));
   const items = refunds.data?.content ?? [];
@@ -108,16 +117,64 @@ export default function AdminRefunds() {
         <Pagination pageInfo={pageInfo} onChange={setPage} className="mt-3" />
       </section>
 
-      {refunding && <RefundModal order={refunding} onClose={() => setRefunding(null)} />}
+      <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <h2 className="mb-1 flex items-center gap-2 font-display text-lg">
+          Đơn custom cần hoàn tiền {customPageInfo.totalElements > 0 && <span className="badge badge-warning">{customPageInfo.totalElements}</span>}
+        </h2>
+        <p className="mb-3 text-xs text-base-content/70">Đơn custom bị huỷ khi khách đã trả cọc / phần còn lại. Chưa có hạn 48 giờ như đơn thường — xử lý theo thứ tự (huỷ sớm nhất trước).</p>
+        {customRefunds.isLoading ? <div className="skeleton h-24 rounded-xl" /> : customRefunds.isError ? (
+          <p className="text-sm text-error">Không tải được danh sách. <button onClick={() => customRefunds.refetch()} className="link">Thử lại</button></p>
+        ) : !customItems.length ? (
+          <p className="text-sm text-base-content/70">Không có đơn custom nào đang chờ hoàn tiền.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-sm">
+              <thead><tr className="text-base-content/70"><th>Mã đơn</th><th>Khách</th><th>Xưởng</th><th className="text-right">Đã trả</th><th>Huỷ lúc</th><th className="text-right">Thao tác</th></tr></thead>
+              <tbody>
+                {customItems.map((o) => (
+                  <tr key={o.id}>
+                    <td className="font-mono text-xs"><Link to={`/custom-orders/${o.id}`} className="link link-hover">{o.orderNumber}</Link></td>
+                    <td className="text-sm">{o.customerName}{o.shippingAddress && <span className="block max-w-56 truncate text-xs text-base-content/70" title={o.shippingAddress}>{o.shippingAddress}</span>}</td>
+                    <td className="text-sm">{o.workshopName}</td>
+                    <td className="text-right text-sm font-semibold">{formatVnd(o.paidAmount)}</td>
+                    <td className="text-xs text-base-content/70">{o.cancelledAt ? formatDate(o.cancelledAt) : '—'}</td>
+                    <td className="text-right"><button onClick={() => setRefundingCustom(o)} className="btn btn-primary btn-xs">Đã hoàn tiền</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <Pagination pageInfo={customPageInfo} onChange={setCustomPage} className="mt-3" />
+      </section>
+
+      {refunding && (
+        <RefundModal
+          useConfirm={useConfirmRefund}
+          target={{ id: refunding.id, code: refunding.orderCode, name: refunding.recipientName, contact: refunding.recipientPhone, max: refunding.totalAmount }}
+          onClose={() => setRefunding(null)}
+        />
+      )}
+      {refundingCustom && (
+        <RefundModal
+          useConfirm={useConfirmCustomRefund}
+          target={{ id: refundingCustom.id, code: refundingCustom.orderNumber, name: refundingCustom.customerName, contact: refundingCustom.shippingAddress, max: refundingCustom.paidAmount }}
+          onClose={() => setRefundingCustom(null)}
+        />
+      )}
     </div>
   );
 }
 
-// Form ghi nhận đã chuyển khoản hoàn tiền: mã GD bắt buộc, số tiền mặc định = tổng đơn (sửa được nếu hoàn 1 phần)
-function RefundModal({ order, onClose }) {
-  const confirm = useConfirmRefund();
+/*
+ * Form ghi nhận đã chuyển khoản hoàn tiền — dùng chung đơn thường + đơn custom (truyền hook mutation qua useConfirm).
+ * Mã GD bắt buộc; số tiền mặc định = target.max (tổng đơn / tiền khách đã trả), sửa được nếu hoàn 1 phần.
+ * Bằng đúng max thì không gửi amount — BE tự hoàn toàn bộ.
+ */
+function RefundModal({ useConfirm, target, onClose }) {
+  const confirm = useConfirm();
   const [reference, setReference] = useState('');
-  const [amount, setAmount] = useState(String(Math.round(Number(order.totalAmount))));
+  const [amount, setAmount] = useState(String(Math.round(Number(target.max))));
   const [note, setNote] = useState('');
   const [err, setErr] = useState('');
 
@@ -125,9 +182,9 @@ function RefundModal({ order, onClose }) {
     setErr('');
     if (!reference.trim()) { setErr('Nhập mã giao dịch ngân hàng của lần chuyển khoản hoàn tiền.'); return; }
     const amt = Number(amount);
-    if (!(amt >= 1 && amt <= Number(order.totalAmount))) { setErr(`Số tiền từ 1 đến ${formatVnd(order.totalAmount)}.`); return; }
+    if (!(amt >= 1 && amt <= Number(target.max))) { setErr(`Số tiền từ 1 đến ${formatVnd(target.max)}.`); return; }
     confirm.mutate(
-      { id: order.id, reference: reference.trim(), amount: amt === Number(order.totalAmount) ? undefined : amt, note: note.trim() || undefined },
+      { id: target.id, reference: reference.trim(), amount: amt === Number(target.max) ? undefined : amt, note: note.trim() || undefined },
       { onSuccess: onClose, onError: (e) => setErr(apiErrorMessage(e, 'Ghi nhận hoàn tiền chưa được.')) }
     );
   };
@@ -136,7 +193,7 @@ function RefundModal({ order, onClose }) {
     <ModalShell
       open
       onClose={onClose}
-      title={`Hoàn tiền đơn ${order.orderCode}`}
+      title={`Hoàn tiền đơn ${target.code}`}
       footer={(
         <>
           <button onClick={onClose} disabled={confirm.isPending} className="btn btn-ghost">Huỷ</button>
@@ -146,14 +203,14 @@ function RefundModal({ order, onClose }) {
     >
       <div className="flex flex-col gap-3 text-sm">
         <p className="rounded-lg bg-base-200/60 px-3 py-2 text-xs text-base-content/70">
-          Chuyển khoản cho khách <b>{order.recipientName}</b> ({order.recipientPhone}) trước, rồi nhập mã giao dịch. Hệ thống không lưu số tài khoản của khách — lấy từ trao đổi với khách.
+          Chuyển khoản cho khách <b>{target.name}</b>{target.contact ? ` (${target.contact})` : ''} trước, rồi nhập mã giao dịch. Hệ thống không lưu số tài khoản của khách — lấy từ trao đổi với khách.
         </p>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Mã giao dịch ngân hàng *</span>
           <input value={reference} onChange={(e) => setReference(e.target.value.slice(0, 100))} placeholder="VD: FT26102112345" className="input input-bordered w-full font-mono" />
         </label>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Số tiền hoàn (₫)</span>
-          <input type="number" min="1" max={order.totalAmount} value={amount} onChange={(e) => setAmount(e.target.value)} className="input input-bordered w-full" />
-          <span className="text-xs text-base-content/70">Mặc định hoàn toàn bộ {formatVnd(order.totalAmount)}.</span>
+          <input type="number" min="1" max={target.max} value={amount} onChange={(e) => setAmount(e.target.value)} className="input input-bordered w-full" />
+          <span className="text-xs text-base-content/70">Mặc định hoàn toàn bộ {formatVnd(target.max)}.</span>
         </label>
         <label className="flex flex-col gap-1.5"><span className="text-base-content/70">Ghi chú</span>
           <textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 1000))} rows={2} placeholder="VD: Đã CK qua MB Bank" className="textarea textarea-bordered w-full" />

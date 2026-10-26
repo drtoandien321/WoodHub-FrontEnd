@@ -31,15 +31,16 @@ test.describe('quoteCardModel', () => {
   });
 
   test('accepted: giá chốt + tổng + ngày + ngày hoàn thành', () => {
-    const m = quoteCardModel({ ...base, status: 'accepted', finalPrice: 9_500_000, finalTotal: 19_000_000, estimatedDays: 12, estimatedCompletionDate: '2026-10-21' }, new Date(2026, 9, 20));
-    expect(m).toMatchObject({ kind: 'final', price: 9_500_000, total: 19_000_000, days: 12, date: '2026-10-21' });
+    const m = quoteCardModel({ ...base, status: 'accepted', finalPrice: 9_500_000, finalTotal: 19_000_000, estimatedDays: 12, estimatedCompletionDate: '2026-10-21' });
+    expect(m).toMatchObject({ kind: 'final', price: 9_500_000, total: 19_000_000, days: 12, date: '2026-10-21', afterDeposit: false });
   });
 
-  test('accepted: ngày dự kiến đã qua (đơn chưa đặt cọc/chưa sản xuất) → ẩn ngày, giữ số ngày (BUG-017)', () => {
-    const q = { ...base, status: 'accepted', finalPrice: 5_000_000, estimatedDays: 6, estimatedCompletionDate: '2026-10-15' };
-    expect(quoteCardModel(q, new Date(2026, 9, 25))).toMatchObject({ kind: 'final', days: 6, date: null });
-    expect(quoteCardModel(q, new Date(2026, 9, 15, 23, 59)).date).toBe('2026-10-15'); // đúng hôm đó vẫn hiện
-    expect(quoteCardModel({ ...q, estimatedCompletionDate: 'abc' }, new Date(2026, 9, 1)).date).toBeNull();
+  test('accepted: BE trả null khi chưa đặt cọc → afterDeposit, giữ số ngày (BUG-017 phía BE)', () => {
+    const q = { ...base, status: 'accepted', finalPrice: 5_000_000, estimatedDays: 6, estimatedCompletionDate: null };
+    expect(quoteCardModel(q)).toMatchObject({ kind: 'final', days: 6, date: null, afterDeposit: true });
+    // Đã cọc mà trễ hạn: ngày đã qua vẫn hiện (BE tính từ lúc cọc nên ngày là thật)
+    expect(quoteCardModel({ ...q, estimatedCompletionDate: '2020-01-01' })).toMatchObject({ date: '2020-01-01', afterDeposit: false });
+    expect(quoteCardModel({ ...q, estimatedCompletionDate: 'abc' })).toMatchObject({ date: null, afterDeposit: true });
   });
 
   test('accepted thiếu finalPrice → dùng giá offer cuối; thiếu cả hai → empty', () => {

@@ -72,7 +72,7 @@ const REAL_ENDPOINTS = new Set([
   'getAdminUsers', 'getAdminUserDetail', 'deleteUser',
   // BE-11 khoá tài khoản + kiểm duyệt đánh giá · hoàn tiền (no-inventory §5.1) · BE-06 liên hệ · BE-14 payout NCC
   'setUserStatus', 'getAdminReviews', 'moderateReview', 'deleteAdminReview',
-  'getPendingRefunds', 'confirmRefund', 'getAdminContacts', 'updateContactStatus', 'getAdminSupplierPayout',
+  'getPendingRefunds', 'confirmRefund', 'getPendingCustomRefunds', 'confirmCustomRefund', 'getAdminContacts', 'updateContactStatus', 'getAdminSupplierPayout',
   // Module Admin — quản lý thanh toán (Portal Quản trị /admin/payments) — API chỉ đọc
   'getAdminPayments', 'getAdminPayment', 'getAdminPaymentStats',
   // Module Admin — Dashboard tổng quan (Portal Quản trị /admin/dashboard) — API chỉ đọc
@@ -443,6 +443,13 @@ export const api = {
    * 400 REFUND_AMOUNT_INVALID · 409 ORDER_NOT_REFUNDABLE / ORDER_ALREADY_REFUNDED
    */
   confirmRefund: ({ id, ...body }) => call(() => http.post('/admin/orders/' + id + '/refund', body), 'confirmRefund', { id, ...body }),
+  /*
+   * Hoàn tiền ĐƠN CUSTOM (OBS-08, no-inventory-order-confirm-fe.md §5.3): đơn custom đã huỷ mà đã có tiền (paidAmount > 0).
+   * GET /admin/custom-orders/refunds/pending → Page<CustomOrderResponse> (huỷ sớm nhất trước, KHÔNG có hạn 48h).
+   * POST /admin/custom-orders/:id/refund { reference*, amount? (mặc định = paidAmount, ≤ paidAmount), note? } → CustomOrderResponse.
+   */
+  getPendingCustomRefunds: (params) => call(() => http.get('/admin/custom-orders/refunds/pending', { params }), 'getPendingCustomRefunds', params),
+  confirmCustomRefund: ({ id, ...body }) => call(() => http.post('/admin/custom-orders/' + id + '/refund', body), 'confirmCustomRefund', { id, ...body }),
   // GET /admin/contacts?status=new|handled|spam&keyword=&page=&size= → Page<ContactResponse>
   getAdminContacts: (params) => call(() => http.get('/admin/contacts', { params }), 'getAdminContacts', params),
   // PATCH /admin/contacts/:id { status: new|handled|spam } → ContactResponse
