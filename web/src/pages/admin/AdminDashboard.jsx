@@ -18,6 +18,8 @@ const RANGES = [
   { key: '90d', label: '90 ngày qua', days: 90 },
   { key: 'all', label: 'Toàn bộ', days: null },
 ];
+// 'YYYY-MM-DD' → 'dd/MM/yyyy' (cắt chuỗi, không qua Date để khỏi lệch ngày do múi giờ)
+const formatYmd = (ymd) => `${ymd.slice(8, 10)}/${ymd.slice(5, 7)}/${ymd.slice(0, 4)}`;
 
 const pct = (n) => `${Math.round((n ?? 0) * 100)}%`;
 
@@ -222,6 +224,16 @@ export default function AdminDashboard() {
     return { params: { from: startOfDayIso(f), to: endOfDayIso(t) }, fromYmd: f, toYmdStr: t };
   }, [days]);
 
+  /*
+   * Nhãn kỳ + link sang trang Thanh toán CÙNG khoảng ngày. Trước đây ô KPI tính theo kỳ (mặc định 30 ngày) nhưng link
+   * mở Payments không lọc ngày → số "đã thanh toán" 2 bên lệch nhau (vd 2 ↔ 4) dù cả hai đều đúng.
+   */
+  const rangeLabel = RANGES.find((r) => r.key === rangeKey).label;
+  const paymentsLink = (extra = {}) => {
+    const qs = new URLSearchParams({ ...(fromYmd ? { from: fromYmd, to: toYmdStr } : {}), ...extra }).toString();
+    return qs ? `/admin/payments?${qs}` : '/admin/payments';
+  };
+
   const summary = useAdminDashboardSummary(params);
   const series = useAdminDashboardTimeseries(params);
   const top = useAdminDashboardTop({ ...params, limit: 5 });
@@ -256,6 +268,11 @@ export default function AdminDashboard() {
         <div>
           <h1 className="font-display text-3xl">Tổng quan hệ thống</h1>
           <p className="mt-1 text-base-content/70">Số liệu toàn sàn: người dùng, doanh thu, gói đăng ký, nhà cung cấp và AI.</p>
+          <p className="mt-1 text-sm text-base-content/70">
+            Kỳ đang xem: <span className="font-medium text-base-content">{rangeLabel}</span>
+            {fromYmd && ` (${formatYmd(fromYmd)} – ${formatYmd(toYmdStr)})`}
+            {' · '}Doanh thu & lượt mua gói tính trong kỳ; tổng người dùng, nhà cung cấp, sản phẩm là toàn bộ.
+          </p>
         </div>
         <select
           className="select select-bordered select-sm w-40"
@@ -280,16 +297,16 @@ export default function AdminDashboard() {
           {/* KPI hàng đầu */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard icon={Wallet} label="Doanh thu (đã thanh toán)" value={s.revenue.totalRevenue} money
-              hint={`${s.revenue.paidCount}/${s.revenue.totalCount} giao dịch · thành công ${pct(s.revenue.successRate)}`} to="/admin/payments" />
+              hint={`${rangeLabel}: ${s.revenue.paidCount}/${s.revenue.totalCount} giao dịch · thành công ${pct(s.revenue.successRate)}`} to={paymentsLink()} />
             <StatCard icon={Users} label="Tổng người dùng" value={s.users.total}
               hint={`+${s.users.newInPeriod} mới trong kỳ · ${s.users.activeRecently} hoạt động 24h`} to="/admin/users"
               iconWrap="bg-info/10 text-info" />
             {/* Lượt bán gói trả phí (giao dịch thành công): gói đăng ký + gói lượt thiết kế, không tính gói Free */}
             <StatCard icon={CreditCard} label="Lượt mua gói (thanh toán thành công)" value={planSales.data?.total ?? '…'}
               hint={planSales.data
-                ? `${planSales.data.subscriptions} gói đăng ký · ${planSales.data.creditPacks} gói thiết kế · ${planSales.data.buyers} tài khoản · ${formatVnd(planSales.data.revenue)}`
+                ? `${rangeLabel}: ${planSales.data.subscriptions} gói đăng ký · ${planSales.data.creditPacks} gói thiết kế · ${planSales.data.buyers} tài khoản · ${formatVnd(planSales.data.revenue)}`
                 : 'Đang tải…'}
-              to="/admin/payments" iconWrap="bg-success/10 text-success" />
+              to={paymentsLink({ status: 'paid' })} iconWrap="bg-success/10 text-success" />
             <RatingStatCard platform={feedback.data} reviews={reviewAvg.data} />
           </div>
 
