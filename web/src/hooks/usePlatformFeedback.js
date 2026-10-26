@@ -16,8 +16,9 @@ export const FEEDBACK_MAX_COMMENT = 1000;
 export const commentLength = (s = '') => [...s.trim()].length;
 
 /*
- * Đánh giá web của tôi. 404 = chưa đánh giá → trả null (không coi là lỗi) để popup biết còn được mời.
- * Trình duyệt vẫn in dòng 404 đỏ ở console (JS không chặn được) → chỉ gọi khi cần:
+ * Đánh giá web của tôi; null = chưa đánh giá (không coi là lỗi) để popup biết còn được mời.
+ * BE mới (26/10) trả 200 body rỗng ('') khi chưa đánh giá; BE cũ trả 404 FEEDBACK_NOT_FOUND → nhận CẢ HAI thành null.
+ * Với BE cũ trình duyệt vẫn in dòng 404 đỏ ở console (JS không chặn được) → chỉ gọi khi cần:
  *  - Bỏ qua admin: admin quản lý đánh giá ở /admin/feedback, không tự đánh giá sàn.
  *  - `enabled: false` từ nơi gọi (vd popup chỉ hỏi khi đang mở) — trước đây popup gắn ở App gọi trên MỌI trang.
  */
@@ -26,10 +27,12 @@ export function useMyPlatformFeedback({ enabled = true } = {}) {
   const isAdmin = useAuthStore((s) => s.user?.role) === 'admin';
   return useQuery({
     queryKey: ['myPlatformFeedback', userId],
-    queryFn: () => api.getMyPlatformFeedback({ platform: 'web' }).catch((e) => {
-      if (e?.response?.status === 404) return null;
-      throw e;
-    }),
+    queryFn: () => api.getMyPlatformFeedback({ platform: 'web' })
+      .then((d) => d || null) // body rỗng ('') / null → null (react-query không nhận undefined)
+      .catch((e) => {
+        if (e?.response?.status === 404) return null;
+        throw e;
+      }),
     enabled: FEEDBACK_ENABLED && !!userId && !isAdmin && enabled,
     staleTime: 5 * 60_000,
   });
