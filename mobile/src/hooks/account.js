@@ -22,7 +22,11 @@ export const useUpdateProfile = () => {
 
 export const useChangePassword = () => useMutation({ mutationFn: api.changePassword });
 
-export const useBusinessProfile = () => useQuery({ queryKey: ['businessProfile'], queryFn: api.getBusinessProfile });
+// Chỉ gọi khi tài khoản đã là doanh nghiệp: tạo hồ sơ = nâng lên business, nên khách cá nhân chắc chắn chưa có (khỏi 404)
+export const useBusinessProfile = () => {
+  const isBusiness = useAuth((s) => s.user?.customerType) === 'business';
+  return useQuery({ queryKey: ['businessProfile'], queryFn: api.getBusinessProfile, enabled: isBusiness });
+};
 export const useSaveBusinessProfile = (exists) => {
   const qc = useQueryClient();
   return useMutation({

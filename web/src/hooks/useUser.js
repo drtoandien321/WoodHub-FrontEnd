@@ -30,11 +30,14 @@ export const useChangePassword = () => useMutation({ mutationFn: api.changePassw
 /*
  * Hồ sơ doanh nghiệp. BE trả 404 khi CHƯA có hồ sơ — đó là trạng thái bình thường của khách cá nhân, không
  * phải lỗi → queryFn đổi 404 thành null để component phân biệt "chưa có" (hiện form tạo) với lỗi thật.
+ * Chỉ GỌI khi customerType = business: tạo hồ sơ là bước nâng tài khoản lên doanh nghiệp, nên khách cá nhân chắc chắn
+ * chưa có → bỏ qua request (trước đây mở Profile luôn in 1 dòng 404 đỏ ở console). data = undefined → "chưa có".
  */
 const BUSINESS_PROFILE_KEY = ['user', 'businessProfile'];
 
-export const useBusinessProfile = ({ enabled = true } = {}) =>
-  useQuery({
+export const useBusinessProfile = ({ enabled = true } = {}) => {
+  const isBusiness = useAuthStore((s) => s.user?.customerType) === 'business';
+  return useQuery({
     queryKey: BUSINESS_PROFILE_KEY,
     queryFn: async () => {
       try {
@@ -44,9 +47,10 @@ export const useBusinessProfile = ({ enabled = true } = {}) =>
         throw err;
       }
     },
-    enabled,
+    enabled: enabled && isBusiness,
     retry: false,
   });
+};
 
 // create hoặc update tuỳ đã có hồ sơ chưa. Tạo mới → BE tự nâng customerType lên business → đồng bộ authStore
 // (Header, trang /b2b, các CTA đọc user.customerType từ đây).
