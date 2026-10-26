@@ -40,6 +40,20 @@ export const useConfirmRefund = () => {
   });
 };
 
+// Hoàn tiền đơn custom (§5.3) — cùng kiểu với đơn thường; làm mới cả chi tiết đơn custom đang mở
+export const usePendingCustomRefunds = (params) =>
+  useQuery({ queryKey: ['pendingCustomRefunds', params], queryFn: () => api.getPendingCustomRefunds(params), ...listOpts });
+export const useConfirmCustomRefund = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: api.confirmCustomRefund,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pendingCustomRefunds'] });
+      qc.invalidateQueries({ queryKey: ['customOrder'] });
+    },
+  });
+};
+
 // ----- Liên hệ -----
 export const useAdminContacts = (params) =>
   useQuery({ queryKey: ['adminContacts', params], queryFn: () => api.getAdminContacts(params), ...listOpts });

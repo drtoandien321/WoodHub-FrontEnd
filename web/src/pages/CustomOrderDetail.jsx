@@ -11,7 +11,8 @@ import { customOrderMeta, NEXT_ORDER_STATUS, CUSTOMER_PAY_STATUSES, ADDRESS_EDIT
 import { apiErrorMessage } from '../utils/apiError.js';
 import StatusBadge from '../components/supplier/StatusBadge.jsx';
 import OrderPaymentPanel from '../components/checkout/OrderPaymentPanel.jsx';
-import { formatVnd } from '../utils/format.js';
+import { formatVnd, formatDate } from '../utils/format.js';
+import { formatDay } from '../utils/quoteSummary.js';
 
 // Trạng thái mà tiền khách đã trả có thể mất nếu xưởng huỷ → hỏi lại trước khi huỷ
 const PAID_STATUSES = new Set(['deposit_paid', 'in_production', 'awaiting_final_payment']);
@@ -29,7 +30,7 @@ const PAID_STATUSES = new Set(['deposit_paid', 'in_production', 'awaiting_final_
  */
 export default function CustomOrderDetail() {
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const me = useAuthStore((s) => s.user);
   const { data: order, isLoading, isError, refetch } = useCustomOrderDetail(id);
   const updateStatus = useUpdateCustomOrderStatus();
@@ -81,6 +82,12 @@ export default function CustomOrderDetail() {
             <div><p className="text-base-content/70">{t('quote.price')}</p><p className="font-medium">{formatVnd(order.unitPrice)}</p></div>
             <div><p className="text-base-content/70">{t('order.total')}</p><p className="font-semibold text-primary">{formatVnd(order.totalAmount)}</p></div>
             <div><p className="text-base-content/70">{t('quote.leadTimeDays')}</p><p className="font-medium">{order.leadTimeDays}</p></div>
+            {/* Ngày dự kiến tính từ lúc đặt cọc (BE BUG-017): chưa cọc → chỉ nói "sau N ngày kể từ khi đặt cọc" */}
+            {order.estimatedCompletionDate ? (
+              <div><p className="text-base-content/70">{t('order.eta.label')}</p><p className="font-medium">{formatDay(order.estimatedCompletionDate, i18n.language)}</p></div>
+            ) : order.status === 'awaiting_deposit' && order.leadTimeDays ? (
+              <div className="col-span-2"><p className="text-base-content/70">{t('order.eta.label')}</p><p className="font-medium">{t('order.eta.afterDeposit', { days: order.leadTimeDays })}</p></div>
+            ) : null}
             {order.location && <div><p className="text-base-content/70">{t('quote.location')}</p><p className="font-medium">{order.location}</p></div>}
           </div>
         </div>
@@ -176,6 +183,14 @@ function MoneySummary({ order }) {
           <dd className="text-primary">{formatVnd(order.remainingAmount ?? 0)}</dd>
         </div>
       </dl>
+      {/* Đơn huỷ khi đã có tiền (OBS-08 §5.3): đã hoàn → hiện số tiền + mã GD; chưa hoàn → báo đang chờ admin hoàn */}
+      {order.refundedAt ? (
+        <p className="mt-3 rounded-xl border border-success/30 bg-success/5 p-3 text-sm">
+          {t('order.refund.done', { amount: formatVnd(order.refundAmount), date: formatDate(order.refundedAt), reference: order.refundReference })}
+        </p>
+      ) : order.needsRefund ? (
+        <p className="mt-3 rounded-xl border border-warning/30 bg-warning/5 p-3 text-sm">{t('order.refund.pending', { amount: formatVnd(order.paidAmount) })}</p>
+      ) : null}
     </section>
   );
 }

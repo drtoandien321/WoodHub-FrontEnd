@@ -43,7 +43,7 @@ export default function QuotePricing({ quote, viewer = 'customer' }) {
         {totalLine}
         <p className="mt-0.5 text-xs text-base-content/70">
           {t('quote.card.agreedPrice')}
-          {m.days !== null && ` · ${t('quote.card.aboutDays', { days: m.days })}`}
+          {m.days !== null && ` · ${t(m.afterDeposit ? 'quote.card.daysAfterDeposit' : 'quote.card.aboutDays', { days: m.days })}`}
           {m.date && ` · ${t('quote.card.expectedBy', { date: formatDay(m.date, i18n.language) })}`}
         </p>
       </div>

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { api } from '../../api/client.js';
 import { usePayment } from '../../hooks/useSubscription.js';
 import { ORDERS_QUERY_KEY, useRepayOrder } from '../../hooks/useOrders.js';
 import { apiErrorMessage } from '../../utils/apiError.js';
@@ -18,8 +19,13 @@ import { formatVnd, formatDate } from '../../utils/format.js';
  * để hiện QR ngay, không phải chờ lượt poll đầu.
  * Mã hết hạn: nút "Lấy mã QR mới" gọi POST /orders/{orderId}/payment (BE-03) — gia hạn CÙNG payment, txnRef giữ nguyên nên QR
  * cũ vẫn được ghi nhận. Cần `orderId` (bất kỳ đơn nào trong nhóm checkout). Trước đây chú thích ghi BE chưa có API (QA BUG-003).
+ *
+ * Huỷ đơn cuối cùng của nhóm (OBS-08, order-repay-expiry-fe.md): BE chuyển payment sang 'expired' NGAY. PaymentResponse
+ * không cho biết vì hết giờ hay vì huỷ → khi QR hết hạn, panel hỏi trạng thái các đơn trong nhóm (`orderIds`, mặc định
+ * [orderId]): tất cả đã huỷ → ẩn QR + đồng hồ, báo đơn đã huỷ; còn đơn chờ → "Lấy mã QR mới" dùng đơn chưa huỷ đó
+ * (repay bằng đơn đã huỷ sẽ 409).
  */
-export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, onPaid }) {
+export default function OrderPaymentPanel({ paymentId, orderId, orderIds, fallback = {}, onPaid }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: payment, isError } = usePayment(paymentId);
@@ -32,8 +38,18 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
   const repay = useRepayOrder();
   // Hết hạn: BE trả 'expired', hoặc vẫn 'pending' nhưng đã quá expiresAt (chưa tới lượt BE cập nhật)
   const qrExpired = status === 'expired' || (status === 'pending' && expiresAt && new Date(expiresAt) <= new Date());
+
+  // Chỉ hỏi trạng thái đơn khi QR đã hết hạn (cùng cache ['order', id] với trang chi tiết đơn)
+  const groupIds = orderIds?.length ? orderIds : orderId ? [orderId] : [];
+  const groupOrders = useQueries({
+    queries: groupIds.map((id) => ({ queryKey: ['order', id], queryFn: () => api.getOrder(id), enabled: qrExpired })),
+  });
+  const isClosed = (o) => o?.status === 'cancelled' || o?.status === 'refunded';
+  const allCancelled = qrExpired && groupIds.length > 0 && groupOrders.every((q) => isClosed(q.data));
+  const repayOrderId = groupOrders.find((q) => q.data && !isClosed(q.data))?.data.id ?? orderId;
+
   const handleRepay = () => {
-    repay.mutate(orderId, {
+    repay.mutate(repayOrderId, {
       onError: (err) => {
         if (err?.response?.status === 409) {
           qc.invalidateQueries({ queryKey: ['payment', paymentId] });
@@ -64,6 +80,16 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
 
   // Chỉ 'failed' mới bỏ QR. 'expired' vẫn hiện QR bên dưới: BE nhận tiền trả muộn qua QR cũ (AUD-005) — bản cũ giấu QR
   // và bảo khách huỷ đơn đặt lại, trái chính sách BE.
+  // Mọi đơn trong nhóm đã huỷ → QR không còn dùng để thanh toán (BE vẫn ghi nhận nếu khách lỡ quét, admin sẽ hoàn tiền)
+  if (allCancelled) {
+    return (
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-base-300 bg-base-200/40 p-6 text-center" role="status">
+        <p className="font-medium">{t('orderPayment.allCancelled')}</p>
+        <p className="text-sm text-base-content/70">{t('orderPayment.allCancelledDesc')}</p>
+      </div>
+    );
+  }
+
   if (status === 'failed') {
     return (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-warning/40 bg-warning/5 p-6 text-center" role="alert">
@@ -90,7 +116,7 @@ export default function OrderPaymentPanel({ paymentId, orderId, fallback = {}, o
       {qrExpired ? (
         <div className="flex flex-col items-center gap-2">
           <p className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-base-content/70">{t('orderPayment.expiredStillValid')}</p>
-          {orderId && (
+          {repayOrderId && (
             <button type="button" onClick={handleRepay} disabled={repay.isPending} className="btn btn-primary btn-sm">
               {repay.isPending ? <span className="loading loading-spinner loading-xs" /> : t('orderPayment.repay')}
             </button>

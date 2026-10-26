@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAdminPayments, useAdminPaymentDetail, useAdminPaymentStats } from '../../hooks/useAdminPayments.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
@@ -11,7 +12,18 @@ const PAGE_SIZE = 20;
 const STATUS_LABEL = { pending: 'Chờ thanh toán', paid: 'Đã thanh toán', failed: 'Thất bại', expired: 'Hết hạn' };
 // Class TĨNH (không ghép động) để Tailwind không purge
 const STATUS_BADGE = { pending: 'badge-warning', paid: 'badge-success', failed: 'badge-error', expired: 'badge-ghost' };
-const PURPOSE_LABEL = { subscription: 'Gói đăng ký', order: 'Đơn hàng' };
+// Đủ 5 giá trị PaymentPurpose của BE — thiếu nhãn trước đây hiện mã thô (credit_pack, custom_deposit…)
+const PURPOSE_LABEL = {
+  subscription: 'Gói đăng ký', order: 'Đơn hàng', credit_pack: 'Gói lượt thiết kế',
+  custom_deposit: 'Cọc đơn custom', custom_final: 'Thanh toán đủ đơn custom',
+};
+
+// Giao dịch cần hoàn (OBS-08): đơn custom → mở chi tiết đơn; đơn thường → trang Hoàn tiền (1 giao dịch có thể gồm nhiều đơn)
+function RefundLink({ payment: p }) {
+  return p.customOrderId
+    ? <Link to={`/custom-orders/${p.customOrderId}`} onClick={(e) => e.stopPropagation()} className="link link-primary text-xs">Mở đơn custom</Link>
+    : <Link to="/admin/refunds" onClick={(e) => e.stopPropagation()} className="link link-primary text-xs">Trang hoàn tiền</Link>;
+}
 
 /*
  * Đọc thông tin phân trang cho CẢ 2 dạng: Spring Page phẳng (BE payments: totalElements/number
@@ -90,6 +102,7 @@ function PaymentDetailModal({ id, onClose }) {
             <DetailRow label="Trạng thái"><span className={`badge ${STATUS_BADGE[p.status] ?? 'badge-ghost'}`}>{STATUS_LABEL[p.status] ?? p.status}</span></DetailRow>
             <DetailRow label="Mục đích">{PURPOSE_LABEL[p.purpose] ?? p.purpose}</DetailRow>
             <DetailRow label="Gói">{p.planName}</DetailRow>
+            {p.customOrderId && <DetailRow label="Đơn custom"><Link to={`/custom-orders/${p.customOrderId}`} className="link link-primary">Xem đơn</Link></DetailRow>}
             <DetailRow label="Số tiền yêu cầu">{formatVnd(p.amount)}</DetailRow>
             <DetailRow label="Số tiền thực nhận">{p.paidAmount != null ? formatVnd(p.paidAmount) : null}</DetailRow>
             <DetailRow label="Nội dung CK (txnRef)"><code>{p.txnRef}</code></DetailRow>
@@ -121,13 +134,15 @@ export default function AdminPayments() {
   const [fromDate, setFromDate] = useState(''); // 'YYYY-MM-DD'
   const [toDate, setToDate] = useState('');
   const [search, setSearch] = useState('');
+  // Chỉ giao dịch đã nhận tiền mà đơn (thường / custom) đã huỷ và chưa hoàn — GET /admin/payments?needsRefund=true (OBS-08)
+  const [needsRefund, setNeedsRefund] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const q = useDebounced(search.trim());
 
   const range = useMemo(() => ({ from: startOfDayIso(fromDate), to: endOfDayIso(toDate) }), [fromDate, toDate]);
   const listParams = {
     page, size: PAGE_SIZE, sort: 'createdAt,desc',
-    status: status || undefined, purpose: purpose || undefined, q: q || undefined, ...range,
+    status: status || undefined, purpose: purpose || undefined, q: q || undefined, needsRefund: needsRefund || undefined, ...range,
   };
 
   const list = useAdminPayments(listParams);
@@ -141,9 +156,9 @@ export default function AdminPayments() {
   const pageInfo = readPage(list.data);
   const s = stats.data;
   const chartData = useMemo(() => fillDays(s?.dailyRevenue, fromDate, toDate), [s, fromDate, toDate]);
-  const hasFilter = status || purpose || fromDate || toDate || search;
+  const hasFilter = status || purpose || fromDate || toDate || search || needsRefund;
 
-  const clearFilters = () => { setStatus(''); setPurpose(''); setFromDate(''); setToDate(''); setSearch(''); setPage(0); };
+  const clearFilters = () => { setStatus(''); setPurpose(''); setFromDate(''); setToDate(''); setSearch(''); setNeedsRefund(false); setPage(0); };
 
   return (
     <div className="flex flex-col gap-6">
@@ -209,6 +224,10 @@ export default function AdminPayments() {
             <span className="mb-1 text-xs text-base-content/70">Đến ngày</span>
             <input type="date" value={toDate} min={fromDate || undefined} onChange={resetPage(setToDate)} className="input input-bordered input-sm" />
           </label>
+          <label className="flex h-8 cursor-pointer items-center gap-2 text-sm">
+            <input type="checkbox" checked={needsRefund} onChange={(e) => { setNeedsRefund(e.target.checked); setPage(0); }} className="checkbox checkbox-warning checkbox-sm" />
+            Cần hoàn tiền
+          </label>
           {hasFilter && <button onClick={clearFilters} className="btn btn-ghost btn-sm">Xoá bộ lọc</button>}
         </div>
 
@@ -235,7 +254,10 @@ export default function AdminPayments() {
                     {formatVnd(p.paidAmount ?? p.amount)}
                     {p.paidAmount != null && p.paidAmount !== p.amount && <div className="text-xs text-warning">yêu cầu {formatVnd(p.amount)}</div>}
                   </td>
-                  <td><span className={`badge badge-sm ${STATUS_BADGE[p.status] ?? 'badge-ghost'}`}>{STATUS_LABEL[p.status] ?? p.status}</span></td>
+                  <td>
+                    <span className={`badge badge-sm ${STATUS_BADGE[p.status] ?? 'badge-ghost'}`}>{STATUS_LABEL[p.status] ?? p.status}</span>
+                    {needsRefund && <div className="mt-1"><span className="badge badge-warning badge-sm">Cần hoàn</span> <RefundLink payment={p} /></div>}
+                  </td>
                   <td className="text-sm text-base-content/70">{formatDate(p.createdAt)}</td>
                   <td className="text-right">
                     <button onClick={(e) => { e.stopPropagation(); setSelectedId(p.id); }} className="btn btn-ghost btn-xs btn-square" aria-label="Xem chi tiết"><Eye width={15} height={15} /></button>
