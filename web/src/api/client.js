@@ -958,21 +958,43 @@ export const api = {
    */
   getAdminModels3d: (params) => call(() => http.get('/admin/models3d', { params }), 'getAdminModels3d', params),
   /*
-   * POST /admin/models3d (multipart): part "data" = Blob JSON { name, productType, description?, editableOptions? },
-   * "glb" (≤ 50MB), "poster" (ảnh ≤ 10MB), "usdz"? (≤ 50MB). KHÔNG đi qua call(): cần FormData + tiến độ upload.
-   * onProgress(0..100) cho thanh tiến độ vì file GLB có thể vài chục MB.
+   * Tạo mẫu 3D — upload THẲNG lên Supabase (docs BE admin-models3d-fe.md §2A), 3 bước:
+   *   1. POST /admin/models3d/upload-urls { posterContentType, usdz } → { glb, poster, usdz? : { path, uploadUrl } }
+   *   2. PUT từng file lên uploadUrl (token nằm trong URL, hạn 2 giờ)
+   *   3. POST /admin/models3d (JSON) { ...data, glbPath, posterPath, usdzPath? } → Model3dResponse
+   * Vì sao: luồng multipart cũ cho file (GLB tới 50MB) đi qua BE và bị đọc hết vào RAM → Render 512MB sập (502).
+   * KHÔNG đi qua call(): cần tiến độ upload. onProgress(0..100) tính trên TỔNG dung lượng các file.
    */
   createAdminModel3d: async ({ data, glb, poster, usdz, onProgress }) => {
     if (USE_MOCK) throw Object.assign(new Error('MOCK'), { response: { status: 400, data: { message: 'Tải mẫu 3D chỉ chạy với BE thật (VITE_USE_MOCK=false).' } } });
-    const form = new FormData();
-    form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
-    form.append('glb', glb);
-    form.append('poster', poster);
-    if (usdz) form.append('usdz', usdz);
-    const res = await http.post('/admin/models3d', form, {
-      timeout: 10 * 60_000, // file lớn + Render chậm → nới timeout mặc định 60s
-      onUploadProgress: (e) => e.total && onProgress?.(Math.round((e.loaded / e.total) * 100)),
+    const posterType = poster.type || ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' })[poster.name.split('.').pop().toLowerCase()];
+    const { data: urls } = await http.post('/admin/models3d/upload-urls', { posterContentType: posterType, usdz: !!usdz });
+
+    const jobs = [
+      { file: glb, target: urls.glb, type: 'model/gltf-binary' },
+      { file: poster, target: urls.poster, type: posterType },
+      ...(usdz ? [{ file: usdz, target: urls.usdz, type: 'model/vnd.usdz+zip' }] : []),
+    ];
+    const total = jobs.reduce((s, j) => s + j.file.size, 0);
+    let done = 0;
+    // Upload lần lượt (không song song) để tiến độ chạy đều và không chia băng thông khi file lớn.
+    for (const { file, target, type } of jobs) {
+      // axios GỐC (không phải `http`): interceptor của http tự đính JWT WoodHub → Supabase sẽ coi là JWT của nó và từ chối.
+      await axios.put(target.uploadUrl, file, {
+        headers: { 'Content-Type': type },
+        timeout: 15 * 60_000, // file 50MB trên mạng chậm
+        onUploadProgress: (e) => total && onProgress?.(Math.min(99, Math.round(((done + e.loaded) / total) * 100))),
+      });
+      done += file.size;
+    }
+
+    const res = await http.post('/admin/models3d', {
+      ...data,
+      glbPath: urls.glb.path,
+      posterPath: urls.poster.path,
+      usdzPath: usdz ? urls.usdz.path : undefined,
     });
+    onProgress?.(100);
     return res.data;
   },
   // PUT /admin/models3d/:id { name, productType, description?, editableOptions? } — THAY toàn bộ (không gửi = xoá)
