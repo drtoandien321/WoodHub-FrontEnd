@@ -11,9 +11,19 @@ import { isUserLocked, markAccountLocked } from '../utils/accountLock.js';
  * Contract đầy đủ (method, path, request/response shape) xem docs/API_CONTRACT.md.
  */
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'; // mặc định mock để FE chạy độc lập
-export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api';
-// URL endpoint STOMP/SockJS — bỏ hậu tố "/api" của BASE_URL vì "/ws" nằm ở gốc BE, không phải dưới /api
-export const WS_URL = BASE_URL.replace(/\/api\/?$/, '') + '/ws';
+// URL thật của BE (Render). WebSocket chat LUÔN nối thẳng tới đây: proxy của Vercel không chuyển tiếp WebSocket.
+const BE_API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api';
+/*
+ * Bản build production gọi REST qua "/api" CÙNG domain → vercel.json rewrite sang Render. Vì sao:
+ *  - Cloudflare đứng trước Render chấm điểm theo IP. Trình duyệt gọi thẳng thì cả nhóm chung wifi (chung IP) có thể
+ *    bị chặn 429 — trang chặn không có header CORS nên console báo nhầm "blocked by CORS". Qua proxy, Render chỉ thấy IP Vercel.
+ *  - Cùng origin → hết preflight OPTIONS → số request tới BE giảm một nửa.
+ * Dev (npm run dev) vẫn gọi thẳng BE. Build chạy ở nơi không có rewrite /api thì đặt VITE_API_PROXY=false.
+ */
+const USE_API_PROXY = import.meta.env.PROD && import.meta.env.VITE_API_PROXY !== 'false';
+export const BASE_URL = USE_API_PROXY ? '/api' : BE_API_URL;
+// URL endpoint STOMP/SockJS — bỏ hậu tố "/api" vì "/ws" nằm ở gốc BE, không phải dưới /api
+export const WS_URL = BE_API_URL.replace(/\/api\/?$/, '') + '/ws';
 
 /*
  * REAL_ENDPOINTS: các endpoint ĐI QUA hàm call() (products, orders, custom, supplier...) đã có BE thật.
