@@ -1,4 +1,4 @@
-import { Client } from '@stomp/stompjs';
+import { Client, ReconnectionTimeMode } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { WS_URL } from '../api/client.js';
 import { useAuthStore } from '../stores/authStore.js';
@@ -22,6 +22,29 @@ import { useAuthStore } from '../stores/authStore.js';
  * bubble tạm rồi phải xử lý de-dup khi tin thật về.
  */
 let client = null;
+
+/*
+ * Reconnect GIÃN DẦN: lần đầu ~3-6s, sau đó nhân đôi mỗi lần thất bại (6s → 12s → … tối đa 2 phút), kết nối lại được
+ * thì stompjs tự reset về mức đầu. Trước đây cố định 4s: mỗi lần BE deploy/sập, MỌI tab đang mở bắn request liên tục
+ * → Cloudflare của Render coi cả IP (vd cả nhóm tester chung wifi) là spam, trả 429 cho mọi API → không đăng nhập được.
+ * Delay đầu ngẫu nhiên (jitter) để các tab không reconnect cùng một nhịp.
+ */
+const RECONNECT_MIN_MS = 3000;
+const RECONNECT_JITTER_MS = 3000;
+const RECONNECT_MAX_MS = 2 * 60_000;
+
+// Tab đang ẩn thì không cần realtime → chờ tới khi người dùng quay lại tab mới (re)connect (đỡ request thừa).
+const waitUntilVisible = () =>
+  new Promise((resolve) => {
+    if (typeof document === 'undefined' || !document.hidden) return resolve();
+    const onChange = () => {
+      if (document.hidden) return;
+      document.removeEventListener('visibilitychange', onChange);
+      resolve();
+    };
+    document.addEventListener('visibilitychange', onChange);
+  });
+
 const listeners = new Set();
 const notificationListeners = new Set();
 const connectedListeners = new Set();
@@ -55,10 +78,14 @@ export function ensureConnected() {
   client = new Client({
     webSocketFactory: () => new SockJS(WS_URL),
     connectHeaders: { Authorization: `Bearer ${token}` },
-    reconnectDelay: 4000,
-    // Lấy token MỚI NHẤT trước mỗi lần (re)connect: access token sống 15 phút, đã được api/client.js refresh →
+    reconnectDelay: RECONNECT_MIN_MS + Math.round(Math.random() * RECONNECT_JITTER_MS),
+    reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,
+    maxReconnectDelay: RECONNECT_MAX_MS,
+    // stompjs AWAIT hàm này trước MỖI lần (re)connect → tab ẩn thì treo ở đây, hiện lại mới kết nối.
+    // Sau đó lấy token MỚI NHẤT: access token sống 15 phút, đã được api/client.js refresh →
     // dùng lại token lúc tạo client thì lần reconnect sau 15 phút bị BE từ chối.
-    beforeConnect: () => {
+    beforeConnect: async () => {
+      await waitUntilVisible();
       const latest = useAuthStore.getState().token;
       if (latest) client.connectHeaders = { Authorization: `Bearer ${latest}` };
     },
