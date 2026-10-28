@@ -11,6 +11,7 @@ import AnalyticsTracker from './components/AnalyticsTracker.jsx';
 import ChatWidget from './components/chatbot/ChatWidget.jsx';
 import ChatDrawer from './components/chat/ChatDrawer.jsx';
 import FeedbackModal from './components/feedback/FeedbackModal.jsx';
+import WelcomeSocialModal from './components/feedback/WelcomeSocialModal.jsx';
 import { useUiStore } from './stores/uiStore.js';
 
 /*
@@ -119,6 +120,8 @@ export default function App() {
       <ChatDrawer />
       {/* Modal Đánh giá WoodHub — mở từ popup sau đặt hàng, footer, landing (useFeedbackStore) */}
       <FeedbackModal />
+      {/* Popup ngay sau đăng nhập: theo dõi Facebook / TikTok + mời đánh giá web */}
+      <WelcomeSocialModal />
       <Routes>
         {/* Landing đứng riêng: hero full-screen, không dùng layout chung */}
         <Route path="/" element={<Landing />} />
