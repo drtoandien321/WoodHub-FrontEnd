@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic, useAdminPlanSales, useAdminReviewAverage } from '../../hooks/useAdminDashboard.js';
+import { useAdminDashboardSummary, useAdminDashboardTimeseries, useAdminDashboardTop, useAdminDashboardTraffic, useAdminPaidSales, useAdminReviewAverage } from '../../hooks/useAdminDashboard.js';
 import StatCard from '../../components/supplier/StatCard.jsx';
 import RevenueChart from '../../components/supplier/RevenueChart.jsx';
 import DailyBarChart from '../../components/admin/DailyBarChart.jsx';
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
   const summary = useAdminDashboardSummary(params);
   const series = useAdminDashboardTimeseries(params);
   const top = useAdminDashboardTop({ ...params, limit: 5 });
-  const planSales = useAdminPlanSales(params);
+  const sales = useAdminPaidSales(params);
   const reviewAvg = useAdminReviewAverage();
   const feedback = useAdminFeedbackSummary(params);
 
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
           <p className="mt-1 text-sm text-base-content/70">
             Kỳ đang xem: <span className="font-medium text-base-content">{rangeLabel}</span>
             {fromYmd && ` (${formatYmd(fromYmd)} – ${formatYmd(toYmdStr)})`}
-            {' · '}Doanh thu & lượt mua gói tính trong kỳ; tổng người dùng, nhà cung cấp, sản phẩm là toàn bộ.
+            {' · '}Doanh thu & lượt mua tính trong kỳ; tổng người dùng, nhà cung cấp, sản phẩm là toàn bộ.
           </p>
         </div>
         <select
@@ -302,10 +302,10 @@ export default function AdminDashboard() {
             <StatCard icon={Users} label="Tổng người dùng" value={s.users.total}
               hint={`+${s.users.newInPeriod} mới trong kỳ · ${s.users.activeRecently} hoạt động 24h`} to="/admin/users"
               iconWrap="bg-info/10 text-info" />
-            {/* Lượt bán gói trả phí (giao dịch thành công): gói đăng ký + gói lượt thiết kế, không tính gói Free */}
-            <StatCard icon={CreditCard} label="Lượt mua gói (thanh toán thành công)" value={planSales.data?.total ?? '…'}
-              hint={planSales.data
-                ? `${rangeLabel}: ${planSales.data.subscriptions} gói đăng ký · ${planSales.data.creditPacks} gói thiết kế · ${planSales.data.buyers} tài khoản · ${formatVnd(planSales.data.revenue)}`
+            {/* Lượt thanh toán thành công: gói đăng ký, gói thiết kế, đơn hàng, đơn custom (không tính gói Free — 0đ) */}
+            <StatCard icon={CreditCard} label="Lượt mua (thanh toán thành công)" value={sales.data?.total ?? '…'}
+              hint={sales.data
+                ? `${rangeLabel}: ${sales.data.subscriptions} gói đăng ký · ${sales.data.creditPacks} gói thiết kế · ${sales.data.orders} đơn hàng · ${sales.data.customPayments} thanh toán custom · ${sales.data.buyers} tài khoản · ${formatVnd(sales.data.revenue)}`
                 : 'Đang tải…'}
               to={paymentsLink({ status: 'paid' })} iconWrap="bg-success/10 text-success" />
             <RatingStatCard platform={feedback.data} reviews={reviewAvg.data} />

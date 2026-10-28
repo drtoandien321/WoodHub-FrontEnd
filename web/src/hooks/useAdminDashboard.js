@@ -1,4 +1,4 @@
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useQueries, keepPreviousData } from '@tanstack/react-query';
 import { api } from '../api/client.js';
 
 /*
@@ -31,31 +31,38 @@ export const useAdminDashboardTraffic = (params) =>
   });
 
 /*
- * Lượt bán gói (ô KPI thứ 3): đếm giao dịch ĐÃ THANH TOÁN của gói đăng ký + gói lượt thiết kế trong kỳ.
- * BE chưa có số này trong /admin/dashboard/summary (subscriptions.activeTotal đếm cả gói Free — 0đ, không phát sinh
- * giao dịch) → dùng GET /admin/payments?status=paid&purpose=… (lọc có sẵn của trang Thanh toán):
- * Đếm LƯỢT MUA (1 tài khoản mua 3 lần = 3), kèm số tài khoản mua (distinct userId) để không nhầm 2 khái niệm.
- * totalElements = số lượt bán, cộng `amount` của trang (size 500 — đủ cho quy mô hiện tại) = doanh thu từ gói.
+ * Lượt mua thành công (ô KPI thứ 3): đếm giao dịch ĐÃ THANH TOÁN trong kỳ theo từng loại — gói đăng ký, gói lượt
+ * thiết kế, đơn hàng, đơn custom (cọc + thanh toán đủ). BE chưa có số này trong /admin/dashboard/summary
+ * (subscriptions.activeTotal đếm cả gói Free — 0đ, không phát sinh giao dịch) → dùng GET /admin/payments?status=paid&purpose=…
+ * (lọc có sẵn của trang Thanh toán). Đếm LƯỢT THANH TOÁN (1 tài khoản mua 3 lần = 3), kèm số tài khoản (distinct userId).
+ * Lưu ý: 1 lần checkout tách nhiều đơn theo NCC nhưng chỉ 1 giao dịch → "đơn hàng" ở đây là số lần thanh toán đơn.
+ * totalElements = số lượt, cộng `paidAmount` của trang (size 500 — đủ cho quy mô hiện tại) = tiền thu được.
  */
 const SALE_PAGE = 500;
+const SALE_PURPOSES = ['subscription', 'credit_pack', 'order', 'custom_deposit', 'custom_final'];
 // paidAmount = tiền thực nhận (có thể khác amount yêu cầu nếu khách chuyển lệch); dự phòng amount
 const sumAmount = (page) => (page?.content ?? []).reduce((s, p) => s + Number(p.paidAmount ?? p.amount ?? 0), 0);
-export function useAdminPlanSales(params) {
-  const q = (purpose) => ({
-    queryKey: ['adminPlanSales', purpose, params],
-    queryFn: () => api.getAdminPayments({ ...params, status: 'paid', purpose, page: 0, size: SALE_PAGE }),
-    ...opts,
+const countOf = (page) => page?.page?.totalElements ?? page?.content?.length ?? 0;
+export function useAdminPaidSales(params) {
+  const results = useQueries({
+    queries: SALE_PURPOSES.map((purpose) => ({
+      queryKey: ['adminPaidSales', purpose, params],
+      queryFn: () => api.getAdminPayments({ ...params, status: 'paid', purpose, page: 0, size: SALE_PAGE }),
+      ...opts,
+    })),
   });
-  const sub = useQuery(q('subscription'));
-  const pack = useQuery(q('credit_pack'));
-  if (!sub.data || !pack.data) return { data: null, isLoading: sub.isLoading || pack.isLoading };
-  const subscriptions = sub.data.page?.totalElements ?? sub.data.content?.length ?? 0;
-  const creditPacks = pack.data.page?.totalElements ?? pack.data.content?.length ?? 0;
+  if (results.some((r) => !r.data)) return { data: null, isLoading: results.some((r) => r.isLoading) };
+  const [sub, pack, order, deposit, final] = results.map((r) => r.data);
+  const counts = {
+    subscriptions: countOf(sub), creditPacks: countOf(pack), orders: countOf(order),
+    customPayments: countOf(deposit) + countOf(final),
+  };
   return {
     data: {
-      total: subscriptions + creditPacks, subscriptions, creditPacks,
-      buyers: new Set([...(sub.data.content ?? []), ...(pack.data.content ?? [])].map((p) => p.userId)).size,
-      revenue: sumAmount(sub.data) + sumAmount(pack.data),
+      ...counts,
+      total: counts.subscriptions + counts.creditPacks + counts.orders + counts.customPayments,
+      buyers: new Set(results.flatMap((r) => r.data.content ?? []).map((p) => p.userId)).size,
+      revenue: results.reduce((s, r) => s + sumAmount(r.data), 0),
     },
     isLoading: false,
   };
