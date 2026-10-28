@@ -1778,5 +1778,17 @@
     ],
     "contactTitle": "9. Liên hệ",
     "contactBody": "Mọi câu hỏi hoặc yêu cầu về dữ liệu cá nhân, vui lòng liên hệ:"
+  },
+  "welcomeSocial": {
+    "title": "Chào mừng {{name}} đến với WoodHub!",
+    "followIntro": "Theo dõi WoodHub để cập nhật mẫu nội thất mới, ưu đãi và video thiết kế 3D/AR.",
+    "facebookHint": "Fanpage WoodHub",
+    "later": "Để sau",
+    "rateTitle": "Bạn thấy WoodHub thế nào?",
+    "rateBody": "Dành 1 phút chấm sao và góp ý để chúng mình làm WoodHub tốt hơn.",
+    "rateReward": "Đánh giá lần đầu được tặng {{count}} lượt thiết kế.",
+    "rateCta": "Đánh giá ngay",
+    "rated": "Bạn đã đánh giá WoodHub {{rating}}★ — cảm ơn bạn!",
+    "editRating": "Sửa đánh giá"
   }
 }

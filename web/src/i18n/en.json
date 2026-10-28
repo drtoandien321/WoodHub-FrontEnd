@@ -1787,5 +1787,17 @@
     ],
     "contactTitle": "9. Contact",
     "contactBody": "For any questions or requests about your personal data, please contact:"
+  },
+  "welcomeSocial": {
+    "title": "Welcome to WoodHub, {{name}}!",
+    "followIntro": "Follow WoodHub for new furniture designs, deals and 3D/AR design videos.",
+    "facebookHint": "WoodHub fanpage",
+    "later": "Maybe later",
+    "rateTitle": "How do you like WoodHub?",
+    "rateBody": "Take a minute to rate us and share feedback so we can make WoodHub better.",
+    "rateReward": "Your first review earns {{count}} design credits.",
+    "rateCta": "Rate now",
+    "rated": "You rated WoodHub {{rating}}★ — thank you!",
+    "editRating": "Edit review"
   }
 }
